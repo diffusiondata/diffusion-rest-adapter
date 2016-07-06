@@ -1,0 +1,15 @@
+*~
+.pmd
+.checkstyle
+.classpath
+.externalToolBuilders
+.idea
+.metadata
+.pmdruleset.xml
+.project
+.settings
+target-eclipse
+target
+*.iml
+.DS_Store
+
