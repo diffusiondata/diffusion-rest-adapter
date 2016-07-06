@@ -14,9 +14,11 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>configuration-model</module>
+        <module>configuration-store</module>
+        <module>configuration-persistence</module>
         <module>publication</module>
         <module>polling</module>
-        <module>configuration</module>
     </modules>
 
     <repositories>
