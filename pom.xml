@@ -32,7 +32,31 @@
         <dependencies>
             <dependency>
                 <groupId>com.pushtechnology.adapters.rest</groupId>
+                <artifactId>configuration-persistence</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.pushtechnology.adapters.rest</groupId>
                 <artifactId>configuration-model</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.pushtechnology.adapters.rest</groupId>
+                <artifactId>configuration-store</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.pushtechnology.adapters.rest</groupId>
+                <artifactId>polling</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.pushtechnology.adapters.rest</groupId>
+                <artifactId>publication</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
@@ -46,6 +70,12 @@
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
                 <version>1.16.6</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpasyncclient</artifactId>
+                <version>4.1</version>
             </dependency>
 
             <dependency>
