@@ -17,6 +17,7 @@
         <module>configuration-model</module>
         <module>configuration-store</module>
         <module>configuration-persistence</module>
+        <module>configuration-model-conversion</module>
         <module>publication</module>
         <module>polling</module>
     </modules>
@@ -45,6 +46,12 @@
             <dependency>
                 <groupId>com.pushtechnology.adapters.rest</groupId>
                 <artifactId>configuration-store</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.pushtechnology.adapters.rest</groupId>
+                <artifactId>configuration-model-conversion</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
@@ -81,7 +88,7 @@
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
-                <version>4.14</version>
+                <version>4.12</version>
                 <scope>test</scope>
             </dependency>
 
