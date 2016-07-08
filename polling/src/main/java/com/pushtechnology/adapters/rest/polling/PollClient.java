@@ -23,6 +23,7 @@ public interface PollClient {
      * @param service the service
      * @param endpoint the endpoint
      * @param callback handler for the response
+     * @throws IllegalStateException if the client is not running
      */
     void request(Service service, Endpoint endpoint, FutureCallback<JSON> callback);
 

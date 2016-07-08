@@ -45,7 +45,12 @@ public final class PollClientImpl implements PollClient {
 
     @Override
     public void request(Service service, Endpoint endpoint, final FutureCallback<JSON> callback) {
-        currentClient.execute(
+        final CloseableHttpAsyncClient client = this.currentClient;
+        if (client == null) {
+            throw new IllegalStateException("Client not running");
+        }
+
+        client.execute(
             new HttpHost(service.getHost(), service.getPort(), "http"),
             new HttpGet(endpoint.getUrl()),
             new FutureCallback<HttpResponse>() {
