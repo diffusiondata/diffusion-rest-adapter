@@ -6,8 +6,8 @@ import java.util.Collections;
 
 import org.junit.Test;
 
-import com.pushtechnology.adapters.rest.model.v2.Model;
-import com.pushtechnology.adapters.rest.model.v2.Service;
+import com.pushtechnology.adapters.rest.model.v3.Model;
+import com.pushtechnology.adapters.rest.model.v3.Service;
 
 /**
  * Unit tests for {@link V1Converter}.
@@ -40,6 +40,7 @@ public final class V1ConverterTest {
         assertEquals(80, service.getPort());
         assertEquals(0, service.getEndpoints().size());
         assertEquals(60000, service.getPollPeriod());
+        assertEquals("localhost", model.getDiffusion().getHost());
     }
 
     @Test(expected = IllegalArgumentException.class)

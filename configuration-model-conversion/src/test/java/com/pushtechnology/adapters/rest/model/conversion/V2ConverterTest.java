@@ -1,13 +1,13 @@
 package com.pushtechnology.adapters.rest.model.conversion;
 
-import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertEquals;
 
 import java.util.Collections;
 
 import org.junit.Test;
 
-import com.pushtechnology.adapters.rest.model.AnyModel;
-import com.pushtechnology.adapters.rest.model.v2.Model;
+import com.pushtechnology.adapters.rest.model.v3.Model;
+import com.pushtechnology.adapters.rest.model.v3.Service;
 
 /**
  * Unit tests for {@link V2Converter}.
@@ -19,10 +19,28 @@ public final class V2ConverterTest {
     public void testConvert() {
         final ModelConverter converter = V2Converter.INSTANCE;
 
-        final AnyModel anyModel = Model.builder().build();
-        final Model model = converter.convert(anyModel);
+        final Model model = converter.convert(
+            com.pushtechnology.adapters.rest.model.v2.Model
+                .builder()
+                .services(Collections.singletonList(
+                    com.pushtechnology.adapters.rest.model.v2.Service
+                        .builder()
+                        .host("localhost")
+                        .port(80)
+                        .endpoints(Collections.<com.pushtechnology.adapters.rest.model.v2.Endpoint>emptyList())
+                        .pollPeriod(5000)
+                        .build()
+                ))
+                .build());
 
-        assertSame(anyModel, model);
+        assertEquals(1, model.getServices().size());
+        final Service service = model.getServices().get(0);
+
+        assertEquals("localhost", service.getHost());
+        assertEquals(80, service.getPort());
+        assertEquals(0, service.getEndpoints().size());
+        assertEquals(5000, service.getPollPeriod());
+        assertEquals("localhost", model.getDiffusion().getHost());
     }
 
     @Test(expected = IllegalArgumentException.class)

@@ -6,8 +6,8 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import org.apache.http.concurrent.FutureCallback;
 
-import com.pushtechnology.adapters.rest.model.v2.Endpoint;
-import com.pushtechnology.adapters.rest.model.v2.Service;
+import com.pushtechnology.adapters.rest.model.v3.Endpoint;
+import com.pushtechnology.adapters.rest.model.v3.Service;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
 /**
