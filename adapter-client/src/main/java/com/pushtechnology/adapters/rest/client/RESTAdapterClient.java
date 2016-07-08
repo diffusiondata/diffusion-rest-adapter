@@ -9,6 +9,9 @@ import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.pushtechnology.adapters.PublishingClient;
 import com.pushtechnology.adapters.PublishingClientImpl;
 import com.pushtechnology.adapters.rest.model.conversion.ConversionContext;
@@ -32,6 +35,8 @@ import com.pushtechnology.adapters.rest.polling.ServiceSession;
  * @author Push Technology Limited
  */
 public class RESTAdapterClient {
+    private static final Logger LOG = LoggerFactory.getLogger(RESTAdapterClient.class);
+
     public static void main(String[] args) throws IOException, InterruptedException {
         final ConversionContext conversionContext = ConversionContext
             .builder()
@@ -77,7 +82,7 @@ public class RESTAdapterClient {
                             .build()))
                 .build());
 
-        System.out.println(model);
+        LOG.debug("Configuration: {}", model);
 
         final PublishingClient diffusionClient = new PublishingClientImpl(model.getDiffusion().getHost(), model.getDiffusion().getPort());
 

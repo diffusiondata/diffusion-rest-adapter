@@ -5,6 +5,8 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.apache.http.concurrent.FutureCallback;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.adapters.PublishingClient;
 import com.pushtechnology.adapters.rest.model.v3.Endpoint;
@@ -17,6 +19,7 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
  * @author Push Technology Limited
  */
 public final class ServiceSession {
+    private static final Logger LOG = LoggerFactory.getLogger(ServiceSession.class);
     private final ScheduledExecutorService executor;
     private final PollClient pollClient;
     private final Service service;
@@ -73,7 +76,8 @@ public final class ServiceSession {
                 new FutureCallback<JSON>() {
                     @Override
                     public void completed(JSON json) {
-                        System.out.println(json.toJsonString());
+                        LOG.trace("Polled value", json.toJsonString());
+
                         diffusionClient.publish(endpoint, json);
 
                         synchronized (ServiceSession.this) {
