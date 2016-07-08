@@ -20,6 +20,7 @@ import com.pushtechnology.adapters.rest.model.conversion.V1Converter;
 import com.pushtechnology.adapters.rest.model.conversion.V2Converter;
 import com.pushtechnology.adapters.rest.model.conversion.V3Converter;
 import com.pushtechnology.adapters.rest.model.conversion.V4Converter;
+import com.pushtechnology.adapters.rest.model.latest.Diffusion;
 import com.pushtechnology.adapters.rest.model.latest.Endpoint;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.Service;
@@ -89,7 +90,12 @@ public class RESTAdapterClient {
 
         LOG.debug("Configuration: {}", model);
 
-        final PublishingClient diffusionClient = new PublishingClientImpl(model.getDiffusion().getHost(), model.getDiffusion().getPort());
+        final Diffusion diffusion = model.getDiffusion();
+        final PublishingClient diffusionClient = new PublishingClientImpl(
+            diffusion.getHost(),
+            diffusion.getPort(),
+            diffusion.getPrincipal(),
+            diffusion.getPassword());
 
         diffusionClient.start();
 

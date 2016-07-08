@@ -15,6 +15,7 @@ import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater.UpdateCallback;
 import com.pushtechnology.diffusion.client.session.Session;
+import com.pushtechnology.diffusion.client.session.SessionFactory;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
 /**
@@ -26,23 +27,35 @@ public final class PublishingClientImpl implements PublishingClient {
     private static final Logger LOG = LoggerFactory.getLogger(PublishingClientImpl.class);
     private final String host;
     private final int port;
+    private final String principal;
+    private final String password;
     private Session session;
 
-    public PublishingClientImpl(String host, int port) {
+    public PublishingClientImpl(String host, int port, String principal, String password) {
         this.host = host;
         this.port = port;
+        this.principal = principal;
+        this.password = password;
     }
 
     @Override
     public synchronized void start() {
         // Use the session factory to open a new session
-        session = Diffusion
+        SessionFactory sessionFactory = Diffusion
             .sessions()
             .listener(new Listener())
             .serverHost(host)
             .serverPort(port)
             .secureTransport(false)
-            .transports(WEBSOCKET)
+            .transports(WEBSOCKET);
+
+        if (principal != null && password != null) {
+            sessionFactory = sessionFactory
+                .principal(principal)
+                .password(password);
+        }
+
+        session = sessionFactory
             .open();
     }
 
