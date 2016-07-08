@@ -6,7 +6,7 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import org.apache.http.concurrent.FutureCallback;
 
-import com.pushtechnology.adapters.Client;
+import com.pushtechnology.adapters.PublishingClient;
 import com.pushtechnology.adapters.rest.model.v3.Endpoint;
 import com.pushtechnology.adapters.rest.model.v3.Service;
 import com.pushtechnology.diffusion.datatype.json.JSON;
@@ -20,7 +20,7 @@ public final class ServiceSession {
     private final ScheduledExecutorService executor;
     private final PollClient pollClient;
     private final Service service;
-    private final Client diffusionClient;
+    private final PublishingClient diffusionClient;
     private boolean isRunning = false;
 
     /**
@@ -30,7 +30,7 @@ public final class ServiceSession {
             ScheduledExecutorService executor,
             PollClient pollClient,
             Service service,
-            Client diffusionClient) {
+            PublishingClient diffusionClient) {
         this.executor = executor;
         this.pollClient = pollClient;
         this.service = service;

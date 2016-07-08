@@ -6,8 +6,8 @@ import static com.pushtechnology.diffusion.client.session.SessionAttributes.Tran
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.pushtechnology.adapters.rest.model.v3.Service;
 import com.pushtechnology.adapters.rest.model.v3.Endpoint;
+import com.pushtechnology.adapters.rest.model.v3.Service;
 import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
@@ -16,16 +16,19 @@ import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
-public final class Client {
+/**
+ * Publishing client to update Diffusion.
+ */
+public final class PublishingClient {
     /**
      * The Diffusion UCI client uses SLF4J for logging. Only the API is included, you need to add your own API.
      */
-    private static final Logger LOG = LoggerFactory.getLogger(Client.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PublishingClient.class);
     private final String host;
     private final int port;
     private Session session;
 
-    public Client(String host, int port) {
+    public PublishingClient(String host, int port) {
         this.host = host;
         this.port = port;
     }
@@ -45,6 +48,9 @@ public final class Client {
             .open();
     }
 
+    /**
+     * Initialise a service to publish to.
+     */
     public synchronized void initialise(Service service) {
         final TopicControl topicControl = session.feature(TopicControl.class);
 
