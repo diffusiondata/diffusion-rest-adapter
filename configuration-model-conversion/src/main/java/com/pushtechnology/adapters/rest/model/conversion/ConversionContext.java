@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.pushtechnology.adapters.rest.model.AnyModel;
-import com.pushtechnology.adapters.rest.model.v3.Model;
+import com.pushtechnology.adapters.rest.model.v4.Model;
 
 /**
  * Context for converting from older versions of the model.

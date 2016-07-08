@@ -11,8 +11,8 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.concurrent.FutureCallback;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 
-import com.pushtechnology.adapters.rest.model.v3.Endpoint;
-import com.pushtechnology.adapters.rest.model.v3.Service;
+import com.pushtechnology.adapters.rest.model.v4.Endpoint;
+import com.pushtechnology.adapters.rest.model.v4.Service;
 import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 

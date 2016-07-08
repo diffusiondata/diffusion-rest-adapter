@@ -4,8 +4,8 @@ import java.io.IOException;
 
 import org.apache.http.concurrent.FutureCallback;
 
-import com.pushtechnology.adapters.rest.model.v3.Endpoint;
-import com.pushtechnology.adapters.rest.model.v3.Service;
+import com.pushtechnology.adapters.rest.model.v4.Endpoint;
+import com.pushtechnology.adapters.rest.model.v4.Service;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
 /**

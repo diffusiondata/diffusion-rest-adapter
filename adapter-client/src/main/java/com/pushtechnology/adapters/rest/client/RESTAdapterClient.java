@@ -19,9 +19,10 @@ import com.pushtechnology.adapters.rest.model.conversion.V0Converter;
 import com.pushtechnology.adapters.rest.model.conversion.V1Converter;
 import com.pushtechnology.adapters.rest.model.conversion.V2Converter;
 import com.pushtechnology.adapters.rest.model.conversion.V3Converter;
-import com.pushtechnology.adapters.rest.model.v3.Endpoint;
-import com.pushtechnology.adapters.rest.model.v3.Model;
-import com.pushtechnology.adapters.rest.model.v3.Service;
+import com.pushtechnology.adapters.rest.model.conversion.V4Converter;
+import com.pushtechnology.adapters.rest.model.v4.Endpoint;
+import com.pushtechnology.adapters.rest.model.v4.Model;
+import com.pushtechnology.adapters.rest.model.v4.Service;
 import com.pushtechnology.adapters.rest.persistence.FileSystemPersistence;
 import com.pushtechnology.adapters.rest.persistence.Persistence;
 import com.pushtechnology.adapters.rest.polling.HttpClientFactoryImpl;
@@ -53,9 +54,13 @@ public class RESTAdapterClient {
                 com.pushtechnology.adapters.rest.model.v2.Model.class,
                 V2Converter.INSTANCE)
             .register(
+                com.pushtechnology.adapters.rest.model.v3.Model.VERSION,
+                com.pushtechnology.adapters.rest.model.v3.Model.class,
+                V3Converter.INSTANCE)
+            .register(
                 Model.VERSION,
                 Model.class,
-                V3Converter.INSTANCE)
+                V4Converter.INSTANCE)
             .build();
 
         final Persistence fileSystemPersistence = new FileSystemPersistence(Paths.get("."), conversionContext);
