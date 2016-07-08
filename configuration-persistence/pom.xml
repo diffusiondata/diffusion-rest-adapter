@@ -22,5 +22,4 @@
             <artifactId>configuration-model-conversion</artifactId>
         </dependency>
     </dependencies>
-
 </project>
