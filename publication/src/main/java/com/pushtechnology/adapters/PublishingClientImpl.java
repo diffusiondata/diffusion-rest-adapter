@@ -22,9 +22,6 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
  * @author Push Technology Limited
  */
 public final class PublishingClientImpl implements PublishingClient {
-    /**
-     * The Diffusion UCI client uses SLF4J for logging. Only the API is included, you need to add your own API.
-     */
     private static final Logger LOG = LoggerFactory.getLogger(PublishingClientImpl.class);
     private final String host;
     private final int port;
