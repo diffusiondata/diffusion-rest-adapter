@@ -63,6 +63,10 @@ public final class ServiceSession {
 
         @Override
         public void run() {
+            if (!isRunning) {
+                return;
+            }
+
             pollClient.request(
                 service,
                 endpoint,
