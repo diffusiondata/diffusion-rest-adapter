@@ -82,7 +82,7 @@ public final class FileSystemPersistence implements Persistence {
 
     private void storeSchemaVersion() throws IOException {
         try (OutputStream versionStream = newOutputStream(versionFilePath, CREATE, WRITE)) {
-            objectMapper.writeValue(versionStream, 1);
+            objectMapper.writeValue(versionStream, 2);
         }
     }
 }
