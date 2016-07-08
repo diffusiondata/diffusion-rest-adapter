@@ -6,8 +6,8 @@ import java.util.Collections;
 
 import org.junit.Test;
 
-import com.pushtechnology.adapters.rest.model.v1.Model;
-import com.pushtechnology.adapters.rest.model.v1.Service;
+import com.pushtechnology.adapters.rest.model.v2.Model;
+import com.pushtechnology.adapters.rest.model.v2.Service;
 
 /**
  * Unit tests for {@link V0Converter}.

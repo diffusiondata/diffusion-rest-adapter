@@ -8,8 +8,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.pushtechnology.adapters.rest.model.AnyModel;
-import com.pushtechnology.adapters.rest.model.v1.Model;
-import com.pushtechnology.adapters.rest.model.v1.Service;
+import com.pushtechnology.adapters.rest.model.v2.Model;
+import com.pushtechnology.adapters.rest.model.v2.Service;
 
 /**
  * Unit tests for {@link ConversionContext}.
@@ -26,6 +26,7 @@ public final class ConversionContextTest {
             .builder()
             .register(0, com.pushtechnology.adapters.rest.model.v0.Model.class, V0Converter.INSTANCE)
             .register(1, Model.class, V1Converter.INSTANCE)
+            .register(2, Model.class, V2Converter.INSTANCE)
             .build();
     }
 
