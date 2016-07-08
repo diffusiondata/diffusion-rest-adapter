@@ -9,6 +9,7 @@ import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
+import com.pushtechnology.adapters.Client;
 import com.pushtechnology.adapters.rest.model.conversion.ConversionContext;
 import com.pushtechnology.adapters.rest.model.conversion.V0Converter;
 import com.pushtechnology.adapters.rest.model.conversion.V1Converter;
@@ -75,20 +76,31 @@ public class RESTAdapterClient {
 
         System.out.println(model);
 
+        final Client diffusionClient = new Client(model.getDiffusion().getHost(), model.getDiffusion().getPort());
+
+        diffusionClient.start();
+
+        model
+            .getServices()
+            .forEach(diffusionClient::initialise);
+
         final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
         final PollClient pollClient = new PollClient();
         pollClient.start();
 
-        for (Service service : model.getServices()) {
-            final ServiceSession serviceSession = new ServiceSession(executor, pollClient, service);
-            serviceSession.start();
-        }
+        model
+            .getServices()
+            .stream()
+            .map(service -> new ServiceSession(executor, pollClient, service, diffusionClient))
+            .forEach(ServiceSession::start);
 
-        sleep(10000L);
+        sleep(60000L);
         pollClient.stop();
 
         executor.shutdown();
+
+        diffusionClient.stop();
 
         fileSystemPersistence.storeModel(model);
     }

@@ -23,8 +23,8 @@
         </dependency>
 
         <dependency>
-            <groupId>com.pushtechnology.diffusion</groupId>
-            <artifactId>diffusion-api</artifactId>
+            <groupId>com.pushtechnology.adapters.rest</groupId>
+            <artifactId>publication</artifactId>
         </dependency>
     </dependencies>
 </project>
