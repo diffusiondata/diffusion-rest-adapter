@@ -10,6 +10,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
 import com.pushtechnology.adapters.PublishingClient;
+import com.pushtechnology.adapters.PublishingClientImpl;
 import com.pushtechnology.adapters.rest.model.conversion.ConversionContext;
 import com.pushtechnology.adapters.rest.model.conversion.V0Converter;
 import com.pushtechnology.adapters.rest.model.conversion.V1Converter;
@@ -78,7 +79,7 @@ public class RESTAdapterClient {
 
         System.out.println(model);
 
-        final PublishingClient diffusionClient = new PublishingClient(model.getDiffusion().getHost(), model.getDiffusion().getPort());
+        final PublishingClient diffusionClient = new PublishingClientImpl(model.getDiffusion().getHost(), model.getDiffusion().getPort());
 
         diffusionClient.start();
 
