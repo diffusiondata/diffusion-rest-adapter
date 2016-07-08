@@ -1,13 +1,14 @@
 package com.pushtechnology.adapters.rest.model.conversion;
 
+import static com.pushtechnology.adapters.rest.model.conversion.V1Converter.INSTANCE;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Collections;
 
 import org.junit.Test;
 
-import com.pushtechnology.adapters.rest.model.v3.Model;
-import com.pushtechnology.adapters.rest.model.v3.Service;
+import com.pushtechnology.adapters.rest.model.v2.Model;
+import com.pushtechnology.adapters.rest.model.v2.Service;
 
 /**
  * Unit tests for {@link V1Converter}.
@@ -18,9 +19,7 @@ public final class V1ConverterTest {
 
     @Test
     public void testConvert() {
-        final ModelConverter converter = V1Converter.INSTANCE;
-
-        final Model model = converter.convert(
+        final Model model = INSTANCE.convert(
             com.pushtechnology.adapters.rest.model.v1.Model
                 .builder()
                 .services(Collections.singletonList(
@@ -40,12 +39,11 @@ public final class V1ConverterTest {
         assertEquals(80, service.getPort());
         assertEquals(0, service.getEndpoints().size());
         assertEquals(60000, service.getPollPeriod());
-        assertEquals("localhost", model.getDiffusion().getHost());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testUnknownModel() {
-        final ModelConverter converter = V1Converter.INSTANCE;
+        final ModelConverter converter = INSTANCE;
 
         converter.convert(com.pushtechnology.adapters.rest.model.v0.Model.builder().build());
     }

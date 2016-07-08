@@ -20,7 +20,7 @@ public final class V3ConverterTest {
         final ModelConverter converter = V3Converter.INSTANCE;
 
         final AnyModel anyModel = Model.builder().build();
-        final Model model = converter.convert(anyModel);
+        final AnyModel model = converter.convert(anyModel);
 
         assertSame(anyModel, model);
     }

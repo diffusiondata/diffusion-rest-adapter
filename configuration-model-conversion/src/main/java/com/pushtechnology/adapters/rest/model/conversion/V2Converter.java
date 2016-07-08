@@ -11,7 +11,7 @@ import com.pushtechnology.adapters.rest.model.v3.Model;
 import com.pushtechnology.adapters.rest.model.v3.Service;
 
 /**
- * Converter between different version 2 of the model and the latest.
+ * Converter between different version 2 of the model version 3.
  *
  * @author Push Technology Limited
  */
@@ -52,5 +52,10 @@ public enum V2Converter implements ModelConverter {
         else {
             throw new IllegalArgumentException("The argument " + model + " cannot be converted");
         }
+    }
+
+    @Override
+    public ModelConverter next() {
+        return V3Converter.INSTANCE;
     }
 }

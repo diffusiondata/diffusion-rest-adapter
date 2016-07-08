@@ -15,5 +15,10 @@ public interface ModelConverter {
      * @return The model converted to the latest version
      * @throws IllegalArgumentException if the converter does not know how to convert supplied model
      */
-    Model convert(AnyModel model);
+    AnyModel convert(AnyModel model);
+
+    /**
+     * @return The next converter to use
+     */
+    ModelConverter next();
 }

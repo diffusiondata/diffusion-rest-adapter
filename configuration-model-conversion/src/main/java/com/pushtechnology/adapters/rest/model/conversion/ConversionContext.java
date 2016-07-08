@@ -29,7 +29,21 @@ public final class ConversionContext implements ModelConverter {
             throw new IllegalArgumentException("The argument " + model + " cannot be converted");
         }
 
-        return converter.convert(model);
+        return convertFrom(converter, model);
+    }
+
+    private Model convertFrom(ModelConverter converter, AnyModel model) {
+        while (converter != null) {
+            model = converter.convert(model);
+            converter = converter.next();
+        }
+
+        return (Model) model;
+    }
+
+    @Override
+    public ModelConverter next() {
+        return null;
     }
 
     /**

@@ -1,5 +1,6 @@
 package com.pushtechnology.adapters.rest.model.conversion;
 
+import static com.pushtechnology.adapters.rest.model.conversion.V2Converter.INSTANCE;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Collections;
@@ -17,9 +18,7 @@ import com.pushtechnology.adapters.rest.model.v3.Service;
 public final class V2ConverterTest {
     @Test
     public void testConvert() {
-        final ModelConverter converter = V2Converter.INSTANCE;
-
-        final Model model = converter.convert(
+        final Model model = INSTANCE.convert(
             com.pushtechnology.adapters.rest.model.v2.Model
                 .builder()
                 .services(Collections.singletonList(
@@ -45,7 +44,7 @@ public final class V2ConverterTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testUnknownModel() {
-        final ModelConverter converter = V2Converter.INSTANCE;
+        final ModelConverter converter = INSTANCE;
 
         converter.convert(com.pushtechnology.adapters.rest.model.v1.Model
             .builder()
