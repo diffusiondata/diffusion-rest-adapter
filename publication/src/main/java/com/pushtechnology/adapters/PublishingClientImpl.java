@@ -2,6 +2,7 @@
 package com.pushtechnology.adapters;
 
 import static com.pushtechnology.diffusion.client.session.SessionAttributes.Transport.WEBSOCKET;
+import static com.pushtechnology.diffusion.client.topics.details.TopicType.JSON;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,10 +11,10 @@ import com.pushtechnology.adapters.rest.model.v3.Endpoint;
 import com.pushtechnology.adapters.rest.model.v3.Service;
 import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
+import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.AddCallback;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater.UpdateCallback;
 import com.pushtechnology.diffusion.client.session.Session;
-import com.pushtechnology.diffusion.client.topics.details.TopicType;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
 /**
@@ -49,9 +50,9 @@ public final class PublishingClientImpl implements PublishingClient {
     public synchronized void initialise(Service service) {
         final TopicControl topicControl = session.feature(TopicControl.class);
 
-        service.getEndpoints().stream().forEach(endpoint -> {
-            topicControl.addTopic(endpoint.getTopic(), TopicType.JSON, new TopicControl.AddCallback.Default());
-        });
+        service
+            .getEndpoints()
+            .forEach(endpoint -> topicControl.addTopic(endpoint.getTopic(), JSON, new AddCallback.Default()));
     }
 
     @Override
