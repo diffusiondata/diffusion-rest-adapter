@@ -1,12 +1,12 @@
 
-package com.pushtechnology.adapters.rest.model.v1;
+package com.pushtechnology.adapters.rest.model.v2;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Value;
 
 /**
- * Endpoint configuration. Version 1.
+ * Endpoint configuration. Version 2.
  * <p>
  * Description of a REST endpoint to poll.
  *
