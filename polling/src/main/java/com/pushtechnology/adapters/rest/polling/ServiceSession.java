@@ -1,11 +1,8 @@
 package com.pushtechnology.adapters.rest.polling;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.concurrent.Future;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.http.concurrent.FutureCallback;
 
@@ -19,10 +16,10 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
  * @author Push Technology Limited
  */
 public final class ServiceSession {
-    private final Collection<Future<?>> tasks = new ArrayList<>();
     private final ScheduledExecutorService executor;
     private final PollClient pollClient;
     private final Service service;
+    private boolean isRunning = false;
 
     /**
      * Constructor.
@@ -37,33 +34,9 @@ public final class ServiceSession {
      * Start the session.
      */
     public synchronized void start() {
+        isRunning = true;
         for (final Endpoint endpoint : service.getEndpoints()) {
-            tasks.add(
-                executor.schedule(new Runnable() {
-                    @Override
-                    public void run() {
-                        pollClient.request(
-                            service,
-                            endpoint,
-                            new FutureCallback<JSON>() {
-                                @Override
-                                public void completed(JSON json) {
-                                    System.out.println(json.toJsonString());
-                                }
-
-                                @Override
-                                public void failed(Exception e) {
-                                    e.printStackTrace();
-                                }
-
-                                @Override
-                                public void cancelled() {
-                                }
-                            });
-                    }
-                },
-                service.getPollPeriod(),
-                TimeUnit.MILLISECONDS));
+            executor.schedule(new PollingTask(endpoint), 0, MILLISECONDS);
         }
     }
 
@@ -71,10 +44,52 @@ public final class ServiceSession {
      * Start the session.
      */
     public synchronized void stop() {
-        final Iterator<Future<?>> taskIterator = tasks.iterator();
-        while (taskIterator.hasNext()) {
-            taskIterator.next().cancel(false);
-            taskIterator.remove();
+        isRunning = false;
+    }
+
+    private final class PollingTask implements Runnable {
+        private final Endpoint endpoint;
+
+        public PollingTask(Endpoint endpoint) {
+            this.endpoint = endpoint;
+        }
+
+        @Override
+        public void run() {
+            pollClient.request(
+                service,
+                endpoint,
+                new FutureCallback<JSON>() {
+                    @Override
+                    public void completed(JSON json) {
+                        System.out.println(json.toJsonString());
+
+                        synchronized (ServiceSession.this) {
+                            if (isRunning) {
+                                executor.schedule(new PollingTask(endpoint), service.getPollPeriod(), MILLISECONDS);
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void failed(Exception e) {
+                        e.printStackTrace();
+                        synchronized (ServiceSession.this) {
+                            if (isRunning) {
+                                executor.schedule(new PollingTask(endpoint), service.getPollPeriod(), MILLISECONDS);
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void cancelled() {
+                        synchronized (ServiceSession.this) {
+                            if (isRunning) {
+                                executor.schedule(new PollingTask(endpoint), service.getPollPeriod(), MILLISECONDS);
+                            }
+                        }
+                    }
+                });
         }
     }
 }
