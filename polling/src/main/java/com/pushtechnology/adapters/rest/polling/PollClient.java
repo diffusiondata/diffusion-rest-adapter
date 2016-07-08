@@ -10,7 +10,6 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.concurrent.FutureCallback;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
-import org.apache.http.impl.nio.client.HttpAsyncClients;
 
 import com.pushtechnology.adapters.rest.model.v3.Endpoint;
 import com.pushtechnology.adapters.rest.model.v3.Service;
@@ -22,12 +21,14 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
  * @author Push Technology Limited
  */
 public final class PollClient {
+    private final HttpClientFactory httpClientFactory;
     private volatile CloseableHttpAsyncClient currentClient;
 
     /**
      * Constructor.
      */
-    public PollClient() {
+    public PollClient(HttpClientFactory httpClientFactory) {
+        this.httpClientFactory = httpClientFactory;
     }
 
     /**
@@ -38,10 +39,7 @@ public final class PollClient {
             return;
         }
 
-        final CloseableHttpAsyncClient client = HttpAsyncClients.custom()
-            .disableCookieManagement()
-            .disableAuthCaching()
-            .build();
+        final CloseableHttpAsyncClient client = httpClientFactory.create();
         currentClient = client;
 
         client.start();
@@ -101,5 +99,6 @@ public final class PollClient {
         }
 
         client.close();
+        currentClient = null;
     }
 }
