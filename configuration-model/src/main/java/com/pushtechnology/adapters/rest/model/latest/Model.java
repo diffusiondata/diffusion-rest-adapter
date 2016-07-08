@@ -20,7 +20,7 @@ public class Model implements AnyModel {
     /**
      * The version of the model.
      */
-    public static final int VERSION = 3;
+    public static final int VERSION = 4;
 
     /**
      * The Diffusion server.
