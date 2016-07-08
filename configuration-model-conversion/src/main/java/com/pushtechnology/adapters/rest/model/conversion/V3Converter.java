@@ -5,10 +5,10 @@ import static java.util.stream.Collectors.toList;
 import java.util.stream.Collectors;
 
 import com.pushtechnology.adapters.rest.model.AnyModel;
-import com.pushtechnology.adapters.rest.model.v4.Diffusion;
-import com.pushtechnology.adapters.rest.model.v4.Endpoint;
-import com.pushtechnology.adapters.rest.model.v4.Model;
-import com.pushtechnology.adapters.rest.model.v4.Service;
+import com.pushtechnology.adapters.rest.model.latest.Diffusion;
+import com.pushtechnology.adapters.rest.model.latest.Endpoint;
+import com.pushtechnology.adapters.rest.model.latest.Model;
+import com.pushtechnology.adapters.rest.model.latest.Service;
 
 /**
  * Converter between different version 3 of the model and version 4.

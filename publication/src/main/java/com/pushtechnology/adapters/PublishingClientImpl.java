@@ -7,8 +7,8 @@ import static com.pushtechnology.diffusion.client.topics.details.TopicType.JSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.pushtechnology.adapters.rest.model.v4.Endpoint;
-import com.pushtechnology.adapters.rest.model.v4.Service;
+import com.pushtechnology.adapters.rest.model.latest.Endpoint;
+import com.pushtechnology.adapters.rest.model.latest.Service;
 import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.AddCallback;

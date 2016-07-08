@@ -17,7 +17,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pushtechnology.adapters.rest.model.AnyModel;
 import com.pushtechnology.adapters.rest.model.conversion.ConversionContext;
-import com.pushtechnology.adapters.rest.model.v4.Model;
+import com.pushtechnology.adapters.rest.model.latest.Model;
 
 /**
  * Persist to the file system.

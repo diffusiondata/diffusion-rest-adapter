@@ -1,7 +1,7 @@
 package com.pushtechnology.adapters.rest.model.conversion;
 
 import com.pushtechnology.adapters.rest.model.AnyModel;
-import com.pushtechnology.adapters.rest.model.v4.Model;
+import com.pushtechnology.adapters.rest.model.latest.Model;
 
 /**
  * Converter between different version 4 of the model and itself.

@@ -8,8 +8,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.pushtechnology.adapters.rest.model.AnyModel;
-import com.pushtechnology.adapters.rest.model.v4.Model;
-import com.pushtechnology.adapters.rest.model.v4.Service;
+import com.pushtechnology.adapters.rest.model.latest.Model;
+import com.pushtechnology.adapters.rest.model.latest.Service;
 
 /**
  * Unit tests for {@link ConversionContext}.

@@ -1,5 +1,5 @@
 
-package com.pushtechnology.adapters.rest.model.v4;
+package com.pushtechnology.adapters.rest.model.latest;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -7,7 +7,7 @@ import java.util.Collections;
 import org.junit.Test;
 
 import com.pushtechnology.adapters.rest.model.AnyModel;
-import com.pushtechnology.adapters.rest.model.v4.Model;
+import com.pushtechnology.adapters.rest.model.latest.Model;
 
 /**
  * Unit tests for {@link V4Converter}.

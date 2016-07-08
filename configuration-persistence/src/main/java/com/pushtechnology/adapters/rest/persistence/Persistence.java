@@ -3,7 +3,7 @@ package com.pushtechnology.adapters.rest.persistence;
 import java.io.IOException;
 import java.util.Optional;
 
-import com.pushtechnology.adapters.rest.model.v4.Model;
+import com.pushtechnology.adapters.rest.model.latest.Model;
 
 /**
  * Allow the configuration model to be loaded and stored to a persisted store.

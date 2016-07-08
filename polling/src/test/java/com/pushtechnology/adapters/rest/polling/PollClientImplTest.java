@@ -17,8 +17,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 
-import com.pushtechnology.adapters.rest.model.v4.Endpoint;
-import com.pushtechnology.adapters.rest.model.v4.Service;
+import com.pushtechnology.adapters.rest.model.latest.Endpoint;
+import com.pushtechnology.adapters.rest.model.latest.Service;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
 /**
