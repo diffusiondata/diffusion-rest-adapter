@@ -21,6 +21,7 @@ import com.pushtechnology.adapters.rest.model.v3.Service;
 import com.pushtechnology.adapters.rest.persistence.FileSystemPersistence;
 import com.pushtechnology.adapters.rest.persistence.Persistence;
 import com.pushtechnology.adapters.rest.polling.PollClient;
+import com.pushtechnology.adapters.rest.polling.PollClientImpl;
 import com.pushtechnology.adapters.rest.polling.ServiceSession;
 
 /**
@@ -86,7 +87,7 @@ public class RESTAdapterClient {
 
         final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
-        final PollClient pollClient = new PollClient();
+        final PollClient pollClient = new PollClientImpl();
         pollClient.start();
 
         model
