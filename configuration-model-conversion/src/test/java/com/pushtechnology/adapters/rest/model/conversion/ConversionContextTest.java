@@ -24,9 +24,18 @@ public final class ConversionContextTest {
     public void setUp() {
         converter = ConversionContext
             .builder()
-            .register(0, com.pushtechnology.adapters.rest.model.v0.Model.class, V0Converter.INSTANCE)
-            .register(1, Model.class, V1Converter.INSTANCE)
-            .register(2, Model.class, V2Converter.INSTANCE)
+            .register(
+                com.pushtechnology.adapters.rest.model.v0.Model.VERSION,
+                com.pushtechnology.adapters.rest.model.v0.Model.class,
+                V0Converter.INSTANCE)
+            .register(
+                com.pushtechnology.adapters.rest.model.v1.Model.VERSION,
+                com.pushtechnology.adapters.rest.model.v1.Model.class,
+                V1Converter.INSTANCE)
+            .register(
+                com.pushtechnology.adapters.rest.model.v2.Model.VERSION,
+                Model.class,
+                V2Converter.INSTANCE)
             .build();
     }
 
@@ -51,7 +60,7 @@ public final class ConversionContextTest {
 
     @Test
     public void testModelVersion1() {
-        assertEquals(Model.class, converter.modelVersion(1));
+        assertEquals(Model.class, converter.modelVersion(Model.VERSION));
     }
 
     @Test(expected = IllegalArgumentException.class)

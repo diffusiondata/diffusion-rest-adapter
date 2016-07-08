@@ -30,9 +30,18 @@ public class RESTAdapterClient {
     public static void main(String[] args) throws IOException, InterruptedException {
         final ConversionContext conversionContext = ConversionContext
             .builder()
-            .register(0, com.pushtechnology.adapters.rest.model.v0.Model.class, V0Converter.INSTANCE)
-            .register(1, com.pushtechnology.adapters.rest.model.v1.Model.class, V1Converter.INSTANCE)
-            .register(2, Model.class, V2Converter.INSTANCE)
+            .register(
+                com.pushtechnology.adapters.rest.model.v0.Model.VERSION,
+                com.pushtechnology.adapters.rest.model.v0.Model.class,
+                V0Converter.INSTANCE)
+            .register(
+                com.pushtechnology.adapters.rest.model.v1.Model.VERSION,
+                com.pushtechnology.adapters.rest.model.v1.Model.class,
+                V1Converter.INSTANCE)
+            .register(
+                com.pushtechnology.adapters.rest.model.v2.Model.VERSION,
+                Model.class,
+                V2Converter.INSTANCE)
             .build();
 
         final Persistence fileSystemPersistence = new FileSystemPersistence(Paths.get("."), conversionContext);

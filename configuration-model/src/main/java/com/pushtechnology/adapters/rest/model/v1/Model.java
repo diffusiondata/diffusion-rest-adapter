@@ -17,5 +17,10 @@ import lombok.Value;
 @Builder
 @AllArgsConstructor
 public class Model implements AnyModel {
+    /**
+     * The version of the model.
+     */
+    public static final int VERSION = 1;
+
     List<Service> services;
 }
