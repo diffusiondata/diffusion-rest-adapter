@@ -20,6 +20,7 @@
         <module>configuration-model-conversion</module>
         <module>publication</module>
         <module>polling</module>
+        <module>adapter-client</module>
     </modules>
 
     <repositories>
