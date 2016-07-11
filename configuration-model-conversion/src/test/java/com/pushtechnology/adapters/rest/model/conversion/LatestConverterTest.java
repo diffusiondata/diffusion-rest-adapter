@@ -10,14 +10,14 @@ import com.pushtechnology.adapters.rest.model.AnyModel;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 
 /**
- * Unit tests for {@link V4Converter}.
+ * Unit tests for {@link LatestConverter}.
  *
  * @author Push Technology Limited
  */
-public final class V4ConverterTest {
+public final class LatestConverterTest {
     @Test
     public void testConvert() {
-        final ModelConverter converter = V4Converter.INSTANCE;
+        final ModelConverter converter = LatestConverter.INSTANCE;
 
         final AnyModel anyModel = Model.builder().build();
         final AnyModel model = converter.convert(anyModel);

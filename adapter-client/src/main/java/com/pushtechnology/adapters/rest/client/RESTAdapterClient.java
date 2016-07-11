@@ -34,7 +34,7 @@ import com.pushtechnology.adapters.rest.model.conversion.V0Converter;
 import com.pushtechnology.adapters.rest.model.conversion.V1Converter;
 import com.pushtechnology.adapters.rest.model.conversion.V2Converter;
 import com.pushtechnology.adapters.rest.model.conversion.V3Converter;
-import com.pushtechnology.adapters.rest.model.conversion.V4Converter;
+import com.pushtechnology.adapters.rest.model.conversion.LatestConverter;
 import com.pushtechnology.adapters.rest.model.latest.Diffusion;
 import com.pushtechnology.adapters.rest.model.latest.Endpoint;
 import com.pushtechnology.adapters.rest.model.latest.Model;
@@ -87,7 +87,7 @@ public final class RESTAdapterClient {
             .register(
                 Model.VERSION,
                 Model.class,
-                V4Converter.INSTANCE)
+                LatestConverter.INSTANCE)
             .build();
 
         final Persistence fileSystemPersistence = new FileSystemPersistence(Paths.get("."), conversionContext);
@@ -140,7 +140,7 @@ public final class RESTAdapterClient {
             .map(service -> new ServiceSession(executor, pollClient, service, diffusionClient))
             .forEach(ServiceSession::start);
 
-        sleep(60000L);
+        sleep(30000L);
         pollClient.stop();
 
         executor.shutdown();

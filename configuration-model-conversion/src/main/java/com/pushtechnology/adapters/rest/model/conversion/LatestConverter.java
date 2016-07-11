@@ -19,11 +19,11 @@ import com.pushtechnology.adapters.rest.model.AnyModel;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 
 /**
- * Converter between different version 4 of the model and itself.
+ * Converter between the latest version of the model and itself.
  *
  * @author Push Technology Limited
  */
-public enum V4Converter implements ModelConverter {
+public enum LatestConverter implements ModelConverter {
     /**
      * The converter.
      */

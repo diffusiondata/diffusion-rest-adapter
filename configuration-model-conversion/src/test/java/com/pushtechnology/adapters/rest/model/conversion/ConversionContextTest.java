@@ -43,7 +43,7 @@ public final class ConversionContextTest {
             .register(
                 Model.VERSION,
                 Model.class,
-                V4Converter.INSTANCE)
+                LatestConverter.INSTANCE)
             .build();
     }
 
