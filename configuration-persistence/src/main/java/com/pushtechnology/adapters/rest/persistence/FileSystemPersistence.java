@@ -30,6 +30,7 @@ import java.util.Optional;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.pushtechnology.adapters.rest.model.AnyModel;
 import com.pushtechnology.adapters.rest.model.conversion.ConversionContext;
 import com.pushtechnology.adapters.rest.model.latest.Model;
@@ -41,7 +42,7 @@ import com.pushtechnology.adapters.rest.model.latest.Model;
  */
 public final class FileSystemPersistence implements Persistence {
     private final JsonFactory jsonFactory = new JsonFactory();
-    private final ObjectMapper objectMapper = new ObjectMapper(jsonFactory);
+    private final ObjectMapper objectMapper = new ObjectMapper(jsonFactory).enable(SerializationFeature.INDENT_OUTPUT);
     private final ConversionContext conversionContext;
     private final Path configFilePath;
     private final Path versionFilePath;
