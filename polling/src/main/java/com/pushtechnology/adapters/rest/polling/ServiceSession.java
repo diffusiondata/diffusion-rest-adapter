@@ -81,8 +81,10 @@ public final class ServiceSession {
 
         @Override
         public void run() {
-            if (!isRunning) {
-                return;
+            synchronized (ServiceSession.this) {
+                if (!isRunning) {
+                    return;
+                }
             }
 
             pollClient.request(

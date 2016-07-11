@@ -18,7 +18,11 @@ package com.pushtechnology.adapters.rest.polling;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
@@ -36,6 +40,7 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
  * @author Push Technology Limited
  */
 public final class PollClientImpl implements PollClient {
+    private static final Pattern CHARSET_PATTERN = Pattern.compile(".+; charset=(\\S+)");
     private final HttpClientFactory httpClientFactory;
     private volatile CloseableHttpAsyncClient currentClient;
 
@@ -83,7 +88,10 @@ public final class PollClientImpl implements PollClient {
                             next = content.read();
                         }
 
-                        callback.completed(Diffusion.dataTypes().json().fromJsonString(new String(baos.toByteArray())));
+                        callback.completed(Diffusion
+                            .dataTypes()
+                            .json()
+                            .fromJsonString(new String(baos.toByteArray(), getResponseCharset(httpResponse))));
                     }
                     catch (IOException e) {
                         failed(e);
@@ -111,5 +119,20 @@ public final class PollClientImpl implements PollClient {
 
         client.close();
         currentClient = null;
+    }
+
+    private Charset getResponseCharset(HttpResponse response) {
+        final Header[] headers = response.getHeaders("content-type");
+        if (headers.length > 0) {
+            final String contentType = headers[0].getValue();
+            final Matcher matcher = CHARSET_PATTERN.matcher(contentType);
+
+            if (matcher.matches()) {
+                final String charset = matcher.group(1);
+                return Charset.forName(charset);
+            }
+        }
+
+        return Charset.forName("ISO-8859-1");
     }
 }
