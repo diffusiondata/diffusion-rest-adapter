@@ -18,21 +18,21 @@ package com.pushtechnology.adapters.rest.model.conversion;
 import com.pushtechnology.adapters.rest.model.AnyModel;
 
 /**
- * Converter between different versions of the model. Creates the latest model.
+ * Converter between different versions of the model.
  *
  * @author Push Technology Limited
  */
 public interface ModelConverter {
     /**
-     * Convert a model to the latest version.
+     * Convert a model to a later.
      * @param model The model
-     * @return The model converted to the latest version
+     * @return The model converted to a later
      * @throws IllegalArgumentException if the converter does not know how to convert supplied model
      */
     AnyModel convert(AnyModel model);
 
     /**
-     * @return The next converter to use
+     * @return The next converter that can be applied to the models returned by this converter
      */
     ModelConverter next();
 }

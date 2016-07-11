@@ -19,7 +19,6 @@ import static java.util.stream.Collectors.toList;
 
 import java.util.stream.Collectors;
 
-import com.pushtechnology.adapters.rest.model.AnyModel;
 import com.pushtechnology.adapters.rest.model.v2.Endpoint;
 import com.pushtechnology.adapters.rest.model.v2.Model;
 import com.pushtechnology.adapters.rest.model.v2.Service;
@@ -29,51 +28,42 @@ import com.pushtechnology.adapters.rest.model.v2.Service;
  *
  * @author Push Technology Limited
  */
-public enum  V1Converter implements ModelConverter {
+public final class V1Converter extends AbstractModelConverter<com.pushtechnology.adapters.rest.model.v1.Model, Model> {
     /**
      * The converter.
      */
-    INSTANCE;
+    public static final V1Converter INSTANCE = new V1Converter();
 
     private static final int DEFAULT_POLL_PERIOD = 60000;
 
-    @Override
-    public Model convert(AnyModel model) {
-        if (model instanceof com.pushtechnology.adapters.rest.model.v1.Model) {
-            final com.pushtechnology.adapters.rest.model.v1.Model oldModel =
-                (com.pushtechnology.adapters.rest.model.v1.Model) model;
-
-            return Model
-                .builder()
-                .services(oldModel
-                    .getServices()
-                    .stream()
-                    .map(oldService -> Service
-                        .builder()
-                        .host(oldService.getHost())
-                        .port(oldService.getPort())
-                        .endpoints(oldService
-                            .getEndpoints()
-                            .stream()
-                            .map(oldEndpoint -> Endpoint
-                                .builder()
-                                .name(oldEndpoint.getName())
-                                .url(oldEndpoint.getUrl())
-                                .topic(oldEndpoint.getTopic())
-                                .build())
-                            .collect(Collectors.toList()))
-                        .pollPeriod(DEFAULT_POLL_PERIOD)
-                        .build())
-                    .collect(toList()))
-                .build();
-        }
-        else {
-            throw new IllegalArgumentException("The argument " + model + " cannot be converted");
-        }
+    private V1Converter() {
+        super(V2Converter.INSTANCE, com.pushtechnology.adapters.rest.model.v1.Model.class);
     }
 
     @Override
-    public ModelConverter next() {
-        return V2Converter.INSTANCE;
+    protected Model convertFrom(com.pushtechnology.adapters.rest.model.v1.Model model) {
+        return Model
+            .builder()
+            .services(model
+                .getServices()
+                .stream()
+                .map(oldService -> Service
+                    .builder()
+                    .host(oldService.getHost())
+                    .port(oldService.getPort())
+                    .endpoints(oldService
+                        .getEndpoints()
+                        .stream()
+                        .map(oldEndpoint -> Endpoint
+                            .builder()
+                            .name(oldEndpoint.getName())
+                            .url(oldEndpoint.getUrl())
+                            .topic(oldEndpoint.getTopic())
+                            .build())
+                        .collect(Collectors.toList()))
+                    .pollPeriod(DEFAULT_POLL_PERIOD)
+                    .build())
+                .collect(toList()))
+            .build();
     }
 }
