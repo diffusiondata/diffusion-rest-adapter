@@ -25,9 +25,7 @@ import com.pushtechnology.adapters.rest.model.latest.Endpoint;
 import com.pushtechnology.adapters.rest.model.latest.Service;
 import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.AddCallback;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater.UpdateCallback;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.session.SessionFactory;
 import com.pushtechnology.diffusion.datatype.json.JSON;
@@ -82,7 +80,9 @@ public final class PublishingClientImpl implements PublishingClient {
 
         service
             .getEndpoints()
-            .forEach(endpoint -> topicControl.addTopic(endpoint.getTopic(), JSON, new AddCallback.Default()));
+            .stream()
+            .map(Endpoint::getTopic)
+            .forEach(topicPath -> topicControl.addTopic(topicPath, JSON, topicPath, AddTopicCallback.INSTANCE));
     }
 
     @Override
@@ -100,7 +100,7 @@ public final class PublishingClientImpl implements PublishingClient {
             .feature(TopicUpdateControl.class)
             .updater()
             .valueUpdater(JSON.class)
-            .update(endpoint.getTopic(), json, new UpdateCallback.Default());
+            .update(endpoint.getTopic(), json, endpoint.getTopic(), UpdateTopicCallback.INSTANCE);
     }
 
     /**
