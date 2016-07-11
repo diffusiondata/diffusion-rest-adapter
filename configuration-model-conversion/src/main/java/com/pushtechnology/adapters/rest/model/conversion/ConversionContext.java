@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright (C) 2016 Push Technology Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
+
 package com.pushtechnology.adapters.rest.model.conversion;
 
 import java.util.HashMap;
@@ -33,12 +48,14 @@ public final class ConversionContext implements ModelConverter {
     }
 
     private Model convertFrom(ModelConverter converter, AnyModel model) {
-        while (converter != null) {
-            model = converter.convert(model);
-            converter = converter.next();
+        ModelConverter currentConverter = converter;
+        AnyModel currentModel = model;
+        while (currentConverter != null) {
+            currentModel = currentConverter.convert(currentModel);
+            currentConverter = currentConverter.next();
         }
 
-        return (Model) model;
+        return (Model) currentModel;
     }
 
     @Override
@@ -64,7 +81,7 @@ public final class ConversionContext implements ModelConverter {
     }
 
     /**
-     * A builder for the {@link ConversionContext}
+     * A builder for the {@link ConversionContext}.
      */
     public static final class Builder {
         private final Map<Integer, Class<? extends AnyModel>> modelVersions;

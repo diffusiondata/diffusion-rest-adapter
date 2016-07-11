@@ -13,25 +13,9 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.model.v0;
-
-import com.pushtechnology.adapters.rest.model.AnyModel;
-
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Value;
-
 /**
- * Empty model.
+ * Package for Diffusion client that polls REST services and republishes data to Diffusion servers or Reappt services.
  *
  * @author Push Technology Limited
  */
-@Value
-@Builder
-@AllArgsConstructor
-public class Model implements AnyModel {
-    /**
-     * The version of the model.
-     */
-    public static final int VERSION = 0;
-}
+package com.pushtechnology.adapters.rest.client;
