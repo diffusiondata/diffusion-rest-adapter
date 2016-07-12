@@ -32,18 +32,26 @@ import com.pushtechnology.adapters.rest.model.latest.Endpoint;
 import com.pushtechnology.adapters.rest.model.latest.Service;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
+import net.jcip.annotations.GuardedBy;
+import net.jcip.annotations.ThreadSafe;
+
 /**
  * The session for a REST service.
+ * <p>
+ * Supports multiple endpoints and dynamically changing the endpoints. Access to the endpoints is synchronised.
  *
  * @author Push Technology Limited
  */
+@ThreadSafe
 public final class ServiceSession {
     private static final Logger LOG = LoggerFactory.getLogger(ServiceSession.class);
+    @GuardedBy("this")
     private final Map<Endpoint, PollHandle> endpointPollers = new HashMap<>();
     private final ScheduledExecutorService executor;
     private final PollClient pollClient;
     private final Service service;
     private final PublishingClient diffusionClient;
+    @GuardedBy("this")
     private boolean isRunning = false;
 
     /**
@@ -163,6 +171,7 @@ public final class ServiceSession {
      */
     private static final class PollHandle {
         private final Future<?> taskHandle;
+        @GuardedBy("ServiceSession.this")
         private Future<?> currentPollHandle;
 
         private PollHandle(Future<?> taskHandle) {
