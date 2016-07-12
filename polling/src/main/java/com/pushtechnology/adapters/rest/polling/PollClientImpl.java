@@ -36,10 +36,18 @@ import com.pushtechnology.adapters.rest.model.latest.Service;
 import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
+import net.jcip.annotations.ThreadSafe;
+
 /**
  * Implementation of {@link PollClient}.
+ * <p>
+ * Synchronises on the instance for the {@link #start()} and {@link #stop()} methods. Calls to the
+ * {@link #request(Service, Endpoint, FutureCallback)} may happen concurrently and atomically access state modified by
+ * the {@link #start()} and {@link #stop()} methods. The request may complete after the {@link PollClient} is stopped.
+ *
  * @author Push Technology Limited
  */
+@ThreadSafe
 public final class PollClientImpl implements PollClient {
     private static final Pattern CHARSET_PATTERN = Pattern.compile(".+; charset=(\\S+)");
     private final HttpClientFactory httpClientFactory;
@@ -53,7 +61,7 @@ public final class PollClientImpl implements PollClient {
     }
 
     @Override
-    public void start() {
+    public synchronized void start() {
         if (currentClient != null) {
             return;
         }
@@ -112,7 +120,7 @@ public final class PollClientImpl implements PollClient {
     }
 
     @Override
-    public void stop() throws IOException {
+    public synchronized void stop() throws IOException {
         final CloseableHttpAsyncClient client = currentClient;
         if (client == null) {
             return;
