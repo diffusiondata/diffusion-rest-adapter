@@ -21,20 +21,24 @@ import java.util.Map;
 import com.pushtechnology.adapters.rest.model.AnyModel;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 
+import net.jcip.annotations.Immutable;
+
 /**
  * Context for converting from older versions of the model.
  *
  * @author Push Technology Limited
  */
+@Immutable
 public final class ConversionContext implements ModelConverter {
-    private final Map<Integer, Class<? extends AnyModel>> modelVersions;
-    private final Map<Class<? extends AnyModel>, ModelConverter> converters;
+    private final Map<Integer, Class<? extends AnyModel>> modelVersions = new HashMap<>();
+    private final Map<Class<? extends AnyModel>, ModelConverter> converters = new HashMap<>();
 
     private ConversionContext(
             Map<Integer, Class<? extends AnyModel>> modelVersions,
             Map<Class<? extends AnyModel>, ModelConverter> converters) {
-        this.modelVersions = modelVersions;
-        this.converters = converters;
+
+        this.modelVersions.putAll(modelVersions);
+        this.converters.putAll(converters);
     }
 
     @Override
@@ -76,13 +80,14 @@ public final class ConversionContext implements ModelConverter {
      */
     public static Builder builder() {
         return new Builder(
-            new HashMap<Integer, Class<? extends AnyModel>>(),
-            new HashMap<Class<? extends AnyModel>, ModelConverter>());
+            new HashMap<>(),
+            new HashMap<>());
     }
 
     /**
      * A builder for the {@link ConversionContext}.
      */
+    @Immutable
     public static final class Builder {
         private final Map<Integer, Class<? extends AnyModel>> modelVersions;
         private final Map<Class<? extends AnyModel>, ModelConverter> converters;
