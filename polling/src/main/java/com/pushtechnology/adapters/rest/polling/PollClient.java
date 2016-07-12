@@ -16,6 +16,7 @@
 package com.pushtechnology.adapters.rest.polling;
 
 import java.io.IOException;
+import java.util.concurrent.Future;
 
 import org.apache.http.concurrent.FutureCallback;
 
@@ -38,9 +39,10 @@ public interface PollClient {
      * @param service the service
      * @param endpoint the endpoint
      * @param callback handler for the response
+     * @return handle to asynchronous poll
      * @throws IllegalStateException if the client is not running
      */
-    void request(Service service, Endpoint endpoint, FutureCallback<JSON> callback);
+    Future<?> request(Service service, Endpoint endpoint, FutureCallback<JSON> callback);
 
     /**
      * Stop the client.

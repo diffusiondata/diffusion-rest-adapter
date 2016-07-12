@@ -1,5 +1,6 @@
 package com.pushtechnology.adapters.rest.polling;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.isA;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -7,9 +8,11 @@ import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.io.IOException;
+import java.util.concurrent.Future;
 
 import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
 import org.apache.http.concurrent.FutureCallback;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.junit.After;
@@ -33,17 +36,22 @@ public final class PollClientImplTest {
     private HttpClientFactory httpClientFactory;
     @Mock
     private FutureCallback<JSON> callback;
+    @Mock
+    private Future<HttpResponse> future;
 
     private final Service service = Service.builder().host("localhost").port(8080).build();
     private final Endpoint endpoint = Endpoint.builder().url("/a/url.json").build();
 
     private PollClientImpl pollClient;
 
+    @SuppressWarnings("unchecked")
     @Before
     public void setUp() {
         initMocks(this);
 
         when(httpClientFactory.create()).thenReturn(httpClient);
+        when(httpClient.execute(isA(HttpHost.class), isA(HttpRequest.class), isA(FutureCallback.class)))
+            .thenReturn(future);
 
         pollClient = new PollClientImpl(httpClientFactory);
     }
@@ -76,8 +84,9 @@ public final class PollClientImplTest {
     public void request() {
         start();
 
-        pollClient.request(service, endpoint, callback);
+        final Future<?> handle = pollClient.request(service, endpoint, callback);
 
+        assertEquals(future, handle);
         verify(httpClient).execute(isA(HttpHost.class), isA(HttpRequest.class), isA(FutureCallback.class));
     }
 

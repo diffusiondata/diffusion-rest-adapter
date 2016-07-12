@@ -19,6 +19,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.concurrent.Future;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -64,13 +65,13 @@ public final class PollClientImpl implements PollClient {
     }
 
     @Override
-    public void request(Service service, Endpoint endpoint, final FutureCallback<JSON> callback) {
+    public Future<?> request(Service service, Endpoint endpoint, final FutureCallback<JSON> callback) {
         final CloseableHttpAsyncClient client = this.currentClient;
         if (client == null) {
             throw new IllegalStateException("Client not running");
         }
 
-        client.execute(
+        return client.execute(
             new HttpHost(service.getHost(), service.getPort(), "http"),
             new HttpGet(endpoint.getUrl()),
             new FutureCallback<HttpResponse>() {
