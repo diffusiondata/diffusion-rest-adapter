@@ -102,6 +102,9 @@ public final class ServiceSession {
         service.getEndpoints().forEach(this::stopEndpoint);
     }
 
+    /**
+     * The polling task. Triggers an asynchronous poll request.
+     */
     private final class PollingTask implements Runnable {
         private final Endpoint endpoint;
 
@@ -141,6 +144,9 @@ public final class ServiceSession {
         }
     }
 
+    /**
+     * Represent a poll. Holds a handle to the task triggering a poll and a handle to the outstanding poll.
+     */
     private static final class PollHandle {
         private final Future<?> taskHandle;
         private Future<?> currentPollHandle;
