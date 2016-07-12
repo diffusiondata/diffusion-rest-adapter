@@ -30,17 +30,24 @@ import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.session.SessionFactory;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
+import net.jcip.annotations.GuardedBy;
+import net.jcip.annotations.ThreadSafe;
+
 /**
  * Implements {@link PublishingClient}.
+ * <p>
+ * Synchronises access to the session. Asynchronous operations may be outstanding when the session is closed.
  *
  * @author Push Technology Limited
  */
+@ThreadSafe
 public final class PublishingClientImpl implements PublishingClient {
     private static final Logger LOG = LoggerFactory.getLogger(PublishingClientImpl.class);
     private final String host;
     private final int port;
     private final String principal;
     private final String password;
+    @GuardedBy("this")
     private Session session;
 
     /**
