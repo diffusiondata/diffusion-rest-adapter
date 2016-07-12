@@ -39,7 +39,7 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
  */
 public final class ServiceSession {
     private static final Logger LOG = LoggerFactory.getLogger(ServiceSession.class);
-    private final Map<Endpoint, Future<?>> endpointPollers = new HashMap<>();
+    private final Map<Endpoint, PollHandle> endpointPollers = new HashMap<>();
     private final ScheduledExecutorService executor;
     private final PollClient pollClient;
     private final Service service;
@@ -79,7 +79,7 @@ public final class ServiceSession {
             0L,
             service.getPollPeriod(),
             MILLISECONDS);
-        endpointPollers.put(endpoint, future);
+        endpointPollers.put(endpoint, new PollHandle(future));
     }
 
     /**
@@ -87,7 +87,11 @@ public final class ServiceSession {
      */
     public synchronized void stopEndpoint(Endpoint endpoint) {
         assert endpointPollers.containsKey(endpoint) : "The endpoint has not been started";
-        endpointPollers.get(endpoint).cancel(false);
+        final PollHandle pollHandle = endpointPollers.remove(endpoint);
+        pollHandle.taskHandle.cancel(false);
+        if (pollHandle.currentPollHandle != null) {
+            pollHandle.currentPollHandle.cancel(false);
+        }
     }
 
     /**
@@ -107,31 +111,43 @@ public final class ServiceSession {
 
         @Override
         public void run() {
-            pollClient.request(
-                service,
-                endpoint,
-                new FutureCallback<JSON>() {
-                    @Override
-                    public void completed(JSON json) {
-                        LOG.trace("Polled value {}", json.toJsonString());
+            synchronized (ServiceSession.this) {
+                endpointPollers.get(endpoint).currentPollHandle = pollClient.request(
+                    service,
+                    endpoint,
+                    new FutureCallback<JSON>() {
+                        @Override
+                        public void completed(JSON json) {
+                            LOG.trace("Polled value {}", json.toJsonString());
 
-                        synchronized (ServiceSession.this) {
-                            if (isRunning) {
-                                diffusionClient.publish(endpoint, json);
+                            synchronized (ServiceSession.this) {
+                                if (isRunning) {
+                                    diffusionClient.publish(endpoint, json);
+                                }
                             }
                         }
-                    }
 
-                    @Override
-                    public void failed(Exception e) {
-                        LOG.warn("Poll failed", e);
-                    }
+                        @Override
+                        public void failed(Exception e) {
+                            LOG.warn("Poll failed", e);
+                        }
 
-                    @Override
-                    public void cancelled() {
-                        LOG.warn("Poll cancelled");
-                    }
-                });
+                        @Override
+                        public void cancelled() {
+                            LOG.warn("Poll cancelled");
+                        }
+                    });
+            }
+        }
+    }
+
+    private static final class PollHandle {
+        private final Future<?> taskHandle;
+        private Future<?> currentPollHandle;
+
+        private PollHandle(Future<?> taskHandle) {
+            this.taskHandle = taskHandle;
+            currentPollHandle = null;
         }
     }
 }
