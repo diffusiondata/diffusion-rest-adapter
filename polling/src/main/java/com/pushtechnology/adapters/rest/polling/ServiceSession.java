@@ -74,8 +74,9 @@ public final class ServiceSession {
      */
     public synchronized void startEndpoint(Endpoint endpoint) {
         assert !endpointPollers.containsKey(endpoint) : "The endpoint has already been started";
+        final PollResultHandler handler = new PollResultHandler(endpoint);
         final ScheduledFuture<?> future = executor.scheduleWithFixedDelay(
-            new PollingTask(endpoint),
+            new PollingTask(endpoint, handler),
             0L,
             service.getPollPeriod(),
             MILLISECONDS);
@@ -107,9 +108,11 @@ public final class ServiceSession {
      */
     private final class PollingTask implements Runnable {
         private final Endpoint endpoint;
+        private final PollResultHandler handler;
 
-        public PollingTask(Endpoint endpoint) {
+        public PollingTask(Endpoint endpoint, PollResultHandler handler) {
             this.endpoint = endpoint;
+            this.handler = handler;
         }
 
         @Override
@@ -118,29 +121,40 @@ public final class ServiceSession {
                 endpointPollers.get(endpoint).currentPollHandle = pollClient.request(
                     service,
                     endpoint,
-                    new FutureCallback<JSON>() {
-                        @Override
-                        public void completed(JSON json) {
-                            LOG.trace("Polled value {}", json.toJsonString());
-
-                            synchronized (ServiceSession.this) {
-                                if (isRunning) {
-                                    diffusionClient.publish(endpoint, json);
-                                }
-                            }
-                        }
-
-                        @Override
-                        public void failed(Exception e) {
-                            LOG.warn("Poll failed", e);
-                        }
-
-                        @Override
-                        public void cancelled() {
-                            LOG.warn("Poll cancelled");
-                        }
-                    });
+                    handler);
             }
+        }
+    }
+
+    /**
+     * The handler for the polling result. Notifies the publishing client of the new data.
+     */
+    private final class PollResultHandler implements FutureCallback<JSON> {
+        private final Endpoint endpoint;
+
+        private PollResultHandler(Endpoint endpoint) {
+            this.endpoint = endpoint;
+        }
+
+        @Override
+        public void completed(JSON json) {
+            LOG.trace("Polled value {}", json.toJsonString());
+
+            synchronized (ServiceSession.this) {
+                if (isRunning) {
+                    diffusionClient.publish(endpoint, json);
+                }
+            }
+        }
+
+        @Override
+        public void failed(Exception e) {
+            LOG.warn("Poll failed", e);
+        }
+
+        @Override
+        public void cancelled() {
+            LOG.warn("Poll cancelled");
         }
     }
 
