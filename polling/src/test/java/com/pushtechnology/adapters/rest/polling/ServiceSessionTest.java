@@ -6,9 +6,12 @@ import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.isA;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.http.concurrent.FutureCallback;
 import org.junit.After;
@@ -37,6 +40,8 @@ public final class ServiceSessionTest {
     private PublishingClient diffusionClient;
     @Mock
     private JSON json;
+    @Mock
+    private ScheduledFuture future;
     @Captor
     private ArgumentCaptor<Runnable> runnableCaptor;
     @Captor
@@ -56,23 +61,27 @@ public final class ServiceSessionTest {
 
     private ServiceSession serviceSession;
 
+    @SuppressWarnings("unchecked")
     @Before
     public void setUp() {
         initMocks(this);
 
         serviceSession = new ServiceSession(executor, pollClient, service, diffusionClient);
+        when(executor
+            .scheduleWithFixedDelay(isA(Runnable.class), isA(Long.class), isA(Long.class), isA(TimeUnit.class)))
+            .thenReturn(future);
     }
 
     @After
     public void postConditions() {
-        verifyNoMoreInteractions(executor, pollClient, diffusionClient);
+        verifyNoMoreInteractions(executor, pollClient, diffusionClient, future);
     }
 
     @Test
     public void startSuccessfulPoll() {
         serviceSession.start();
 
-        verify(executor).schedule(runnableCaptor.capture(), eq(0L), eq(MILLISECONDS));
+        verify(executor).scheduleWithFixedDelay(runnableCaptor.capture(), eq(0L), eq(5000L), eq(MILLISECONDS));
 
         final Runnable runnable = runnableCaptor.getValue();
 
@@ -85,14 +94,13 @@ public final class ServiceSessionTest {
         callback.completed(json);
 
         verify(diffusionClient).publish(endpoint, json);
-        verify(executor).schedule(isA(Runnable.class), eq(5000L), eq(MILLISECONDS));
     }
 
     @Test
     public void startFailedPoll() {
         serviceSession.start();
 
-        verify(executor).schedule(runnableCaptor.capture(), eq(0L), eq(MILLISECONDS));
+        verify(executor).scheduleWithFixedDelay(runnableCaptor.capture(), eq(0L), eq(5000L), eq(MILLISECONDS));
 
         final Runnable runnable = runnableCaptor.getValue();
 
@@ -103,20 +111,36 @@ public final class ServiceSessionTest {
         final FutureCallback<JSON> callback = callbackCaptor.getValue();
 
         callback.failed(new Exception("Intentional exception"));
-
-        verify(executor).schedule(isA(Runnable.class), eq(5000L), eq(MILLISECONDS));
     }
 
     @Test
     public void stop() {
         serviceSession.start();
 
-        verify(executor).schedule(runnableCaptor.capture(), eq(0L), eq(MILLISECONDS));
-
-        final Runnable runnable = runnableCaptor.getValue();
+        verify(executor).scheduleWithFixedDelay(runnableCaptor.capture(), eq(0L), eq(5000L), eq(MILLISECONDS));
 
         serviceSession.stop();
 
+        verify(future).cancel(false);
+    }
+
+    @Test
+    public void stopDuringPoll() {
+        serviceSession.start();
+
+        verify(executor).scheduleWithFixedDelay(runnableCaptor.capture(), eq(0L), eq(5000L), eq(MILLISECONDS));
+
+        final Runnable runnable = runnableCaptor.getValue();
+
         runnable.run();
+
+        verify(pollClient).request(eq(service), eq(endpoint), callbackCaptor.capture());
+
+        final FutureCallback<JSON> callback = callbackCaptor.getValue();
+
+        serviceSession.stop();
+        verify(future).cancel(false);
+
+        callback.completed(json);
     }
 }

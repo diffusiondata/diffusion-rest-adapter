@@ -17,7 +17,11 @@ package com.pushtechnology.adapters.rest.polling;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 
 import org.apache.http.concurrent.FutureCallback;
 import org.slf4j.Logger;
@@ -35,6 +39,7 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
  */
 public final class ServiceSession {
     private static final Logger LOG = LoggerFactory.getLogger(ServiceSession.class);
+    private final Map<Endpoint, Future<?>> endpointPollers = new HashMap<>();
     private final ScheduledExecutorService executor;
     private final PollClient pollClient;
     private final Service service;
@@ -60,9 +65,29 @@ public final class ServiceSession {
      */
     public synchronized void start() {
         isRunning = true;
-        for (final Endpoint endpoint : service.getEndpoints()) {
-            executor.schedule(new PollingTask(endpoint), 0, MILLISECONDS);
-        }
+
+        service.getEndpoints().forEach(this::startEndpoint);
+    }
+
+    /**
+     * Start polling an endpoint.
+     */
+    public synchronized void startEndpoint(Endpoint endpoint) {
+        assert !endpointPollers.containsKey(endpoint) : "The endpoint has already been started";
+        final ScheduledFuture<?> future = executor.scheduleWithFixedDelay(
+            new PollingTask(endpoint),
+            0L,
+            service.getPollPeriod(),
+            MILLISECONDS);
+        endpointPollers.put(endpoint, future);
+    }
+
+    /**
+     * Stop polling an endpoint.
+     */
+    public synchronized void stopEndpoint(Endpoint endpoint) {
+        assert endpointPollers.containsKey(endpoint) : "The endpoint has not been started";
+        endpointPollers.get(endpoint).cancel(false);
     }
 
     /**
@@ -70,6 +95,7 @@ public final class ServiceSession {
      */
     public synchronized void stop() {
         isRunning = false;
+        service.getEndpoints().forEach(this::stopEndpoint);
     }
 
     private final class PollingTask implements Runnable {
@@ -81,46 +107,29 @@ public final class ServiceSession {
 
         @Override
         public void run() {
-            synchronized (ServiceSession.this) {
-                if (!isRunning) {
-                    return;
-                }
-            }
-
             pollClient.request(
                 service,
                 endpoint,
                 new FutureCallback<JSON>() {
                     @Override
                     public void completed(JSON json) {
-                        LOG.trace("Polled value", json.toJsonString());
-
-                        diffusionClient.publish(endpoint, json);
+                        LOG.trace("Polled value {}", json.toJsonString());
 
                         synchronized (ServiceSession.this) {
                             if (isRunning) {
-                                executor.schedule(new PollingTask(endpoint), service.getPollPeriod(), MILLISECONDS);
+                                diffusionClient.publish(endpoint, json);
                             }
                         }
                     }
 
                     @Override
                     public void failed(Exception e) {
-                        e.printStackTrace();
-                        synchronized (ServiceSession.this) {
-                            if (isRunning) {
-                                executor.schedule(new PollingTask(endpoint), service.getPollPeriod(), MILLISECONDS);
-                            }
-                        }
+                        LOG.warn("Poll failed", e);
                     }
 
                     @Override
                     public void cancelled() {
-                        synchronized (ServiceSession.this) {
-                            if (isRunning) {
-                                executor.schedule(new PollingTask(endpoint), service.getPollPeriod(), MILLISECONDS);
-                            }
-                        }
+                        LOG.warn("Poll cancelled");
                     }
                 });
         }
