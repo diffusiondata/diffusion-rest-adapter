@@ -8,7 +8,7 @@ import java.util.Collections;
 import org.junit.Test;
 
 import com.pushtechnology.adapters.rest.model.v1.Model;
-import com.pushtechnology.adapters.rest.model.v1.Service;
+import com.pushtechnology.adapters.rest.model.v1.ServiceConfig;
 
 /**
  * Unit tests for {@link V0Converter}.
@@ -28,6 +28,6 @@ public final class V0ConverterTest {
     public void testUnknownModel() {
         final ModelConverter converter = INSTANCE;
 
-        converter.convert(Model.builder().services(Collections.<Service>emptyList()).build());
+        converter.convert(Model.builder().services(Collections.<ServiceConfig>emptyList()).build());
     }
 }

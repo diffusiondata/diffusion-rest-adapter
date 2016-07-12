@@ -24,8 +24,8 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 
 import com.pushtechnology.adapters.PublishingClient;
-import com.pushtechnology.adapters.rest.model.latest.Endpoint;
-import com.pushtechnology.adapters.rest.model.latest.Service;
+import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
+import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
 /**
@@ -33,7 +33,7 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
  *
  * @author Push Technology Limited
  */
-public final class ServiceSessionTest {
+public final class ServiceConfigSessionTest {
     @Mock
     private ScheduledExecutorService executor;
     @Mock
@@ -53,16 +53,16 @@ public final class ServiceSessionTest {
     @Captor
     private ArgumentCaptor<FutureCallback<JSON>> callbackCaptor;
 
-    private final Endpoint endpoint = Endpoint
+    private final EndpointConfig endpointConfig = EndpointConfig
         .builder()
         .url("/a/url")
         .build();
-    private final Service service = Service
+    private final ServiceConfig serviceConfig = ServiceConfig
         .builder()
         .host("localhost")
         .port(80)
         .pollPeriod(5000L)
-        .endpoints(singletonList(endpoint))
+        .endpoints(singletonList(endpointConfig))
         .build();
 
     private ServiceSession serviceSession;
@@ -72,12 +72,12 @@ public final class ServiceSessionTest {
     public void setUp() {
         initMocks(this);
 
-        serviceSession = new ServiceSession(executor, pollClient, service, diffusionClient);
+        serviceSession = new ServiceSession(executor, pollClient, serviceConfig, diffusionClient);
         when(executor
             .scheduleWithFixedDelay(isA(Runnable.class), isA(Long.class), isA(Long.class), isA(TimeUnit.class)))
             .thenReturn(taskFuture);
         when(pollClient
-            .request(isA(Service.class), isA(Endpoint.class), isA(FutureCallback.class)))
+            .request(isA(ServiceConfig.class), isA(EndpointConfig.class), isA(FutureCallback.class)))
             .thenReturn(pollFuture0, pollFuture1);
     }
 
@@ -96,13 +96,13 @@ public final class ServiceSessionTest {
 
         runnable.run();
 
-        verify(pollClient).request(eq(service), eq(endpoint), callbackCaptor.capture());
+        verify(pollClient).request(eq(serviceConfig), eq(endpointConfig), callbackCaptor.capture());
 
         final FutureCallback<JSON> callback = callbackCaptor.getValue();
 
         callback.completed(json);
 
-        verify(diffusionClient).publish(endpoint, json);
+        verify(diffusionClient).publish(endpointConfig, json);
     }
 
     @Test
@@ -115,7 +115,7 @@ public final class ServiceSessionTest {
 
         runnable.run();
 
-        verify(pollClient).request(eq(service), eq(endpoint), callbackCaptor.capture());
+        verify(pollClient).request(eq(serviceConfig), eq(endpointConfig), callbackCaptor.capture());
 
         final FutureCallback<JSON> callback = callbackCaptor.getValue();
 
@@ -143,7 +143,7 @@ public final class ServiceSessionTest {
 
         runnable.run();
 
-        verify(pollClient).request(eq(service), eq(endpoint), callbackCaptor.capture());
+        verify(pollClient).request(eq(serviceConfig), eq(endpointConfig), callbackCaptor.capture());
 
         serviceSession.stop();
 
@@ -161,11 +161,11 @@ public final class ServiceSessionTest {
 
         runnable.run();
 
-        verify(pollClient).request(eq(service), eq(endpoint), callbackCaptor.capture());
+        verify(pollClient).request(eq(serviceConfig), eq(endpointConfig), callbackCaptor.capture());
 
         runnable.run();
 
-        verify(pollClient, times(2)).request(eq(service), eq(endpoint), callbackCaptor.capture());
+        verify(pollClient, times(2)).request(eq(serviceConfig), eq(endpointConfig), callbackCaptor.capture());
 
         serviceSession.stop();
 
@@ -183,7 +183,7 @@ public final class ServiceSessionTest {
 
         runnable.run();
 
-        verify(pollClient).request(eq(service), eq(endpoint), callbackCaptor.capture());
+        verify(pollClient).request(eq(serviceConfig), eq(endpointConfig), callbackCaptor.capture());
 
         final FutureCallback<JSON> callback = callbackCaptor.getValue();
 

@@ -31,7 +31,7 @@ public final class LatestConverterTest {
 
         converter.convert(com.pushtechnology.adapters.rest.model.v1.Model
             .builder()
-            .services(Collections.<com.pushtechnology.adapters.rest.model.v1.Service>emptyList())
+            .services(Collections.<com.pushtechnology.adapters.rest.model.v1.ServiceConfig>emptyList())
             .build());
     }
 }

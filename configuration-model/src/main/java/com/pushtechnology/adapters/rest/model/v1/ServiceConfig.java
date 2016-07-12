@@ -15,31 +15,35 @@
 
 package com.pushtechnology.adapters.rest.model.v1;
 
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Value;
 
 /**
- * Endpoint configuration. Version 1.
+ * Service configuration. Version 1.
  * <p>
- * Description of a REST endpoint to poll.
+ * Description of a REST service to poll.
  *
  * @author Push Technology Limited
  */
 @Value
 @Builder
 @AllArgsConstructor
-public class Endpoint {
+public class ServiceConfig {
     /**
-     * The name of the endpoint.
+     * The host of the service.
      */
-    String name;
+    String host;
+
     /**
-     * The URL of the endpoint.
+     * The port to connect to.
      */
-    String url;
+    int port;
+
     /**
-     * The topic to map the endpoint to.
+     * The endpoints the service makes available.
      */
-    String topic;
+    List<EndpointConfig> endpoints;
 }

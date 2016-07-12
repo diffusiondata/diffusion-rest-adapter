@@ -31,8 +31,8 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.concurrent.FutureCallback;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 
-import com.pushtechnology.adapters.rest.model.latest.Endpoint;
-import com.pushtechnology.adapters.rest.model.latest.Service;
+import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
+import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
@@ -42,8 +42,9 @@ import net.jcip.annotations.ThreadSafe;
  * Implementation of {@link PollClient}.
  * <p>
  * Synchronises on the instance for the {@link #start()} and {@link #stop()} methods. Calls to the
- * {@link #request(Service, Endpoint, FutureCallback)} may happen concurrently and atomically access state modified by
- * the {@link #start()} and {@link #stop()} methods. The request may complete after the {@link PollClient} is stopped.
+ * {@link #request(ServiceConfig, EndpointConfig, FutureCallback)} may happen concurrently and atomically access state
+ * modified by the {@link #start()} and {@link #stop()} methods. The request may complete after the {@link PollClient}
+ * is stopped.
  *
  * @author Push Technology Limited
  */
@@ -73,15 +74,18 @@ public final class PollClientImpl implements PollClient {
     }
 
     @Override
-    public Future<?> request(Service service, Endpoint endpoint, final FutureCallback<JSON> callback) {
+    public Future<?> request(
+            ServiceConfig serviceConfig,
+            EndpointConfig endpointConfig,
+            final FutureCallback<JSON> callback) {
         final CloseableHttpAsyncClient client = this.currentClient;
         if (client == null) {
             throw new IllegalStateException("Client not running");
         }
 
         return client.execute(
-            new HttpHost(service.getHost(), service.getPort(), "http"),
-            new HttpGet(endpoint.getUrl()),
+            new HttpHost(serviceConfig.getHost(), serviceConfig.getPort(), "http"),
+            new HttpGet(endpointConfig.getUrl()),
             new FutureCallback<HttpResponse>() {
                 @Override
                 public void completed(HttpResponse httpResponse) {

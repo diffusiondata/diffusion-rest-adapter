@@ -28,8 +28,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.adapters.PublishingClient;
-import com.pushtechnology.adapters.rest.model.latest.Endpoint;
-import com.pushtechnology.adapters.rest.model.latest.Service;
+import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
+import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
 import net.jcip.annotations.GuardedBy;
@@ -46,10 +46,10 @@ import net.jcip.annotations.ThreadSafe;
 public final class ServiceSession {
     private static final Logger LOG = LoggerFactory.getLogger(ServiceSession.class);
     @GuardedBy("this")
-    private final Map<Endpoint, PollHandle> endpointPollers = new HashMap<>();
+    private final Map<EndpointConfig, PollHandle> endpointPollers = new HashMap<>();
     private final ScheduledExecutorService executor;
     private final PollClient pollClient;
-    private final Service service;
+    private final ServiceConfig serviceConfig;
     private final PublishingClient diffusionClient;
     @GuardedBy("this")
     private boolean isRunning = false;
@@ -60,11 +60,11 @@ public final class ServiceSession {
     public ServiceSession(
             ScheduledExecutorService executor,
             PollClient pollClient,
-            Service service,
+            ServiceConfig serviceConfig,
             PublishingClient diffusionClient) {
         this.executor = executor;
         this.pollClient = pollClient;
-        this.service = service;
+        this.serviceConfig = serviceConfig;
         this.diffusionClient = diffusionClient;
     }
 
@@ -74,29 +74,29 @@ public final class ServiceSession {
     public synchronized void start() {
         isRunning = true;
 
-        service.getEndpoints().forEach(this::startEndpoint);
+        serviceConfig.getEndpoints().forEach(this::startEndpoint);
     }
 
     /**
      * Start polling an endpoint.
      */
-    public synchronized void startEndpoint(Endpoint endpoint) {
-        assert !endpointPollers.containsKey(endpoint) : "The endpoint has already been started";
-        final PollResultHandler handler = new PollResultHandler(endpoint);
+    public synchronized void startEndpoint(EndpointConfig endpointConfig) {
+        assert !endpointPollers.containsKey(endpointConfig) : "The endpoint has already been started";
+        final PollResultHandler handler = new PollResultHandler(endpointConfig);
         final ScheduledFuture<?> future = executor.scheduleWithFixedDelay(
-            new PollingTask(endpoint, handler),
+            new PollingTask(endpointConfig, handler),
             0L,
-            service.getPollPeriod(),
+            serviceConfig.getPollPeriod(),
             MILLISECONDS);
-        endpointPollers.put(endpoint, new PollHandle(future));
+        endpointPollers.put(endpointConfig, new PollHandle(future));
     }
 
     /**
      * Stop polling an endpoint.
      */
-    public synchronized void stopEndpoint(Endpoint endpoint) {
-        assert endpointPollers.containsKey(endpoint) : "The endpoint has not been started";
-        final PollHandle pollHandle = endpointPollers.remove(endpoint);
+    public synchronized void stopEndpoint(EndpointConfig endpointConfig) {
+        assert endpointPollers.containsKey(endpointConfig) : "The endpoint has not been started";
+        final PollHandle pollHandle = endpointPollers.remove(endpointConfig);
         pollHandle.taskHandle.cancel(false);
         if (pollHandle.currentPollHandle != null) {
             pollHandle.currentPollHandle.cancel(false);
@@ -108,27 +108,27 @@ public final class ServiceSession {
      */
     public synchronized void stop() {
         isRunning = false;
-        service.getEndpoints().forEach(this::stopEndpoint);
+        serviceConfig.getEndpoints().forEach(this::stopEndpoint);
     }
 
     /**
      * The polling task. Triggers an asynchronous poll request.
      */
     private final class PollingTask implements Runnable {
-        private final Endpoint endpoint;
+        private final EndpointConfig endpointConfig;
         private final PollResultHandler handler;
 
-        public PollingTask(Endpoint endpoint, PollResultHandler handler) {
-            this.endpoint = endpoint;
+        public PollingTask(EndpointConfig endpointConfig, PollResultHandler handler) {
+            this.endpointConfig = endpointConfig;
             this.handler = handler;
         }
 
         @Override
         public void run() {
             synchronized (ServiceSession.this) {
-                endpointPollers.get(endpoint).currentPollHandle = pollClient.request(
-                    service,
-                    endpoint,
+                endpointPollers.get(endpointConfig).currentPollHandle = pollClient.request(
+                    serviceConfig,
+                    endpointConfig,
                     handler);
             }
         }
@@ -138,10 +138,10 @@ public final class ServiceSession {
      * The handler for the polling result. Notifies the publishing client of the new data.
      */
     private final class PollResultHandler implements FutureCallback<JSON> {
-        private final Endpoint endpoint;
+        private final EndpointConfig endpointConfig;
 
-        private PollResultHandler(Endpoint endpoint) {
-            this.endpoint = endpoint;
+        private PollResultHandler(EndpointConfig endpointConfig) {
+            this.endpointConfig = endpointConfig;
         }
 
         @Override
@@ -150,7 +150,7 @@ public final class ServiceSession {
 
             synchronized (ServiceSession.this) {
                 if (isRunning) {
-                    diffusionClient.publish(endpoint, json);
+                    diffusionClient.publish(endpointConfig, json);
                 }
             }
         }

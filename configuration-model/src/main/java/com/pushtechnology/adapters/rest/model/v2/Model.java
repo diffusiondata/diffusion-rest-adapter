@@ -37,5 +37,5 @@ public class Model implements AnyModel {
      */
     public static final int VERSION = 2;
 
-    List<Service> services;
+    List<ServiceConfig> services;
 }

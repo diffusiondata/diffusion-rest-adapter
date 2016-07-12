@@ -19,9 +19,9 @@ import static java.util.stream.Collectors.toList;
 
 import java.util.stream.Collectors;
 
-import com.pushtechnology.adapters.rest.model.v2.Endpoint;
 import com.pushtechnology.adapters.rest.model.v2.Model;
-import com.pushtechnology.adapters.rest.model.v2.Service;
+import com.pushtechnology.adapters.rest.model.v2.EndpointConfig;
+import com.pushtechnology.adapters.rest.model.v2.ServiceConfig;
 
 import net.jcip.annotations.Immutable;
 
@@ -50,14 +50,14 @@ public final class V1Converter extends AbstractModelConverter<com.pushtechnology
             .services(model
                 .getServices()
                 .stream()
-                .map(oldService -> Service
+                .map(oldService -> ServiceConfig
                     .builder()
                     .host(oldService.getHost())
                     .port(oldService.getPort())
                     .endpoints(oldService
                         .getEndpoints()
                         .stream()
-                        .map(oldEndpoint -> Endpoint
+                        .map(oldEndpoint -> EndpointConfig
                             .builder()
                             .name(oldEndpoint.getName())
                             .url(oldEndpoint.getUrl())

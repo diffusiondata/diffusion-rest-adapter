@@ -19,10 +19,10 @@ import static java.util.stream.Collectors.toList;
 
 import java.util.stream.Collectors;
 
-import com.pushtechnology.adapters.rest.model.latest.Diffusion;
-import com.pushtechnology.adapters.rest.model.latest.Endpoint;
+import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
+import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
-import com.pushtechnology.adapters.rest.model.latest.Service;
+import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 
 import net.jcip.annotations.Immutable;
 
@@ -49,14 +49,14 @@ public final class V3Converter extends AbstractModelConverter<com.pushtechnology
             .services(model
                 .getServices()
                 .stream()
-                .map(oldService -> Service
+                .map(oldService -> ServiceConfig
                     .builder()
                     .host(oldService.getHost())
                     .port(oldService.getPort())
                     .endpoints(oldService
                         .getEndpoints()
                         .stream()
-                        .map(oldEndpoint -> Endpoint
+                        .map(oldEndpoint -> EndpointConfig
                             .builder()
                             .name(oldEndpoint.getName())
                             .url(oldEndpoint.getUrl())
@@ -66,7 +66,7 @@ public final class V3Converter extends AbstractModelConverter<com.pushtechnology
                     .pollPeriod(oldService.getPollPeriod())
                     .build())
                 .collect(toList()))
-            .diffusion(Diffusion
+            .diffusion(DiffusionConfig
                 .builder()
                 .host(model.getDiffusion().getHost())
                 .port(model.getDiffusion().getPort())

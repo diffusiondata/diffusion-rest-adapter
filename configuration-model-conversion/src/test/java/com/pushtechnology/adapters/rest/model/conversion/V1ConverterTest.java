@@ -8,7 +8,7 @@ import java.util.Collections;
 import org.junit.Test;
 
 import com.pushtechnology.adapters.rest.model.v2.Model;
-import com.pushtechnology.adapters.rest.model.v2.Service;
+import com.pushtechnology.adapters.rest.model.v2.ServiceConfig;
 
 /**
  * Unit tests for {@link V1Converter}.
@@ -23,17 +23,17 @@ public final class V1ConverterTest {
             com.pushtechnology.adapters.rest.model.v1.Model
                 .builder()
                 .services(Collections.singletonList(
-                    com.pushtechnology.adapters.rest.model.v1.Service
+                    com.pushtechnology.adapters.rest.model.v1.ServiceConfig
                     .builder()
                     .host("localhost")
                     .port(80)
-                    .endpoints(Collections.<com.pushtechnology.adapters.rest.model.v1.Endpoint>emptyList())
+                    .endpoints(Collections.<com.pushtechnology.adapters.rest.model.v1.EndpointConfig>emptyList())
                     .build()
                 ))
                 .build());
 
         assertEquals(1, model.getServices().size());
-        final Service service = model.getServices().get(0);
+        final ServiceConfig service = model.getServices().get(0);
 
         assertEquals("localhost", service.getHost());
         assertEquals(80, service.getPort());

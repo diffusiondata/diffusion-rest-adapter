@@ -20,8 +20,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 
-import com.pushtechnology.adapters.rest.model.latest.Endpoint;
-import com.pushtechnology.adapters.rest.model.latest.Service;
+import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
+import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
 /**
@@ -39,8 +39,8 @@ public final class PollClientImplTest {
     @Mock
     private Future<HttpResponse> future;
 
-    private final Service service = Service.builder().host("localhost").port(8080).build();
-    private final Endpoint endpoint = Endpoint.builder().url("/a/url.json").build();
+    private final ServiceConfig serviceConfig = ServiceConfig.builder().host("localhost").port(8080).build();
+    private final EndpointConfig endpointConfig = EndpointConfig.builder().url("/a/url.json").build();
 
     private PollClientImpl pollClient;
 
@@ -71,7 +71,7 @@ public final class PollClientImplTest {
 
     @Test(expected = IllegalStateException.class)
     public void requestBeforeStart() {
-        pollClient.request(service, endpoint, callback);
+        pollClient.request(serviceConfig, endpointConfig, callback);
     }
 
     @Test
@@ -84,7 +84,7 @@ public final class PollClientImplTest {
     public void request() {
         start();
 
-        final Future<?> handle = pollClient.request(service, endpoint, callback);
+        final Future<?> handle = pollClient.request(serviceConfig, endpointConfig, callback);
 
         assertEquals(future, handle);
         verify(httpClient).execute(isA(HttpHost.class), isA(HttpRequest.class), isA(FutureCallback.class));

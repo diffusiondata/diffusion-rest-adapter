@@ -13,14 +13,14 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.model.v2;
+package com.pushtechnology.adapters.rest.model.v1;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Value;
 
 /**
- * Endpoint configuration. Version 2.
+ * Endpoint configuration. Version 1.
  * <p>
  * Description of a REST endpoint to poll.
  *
@@ -29,7 +29,7 @@ import lombok.Value;
 @Value
 @Builder
 @AllArgsConstructor
-public class Endpoint {
+public class EndpointConfig {
     /**
      * The name of the endpoint.
      */

@@ -19,7 +19,7 @@ import java.util.Collections;
 
 import com.pushtechnology.adapters.rest.model.AnyModel;
 import com.pushtechnology.adapters.rest.model.v1.Model;
-import com.pushtechnology.adapters.rest.model.v1.Service;
+import com.pushtechnology.adapters.rest.model.v1.ServiceConfig;
 
 import net.jcip.annotations.Immutable;
 
@@ -40,7 +40,7 @@ public enum V0Converter implements ModelConverter {
         if (model instanceof com.pushtechnology.adapters.rest.model.v0.Model) {
             return Model
                 .builder()
-                .services(Collections.<Service>emptyList())
+                .services(Collections.<ServiceConfig>emptyList())
                 .build();
         }
         else {

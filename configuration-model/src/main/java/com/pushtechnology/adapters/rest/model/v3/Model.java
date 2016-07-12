@@ -40,10 +40,10 @@ public class Model implements AnyModel {
     /**
      * The Diffusion server.
      */
-    private Diffusion diffusion;
+    private DiffusionConfig diffusion;
 
     /**
      * The REST services to poll.
      */
-    List<Service> services;
+    List<ServiceConfig> services;
 }

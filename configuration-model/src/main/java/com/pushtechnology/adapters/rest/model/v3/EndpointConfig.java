@@ -29,7 +29,7 @@ import lombok.Value;
 @Value
 @Builder
 @AllArgsConstructor
-public class Endpoint {
+public class EndpointConfig {
     /**
      * The name of the endpoint.
      */

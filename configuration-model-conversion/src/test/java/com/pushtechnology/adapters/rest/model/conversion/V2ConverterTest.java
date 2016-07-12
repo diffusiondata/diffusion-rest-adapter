@@ -8,7 +8,7 @@ import java.util.Collections;
 import org.junit.Test;
 
 import com.pushtechnology.adapters.rest.model.v3.Model;
-import com.pushtechnology.adapters.rest.model.v3.Service;
+import com.pushtechnology.adapters.rest.model.v3.ServiceConfig;
 
 /**
  * Unit tests for {@link V2Converter}.
@@ -22,18 +22,18 @@ public final class V2ConverterTest {
             com.pushtechnology.adapters.rest.model.v2.Model
                 .builder()
                 .services(Collections.singletonList(
-                    com.pushtechnology.adapters.rest.model.v2.Service
+                    com.pushtechnology.adapters.rest.model.v2.ServiceConfig
                         .builder()
                         .host("localhost")
                         .port(80)
-                        .endpoints(Collections.<com.pushtechnology.adapters.rest.model.v2.Endpoint>emptyList())
+                        .endpoints(Collections.<com.pushtechnology.adapters.rest.model.v2.EndpointConfig>emptyList())
                         .pollPeriod(5000)
                         .build()
                 ))
                 .build());
 
         assertEquals(1, model.getServices().size());
-        final Service service = model.getServices().get(0);
+        final ServiceConfig service = model.getServices().get(0);
 
         assertEquals("localhost", service.getHost());
         assertEquals(80, service.getPort());
@@ -48,7 +48,7 @@ public final class V2ConverterTest {
 
         converter.convert(com.pushtechnology.adapters.rest.model.v1.Model
             .builder()
-            .services(Collections.<com.pushtechnology.adapters.rest.model.v1.Service>emptyList())
+            .services(Collections.<com.pushtechnology.adapters.rest.model.v1.ServiceConfig>emptyList())
             .build());
     }
 }

@@ -15,8 +15,8 @@
 
 package com.pushtechnology.adapters;
 
-import com.pushtechnology.adapters.rest.model.latest.Endpoint;
-import com.pushtechnology.adapters.rest.model.latest.Service;
+import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
+import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
 /**
@@ -33,7 +33,7 @@ public interface PublishingClient {
     /**
      * Initialise a service to publish to.
      */
-    void initialise(Service service);
+    void initialise(ServiceConfig serviceConfig);
 
     /**
      * Stop the client running.
@@ -43,5 +43,5 @@ public interface PublishingClient {
     /**
      * Update the topic associated with an endpoint.
      */
-    void publish(Endpoint endpoint, JSON json);
+    void publish(EndpointConfig endpointConfig, JSON json);
 }

@@ -8,7 +8,7 @@ import java.util.Collections;
 import org.junit.Test;
 
 import com.pushtechnology.adapters.rest.model.latest.Model;
-import com.pushtechnology.adapters.rest.model.latest.Service;
+import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 
 /**
  * Unit tests for {@link V3Converter}.
@@ -22,15 +22,15 @@ public final class V3ConverterTest {
             com.pushtechnology.adapters.rest.model.v3.Model
                 .builder()
                 .services(Collections.singletonList(
-                    com.pushtechnology.adapters.rest.model.v3.Service
+                    com.pushtechnology.adapters.rest.model.v3.ServiceConfig
                         .builder()
                         .host("localhost")
                         .port(80)
-                        .endpoints(Collections.<com.pushtechnology.adapters.rest.model.v3.Endpoint>emptyList())
+                        .endpoints(Collections.<com.pushtechnology.adapters.rest.model.v3.EndpointConfig>emptyList())
                         .pollPeriod(5000)
                         .build()
                 ))
-                .diffusion(com.pushtechnology.adapters.rest.model.v3.Diffusion
+                .diffusion(com.pushtechnology.adapters.rest.model.v3.DiffusionConfig
                     .builder()
                     .host("localhost")
                     .port(8080)
@@ -38,7 +38,7 @@ public final class V3ConverterTest {
                 .build());
 
         assertEquals(1, model.getServices().size());
-        final Service service = model.getServices().get(0);
+        final ServiceConfig service = model.getServices().get(0);
 
         assertEquals("localhost", service.getHost());
         assertEquals(80, service.getPort());
@@ -54,7 +54,7 @@ public final class V3ConverterTest {
 
         converter.convert(com.pushtechnology.adapters.rest.model.v1.Model
             .builder()
-            .services(Collections.<com.pushtechnology.adapters.rest.model.v1.Service>emptyList())
+            .services(Collections.<com.pushtechnology.adapters.rest.model.v1.ServiceConfig>emptyList())
             .build());
     }
 }

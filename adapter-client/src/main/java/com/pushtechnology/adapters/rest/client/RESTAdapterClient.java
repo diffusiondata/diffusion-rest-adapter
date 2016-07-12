@@ -30,15 +30,15 @@ import org.slf4j.LoggerFactory;
 import com.pushtechnology.adapters.PublishingClient;
 import com.pushtechnology.adapters.PublishingClientImpl;
 import com.pushtechnology.adapters.rest.model.conversion.ConversionContext;
+import com.pushtechnology.adapters.rest.model.conversion.LatestConverter;
 import com.pushtechnology.adapters.rest.model.conversion.V0Converter;
 import com.pushtechnology.adapters.rest.model.conversion.V1Converter;
 import com.pushtechnology.adapters.rest.model.conversion.V2Converter;
 import com.pushtechnology.adapters.rest.model.conversion.V3Converter;
-import com.pushtechnology.adapters.rest.model.conversion.LatestConverter;
-import com.pushtechnology.adapters.rest.model.latest.Diffusion;
-import com.pushtechnology.adapters.rest.model.latest.Endpoint;
+import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
+import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
-import com.pushtechnology.adapters.rest.model.latest.Service;
+import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.persistence.FileSystemPersistence;
 import com.pushtechnology.adapters.rest.persistence.Persistence;
 import com.pushtechnology.adapters.rest.polling.HttpClientFactoryImpl;
@@ -99,13 +99,13 @@ public final class RESTAdapterClient {
                 .builder()
                 .services(
                     singletonList(
-                        Service
+                        ServiceConfig
                             .builder()
                             .host("petition.parliament.uk")
                             .port(80)
                             .endpoints(
                                 singletonList(
-                                    Endpoint
+                                    EndpointConfig
                                         .builder()
                                         .name("endpoint-0")
                                         .url("/petitions/131215.json")
@@ -116,12 +116,12 @@ public final class RESTAdapterClient {
 
         LOG.debug("Configuration: {}", model);
 
-        final Diffusion diffusion = model.getDiffusion();
+        final DiffusionConfig diffusionConfig = model.getDiffusion();
         final PublishingClient diffusionClient = new PublishingClientImpl(
-            diffusion.getHost(),
-            diffusion.getPort(),
-            diffusion.getPrincipal(),
-            diffusion.getPassword());
+            diffusionConfig.getHost(),
+            diffusionConfig.getPort(),
+            diffusionConfig.getPrincipal(),
+            diffusionConfig.getPassword());
 
         diffusionClient.start();
 

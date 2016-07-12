@@ -21,8 +21,8 @@ import static com.pushtechnology.diffusion.client.topics.details.TopicType.JSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.pushtechnology.adapters.rest.model.latest.Endpoint;
-import com.pushtechnology.adapters.rest.model.latest.Service;
+import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
+import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
@@ -82,13 +82,13 @@ public final class PublishingClientImpl implements PublishingClient {
     }
 
     @Override
-    public synchronized void initialise(Service service) {
+    public synchronized void initialise(ServiceConfig serviceConfig) {
         final TopicControl topicControl = session.feature(TopicControl.class);
 
-        service
+        serviceConfig
             .getEndpoints()
             .stream()
-            .map(Endpoint::getTopic)
+            .map(EndpointConfig::getTopic)
             .forEach(topicPath -> topicControl.addTopic(topicPath, JSON, topicPath, AddTopicCallback.INSTANCE));
     }
 
@@ -98,7 +98,7 @@ public final class PublishingClientImpl implements PublishingClient {
     }
 
     @Override
-    public synchronized void publish(Endpoint endpoint, JSON json) {
+    public synchronized void publish(EndpointConfig endpointConfig, JSON json) {
         if (!session.getState().isConnected()) {
             return;
         }
@@ -107,7 +107,7 @@ public final class PublishingClientImpl implements PublishingClient {
             .feature(TopicUpdateControl.class)
             .updater()
             .valueUpdater(JSON.class)
-            .update(endpoint.getTopic(), json, endpoint.getTopic(), UpdateTopicCallback.INSTANCE);
+            .update(endpointConfig.getTopic(), json, endpointConfig.getTopic(), UpdateTopicCallback.INSTANCE);
     }
 
     /**

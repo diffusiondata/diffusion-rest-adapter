@@ -13,7 +13,7 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.model.v1;
+package com.pushtechnology.adapters.rest.model.v2;
 
 import java.util.List;
 
@@ -22,7 +22,7 @@ import lombok.Builder;
 import lombok.Value;
 
 /**
- * Service configuration. Version 1.
+ * Service configuration. Version 2.
  * <p>
  * Description of a REST service to poll.
  *
@@ -31,7 +31,7 @@ import lombok.Value;
 @Value
 @Builder
 @AllArgsConstructor
-public class Service {
+public class ServiceConfig {
     /**
      * The host of the service.
      */
@@ -45,5 +45,10 @@ public class Service {
     /**
      * The endpoints the service makes available.
      */
-    List<Endpoint> endpoints;
+    List<EndpointConfig> endpoints;
+
+    /**
+     * The time in milliseconds between polls.
+     */
+    long pollPeriod;
 }

@@ -31,7 +31,7 @@ import lombok.Value;
 @Value
 @Builder
 @AllArgsConstructor
-public class Service {
+public class ServiceConfig {
     /**
      * The host of the service.
      */
@@ -45,7 +45,7 @@ public class Service {
     /**
      * The endpoints the service makes available.
      */
-    List<Endpoint> endpoints;
+    List<EndpointConfig> endpoints;
 
     /**
      * The time in milliseconds between polls.

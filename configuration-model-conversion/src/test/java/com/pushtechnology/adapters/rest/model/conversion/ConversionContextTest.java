@@ -9,7 +9,7 @@ import org.junit.Test;
 
 import com.pushtechnology.adapters.rest.model.AnyModel;
 import com.pushtechnology.adapters.rest.model.latest.Model;
-import com.pushtechnology.adapters.rest.model.latest.Service;
+import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 
 /**
  * Unit tests for {@link ConversionContext}.
@@ -49,7 +49,7 @@ public final class ConversionContextTest {
 
     @Test
     public void testConvertFromV1() {
-        final Model model = converter.convert(Model.builder().services(Collections.<Service>emptyList()).build());
+        final Model model = converter.convert(Model.builder().services(Collections.<ServiceConfig>emptyList()).build());
 
         assertEquals(0, model.getServices().size());
     }

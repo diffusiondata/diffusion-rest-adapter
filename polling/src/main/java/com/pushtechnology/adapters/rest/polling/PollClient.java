@@ -20,8 +20,8 @@ import java.util.concurrent.Future;
 
 import org.apache.http.concurrent.FutureCallback;
 
-import com.pushtechnology.adapters.rest.model.latest.Endpoint;
-import com.pushtechnology.adapters.rest.model.latest.Service;
+import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
+import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
 /**
@@ -36,13 +36,13 @@ public interface PollClient {
 
     /**
      * Poll an endpoint using the client.
-     * @param service the service
-     * @param endpoint the endpoint
+     * @param serviceConfig the service
+     * @param endpointConfig the endpoint
      * @param callback handler for the response
      * @return handle to asynchronous poll
      * @throws IllegalStateException if the client is not running
      */
-    Future<?> request(Service service, Endpoint endpoint, FutureCallback<JSON> callback);
+    Future<?> request(ServiceConfig serviceConfig, EndpointConfig endpointConfig, FutureCallback<JSON> callback);
 
     /**
      * Stop the client.
