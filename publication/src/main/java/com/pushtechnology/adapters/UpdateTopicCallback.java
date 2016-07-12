@@ -21,11 +21,14 @@ import org.slf4j.LoggerFactory;
 import com.pushtechnology.diffusion.client.callbacks.ErrorReason;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater.UpdateContextCallback;
 
+import net.jcip.annotations.Immutable;
+
 /**
  * Callback for topic updates.
  *
  * @author Push Technology Limited
  */
+@Immutable
 public enum  UpdateTopicCallback implements UpdateContextCallback<String> {
     /**
      * Instance of the callback.

@@ -35,11 +35,14 @@ import com.pushtechnology.adapters.rest.model.AnyModel;
 import com.pushtechnology.adapters.rest.model.conversion.ConversionContext;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 
+import net.jcip.annotations.Immutable;
+
 /**
  * Persist to the file system.
  *
  * @author Push Technology Limited
  */
+@Immutable
 public final class FileSystemPersistence implements Persistence {
     private final JsonFactory jsonFactory = new JsonFactory();
     private final ObjectMapper objectMapper = new ObjectMapper(jsonFactory).enable(SerializationFeature.INDENT_OUTPUT);

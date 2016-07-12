@@ -21,11 +21,14 @@ import com.pushtechnology.adapters.rest.model.AnyModel;
 import com.pushtechnology.adapters.rest.model.v1.Model;
 import com.pushtechnology.adapters.rest.model.v1.Service;
 
+import net.jcip.annotations.Immutable;
+
 /**
  * Converter between different version 0 of the model and version 1.
  *
  * @author Push Technology Limited
  */
+@Immutable
 public enum V0Converter implements ModelConverter {
     /**
      * The converter.

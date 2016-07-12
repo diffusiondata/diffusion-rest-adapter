@@ -18,11 +18,14 @@ package com.pushtechnology.adapters.rest.model.conversion;
 import com.pushtechnology.adapters.rest.model.AnyModel;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 
+import net.jcip.annotations.Immutable;
+
 /**
  * Converter between the latest version of the model and itself.
  *
  * @author Push Technology Limited
  */
+@Immutable
 public enum LatestConverter implements ModelConverter {
     /**
      * The converter.

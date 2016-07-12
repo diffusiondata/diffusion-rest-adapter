@@ -21,11 +21,14 @@ import org.slf4j.LoggerFactory;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicAddFailReason;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 
+import net.jcip.annotations.Immutable;
+
 /**
  * Callback for topic creation.
  *
  * @author Push Technology Limited
  */
+@Immutable
 public enum AddTopicCallback implements TopicControl.AddContextCallback<String> {
     /**
      * Callback instance.

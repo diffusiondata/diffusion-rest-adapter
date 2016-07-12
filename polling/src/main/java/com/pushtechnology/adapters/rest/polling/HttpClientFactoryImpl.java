@@ -18,11 +18,14 @@ package com.pushtechnology.adapters.rest.polling;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.apache.http.impl.nio.client.HttpAsyncClients;
 
+import net.jcip.annotations.Immutable;
+
 /**
  * Implementation of {@link HttpClientFactory}s.
  *
  * @author Push Technology Limited
  */
+@Immutable
 public final class HttpClientFactoryImpl implements HttpClientFactory {
     @Override
     public CloseableHttpAsyncClient create() {

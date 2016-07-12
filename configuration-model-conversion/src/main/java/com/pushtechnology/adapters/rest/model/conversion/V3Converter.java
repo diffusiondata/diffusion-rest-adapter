@@ -24,11 +24,14 @@ import com.pushtechnology.adapters.rest.model.latest.Endpoint;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.Service;
 
+import net.jcip.annotations.Immutable;
+
 /**
  * Converter between different version 3 of the model and version 4.
  *
  * @author Push Technology Limited
  */
+@Immutable
 public final class V3Converter extends AbstractModelConverter<com.pushtechnology.adapters.rest.model.v3.Model, Model> {
     /**
      * The converter.
