@@ -13,12 +13,12 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters;
+package com.pushtechnology.adapters.rest.publication;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.pushtechnology.adapters.PublishingClient.InitialiseCallback;
+import com.pushtechnology.adapters.rest.publication.PublishingClient.InitialiseCallback;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicAddFailReason;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 

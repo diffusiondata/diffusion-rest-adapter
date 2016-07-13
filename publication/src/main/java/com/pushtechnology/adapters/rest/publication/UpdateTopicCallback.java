@@ -13,7 +13,7 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters;
+package com.pushtechnology.adapters.rest.publication;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

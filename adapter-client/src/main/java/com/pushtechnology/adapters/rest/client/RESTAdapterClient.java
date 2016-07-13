@@ -27,9 +27,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.pushtechnology.adapters.PublishingClient;
-import com.pushtechnology.adapters.PublishingClient.InitialiseCallback;
-import com.pushtechnology.adapters.PublishingClientImpl;
+import com.pushtechnology.adapters.rest.publication.PublishingClient;
+import com.pushtechnology.adapters.rest.publication.PublishingClient.InitialiseCallback;
+import com.pushtechnology.adapters.rest.publication.PublishingClientImpl;
 import com.pushtechnology.adapters.rest.model.conversion.ConversionContext;
 import com.pushtechnology.adapters.rest.model.conversion.LatestConverter;
 import com.pushtechnology.adapters.rest.model.conversion.V0Converter;

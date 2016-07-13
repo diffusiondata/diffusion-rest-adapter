@@ -18,4 +18,4 @@
  *
  * @author Push Technology Limited
  */
-package com.pushtechnology.adapters;
+package com.pushtechnology.adapters.rest.publication;

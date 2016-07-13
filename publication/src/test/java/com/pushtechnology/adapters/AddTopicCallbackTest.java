@@ -11,6 +11,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 
+import com.pushtechnology.adapters.rest.publication.AddTopicCallback;
+import com.pushtechnology.adapters.rest.publication.PublishingClient;
+
 /**
  * Unit tests for {@link AddTopicCallback}.
  *

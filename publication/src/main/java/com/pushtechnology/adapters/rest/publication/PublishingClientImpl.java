@@ -13,7 +13,7 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters;
+package com.pushtechnology.adapters.rest.publication;
 
 import static com.pushtechnology.diffusion.client.topics.details.TopicType.JSON;
 
