@@ -89,7 +89,7 @@ public final class ServiceSessionTest {
     @Test
     public void startSuccessfulPoll() {
         serviceSession.start();
-        serviceSession.startEndpoint(endpointConfig);
+        serviceSession.addEndpoint(endpointConfig);
 
         verify(executor).scheduleWithFixedDelay(runnableCaptor.capture(), eq(0L), eq(5000L), eq(MILLISECONDS));
 
@@ -109,7 +109,7 @@ public final class ServiceSessionTest {
     @Test
     public void startFailedPoll() {
         serviceSession.start();
-        serviceSession.startEndpoint(endpointConfig);
+        serviceSession.addEndpoint(endpointConfig);
 
         verify(executor).scheduleWithFixedDelay(runnableCaptor.capture(), eq(0L), eq(5000L), eq(MILLISECONDS));
 
@@ -127,7 +127,7 @@ public final class ServiceSessionTest {
     @Test
     public void stop() {
         serviceSession.start();
-        serviceSession.startEndpoint(endpointConfig);
+        serviceSession.addEndpoint(endpointConfig);
 
         verify(executor).scheduleWithFixedDelay(runnableCaptor.capture(), eq(0L), eq(5000L), eq(MILLISECONDS));
 
@@ -139,7 +139,7 @@ public final class ServiceSessionTest {
     @Test
     public void stopBeforePoll() {
         serviceSession.start();
-        serviceSession.startEndpoint(endpointConfig);
+        serviceSession.addEndpoint(endpointConfig);
 
         verify(executor).scheduleWithFixedDelay(runnableCaptor.capture(), eq(0L), eq(5000L), eq(MILLISECONDS));
 
@@ -158,7 +158,7 @@ public final class ServiceSessionTest {
     @Test
     public void stopBeforeSecondPoll() {
         serviceSession.start();
-        serviceSession.startEndpoint(endpointConfig);
+        serviceSession.addEndpoint(endpointConfig);
 
         verify(executor).scheduleWithFixedDelay(runnableCaptor.capture(), eq(0L), eq(5000L), eq(MILLISECONDS));
 
@@ -181,7 +181,7 @@ public final class ServiceSessionTest {
     @Test
     public void stopDuringPoll() {
         serviceSession.start();
-        serviceSession.startEndpoint(endpointConfig);
+        serviceSession.addEndpoint(endpointConfig);
 
         verify(executor).scheduleWithFixedDelay(runnableCaptor.capture(), eq(0L), eq(5000L), eq(MILLISECONDS));
 

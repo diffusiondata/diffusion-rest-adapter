@@ -144,7 +144,7 @@ public final class RESTAdapterClient {
 
                     @Override
                     public void onEndpointAdded(ServiceConfig serviceConfig, EndpointConfig endpointConfig) {
-                        serviceSession.startEndpoint(endpointConfig);
+                        serviceSession.addEndpoint(endpointConfig);
                     }
 
                     @Override

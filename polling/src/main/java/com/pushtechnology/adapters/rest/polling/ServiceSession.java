@@ -77,9 +77,9 @@ public final class ServiceSession {
     }
 
     /**
-     * Start polling an endpoint.
+     * Add an endpoint to the session.
      */
-    public synchronized void startEndpoint(EndpointConfig endpointConfig) {
+    public synchronized void addEndpoint(EndpointConfig endpointConfig) {
         assert !endpointPollers.containsKey(endpointConfig) : "The endpoint has already been started";
         final PollResultHandler handler = new PollResultHandler(endpointConfig);
         final ScheduledFuture<?> future = executor.scheduleWithFixedDelay(
@@ -91,9 +91,9 @@ public final class ServiceSession {
     }
 
     /**
-     * Stop polling an endpoint.
+     * Remove an endpoint from the session.
      */
-    public synchronized void stopEndpoint(EndpointConfig endpointConfig) {
+    public synchronized void removeEndpoint(EndpointConfig endpointConfig) {
         assert endpointPollers.containsKey(endpointConfig) : "The endpoint has not been started";
         final PollHandle pollHandle = endpointPollers.remove(endpointConfig);
         pollHandle.taskHandle.cancel(false);
