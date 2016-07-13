@@ -135,6 +135,13 @@ public final class PublishingClientImplTest {
         verify(session).close();
     }
 
+    @Test(expected = IllegalStateException.class)
+    public void publishBeforeStart() {
+        final PublishingClient client = new PublishingClientImpl(sessionFactory);
+
+        client.publish(endpointConfig, json);
+    }
+
     @Test
     public void publish() {
         final PublishingClient client = new PublishingClientImpl(sessionFactory);

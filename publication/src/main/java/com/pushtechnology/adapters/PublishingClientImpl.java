@@ -61,6 +61,10 @@ public final class PublishingClientImpl implements PublishingClient {
 
     @Override
     public synchronized void initialise(ServiceConfig serviceConfig) {
+        if (session == null) {
+            throw new IllegalStateException("Client has not started");
+        }
+
         final TopicControl topicControl = session.feature(TopicControl.class);
 
         serviceConfig
@@ -72,13 +76,18 @@ public final class PublishingClientImpl implements PublishingClient {
 
     @Override
     public synchronized void stop() {
+        if (session == null) {
+            return;
+        }
+
         session.close();
+        session = null;
     }
 
     @Override
     public synchronized void publish(EndpointConfig endpointConfig, JSON json) {
-        if (!session.getState().isConnected()) {
-            return;
+        if (session == null || !session.getState().isConnected()) {
+            throw new IllegalStateException("Session closed");
         }
 
         session
