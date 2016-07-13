@@ -33,7 +33,7 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
  *
  * @author Push Technology Limited
  */
-public final class ServiceConfigSessionTest {
+public final class ServiceSessionTest {
     @Mock
     private ScheduledExecutorService executor;
     @Mock
