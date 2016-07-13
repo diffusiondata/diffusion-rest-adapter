@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
+import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.publication.PublishingClient.InitialiseCallback;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicAddFailReason;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
@@ -31,33 +32,32 @@ import net.jcip.annotations.Immutable;
  * @author Push Technology Limited
  */
 @Immutable
-public final class AddTopicCallback implements TopicControl.AddCallback {
+public final class AddTopicCallback implements TopicControl.AddContextCallback<EndpointConfig> {
     private static final Logger LOG = LoggerFactory.getLogger(AddTopicCallback.class);
-    private final EndpointConfig endpointConfig;
+    private final ServiceConfig serviceConfig;
     private final InitialiseCallback callback;
 
     /**
      * Constructor.
      */
-    public AddTopicCallback(EndpointConfig endpointConfig, InitialiseCallback callback) {
-        this.endpointConfig = endpointConfig;
-
+    public AddTopicCallback(ServiceConfig serviceConfig, InitialiseCallback callback) {
+        this.serviceConfig = serviceConfig;
         this.callback = callback;
     }
 
     @Override
-    public void onTopicAdded(String topicPath) {
+    public void onTopicAdded(EndpointConfig endpointConfig, String topicPath) {
         LOG.trace("Topic created {}", topicPath);
-        callback.onEndpointAdded(endpointConfig);
+        callback.onEndpointAdded(serviceConfig, endpointConfig);
     }
 
     @Override
-    public void onTopicAddFailed(String topicPath, TopicAddFailReason reason) {
+    public void onTopicAddFailed(EndpointConfig endpointConfig, String topicPath, TopicAddFailReason reason) {
         assert endpointConfig.getTopic().equals(topicPath) :
             "Context used to improve discard logging, expected to be the topic path";
 
         if (TopicAddFailReason.EXISTS == reason) {
-            onTopicAdded(topicPath);
+            onTopicAdded(endpointConfig, topicPath);
         }
         else {
             LOG.warn("Failed to add topic {}: {}", topicPath, reason);
@@ -65,7 +65,7 @@ public final class AddTopicCallback implements TopicControl.AddCallback {
     }
 
     @Override
-    public void onDiscard() {
+    public void onDiscard(EndpointConfig endpointConfig) {
         LOG.trace("Failed to add topic {}", endpointConfig.getTopic());
     }
 }

@@ -52,6 +52,6 @@ public interface PublishingClient {
         /**
          * Notification when the endpoint has been added.
          */
-        void onEndpointAdded(EndpointConfig endpointConfig);
+        void onEndpointAdded(ServiceConfig serviceConfig, EndpointConfig endpointConfig);
     }
 }

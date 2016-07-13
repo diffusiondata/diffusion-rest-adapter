@@ -15,11 +15,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 
-import com.pushtechnology.adapters.rest.publication.PublishingClient;
-import com.pushtechnology.adapters.rest.publication.PublishingClient.InitialiseCallback;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.publication.AddTopicCallback;
+import com.pushtechnology.adapters.rest.publication.PublishingClient;
+import com.pushtechnology.adapters.rest.publication.PublishingClient.InitialiseCallback;
 import com.pushtechnology.adapters.rest.publication.PublishingClientImpl;
 import com.pushtechnology.adapters.rest.publication.UpdateTopicCallback;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
@@ -119,7 +119,7 @@ public final class PublishingClientImplTest {
         client.initialise(serviceConfig, callback);
 
         verify(session).feature(TopicControl.class);
-        verify(topicControl).addTopic(eq("a/topic"), eq(JSON), isA(AddTopicCallback.class));
+        verify(topicControl).addTopic(eq("a/topic"), eq(JSON), eq(endpointConfig), isA(AddTopicCallback.class));
     }
 
     @Test
@@ -162,7 +162,7 @@ public final class PublishingClientImplTest {
         client.initialise(serviceConfig, callback);
 
         verify(session).feature(TopicControl.class);
-        verify(topicControl).addTopic(eq("a/topic"), eq(JSON), isA(AddTopicCallback.class));
+        verify(topicControl).addTopic(eq("a/topic"), eq(JSON), eq(endpointConfig), isA(AddTopicCallback.class));
 
         client.publish(endpointConfig, json);
 

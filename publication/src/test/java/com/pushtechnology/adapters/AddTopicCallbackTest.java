@@ -2,6 +2,7 @@ package com.pushtechnology.adapters;
 
 import static com.pushtechnology.diffusion.client.features.control.topics.TopicAddFailReason.EXISTS;
 import static com.pushtechnology.diffusion.client.features.control.topics.TopicAddFailReason.EXISTS_MISMATCH;
+import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -12,6 +13,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
+import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.publication.AddTopicCallback;
 import com.pushtechnology.adapters.rest.publication.PublishingClient;
 
@@ -24,6 +26,7 @@ public final class AddTopicCallbackTest {
     @Mock
     private PublishingClient.InitialiseCallback callback;
 
+    private ServiceConfig serviceConfig;
     private EndpointConfig endpointConfig;
     private AddTopicCallback addTopicCallback;
 
@@ -38,7 +41,15 @@ public final class AddTopicCallbackTest {
             .url("http://localhost/json")
             .build();
 
-        addTopicCallback = new AddTopicCallback(endpointConfig, callback);
+        serviceConfig = ServiceConfig
+            .builder()
+            .host("localhost")
+            .port(8080)
+            .pollPeriod(60000)
+            .endpoints(singletonList(endpointConfig))
+            .build();
+
+        addTopicCallback = new AddTopicCallback(serviceConfig, callback);
     }
 
     @After
@@ -48,25 +59,25 @@ public final class AddTopicCallbackTest {
 
     @Test
     public void onTopicAdded() {
-        addTopicCallback.onTopicAdded("topic");
+        addTopicCallback.onTopicAdded(endpointConfig, "topic");
 
-        verify(callback).onEndpointAdded(endpointConfig);
+        verify(callback).onEndpointAdded(serviceConfig, endpointConfig);
     }
 
     @Test
     public void onTopicAddFailedExists() {
-        addTopicCallback.onTopicAddFailed("topic", EXISTS);
+        addTopicCallback.onTopicAddFailed(endpointConfig, "topic", EXISTS);
 
-        verify(callback).onEndpointAdded(endpointConfig);
+        verify(callback).onEndpointAdded(serviceConfig, endpointConfig);
     }
 
     @Test
     public void onTopicAddFailed() {
-        addTopicCallback.onTopicAddFailed("topic", EXISTS_MISMATCH);
+        addTopicCallback.onTopicAddFailed(endpointConfig, "topic", EXISTS_MISMATCH);
     }
 
     @Test
     public void onDiscard() {
-        addTopicCallback.onDiscard();
+        addTopicCallback.onDiscard(endpointConfig);
     }
 }
