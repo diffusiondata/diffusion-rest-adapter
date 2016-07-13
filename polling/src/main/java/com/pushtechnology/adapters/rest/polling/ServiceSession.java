@@ -18,7 +18,6 @@ package com.pushtechnology.adapters.rest.polling;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
@@ -127,12 +126,10 @@ public final class ServiceSession {
     public synchronized void stop() {
         isRunning = false;
 
-        final Iterator<Map.Entry<EndpointConfig, PollHandle>> iterator = endpointPollers.entrySet().iterator();
-        while (iterator.hasNext()) {
-            final Map.Entry<EndpointConfig, PollHandle> entry = iterator.next();
-            stopEndpoint(entry.getValue());
-            iterator.remove();
-        }
+        endpointPollers.replaceAll((endpointConfig, pollHandle) -> {
+            stopEndpoint(pollHandle);
+            return null;
+        });
     }
 
     /**
