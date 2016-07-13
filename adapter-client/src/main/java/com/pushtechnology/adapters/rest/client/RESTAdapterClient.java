@@ -16,7 +16,6 @@
 package com.pushtechnology.adapters.rest.client;
 
 import static com.pushtechnology.diffusion.client.session.SessionAttributes.Transport.WEBSOCKET;
-import static java.lang.Thread.sleep;
 import static java.util.Collections.singletonList;
 
 import java.io.IOException;
