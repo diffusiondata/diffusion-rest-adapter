@@ -18,6 +18,7 @@ package com.pushtechnology.adapters.rest.publication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.publication.PublishingClient.InitialiseCallback;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicAddFailReason;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
@@ -32,14 +33,14 @@ import net.jcip.annotations.Immutable;
 @Immutable
 public final class AddTopicCallback implements TopicControl.AddCallback {
     private static final Logger LOG = LoggerFactory.getLogger(AddTopicCallback.class);
-    private final String expectedTopicPath;
+    private final EndpointConfig endpointConfig;
     private final InitialiseCallback callback;
 
     /**
      * Constructor.
      */
-    public AddTopicCallback(String expectedTopicPath, InitialiseCallback callback) {
-        this.expectedTopicPath = expectedTopicPath;
+    public AddTopicCallback(EndpointConfig endpointConfig, InitialiseCallback callback) {
+        this.endpointConfig = endpointConfig;
 
         this.callback = callback;
     }
@@ -47,12 +48,12 @@ public final class AddTopicCallback implements TopicControl.AddCallback {
     @Override
     public void onTopicAdded(String topicPath) {
         LOG.trace("Topic created {}", topicPath);
-        callback.onTopicAdded(topicPath);
+        callback.onEndpointAdded(endpointConfig);
     }
 
     @Override
     public void onTopicAddFailed(String topicPath, TopicAddFailReason reason) {
-        assert expectedTopicPath.equals(topicPath) :
+        assert endpointConfig.getTopic().equals(topicPath) :
             "Context used to improve discard logging, expected to be the topic path";
 
         if (TopicAddFailReason.EXISTS == reason) {
@@ -65,6 +66,6 @@ public final class AddTopicCallback implements TopicControl.AddCallback {
 
     @Override
     public void onDiscard() {
-        LOG.trace("Failed to add topic {}", expectedTopicPath);
+        LOG.trace("Failed to add topic {}", endpointConfig.getTopic());
     }
 }

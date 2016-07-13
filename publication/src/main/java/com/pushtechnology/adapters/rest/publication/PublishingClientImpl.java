@@ -17,6 +17,8 @@ package com.pushtechnology.adapters.rest.publication;
 
 import static com.pushtechnology.diffusion.client.topics.details.TopicType.JSON;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,12 +68,12 @@ public final class PublishingClientImpl implements PublishingClient {
         }
 
         final TopicControl topicControl = session.feature(TopicControl.class);
+        final List<EndpointConfig> endpoints = serviceConfig.getEndpoints();
 
-        serviceConfig
-            .getEndpoints()
+        endpoints
             .stream()
-            .map(EndpointConfig::getTopic)
-            .forEach(topicPath -> topicControl.addTopic(topicPath, JSON, new AddTopicCallback(topicPath, callback)));
+            .forEach(endpoint -> topicControl
+                .addTopic(endpoint.getTopic(), JSON, new AddTopicCallback(endpoint, callback)));
     }
 
     @Override

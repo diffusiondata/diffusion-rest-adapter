@@ -11,6 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 
+import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.publication.AddTopicCallback;
 import com.pushtechnology.adapters.rest.publication.PublishingClient;
 
@@ -23,13 +24,21 @@ public final class AddTopicCallbackTest {
     @Mock
     private PublishingClient.InitialiseCallback callback;
 
+    private EndpointConfig endpointConfig;
     private AddTopicCallback addTopicCallback;
 
     @Before
     public void setUp() {
         initMocks(this);
 
-        addTopicCallback = new AddTopicCallback("topic", callback);
+        endpointConfig = EndpointConfig
+            .builder()
+            .name("endpoint")
+            .topic("topic")
+            .url("http://localhost/json")
+            .build();
+
+        addTopicCallback = new AddTopicCallback(endpointConfig, callback);
     }
 
     @After
@@ -41,14 +50,14 @@ public final class AddTopicCallbackTest {
     public void onTopicAdded() {
         addTopicCallback.onTopicAdded("topic");
 
-        verify(callback).onTopicAdded("topic");
+        verify(callback).onEndpointAdded(endpointConfig);
     }
 
     @Test
     public void onTopicAddFailedExists() {
         addTopicCallback.onTopicAddFailed("topic", EXISTS);
 
-        verify(callback).onTopicAdded("topic");
+        verify(callback).onEndpointAdded(endpointConfig);
     }
 
     @Test

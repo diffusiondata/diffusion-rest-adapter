@@ -50,8 +50,8 @@ public interface PublishingClient {
      */
     interface InitialiseCallback {
         /**
-         * Notification when the topic has been added.
+         * Notification when the endpoint has been added.
          */
-        void onTopicAdded(String topicPath);
+        void onEndpointAdded(EndpointConfig endpointConfig);
     }
 }

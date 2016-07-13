@@ -129,7 +129,7 @@ public final class RESTAdapterClient {
 
         final InitialiseCallback callback = new InitialiseCallback() {
             @Override
-            public void onTopicAdded(String topicPath) {
+            public void onEndpointAdded(EndpointConfig endpointConfig) {
             }
         };
 
