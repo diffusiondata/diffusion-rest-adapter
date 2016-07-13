@@ -50,8 +50,18 @@ public interface PublishingClient {
      */
     interface InitialiseCallback {
         /**
-         * Notification when the endpoint has been added.
+         * Notification when an endpoint has been added.
          */
         void onEndpointAdded(ServiceConfig serviceConfig, EndpointConfig endpointConfig);
+
+        /**
+         * Notification when an endpoint has failed.
+         */
+        void onEndpointFailed(ServiceConfig serviceConfig, EndpointConfig endpointConfig);
+
+        /**
+         * Notification when the service has been added.
+         */
+        void onServiceAdded(ServiceConfig serviceConfig);
     }
 }

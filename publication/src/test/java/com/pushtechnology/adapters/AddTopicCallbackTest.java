@@ -62,6 +62,7 @@ public final class AddTopicCallbackTest {
         addTopicCallback.onTopicAdded(endpointConfig, "topic");
 
         verify(callback).onEndpointAdded(serviceConfig, endpointConfig);
+        verify(callback).onServiceAdded(serviceConfig);
     }
 
     @Test
@@ -69,15 +70,20 @@ public final class AddTopicCallbackTest {
         addTopicCallback.onTopicAddFailed(endpointConfig, "topic", EXISTS);
 
         verify(callback).onEndpointAdded(serviceConfig, endpointConfig);
+        verify(callback).onServiceAdded(serviceConfig);
     }
 
     @Test
     public void onTopicAddFailed() {
         addTopicCallback.onTopicAddFailed(endpointConfig, "topic", EXISTS_MISMATCH);
+        verify(callback).onEndpointFailed(serviceConfig, endpointConfig);
+        verify(callback).onServiceAdded(serviceConfig);
     }
 
     @Test
     public void onDiscard() {
         addTopicCallback.onDiscard(endpointConfig);
+        verify(callback).onEndpointFailed(serviceConfig, endpointConfig);
+        verify(callback).onServiceAdded(serviceConfig);
     }
 }

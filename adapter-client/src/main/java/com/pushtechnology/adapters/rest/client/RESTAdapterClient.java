@@ -27,9 +27,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.pushtechnology.adapters.rest.publication.PublishingClient;
-import com.pushtechnology.adapters.rest.publication.PublishingClient.InitialiseCallback;
-import com.pushtechnology.adapters.rest.publication.PublishingClientImpl;
 import com.pushtechnology.adapters.rest.model.conversion.ConversionContext;
 import com.pushtechnology.adapters.rest.model.conversion.LatestConverter;
 import com.pushtechnology.adapters.rest.model.conversion.V0Converter;
@@ -46,6 +43,9 @@ import com.pushtechnology.adapters.rest.polling.HttpClientFactoryImpl;
 import com.pushtechnology.adapters.rest.polling.PollClient;
 import com.pushtechnology.adapters.rest.polling.PollClientImpl;
 import com.pushtechnology.adapters.rest.polling.ServiceSession;
+import com.pushtechnology.adapters.rest.publication.PublishingClient;
+import com.pushtechnology.adapters.rest.publication.PublishingClient.InitialiseCallback;
+import com.pushtechnology.adapters.rest.publication.PublishingClientImpl;
 import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.session.SessionFactory;
 
@@ -130,6 +130,14 @@ public final class RESTAdapterClient {
         final InitialiseCallback callback = new InitialiseCallback() {
             @Override
             public void onEndpointAdded(ServiceConfig serviceConfig, EndpointConfig endpointConfig) {
+            }
+
+            @Override
+            public void onEndpointFailed(ServiceConfig serviceConfig, EndpointConfig endpointConfig) {
+            }
+
+            @Override
+            public void onServiceAdded(ServiceConfig serviceConfig) {
             }
         };
 

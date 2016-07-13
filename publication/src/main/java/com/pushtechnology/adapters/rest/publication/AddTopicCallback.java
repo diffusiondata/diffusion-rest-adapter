@@ -15,6 +15,8 @@
 
 package com.pushtechnology.adapters.rest.publication;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,6 +38,7 @@ public final class AddTopicCallback implements TopicControl.AddContextCallback<E
     private static final Logger LOG = LoggerFactory.getLogger(AddTopicCallback.class);
     private final ServiceConfig serviceConfig;
     private final InitialiseCallback callback;
+    private final AtomicInteger completedCount = new AtomicInteger(0);
 
     /**
      * Constructor.
@@ -49,6 +52,7 @@ public final class AddTopicCallback implements TopicControl.AddContextCallback<E
     public void onTopicAdded(EndpointConfig endpointConfig, String topicPath) {
         LOG.trace("Topic created {}", topicPath);
         callback.onEndpointAdded(serviceConfig, endpointConfig);
+        checkComplete();
     }
 
     @Override
@@ -61,11 +65,21 @@ public final class AddTopicCallback implements TopicControl.AddContextCallback<E
         }
         else {
             LOG.warn("Failed to add topic {}: {}", topicPath, reason);
+            callback.onEndpointFailed(serviceConfig, endpointConfig);
+            checkComplete();
         }
     }
 
     @Override
     public void onDiscard(EndpointConfig endpointConfig) {
         LOG.trace("Failed to add topic {}", endpointConfig.getTopic());
+        callback.onEndpointFailed(serviceConfig, endpointConfig);
+        checkComplete();
+    }
+
+    private void checkComplete() {
+        if (completedCount.incrementAndGet() == serviceConfig.getEndpoints().size()) {
+            callback.onServiceAdded(serviceConfig);
+        }
     }
 }
