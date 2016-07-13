@@ -15,7 +15,6 @@
 
 package com.pushtechnology.adapters;
 
-import static com.pushtechnology.diffusion.client.session.SessionAttributes.Transport.WEBSOCKET;
 import static com.pushtechnology.diffusion.client.topics.details.TopicType.JSON;
 
 import org.slf4j.Logger;
@@ -23,7 +22,6 @@ import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
 import com.pushtechnology.diffusion.client.session.Session;
@@ -43,41 +41,21 @@ import net.jcip.annotations.ThreadSafe;
 @ThreadSafe
 public final class PublishingClientImpl implements PublishingClient {
     private static final Logger LOG = LoggerFactory.getLogger(PublishingClientImpl.class);
-    private final String host;
-    private final int port;
-    private final String principal;
-    private final String password;
+    private final SessionFactory sessionFactory;
     @GuardedBy("this")
     private Session session;
 
     /**
      * Constructor.
      */
-    public PublishingClientImpl(String host, int port, String principal, String password) {
-        this.host = host;
-        this.port = port;
-        this.principal = principal;
-        this.password = password;
+    public PublishingClientImpl(SessionFactory sessionFactory) {
+        this.sessionFactory = sessionFactory;
     }
 
     @Override
     public synchronized void start() {
-        // Use the session factory to open a new session
-        SessionFactory sessionFactory = Diffusion
-            .sessions()
-            .listener(new Listener())
-            .serverHost(host)
-            .serverPort(port)
-            .secureTransport(false)
-            .transports(WEBSOCKET);
-
-        if (principal != null && password != null) {
-            sessionFactory = sessionFactory
-                .principal(principal)
-                .password(password);
-        }
-
         session = sessionFactory
+            .listener(new Listener())
             .open();
     }
 

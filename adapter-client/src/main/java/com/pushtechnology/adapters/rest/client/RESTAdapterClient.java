@@ -15,6 +15,7 @@
 
 package com.pushtechnology.adapters.rest.client;
 
+import static com.pushtechnology.diffusion.client.session.SessionAttributes.Transport.WEBSOCKET;
 import static java.lang.Thread.sleep;
 import static java.util.Collections.singletonList;
 
@@ -45,6 +46,8 @@ import com.pushtechnology.adapters.rest.polling.HttpClientFactoryImpl;
 import com.pushtechnology.adapters.rest.polling.PollClient;
 import com.pushtechnology.adapters.rest.polling.PollClientImpl;
 import com.pushtechnology.adapters.rest.polling.ServiceSession;
+import com.pushtechnology.diffusion.client.Diffusion;
+import com.pushtechnology.diffusion.client.session.SessionFactory;
 
 /**
  * Simple client adapting REST to Diffusion.
@@ -116,12 +119,7 @@ public final class RESTAdapterClient {
 
         LOG.debug("Configuration: {}", model);
 
-        final DiffusionConfig diffusionConfig = model.getDiffusion();
-        final PublishingClient diffusionClient = new PublishingClientImpl(
-            diffusionConfig.getHost(),
-            diffusionConfig.getPort(),
-            diffusionConfig.getPrincipal(),
-            diffusionConfig.getPassword());
+        final PublishingClient diffusionClient = new PublishingClientImpl(getSessionFactory(model.getDiffusion()));
 
         diffusionClient.start();
 
@@ -148,5 +146,23 @@ public final class RESTAdapterClient {
         diffusionClient.stop();
 
         fileSystemPersistence.storeModel(model);
+    }
+
+    private static SessionFactory getSessionFactory(DiffusionConfig diffusionConfig) {
+        final SessionFactory sessionFactory = Diffusion
+            .sessions()
+            .serverHost(diffusionConfig.getHost())
+            .serverPort(diffusionConfig.getPort())
+            .secureTransport(false)
+            .transports(WEBSOCKET);
+
+        if (diffusionConfig.getPrincipal() != null && diffusionConfig.getPassword() != null) {
+            return sessionFactory
+                .principal(diffusionConfig.getPrincipal())
+                .password(diffusionConfig.getPassword());
+        }
+        else  {
+            return sessionFactory;
+        }
     }
 }
