@@ -74,31 +74,50 @@ public final class ServiceSession {
      */
     public synchronized void start() {
         isRunning = true;
+
+        endpointPollers.replaceAll((endpoint, currentHandle) -> startEndpoint(endpoint));
     }
 
     /**
      * Add an endpoint to the session.
      */
     public synchronized void addEndpoint(EndpointConfig endpointConfig) {
-        assert !endpointPollers.containsKey(endpointConfig) : "The endpoint has already been started";
+        if (endpointPollers.containsKey(endpointConfig)) {
+            return;
+        }
+
+        endpointPollers.put(endpointConfig, isRunning ? startEndpoint(endpointConfig) : null);
+    }
+
+    private PollHandle startEndpoint(EndpointConfig endpointConfig) {
+        assert endpointPollers.get(endpointConfig) == null : "The endpoint has already been started";
+
         final PollResultHandler handler = new PollResultHandler(endpointConfig);
         final ScheduledFuture<?> future = executor.scheduleWithFixedDelay(
             new PollingTask(endpointConfig, handler),
             0L,
             serviceConfig.getPollPeriod(),
             MILLISECONDS);
-        endpointPollers.put(endpointConfig, new PollHandle(future));
+
+        return new PollHandle(future);
     }
 
     /**
      * Remove an endpoint from the session.
      */
     public synchronized void removeEndpoint(EndpointConfig endpointConfig) {
-        assert endpointPollers.containsKey(endpointConfig) : "The endpoint has not been started";
-        final PollHandle pollHandle = endpointPollers.remove(endpointConfig);
-        pollHandle.taskHandle.cancel(false);
-        if (pollHandle.currentPollHandle != null) {
-            pollHandle.currentPollHandle.cancel(false);
+        assert endpointPollers.containsKey(endpointConfig) : "The endpoint has not been added";
+
+        stopEndpoint(endpointPollers.remove(endpointConfig));
+
+    }
+
+    private void stopEndpoint(PollHandle pollHandle) {
+        if (pollHandle != null) {
+            pollHandle.taskHandle.cancel(false);
+            if (pollHandle.currentPollHandle != null) {
+                pollHandle.currentPollHandle.cancel(false);
+            }
         }
     }
 
@@ -111,11 +130,7 @@ public final class ServiceSession {
         final Iterator<Map.Entry<EndpointConfig, PollHandle>> iterator = endpointPollers.entrySet().iterator();
         while (iterator.hasNext()) {
             final Map.Entry<EndpointConfig, PollHandle> entry = iterator.next();
-            final PollHandle pollHandle = entry.getValue();
-            pollHandle.taskHandle.cancel(false);
-            if (pollHandle.currentPollHandle != null) {
-                pollHandle.currentPollHandle.cancel(false);
-            }
+            stopEndpoint(entry.getValue());
             iterator.remove();
         }
     }
