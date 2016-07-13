@@ -13,6 +13,8 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
@@ -24,6 +26,7 @@ import com.pushtechnology.adapters.rest.publication.PublishingClientImpl;
 import com.pushtechnology.adapters.rest.publication.UpdateTopicCallback;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
+import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.UpdateSource;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.ValueUpdater;
 import com.pushtechnology.diffusion.client.session.Session;
@@ -52,6 +55,10 @@ public final class PublishingClientImplTest {
     private JSON json;
     @Mock
     private InitialiseCallback callback;
+    @Captor
+    private ArgumentCaptor<AddTopicCallback> addCallbackCaptor;
+    @Captor
+    private ArgumentCaptor<UpdateSource> updateSourceCaptor;
 
     private EndpointConfig endpointConfig;
     private ServiceConfig serviceConfig;
@@ -66,7 +73,6 @@ public final class PublishingClientImplTest {
         when(session.feature(TopicControl.class)).thenReturn(topicControl);
         when(session.feature(TopicUpdateControl.class)).thenReturn(updateControl);
         when(session.getState()).thenReturn(CONNECTED_ACTIVE);
-        when(updateControl.updater()).thenReturn(rawUpdater);
         when(rawUpdater.valueUpdater(JSON.class)).thenReturn(updater);
 
         endpointConfig = EndpointConfig
@@ -163,13 +169,21 @@ public final class PublishingClientImplTest {
         client.initialise(serviceConfig, callback);
 
         verify(session).feature(TopicControl.class);
-        verify(topicControl).addTopic(eq("a/topic"), eq(JSON), eq(endpointConfig), isA(AddTopicCallback.class));
+        verify(topicControl).addTopic(eq("a/topic"), eq(JSON), eq(endpointConfig), addCallbackCaptor.capture());
+
+        addCallbackCaptor.getValue().onTopicAdded(endpointConfig, "a/topic");
+        verify(callback).onEndpointAdded(serviceConfig, endpointConfig);
+
+        verify(updateControl).registerUpdateSource(eq("a"), updateSourceCaptor.capture());
+
+        updateSourceCaptor.getValue().onActive("a/topic", rawUpdater);
+
+        verify(callback).onServiceAdded(serviceConfig);
 
         client.publish(serviceConfig, endpointConfig, json);
 
         verify(session).getState();
         verify(session).feature(TopicUpdateControl.class);
-        verify(updateControl).updater();
         verify(rawUpdater).valueUpdater(JSON.class);
         verify(updater).update("a/topic", json, "a/topic", UpdateTopicCallback.INSTANCE);
     }

@@ -17,6 +17,9 @@ package com.pushtechnology.adapters.rest.publication;
 
 import static com.pushtechnology.diffusion.client.topics.details.TopicType.JSON;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,6 +27,8 @@ import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
+import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.UpdateSource;
+import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.ValueUpdater;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.session.SessionFactory;
 import com.pushtechnology.diffusion.datatype.json.JSON;
@@ -44,6 +49,8 @@ public final class PublishingClientImpl implements PublishingClient {
     private final SessionFactory sessionFactory;
     @GuardedBy("this")
     private Session session;
+    @GuardedBy("this")
+    private Map<ServiceConfig, ValueUpdater<JSON>> updaters = new HashMap<>();
 
     /**
      * Constructor.
@@ -67,7 +74,7 @@ public final class PublishingClientImpl implements PublishingClient {
 
         final TopicControl topicControl = session.feature(TopicControl.class);
 
-        final AddTopicCallback addCallback = new AddTopicCallback(serviceConfig, callback);
+        final AddTopicCallback addCallback = new AddTopicCallback(serviceConfig, new Initialise(callback));
 
         serviceConfig
             .getEndpoints()
@@ -95,15 +102,55 @@ public final class PublishingClientImpl implements PublishingClient {
             throw new IllegalStateException("Session closed");
         }
 
-        session
-            .feature(TopicUpdateControl.class)
-            .updater()
-            .valueUpdater(JSON.class)
+        updaters.get(serviceConfig)
             .update(
                 serviceConfig.getTopicRoot() + "/" + endpointConfig.getTopic(),
                 json,
                 serviceConfig.getTopicRoot() + "/" + endpointConfig.getTopic(),
                 UpdateTopicCallback.INSTANCE);
+    }
+
+    private final class Initialise implements InitialiseCallback {
+        private final InitialiseCallback delegate;
+
+        private Initialise(InitialiseCallback delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void onEndpointAdded(ServiceConfig serviceConfig, EndpointConfig endpointConfig) {
+            delegate.onEndpointAdded(serviceConfig, endpointConfig);
+        }
+
+        @Override
+        public void onEndpointFailed(ServiceConfig serviceConfig, EndpointConfig endpointConfig) {
+            delegate.onEndpointFailed(serviceConfig, endpointConfig);
+        }
+
+        @Override
+        public void onServiceAdded(ServiceConfig serviceConfig) {
+            synchronized (PublishingClientImpl.this) {
+                session
+                    .feature(TopicUpdateControl.class)
+                    .registerUpdateSource(
+                        serviceConfig.getTopicRoot(),
+                        new UpdateSource.Default() {
+                            @Override
+                            public void onActive(String topicPath, TopicUpdateControl.Updater updater) {
+                                synchronized (PublishingClientImpl.this) {
+                                    LOG.warn("Active for service: {}", serviceConfig);
+                                    updaters.put(serviceConfig, updater.valueUpdater(JSON.class));
+                                    delegate.onServiceAdded(serviceConfig);
+                                }
+                            }
+
+                            @Override
+                            public void onStandby(String topicPath) {
+                                LOG.warn("On standby for service: {}", serviceConfig);
+                            }
+                        });
+            }
+        }
     }
 
     /**
