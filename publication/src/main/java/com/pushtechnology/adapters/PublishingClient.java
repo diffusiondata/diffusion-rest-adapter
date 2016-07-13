@@ -33,7 +33,7 @@ public interface PublishingClient {
     /**
      * Initialise a service to publish to.
      */
-    void initialise(ServiceConfig serviceConfig);
+    void initialise(ServiceConfig serviceConfig, InitialiseCallback callback);
 
     /**
      * Stop the client running.
@@ -44,4 +44,14 @@ public interface PublishingClient {
      * Update the topic associated with an endpoint.
      */
     void publish(EndpointConfig endpointConfig, JSON json);
+
+    /**
+     * Callback for initialising a service.
+     */
+    interface InitialiseCallback {
+        /**
+         * Notification when the topic has been added.
+         */
+        void onTopicAdded(String topicPath);
+    }
 }

@@ -3,6 +3,7 @@ package com.pushtechnology.adapters;
 import static com.pushtechnology.diffusion.client.session.Session.State.CONNECTED_ACTIVE;
 import static com.pushtechnology.diffusion.client.topics.details.TopicType.JSON;
 import static java.util.Collections.singletonList;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.isA;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -14,6 +15,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 
+import com.pushtechnology.adapters.PublishingClient.InitialiseCallback;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
@@ -44,6 +46,8 @@ public final class PublishingClientImplTest {
     private ValueUpdater<JSON> updater;
     @Mock
     private JSON json;
+    @Mock
+    private InitialiseCallback callback;
 
     private EndpointConfig endpointConfig;
     private ServiceConfig serviceConfig;
@@ -79,7 +83,7 @@ public final class PublishingClientImplTest {
 
     @After
     public void postConditions() {
-        verifyNoMoreInteractions(sessionFactory, session, topicControl, updateControl, rawUpdater, updater);
+        verifyNoMoreInteractions(sessionFactory, session, topicControl, updateControl, rawUpdater, updater, callback);
     }
 
     @Test
@@ -96,7 +100,7 @@ public final class PublishingClientImplTest {
     public void initialiseBeforeStart() {
         final PublishingClient client = new PublishingClientImpl(sessionFactory);
 
-        client.initialise(serviceConfig);
+        client.initialise(serviceConfig, callback);
     }
 
     @Test
@@ -108,10 +112,10 @@ public final class PublishingClientImplTest {
         verify(sessionFactory).listener(isA(Session.Listener.class));
         verify(sessionFactory).open();
 
-        client.initialise(serviceConfig);
+        client.initialise(serviceConfig, callback);
 
         verify(session).feature(TopicControl.class);
-        verify(topicControl).addTopic("a/topic", JSON, "a/topic", AddTopicCallback.INSTANCE);
+        verify(topicControl).addTopic(eq("a/topic"), eq(JSON), isA(AddTopicCallback.class));
     }
 
     @Test
@@ -151,10 +155,10 @@ public final class PublishingClientImplTest {
         verify(sessionFactory).listener(isA(Session.Listener.class));
         verify(sessionFactory).open();
 
-        client.initialise(serviceConfig);
+        client.initialise(serviceConfig, callback);
 
         verify(session).feature(TopicControl.class);
-        verify(topicControl).addTopic("a/topic", JSON, "a/topic", AddTopicCallback.INSTANCE);
+        verify(topicControl).addTopic(eq("a/topic"), eq(JSON), isA(AddTopicCallback.class));
 
         client.publish(endpointConfig, json);
 

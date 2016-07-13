@@ -60,7 +60,7 @@ public final class PublishingClientImpl implements PublishingClient {
     }
 
     @Override
-    public synchronized void initialise(ServiceConfig serviceConfig) {
+    public synchronized void initialise(ServiceConfig serviceConfig, InitialiseCallback callback) {
         if (session == null) {
             throw new IllegalStateException("Client has not started");
         }
@@ -71,7 +71,7 @@ public final class PublishingClientImpl implements PublishingClient {
             .getEndpoints()
             .stream()
             .map(EndpointConfig::getTopic)
-            .forEach(topicPath -> topicControl.addTopic(topicPath, JSON, topicPath, AddTopicCallback.INSTANCE));
+            .forEach(topicPath -> topicControl.addTopic(topicPath, JSON, new AddTopicCallback(topicPath, callback)));
     }
 
     @Override

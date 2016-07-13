@@ -18,6 +18,7 @@ package com.pushtechnology.adapters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.pushtechnology.adapters.PublishingClient.InitialiseCallback;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicAddFailReason;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 
@@ -29,27 +30,33 @@ import net.jcip.annotations.Immutable;
  * @author Push Technology Limited
  */
 @Immutable
-public enum AddTopicCallback implements TopicControl.AddContextCallback<String> {
-    /**
-     * Callback instance.
-     */
-    INSTANCE;
-
+public final class AddTopicCallback implements TopicControl.AddCallback {
     private static final Logger LOG = LoggerFactory.getLogger(AddTopicCallback.class);
+    private final String expectedTopicPath;
+    private final InitialiseCallback callback;
 
-    @Override
-    public void onTopicAdded(String context, String topicPath) {
-        assert context.equals(topicPath) : "Context used to improve discard logging, expected to be the topic path";
+    /**
+     * Constructor.
+     */
+    public AddTopicCallback(String expectedTopicPath, InitialiseCallback callback) {
+        this.expectedTopicPath = expectedTopicPath;
 
-        LOG.trace("Topic created {}", topicPath);
+        this.callback = callback;
     }
 
     @Override
-    public void onTopicAddFailed(String context, String topicPath, TopicAddFailReason reason) {
-        assert context.equals(topicPath) : "Context used to improve discard logging, expected to be the topic path";
+    public void onTopicAdded(String topicPath) {
+        LOG.trace("Topic created {}", topicPath);
+        callback.onTopicAdded(topicPath);
+    }
+
+    @Override
+    public void onTopicAddFailed(String topicPath, TopicAddFailReason reason) {
+        assert expectedTopicPath.equals(topicPath) :
+            "Context used to improve discard logging, expected to be the topic path";
 
         if (TopicAddFailReason.EXISTS == reason) {
-            onTopicAdded(context, topicPath);
+            onTopicAdded(topicPath);
         }
         else {
             LOG.warn("Failed to add topic {}: {}", topicPath, reason);
@@ -57,7 +64,7 @@ public enum AddTopicCallback implements TopicControl.AddContextCallback<String> 
     }
 
     @Override
-    public void onDiscard(String context) {
-        LOG.trace("Failed to add topic {}", context);
+    public void onDiscard() {
+        LOG.trace("Failed to add topic {}", expectedTopicPath);
     }
 }

@@ -28,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.adapters.PublishingClient;
+import com.pushtechnology.adapters.PublishingClient.InitialiseCallback;
 import com.pushtechnology.adapters.PublishingClientImpl;
 import com.pushtechnology.adapters.rest.model.conversion.ConversionContext;
 import com.pushtechnology.adapters.rest.model.conversion.LatestConverter;
@@ -123,14 +124,20 @@ public final class RESTAdapterClient {
 
         diffusionClient.start();
 
-        model
-            .getServices()
-            .forEach(diffusionClient::initialise);
-
-        final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-
         final PollClient pollClient = new PollClientImpl(new HttpClientFactoryImpl());
         pollClient.start();
+
+        final InitialiseCallback callback = new InitialiseCallback() {
+            @Override
+            public void onTopicAdded(String topicPath) {
+            }
+        };
+
+        model
+            .getServices()
+            .forEach(service -> diffusionClient.initialise(service, callback));
+
+        final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
         model
             .getServices()
