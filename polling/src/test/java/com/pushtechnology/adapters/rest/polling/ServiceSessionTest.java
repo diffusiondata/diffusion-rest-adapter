@@ -103,7 +103,7 @@ public final class ServiceSessionTest {
 
         callback.completed(json);
 
-        verify(diffusionClient).publish(endpointConfig, json);
+        verify(diffusionClient).publish(serviceConfig, endpointConfig, json);
     }
 
     @Test

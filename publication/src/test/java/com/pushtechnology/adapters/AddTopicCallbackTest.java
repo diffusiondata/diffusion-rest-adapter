@@ -47,6 +47,7 @@ public final class AddTopicCallbackTest {
             .port(8080)
             .pollPeriod(60000)
             .endpoints(singletonList(endpointConfig))
+            .topicRoot("a")
             .build();
 
         addTopicCallback = new AddTopicCallback(serviceConfig, callback);
@@ -59,7 +60,7 @@ public final class AddTopicCallbackTest {
 
     @Test
     public void onTopicAdded() {
-        addTopicCallback.onTopicAdded(endpointConfig, "topic");
+        addTopicCallback.onTopicAdded(endpointConfig, "a/topic");
 
         verify(callback).onEndpointAdded(serviceConfig, endpointConfig);
         verify(callback).onServiceAdded(serviceConfig);
@@ -67,7 +68,7 @@ public final class AddTopicCallbackTest {
 
     @Test
     public void onTopicAddFailedExists() {
-        addTopicCallback.onTopicAddFailed(endpointConfig, "topic", EXISTS);
+        addTopicCallback.onTopicAddFailed(endpointConfig, "a/topic", EXISTS);
 
         verify(callback).onEndpointAdded(serviceConfig, endpointConfig);
         verify(callback).onServiceAdded(serviceConfig);
@@ -75,7 +76,7 @@ public final class AddTopicCallbackTest {
 
     @Test
     public void onTopicAddFailed() {
-        addTopicCallback.onTopicAddFailed(endpointConfig, "topic", EXISTS_MISMATCH);
+        addTopicCallback.onTopicAddFailed(endpointConfig, "a/topic", EXISTS_MISMATCH);
         verify(callback).onEndpointFailed(serviceConfig, endpointConfig);
         verify(callback).onServiceAdded(serviceConfig);
     }

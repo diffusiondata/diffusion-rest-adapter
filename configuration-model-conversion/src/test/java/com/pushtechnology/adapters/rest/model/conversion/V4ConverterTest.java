@@ -1,36 +1,36 @@
 package com.pushtechnology.adapters.rest.model.conversion;
 
-import static com.pushtechnology.adapters.rest.model.conversion.V3Converter.INSTANCE;
+import static com.pushtechnology.adapters.rest.model.conversion.V4Converter.INSTANCE;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Collections;
 
 import org.junit.Test;
 
-import com.pushtechnology.adapters.rest.model.v4.Model;
-import com.pushtechnology.adapters.rest.model.v4.ServiceConfig;
+import com.pushtechnology.adapters.rest.model.latest.Model;
+import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 
 /**
- * Unit tests for {@link V3Converter}.
+ * Unit tests for {@link V4Converter}.
  *
  * @author Push Technology Limited
  */
-public final class V3ConverterTest {
+public final class V4ConverterTest {
     @Test
     public void testConvert() {
         final Model model = INSTANCE.convert(
-            com.pushtechnology.adapters.rest.model.v3.Model
+            com.pushtechnology.adapters.rest.model.v4.Model
                 .builder()
                 .services(Collections.singletonList(
-                    com.pushtechnology.adapters.rest.model.v3.ServiceConfig
+                    com.pushtechnology.adapters.rest.model.v4.ServiceConfig
                         .builder()
                         .host("localhost")
                         .port(80)
-                        .endpoints(Collections.<com.pushtechnology.adapters.rest.model.v3.EndpointConfig>emptyList())
+                        .endpoints(Collections.<com.pushtechnology.adapters.rest.model.v4.EndpointConfig>emptyList())
                         .pollPeriod(5000)
                         .build()
                 ))
-                .diffusion(com.pushtechnology.adapters.rest.model.v3.DiffusionConfig
+                .diffusion(com.pushtechnology.adapters.rest.model.v4.DiffusionConfig
                     .builder()
                     .host("localhost")
                     .port(8080)
@@ -44,6 +44,7 @@ public final class V3ConverterTest {
         assertEquals(80, service.getPort());
         assertEquals(0, service.getEndpoints().size());
         assertEquals(5000, service.getPollPeriod());
+        assertEquals("", service.getTopicRoot());
         assertEquals("localhost", model.getDiffusion().getHost());
         assertEquals(8080, model.getDiffusion().getPort());
     }

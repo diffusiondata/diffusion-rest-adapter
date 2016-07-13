@@ -22,7 +22,7 @@ import lombok.Builder;
 import lombok.Value;
 
 /**
- * Service configuration. Version 4.
+ * Service configuration. Version 5.
  * <p>
  * Description of a REST service to poll.
  *
@@ -51,4 +51,9 @@ public class ServiceConfig {
      * The time in milliseconds between polls.
      */
     long pollPeriod;
+
+    /**
+     * The topic root.
+     */
+    String topicRoot;
 }

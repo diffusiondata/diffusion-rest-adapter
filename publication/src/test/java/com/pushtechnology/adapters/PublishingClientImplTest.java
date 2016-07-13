@@ -72,7 +72,7 @@ public final class PublishingClientImplTest {
         endpointConfig = EndpointConfig
             .builder()
             .name("endpoint-0")
-            .topic("a/topic")
+            .topic("topic")
             .url("http://localhost/json")
             .build();
 
@@ -82,6 +82,7 @@ public final class PublishingClientImplTest {
             .port(8080)
             .pollPeriod(60000)
             .endpoints(singletonList(endpointConfig))
+            .topicRoot("a")
             .build();
     }
 
@@ -147,7 +148,7 @@ public final class PublishingClientImplTest {
     public void publishBeforeStart() {
         final PublishingClient client = new PublishingClientImpl(sessionFactory);
 
-        client.publish(endpointConfig, json);
+        client.publish(serviceConfig, endpointConfig, json);
     }
 
     @Test
@@ -164,7 +165,7 @@ public final class PublishingClientImplTest {
         verify(session).feature(TopicControl.class);
         verify(topicControl).addTopic(eq("a/topic"), eq(JSON), eq(endpointConfig), isA(AddTopicCallback.class));
 
-        client.publish(endpointConfig, json);
+        client.publish(serviceConfig, endpointConfig, json);
 
         verify(session).getState();
         verify(session).feature(TopicUpdateControl.class);

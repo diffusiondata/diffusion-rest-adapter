@@ -43,7 +43,7 @@ public interface PublishingClient {
     /**
      * Update the topic associated with an endpoint.
      */
-    void publish(EndpointConfig endpointConfig, JSON json);
+    void publish(ServiceConfig serviceConfig, EndpointConfig endpointConfig, JSON json);
 
     /**
      * Callback for initialising a service.

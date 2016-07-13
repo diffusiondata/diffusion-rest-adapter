@@ -57,7 +57,7 @@ public final class AddTopicCallback implements TopicControl.AddContextCallback<E
 
     @Override
     public void onTopicAddFailed(EndpointConfig endpointConfig, String topicPath, TopicAddFailReason reason) {
-        assert endpointConfig.getTopic().equals(topicPath) :
+        assert (serviceConfig.getTopicRoot() + "/" + endpointConfig.getTopic()).equals(topicPath) :
             "Context used to improve discard logging, expected to be the topic path";
 
         if (TopicAddFailReason.EXISTS == reason) {
@@ -72,7 +72,7 @@ public final class AddTopicCallback implements TopicControl.AddContextCallback<E
 
     @Override
     public void onDiscard(EndpointConfig endpointConfig) {
-        LOG.trace("Failed to add topic {}", endpointConfig.getTopic());
+        LOG.trace("Failed to add topic {}", serviceConfig.getTopicRoot() + "/" + endpointConfig.getTopic());
         callback.onEndpointFailed(serviceConfig, endpointConfig);
         checkComplete();
     }

@@ -13,14 +13,14 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.model.latest;
+package com.pushtechnology.adapters.rest.model.v4;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Value;
 
 /**
- * Diffusion configuration. Version 5.
+ * Diffusion configuration. Version 4.
  * <p>
  * Description of a Diffusion server to publish to.
  *

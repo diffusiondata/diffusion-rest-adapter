@@ -159,7 +159,7 @@ public final class ServiceSession {
 
             synchronized (ServiceSession.this) {
                 if (isRunning) {
-                    diffusionClient.publish(endpointConfig, json);
+                    diffusionClient.publish(serviceConfig, endpointConfig, json);
                 }
             }
         }

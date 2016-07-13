@@ -19,31 +19,31 @@ import static java.util.stream.Collectors.toList;
 
 import java.util.stream.Collectors;
 
-import com.pushtechnology.adapters.rest.model.v4.DiffusionConfig;
-import com.pushtechnology.adapters.rest.model.v4.EndpointConfig;
-import com.pushtechnology.adapters.rest.model.v4.Model;
-import com.pushtechnology.adapters.rest.model.v4.ServiceConfig;
+import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
+import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
+import com.pushtechnology.adapters.rest.model.latest.Model;
+import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 
 import net.jcip.annotations.Immutable;
 
 /**
- * Converter between different version 3 of the model and version 4.
+ * Converter between different version 4 of the model and version 5.
  *
  * @author Push Technology Limited
  */
 @Immutable
-public final class V3Converter extends AbstractModelConverter<com.pushtechnology.adapters.rest.model.v3.Model, Model> {
+public final class V4Converter extends AbstractModelConverter<com.pushtechnology.adapters.rest.model.v4.Model, Model> {
     /**
      * The converter.
      */
-    public static final V3Converter INSTANCE = new V3Converter();
+    public static final V4Converter INSTANCE = new V4Converter();
 
-    private V3Converter() {
-        super(V4Converter.INSTANCE, com.pushtechnology.adapters.rest.model.v3.Model.class);
+    private V4Converter() {
+        super(LatestConverter.INSTANCE, com.pushtechnology.adapters.rest.model.v4.Model.class);
     }
 
     @Override
-    protected Model convertFrom(com.pushtechnology.adapters.rest.model.v3.Model model) {
+    protected Model convertFrom(com.pushtechnology.adapters.rest.model.v4.Model model) {
         return Model
             .builder()
             .services(model
@@ -64,6 +64,7 @@ public final class V3Converter extends AbstractModelConverter<com.pushtechnology
                             .build())
                         .collect(Collectors.toList()))
                     .pollPeriod(oldService.getPollPeriod())
+                    .topicRoot("")
                     .build())
                 .collect(toList()))
             .diffusion(DiffusionConfig

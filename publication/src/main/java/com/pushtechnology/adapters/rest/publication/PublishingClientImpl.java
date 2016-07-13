@@ -72,7 +72,11 @@ public final class PublishingClientImpl implements PublishingClient {
         serviceConfig
             .getEndpoints()
             .stream()
-            .forEach(endpoint -> topicControl.addTopic(endpoint.getTopic(), JSON, endpoint, addCallback));
+            .forEach(endpoint -> topicControl.addTopic(
+                serviceConfig.getTopicRoot() + "/" + endpoint.getTopic(),
+                JSON,
+                endpoint,
+                addCallback));
     }
 
     @Override
@@ -86,7 +90,7 @@ public final class PublishingClientImpl implements PublishingClient {
     }
 
     @Override
-    public synchronized void publish(EndpointConfig endpointConfig, JSON json) {
+    public synchronized void publish(ServiceConfig serviceConfig, EndpointConfig endpointConfig, JSON json) {
         if (session == null || !session.getState().isConnected()) {
             throw new IllegalStateException("Session closed");
         }
@@ -95,7 +99,11 @@ public final class PublishingClientImpl implements PublishingClient {
             .feature(TopicUpdateControl.class)
             .updater()
             .valueUpdater(JSON.class)
-            .update(endpointConfig.getTopic(), json, endpointConfig.getTopic(), UpdateTopicCallback.INSTANCE);
+            .update(
+                serviceConfig.getTopicRoot() + "/" + endpointConfig.getTopic(),
+                json,
+                serviceConfig.getTopicRoot() + "/" + endpointConfig.getTopic(),
+                UpdateTopicCallback.INSTANCE);
     }
 
     /**

@@ -33,6 +33,7 @@ import com.pushtechnology.adapters.rest.model.conversion.V0Converter;
 import com.pushtechnology.adapters.rest.model.conversion.V1Converter;
 import com.pushtechnology.adapters.rest.model.conversion.V2Converter;
 import com.pushtechnology.adapters.rest.model.conversion.V3Converter;
+import com.pushtechnology.adapters.rest.model.conversion.V4Converter;
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
@@ -87,6 +88,10 @@ public final class RESTAdapterClient {
                 com.pushtechnology.adapters.rest.model.v3.Model.VERSION,
                 com.pushtechnology.adapters.rest.model.v3.Model.class,
                 V3Converter.INSTANCE)
+            .register(
+                com.pushtechnology.adapters.rest.model.v4.Model.VERSION,
+                com.pushtechnology.adapters.rest.model.v4.Model.class,
+                V4Converter.INSTANCE)
             .register(
                 Model.VERSION,
                 Model.class,
