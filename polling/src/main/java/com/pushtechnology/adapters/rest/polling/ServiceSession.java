@@ -18,6 +18,7 @@ package com.pushtechnology.adapters.rest.polling;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
@@ -27,9 +28,9 @@ import org.apache.http.concurrent.FutureCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.pushtechnology.adapters.rest.publication.PublishingClient;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
+import com.pushtechnology.adapters.rest.publication.PublishingClient;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
 import net.jcip.annotations.GuardedBy;
@@ -73,8 +74,6 @@ public final class ServiceSession {
      */
     public synchronized void start() {
         isRunning = true;
-
-        serviceConfig.getEndpoints().forEach(this::startEndpoint);
     }
 
     /**
@@ -108,7 +107,17 @@ public final class ServiceSession {
      */
     public synchronized void stop() {
         isRunning = false;
-        serviceConfig.getEndpoints().forEach(this::stopEndpoint);
+
+        final Iterator<Map.Entry<EndpointConfig, PollHandle>> iterator = endpointPollers.entrySet().iterator();
+        while (iterator.hasNext()) {
+            final Map.Entry<EndpointConfig, PollHandle> entry = iterator.next();
+            final PollHandle pollHandle = entry.getValue();
+            pollHandle.taskHandle.cancel(false);
+            if (pollHandle.currentPollHandle != null) {
+                pollHandle.currentPollHandle.cancel(false);
+            }
+            iterator.remove();
+        }
     }
 
     /**

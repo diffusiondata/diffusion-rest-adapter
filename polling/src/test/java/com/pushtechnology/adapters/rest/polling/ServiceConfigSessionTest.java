@@ -89,6 +89,7 @@ public final class ServiceConfigSessionTest {
     @Test
     public void startSuccessfulPoll() {
         serviceSession.start();
+        serviceSession.startEndpoint(endpointConfig);
 
         verify(executor).scheduleWithFixedDelay(runnableCaptor.capture(), eq(0L), eq(5000L), eq(MILLISECONDS));
 
@@ -108,6 +109,7 @@ public final class ServiceConfigSessionTest {
     @Test
     public void startFailedPoll() {
         serviceSession.start();
+        serviceSession.startEndpoint(endpointConfig);
 
         verify(executor).scheduleWithFixedDelay(runnableCaptor.capture(), eq(0L), eq(5000L), eq(MILLISECONDS));
 
@@ -125,6 +127,7 @@ public final class ServiceConfigSessionTest {
     @Test
     public void stop() {
         serviceSession.start();
+        serviceSession.startEndpoint(endpointConfig);
 
         verify(executor).scheduleWithFixedDelay(runnableCaptor.capture(), eq(0L), eq(5000L), eq(MILLISECONDS));
 
@@ -136,6 +139,7 @@ public final class ServiceConfigSessionTest {
     @Test
     public void stopBeforePoll() {
         serviceSession.start();
+        serviceSession.startEndpoint(endpointConfig);
 
         verify(executor).scheduleWithFixedDelay(runnableCaptor.capture(), eq(0L), eq(5000L), eq(MILLISECONDS));
 
@@ -154,6 +158,7 @@ public final class ServiceConfigSessionTest {
     @Test
     public void stopBeforeSecondPoll() {
         serviceSession.start();
+        serviceSession.startEndpoint(endpointConfig);
 
         verify(executor).scheduleWithFixedDelay(runnableCaptor.capture(), eq(0L), eq(5000L), eq(MILLISECONDS));
 
@@ -176,6 +181,7 @@ public final class ServiceConfigSessionTest {
     @Test
     public void stopDuringPoll() {
         serviceSession.start();
+        serviceSession.startEndpoint(endpointConfig);
 
         verify(executor).scheduleWithFixedDelay(runnableCaptor.capture(), eq(0L), eq(5000L), eq(MILLISECONDS));
 

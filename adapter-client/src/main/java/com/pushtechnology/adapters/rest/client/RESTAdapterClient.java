@@ -127,31 +127,30 @@ public final class RESTAdapterClient {
         final PollClient pollClient = new PollClientImpl(new HttpClientFactoryImpl());
         pollClient.start();
 
-        final InitialiseCallback callback = new InitialiseCallback() {
-            @Override
-            public void onEndpointAdded(ServiceConfig serviceConfig, EndpointConfig endpointConfig) {
-            }
-
-            @Override
-            public void onEndpointFailed(ServiceConfig serviceConfig, EndpointConfig endpointConfig) {
-            }
-
-            @Override
-            public void onServiceAdded(ServiceConfig serviceConfig) {
-            }
-        };
-
-        model
-            .getServices()
-            .forEach(service -> diffusionClient.initialise(service, callback));
-
         final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
         model
             .getServices()
-            .stream()
-            .map(service -> new ServiceSession(executor, pollClient, service, diffusionClient))
-            .forEach(ServiceSession::start);
+            .forEach(service -> diffusionClient.initialise(
+                service,
+                new InitialiseCallback() {
+                    private final ServiceSession serviceSession =
+                        new ServiceSession(executor, pollClient, service, diffusionClient);
+
+                    @Override
+                    public void onEndpointAdded(ServiceConfig serviceConfig, EndpointConfig endpointConfig) {
+                        serviceSession.startEndpoint(endpointConfig);
+                    }
+
+                    @Override
+                    public void onEndpointFailed(ServiceConfig serviceConfig, EndpointConfig endpointConfig) {
+                    }
+
+                    @Override
+                    public void onServiceAdded(ServiceConfig serviceConfig) {
+                        serviceSession.start();
+                    }
+                }));
     }
 
     private static SessionFactory getSessionFactory(DiffusionConfig diffusionConfig) {
