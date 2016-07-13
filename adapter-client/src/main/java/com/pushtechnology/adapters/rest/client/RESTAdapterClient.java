@@ -118,6 +118,7 @@ public final class RESTAdapterClient {
                 .build());
 
         LOG.debug("Configuration: {}", model);
+        fileSystemPersistence.storeModel(model);
 
         final PublishingClient diffusionClient = new PublishingClientImpl(getSessionFactory(model.getDiffusion()));
 
@@ -137,15 +138,6 @@ public final class RESTAdapterClient {
             .stream()
             .map(service -> new ServiceSession(executor, pollClient, service, diffusionClient))
             .forEach(ServiceSession::start);
-
-        sleep(30000L);
-        pollClient.stop();
-
-        executor.shutdown();
-
-        diffusionClient.stop();
-
-        fileSystemPersistence.storeModel(model);
     }
 
     private static SessionFactory getSessionFactory(DiffusionConfig diffusionConfig) {
