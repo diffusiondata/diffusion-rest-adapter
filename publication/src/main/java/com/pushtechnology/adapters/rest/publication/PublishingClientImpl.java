@@ -99,8 +99,17 @@ public final class PublishingClientImpl implements PublishingClient {
 
     @Override
     public synchronized void publish(ServiceConfig serviceConfig, EndpointConfig endpointConfig, JSON json) {
-        if (session == null || !session.getState().isConnected()) {
+        if (session == null) {
+            throw new IllegalStateException("Publishing client not started");
+        }
+
+        final Session.State state = session.getState();
+        if (state.isClosed()) {
             throw new IllegalStateException("Session closed");
+        }
+        else if (state.isRecovering()) {
+            LOG.debug("Dropped an update while session is recovering");
+            return;
         }
 
         updaters.get(serviceConfig)
