@@ -14,21 +14,21 @@ import org.mockito.Mock;
 
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.adapters.rest.publication.AddTopicCallback;
+import com.pushtechnology.adapters.rest.publication.TopicCreationInitialisationAdapter;
 import com.pushtechnology.adapters.rest.publication.PublishingClient;
 
 /**
- * Unit tests for {@link AddTopicCallback}.
+ * Unit tests for {@link TopicCreationInitialisationAdapter}.
  *
  * @author Matt Champion on 13/07/2016
  */
-public final class AddTopicCallbackTest {
+public final class TopicCreationInitialisationAdapterTest {
     @Mock
     private PublishingClient.InitialiseCallback callback;
 
     private ServiceConfig serviceConfig;
     private EndpointConfig endpointConfig;
-    private AddTopicCallback addTopicCallback;
+    private TopicCreationInitialisationAdapter topicCreationInitialisationAdapter;
 
     @Before
     public void setUp() {
@@ -50,7 +50,7 @@ public final class AddTopicCallbackTest {
             .topicRoot("a")
             .build();
 
-        addTopicCallback = new AddTopicCallback(serviceConfig, callback);
+        topicCreationInitialisationAdapter = new TopicCreationInitialisationAdapter(serviceConfig, callback);
     }
 
     @After
@@ -60,7 +60,7 @@ public final class AddTopicCallbackTest {
 
     @Test
     public void onTopicAdded() {
-        addTopicCallback.onTopicAdded(endpointConfig, "a/topic");
+        topicCreationInitialisationAdapter.onTopicAdded(endpointConfig, "a/topic");
 
         verify(callback).onEndpointAdded(serviceConfig, endpointConfig);
         verify(callback).onServiceAdded(serviceConfig);
@@ -68,7 +68,7 @@ public final class AddTopicCallbackTest {
 
     @Test
     public void onTopicAddFailedExists() {
-        addTopicCallback.onTopicAddFailed(endpointConfig, "a/topic", EXISTS);
+        topicCreationInitialisationAdapter.onTopicAddFailed(endpointConfig, "a/topic", EXISTS);
 
         verify(callback).onEndpointAdded(serviceConfig, endpointConfig);
         verify(callback).onServiceAdded(serviceConfig);
@@ -76,14 +76,14 @@ public final class AddTopicCallbackTest {
 
     @Test
     public void onTopicAddFailed() {
-        addTopicCallback.onTopicAddFailed(endpointConfig, "a/topic", EXISTS_MISMATCH);
+        topicCreationInitialisationAdapter.onTopicAddFailed(endpointConfig, "a/topic", EXISTS_MISMATCH);
         verify(callback).onEndpointFailed(serviceConfig, endpointConfig);
         verify(callback).onServiceAdded(serviceConfig);
     }
 
     @Test
     public void onDiscard() {
-        addTopicCallback.onDiscard(endpointConfig);
+        topicCreationInitialisationAdapter.onDiscard(endpointConfig);
         verify(callback).onEndpointFailed(serviceConfig, endpointConfig);
         verify(callback).onServiceAdded(serviceConfig);
     }

@@ -74,7 +74,8 @@ public final class PublishingClientImpl implements PublishingClient {
 
         final TopicControl topicControl = session.feature(TopicControl.class);
 
-        final AddTopicCallback addCallback = new AddTopicCallback(serviceConfig, new Initialise(callback));
+        final TopicCreationInitialisationAdapter addCallback =
+            new TopicCreationInitialisationAdapter(serviceConfig, new Initialise(callback));
 
         serviceConfig
             .getEndpoints()

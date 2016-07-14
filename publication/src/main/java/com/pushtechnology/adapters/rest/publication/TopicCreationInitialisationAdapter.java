@@ -29,13 +29,13 @@ import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 import net.jcip.annotations.Immutable;
 
 /**
- * Callback for topic creation.
+ * Adapts the creation of topics to the {@link InitialiseCallback}.
  *
  * @author Push Technology Limited
  */
 @Immutable
-public final class AddTopicCallback implements TopicControl.AddContextCallback<EndpointConfig> {
-    private static final Logger LOG = LoggerFactory.getLogger(AddTopicCallback.class);
+public final class TopicCreationInitialisationAdapter implements TopicControl.AddContextCallback<EndpointConfig> {
+    private static final Logger LOG = LoggerFactory.getLogger(TopicCreationInitialisationAdapter.class);
     private final ServiceConfig serviceConfig;
     private final InitialiseCallback callback;
     private final AtomicInteger completedCount = new AtomicInteger(0);
@@ -43,7 +43,7 @@ public final class AddTopicCallback implements TopicControl.AddContextCallback<E
     /**
      * Constructor.
      */
-    public AddTopicCallback(ServiceConfig serviceConfig, InitialiseCallback callback) {
+    public TopicCreationInitialisationAdapter(ServiceConfig serviceConfig, InitialiseCallback callback) {
         this.serviceConfig = serviceConfig;
         this.callback = callback;
     }

@@ -19,7 +19,7 @@ import org.mockito.Mock;
 
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.adapters.rest.publication.AddTopicCallback;
+import com.pushtechnology.adapters.rest.publication.TopicCreationInitialisationAdapter;
 import com.pushtechnology.adapters.rest.publication.PublishingClient;
 import com.pushtechnology.adapters.rest.publication.PublishingClient.InitialiseCallback;
 import com.pushtechnology.adapters.rest.publication.PublishingClientImpl;
@@ -56,7 +56,7 @@ public final class PublishingClientImplTest {
     @Mock
     private InitialiseCallback callback;
     @Captor
-    private ArgumentCaptor<AddTopicCallback> addCallbackCaptor;
+    private ArgumentCaptor<TopicCreationInitialisationAdapter> addCallbackCaptor;
     @Captor
     private ArgumentCaptor<UpdateSource> updateSourceCaptor;
 
@@ -126,7 +126,7 @@ public final class PublishingClientImplTest {
         client.initialise(serviceConfig, callback);
 
         verify(session).feature(TopicControl.class);
-        verify(topicControl).addTopic(eq("a/topic"), eq(JSON), eq(endpointConfig), isA(AddTopicCallback.class));
+        verify(topicControl).addTopic(eq("a/topic"), eq(JSON), eq(endpointConfig), isA(TopicCreationInitialisationAdapter.class));
     }
 
     @Test
