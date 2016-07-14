@@ -58,7 +58,60 @@ import com.pushtechnology.diffusion.client.session.SessionFactory;
 public final class RESTAdapterClient {
     private static final Logger LOG = LoggerFactory.getLogger(RESTAdapterClient.class);
 
-    private RESTAdapterClient() {
+    private final PublishingClient publishingClient;
+    private final PollClient pollClient;
+    private final ScheduledExecutorService executor;
+
+    private RESTAdapterClient(
+        PublishingClient publishingClient,
+        PollClient pollClient,
+        ScheduledExecutorService executor) {
+
+        this.publishingClient = publishingClient;
+        this.pollClient = pollClient;
+        this.executor = executor;
+    }
+
+    /**
+     * Factory method for {@link RESTAdapterClient}.
+     * @param model the configuration to use
+     * @return a new {@link RESTAdapterClient}
+     */
+    public static RESTAdapterClient create(Model model) {
+        LOG.debug("Creating REST adapter client with configuration: {}", model);
+        final PublishingClient diffusionClient = new PublishingClientImpl(getSessionFactory(model.getDiffusion()));
+
+        diffusionClient.start();
+
+        final PollClient pollClient = new PollClientImpl(new HttpClientFactoryImpl());
+        pollClient.start();
+
+        final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+
+        model
+            .getServices()
+            .forEach(service -> diffusionClient.initialise(
+                service,
+                new InitialiseCallback() {
+                    private final ServiceSession serviceSession =
+                        new ServiceSession(executor, pollClient, service, diffusionClient);
+
+                    @Override
+                    public void onEndpointAdded(ServiceConfig serviceConfig, EndpointConfig endpointConfig) {
+                        serviceSession.addEndpoint(endpointConfig);
+                    }
+
+                    @Override
+                    public void onEndpointFailed(ServiceConfig serviceConfig, EndpointConfig endpointConfig) {
+                    }
+
+                    @Override
+                    public void onServiceAdded(ServiceConfig serviceConfig) {
+                        serviceSession.start();
+                    }
+                }));
+
+        return new RESTAdapterClient(diffusionClient, pollClient, executor);
     }
 
     /**
@@ -122,40 +175,9 @@ public final class RESTAdapterClient {
                             .build()))
                 .build());
 
-        LOG.debug("Configuration: {}", model);
         fileSystemPersistence.storeModel(model);
 
-        final PublishingClient diffusionClient = new PublishingClientImpl(getSessionFactory(model.getDiffusion()));
-
-        diffusionClient.start();
-
-        final PollClient pollClient = new PollClientImpl(new HttpClientFactoryImpl());
-        pollClient.start();
-
-        final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-
-        model
-            .getServices()
-            .forEach(service -> diffusionClient.initialise(
-                service,
-                new InitialiseCallback() {
-                    private final ServiceSession serviceSession =
-                        new ServiceSession(executor, pollClient, service, diffusionClient);
-
-                    @Override
-                    public void onEndpointAdded(ServiceConfig serviceConfig, EndpointConfig endpointConfig) {
-                        serviceSession.addEndpoint(endpointConfig);
-                    }
-
-                    @Override
-                    public void onEndpointFailed(ServiceConfig serviceConfig, EndpointConfig endpointConfig) {
-                    }
-
-                    @Override
-                    public void onServiceAdded(ServiceConfig serviceConfig) {
-                        serviceSession.start();
-                    }
-                }));
+        create(model);
     }
 
     private static SessionFactory getSessionFactory(DiffusionConfig diffusionConfig) {
