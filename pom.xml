@@ -21,6 +21,7 @@
         <module>publication</module>
         <module>polling</module>
         <module>adapter-client</module>
+        <module>topic-management</module>
     </modules>
 
     <repositories>
@@ -65,6 +66,12 @@
             <dependency>
                 <groupId>com.pushtechnology.adapters.rest</groupId>
                 <artifactId>publication</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.pushtechnology.adapters.rest</groupId>
+                <artifactId>topic-management</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
