@@ -60,9 +60,9 @@ public final class PublishingClientImpl implements PublishingClient {
     }
 
     @Override
-    public synchronized void start() {
+    public synchronized void start(Session.Listener listener) {
         session = sessionFactory
-            .listener(new Listener())
+            .listener(listener)
             .open();
     }
 
@@ -151,17 +151,6 @@ public final class PublishingClientImpl implements PublishingClient {
                             }
                         });
             }
-        }
-    }
-
-    /**
-     * A simple session state listener that logs out state changes.
-     */
-    private static final class Listener implements Session.Listener {
-
-        @Override
-        public void onSessionStateChanged(Session session, Session.State oldState, Session.State newState) {
-            LOG.info("{} {} -> {}", session, oldState, newState);
         }
     }
 }

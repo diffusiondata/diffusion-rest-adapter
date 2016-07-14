@@ -44,6 +44,8 @@ public final class PublishingClientImplTest {
     @Mock
     private Session session;
     @Mock
+    private Session.Listener listener;
+    @Mock
     private TopicControl topicControl;
     @Mock
     private TopicUpdateControl updateControl;
@@ -101,9 +103,9 @@ public final class PublishingClientImplTest {
     public void start() {
         final PublishingClient client = new PublishingClientImpl(sessionFactory);
 
-        client.start();
+        client.start(listener);
 
-        verify(sessionFactory).listener(isA(Session.Listener.class));
+        verify(sessionFactory).listener(listener);
         verify(sessionFactory).open();
     }
 
@@ -118,9 +120,9 @@ public final class PublishingClientImplTest {
     public void initialise() {
         final PublishingClient client = new PublishingClientImpl(sessionFactory);
 
-        client.start();
+        client.start(listener);
 
-        verify(sessionFactory).listener(isA(Session.Listener.class));
+        verify(sessionFactory).listener(listener);
         verify(sessionFactory).open();
 
         client.initialise(serviceConfig, callback);
@@ -140,9 +142,9 @@ public final class PublishingClientImplTest {
     public void stop() {
         final PublishingClient client = new PublishingClientImpl(sessionFactory);
 
-        client.start();
+        client.start(listener);
 
-        verify(sessionFactory).listener(isA(Session.Listener.class));
+        verify(sessionFactory).listener(listener);
         verify(sessionFactory).open();
 
         client.stop();
@@ -161,9 +163,9 @@ public final class PublishingClientImplTest {
     public void publish() {
         final PublishingClient client = new PublishingClientImpl(sessionFactory);
 
-        client.start();
+        client.start(listener);
 
-        verify(sessionFactory).listener(isA(Session.Listener.class));
+        verify(sessionFactory).listener(listener);
         verify(sessionFactory).open();
 
         client.initialise(serviceConfig, callback);

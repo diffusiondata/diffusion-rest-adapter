@@ -36,6 +36,7 @@ import com.pushtechnology.adapters.rest.publication.PublishingClient;
 import com.pushtechnology.adapters.rest.publication.PublishingClient.InitialiseCallback;
 import com.pushtechnology.adapters.rest.publication.PublishingClientImpl;
 import com.pushtechnology.diffusion.client.Diffusion;
+import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.session.SessionFactory;
 
 import net.jcip.annotations.GuardedBy;
@@ -75,10 +76,11 @@ public final class RESTAdapterClient {
             throw new IllegalStateException("The client is already running");
         }
 
-        publishingClient.start();
+        publishingClient.start(new Listener());
         pollClient.start();
 
         final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+        currentExecutor = executor;
 
         model
             .getServices()
@@ -138,7 +140,8 @@ public final class RESTAdapterClient {
             .serverHost(diffusionConfig.getHost())
             .serverPort(diffusionConfig.getPort())
             .secureTransport(false)
-            .transports(WEBSOCKET);
+            .transports(WEBSOCKET)
+            .reconnectionTimeout(5000);
 
         if (diffusionConfig.getPrincipal() != null && diffusionConfig.getPassword() != null) {
             return sessionFactory
@@ -147,6 +150,30 @@ public final class RESTAdapterClient {
         }
         else  {
             return sessionFactory;
+        }
+    }
+
+    /**
+     * A simple session state listener that logs out state changes.
+     */
+    private final class Listener implements Session.Listener {
+        @Override
+        public void onSessionStateChanged(Session session, Session.State oldState, Session.State newState) {
+            synchronized (RESTAdapterClient.this) {
+                if (currentExecutor == null) {
+                    return;
+                }
+
+                LOG.warn("{} {} -> {}", session, oldState, newState);
+                if (newState.isClosed()) {
+                    try {
+                        stop();
+                    }
+                    catch (IOException e) {
+                        LOG.warn("Exception stopping client", e);
+                    }
+                }
+            }
         }
     }
 }
