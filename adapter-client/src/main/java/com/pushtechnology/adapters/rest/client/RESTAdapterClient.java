@@ -93,7 +93,7 @@ public final class RESTAdapterClient {
 
             @Override
             public void failed(Exception ex) {
-                LOG.warn("Failed to poll endpoint {}", endpointConfig);
+                LOG.warn("Failed to poll endpoint {}", endpointConfig, ex);
             }
 
             @Override
