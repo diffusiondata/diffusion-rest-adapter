@@ -29,7 +29,6 @@ import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.adapters.rest.publication.PublishingClient;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
 import net.jcip.annotations.GuardedBy;
@@ -50,7 +49,7 @@ public final class ServiceSession {
     private final ScheduledExecutorService executor;
     private final PollClient pollClient;
     private final ServiceConfig serviceConfig;
-    private final PublishingClient diffusionClient;
+    private final PollHandlerFactory handlerFactory;
     @GuardedBy("this")
     private boolean isRunning = false;
 
@@ -61,11 +60,12 @@ public final class ServiceSession {
             ScheduledExecutorService executor,
             PollClient pollClient,
             ServiceConfig serviceConfig,
-            PublishingClient diffusionClient) {
+            PollHandlerFactory handlerFactory) {
+
         this.executor = executor;
         this.pollClient = pollClient;
         this.serviceConfig = serviceConfig;
-        this.diffusionClient = diffusionClient;
+        this.handlerFactory = handlerFactory;
     }
 
     /**
@@ -91,7 +91,7 @@ public final class ServiceSession {
     private PollHandle startEndpoint(EndpointConfig endpointConfig) {
         assert endpointPollers.get(endpointConfig) == null : "The endpoint has already been started";
 
-        final PollResultHandler handler = new PollResultHandler(endpointConfig);
+        final PollResultHandler handler = new PollResultHandler(handlerFactory.create(serviceConfig, endpointConfig));
         final ScheduledFuture<?> future = executor.scheduleWithFixedDelay(
             new PollingTask(endpointConfig, handler),
             0L,
@@ -159,10 +159,10 @@ public final class ServiceSession {
      * The handler for the polling result. Notifies the publishing client of the new data.
      */
     private final class PollResultHandler implements FutureCallback<JSON> {
-        private final EndpointConfig endpointConfig;
+        private final FutureCallback<JSON> delegate;
 
-        private PollResultHandler(EndpointConfig endpointConfig) {
-            this.endpointConfig = endpointConfig;
+        private PollResultHandler(FutureCallback<JSON> delegate) {
+            this.delegate = delegate;
         }
 
         @Override
@@ -171,19 +171,19 @@ public final class ServiceSession {
 
             synchronized (ServiceSession.this) {
                 if (isRunning) {
-                    diffusionClient.publish(serviceConfig, endpointConfig, json);
+                    delegate.completed(json);
                 }
             }
         }
 
         @Override
         public void failed(Exception e) {
-            LOG.warn("Poll failed", e);
+            delegate.failed(e);
         }
 
         @Override
         public void cancelled() {
-            LOG.warn("Poll cancelled");
+            delegate.cancelled();
         }
     }
 

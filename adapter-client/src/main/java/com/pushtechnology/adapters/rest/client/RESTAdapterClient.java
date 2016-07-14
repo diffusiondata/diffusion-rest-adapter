@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.apache.http.concurrent.FutureCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,6 +32,7 @@ import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.polling.HttpClientFactoryImpl;
 import com.pushtechnology.adapters.rest.polling.PollClient;
 import com.pushtechnology.adapters.rest.polling.PollClientImpl;
+import com.pushtechnology.adapters.rest.polling.PollHandlerFactory;
 import com.pushtechnology.adapters.rest.polling.ServiceSession;
 import com.pushtechnology.adapters.rest.publication.PublishingClient;
 import com.pushtechnology.adapters.rest.publication.PublishingClient.InitialiseCallback;
@@ -38,6 +40,7 @@ import com.pushtechnology.adapters.rest.publication.PublishingClientImpl;
 import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.session.SessionFactory;
+import com.pushtechnology.diffusion.datatype.json.JSON;
 
 import net.jcip.annotations.GuardedBy;
 import net.jcip.annotations.ThreadSafe;
@@ -82,13 +85,30 @@ public final class RESTAdapterClient {
         final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
         currentExecutor = executor;
 
+        final PollHandlerFactory handlerFactory = (serviceConfig, endpointConfig) -> new FutureCallback<JSON>() {
+            @Override
+            public void completed(JSON result) {
+                publishingClient.publish(serviceConfig, endpointConfig, result);
+            }
+
+            @Override
+            public void failed(Exception ex) {
+                LOG.warn("Failed to poll endpoint {}", endpointConfig);
+            }
+
+            @Override
+            public void cancelled() {
+                LOG.debug("Polling cancelled for endpoint {}", endpointConfig);
+            }
+        };
+
         model
             .getServices()
             .forEach(service -> publishingClient.initialise(
                 service,
                 new InitialiseCallback() {
                     private final ServiceSession serviceSession =
-                        new ServiceSession(executor, pollClient, service, publishingClient);
+                        new ServiceSession(executor, pollClient, service, handlerFactory);
 
                     @Override
                     public void onEndpointAdded(ServiceConfig serviceConfig, EndpointConfig endpointConfig) {

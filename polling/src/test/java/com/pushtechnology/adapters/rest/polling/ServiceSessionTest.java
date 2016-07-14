@@ -4,6 +4,7 @@ import static java.util.Collections.singletonList;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.isA;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -23,7 +24,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 
-import com.pushtechnology.adapters.rest.publication.PublishingClient;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.diffusion.datatype.json.JSON;
@@ -39,7 +39,7 @@ public final class ServiceSessionTest {
     @Mock
     private PollClient pollClient;
     @Mock
-    private PublishingClient diffusionClient;
+    private PollHandlerFactory handlerFactory;
     @Mock
     private JSON json;
     @Mock
@@ -48,6 +48,8 @@ public final class ServiceSessionTest {
     private Future pollFuture0;
     @Mock
     private Future pollFuture1;
+    @Mock
+    private FutureCallback<JSON> handler;
     @Captor
     private ArgumentCaptor<Runnable> runnableCaptor;
     @Captor
@@ -72,24 +74,26 @@ public final class ServiceSessionTest {
     public void setUp() {
         initMocks(this);
 
-        serviceSession = new ServiceSession(executor, pollClient, serviceConfig, diffusionClient);
+        serviceSession = new ServiceSession(executor, pollClient, serviceConfig, handlerFactory);
         when(executor
             .scheduleWithFixedDelay(isA(Runnable.class), isA(Long.class), isA(Long.class), isA(TimeUnit.class)))
             .thenReturn(taskFuture);
         when(pollClient
             .request(isA(ServiceConfig.class), isA(EndpointConfig.class), isA(FutureCallback.class)))
             .thenReturn(pollFuture0, pollFuture1);
+        when(handlerFactory.create(serviceConfig, endpointConfig)).thenReturn(handler);
     }
 
     @After
     public void postConditions() {
-        verifyNoMoreInteractions(executor, pollClient, diffusionClient, taskFuture);
+        verifyNoMoreInteractions(executor, pollClient, handlerFactory, taskFuture);
     }
 
     @Test
     public void startSuccessfulPoll() {
         serviceSession.start();
         serviceSession.addEndpoint(endpointConfig);
+        verify(handlerFactory).create(serviceConfig, endpointConfig);
 
         verify(executor).scheduleWithFixedDelay(runnableCaptor.capture(), eq(0L), eq(5000L), eq(MILLISECONDS));
 
@@ -103,13 +107,14 @@ public final class ServiceSessionTest {
 
         callback.completed(json);
 
-        verify(diffusionClient).publish(serviceConfig, endpointConfig, json);
+        verify(handler).completed(json);
     }
 
     @Test
     public void startFailedPoll() {
         serviceSession.start();
         serviceSession.addEndpoint(endpointConfig);
+        verify(handlerFactory).create(serviceConfig, endpointConfig);
 
         verify(executor).scheduleWithFixedDelay(runnableCaptor.capture(), eq(0L), eq(5000L), eq(MILLISECONDS));
 
@@ -121,13 +126,17 @@ public final class ServiceSessionTest {
 
         final FutureCallback<JSON> callback = callbackCaptor.getValue();
 
-        callback.failed(new Exception("Intentional exception"));
+        final Exception ex = new Exception("Intentional exception");
+        callback.failed(ex);
+
+        verify(handler).failed(ex);
     }
 
     @Test
     public void stop() {
         serviceSession.start();
         serviceSession.addEndpoint(endpointConfig);
+        verify(handlerFactory).create(serviceConfig, endpointConfig);
 
         verify(executor).scheduleWithFixedDelay(runnableCaptor.capture(), eq(0L), eq(5000L), eq(MILLISECONDS));
 
@@ -140,6 +149,7 @@ public final class ServiceSessionTest {
     public void stopBeforePoll() {
         serviceSession.start();
         serviceSession.addEndpoint(endpointConfig);
+        verify(handlerFactory).create(serviceConfig, endpointConfig);
 
         verify(executor).scheduleWithFixedDelay(runnableCaptor.capture(), eq(0L), eq(5000L), eq(MILLISECONDS));
 
@@ -159,6 +169,7 @@ public final class ServiceSessionTest {
     public void stopBeforeSecondPoll() {
         serviceSession.start();
         serviceSession.addEndpoint(endpointConfig);
+        verify(handlerFactory).create(serviceConfig, endpointConfig);
 
         verify(executor).scheduleWithFixedDelay(runnableCaptor.capture(), eq(0L), eq(5000L), eq(MILLISECONDS));
 
@@ -182,6 +193,7 @@ public final class ServiceSessionTest {
     public void stopDuringPoll() {
         serviceSession.start();
         serviceSession.addEndpoint(endpointConfig);
+        verify(handlerFactory).create(serviceConfig, endpointConfig);
 
         verify(executor).scheduleWithFixedDelay(runnableCaptor.capture(), eq(0L), eq(5000L), eq(MILLISECONDS));
 
@@ -197,5 +209,7 @@ public final class ServiceSessionTest {
         verify(taskFuture).cancel(false);
 
         callback.completed(json);
+
+        verify(handler, never()).completed(json);
     }
 }
