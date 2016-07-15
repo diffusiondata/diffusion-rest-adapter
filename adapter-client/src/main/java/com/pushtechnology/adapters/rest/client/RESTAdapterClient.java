@@ -131,14 +131,15 @@ public final class RESTAdapterClient {
      * @throws IllegalStateException if the client is not running
      */
     public synchronized void stop() throws IOException {
-        if (currentExecutor == null) {
+        final ScheduledExecutorService executor = this.currentExecutor;
+        if (executor == null) {
             throw new IllegalStateException("The client is not running");
         }
 
         publishingClient.stop();
         pollClient.stop();
-        currentExecutor.shutdown();
-        currentExecutor = null;
+        executor.shutdown();
+        this.currentExecutor = null;
     }
 
     /**
