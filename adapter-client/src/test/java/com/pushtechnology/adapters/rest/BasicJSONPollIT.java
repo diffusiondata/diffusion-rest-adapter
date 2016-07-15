@@ -42,16 +42,7 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
  * @author Push Technology Limited
  */
 public final class BasicJSONPollIT {
-    private static Server jettyServer;
-
-    @Mock
-    private Session.Listener listener;
-    @Mock
-    private Topics.ValueStream<JSON> stream;
-    @Mock
-    private Topics.CompletionCallback callback;
-
-    private final Model model = Model
+    private static final Model MODEL = Model
         .builder()
         .diffusion(DiffusionConfig
             .builder()
@@ -84,6 +75,15 @@ public final class BasicJSONPollIT {
                 .build()))
         .build();
 
+    private static Server jettyServer;
+
+    @Mock
+    private Session.Listener listener;
+    @Mock
+    private Topics.ValueStream<JSON> stream;
+    @Mock
+    private Topics.CompletionCallback callback;
+
     @BeforeClass
     public static void startApplicationServer() throws Exception {
         final ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
@@ -111,9 +111,31 @@ public final class BasicJSONPollIT {
 
     @Test
     public void test() throws IOException {
-        final RESTAdapterClient client = RESTAdapterClient.create(model);
-        client.start();
+        final RESTAdapterClient client = startClient();
+        final Session session = startSession();
 
+        final Topics topics = session.feature(Topics.class);
+        topics.addFallbackStream(JSON.class, stream);
+        topics.subscribe("?rest/", callback);
+
+        verify(callback, timed()).onComplete();
+        verify(stream, timed()).onSubscription(eq("rest/increment"), isA(TopicSpecification.class));
+
+        stopSession(session);
+        client.stop();
+    }
+
+    private static VerificationWithTimeout timed() {
+        return timeout(5000);
+    }
+
+    private static RESTAdapterClient startClient() {
+        final RESTAdapterClient client = RESTAdapterClient.create(MODEL);
+        client.start();
+        return client;
+    }
+
+    private Session startSession() {
         final Session session = Diffusion
             .sessions()
             .serverHost("localhost")
@@ -121,20 +143,11 @@ public final class BasicJSONPollIT {
             .listener(listener)
             .open();
         verify(listener, timed()).onSessionStateChanged(session, CONNECTING, CONNECTED_ACTIVE);
-
-        session.feature(Topics.class).addFallbackStream(JSON.class, stream);
-        session.feature(Topics.class).subscribe("?rest/", callback);
-        verify(callback, timed()).onComplete();
-
-        verify(stream, timed()).onSubscription(eq("rest/increment"), isA(TopicSpecification.class));
-
-        session.close();
-        verify(listener, timed()).onSessionStateChanged(session, CONNECTED_ACTIVE, CLOSED_BY_CLIENT);
-
-        client.stop();
+        return session;
     }
 
-    private static VerificationWithTimeout timed() {
-        return timeout(5000);
+    private void stopSession(Session session) {
+        session.close();
+        verify(listener, timed()).onSessionStateChanged(session, CONNECTED_ACTIVE, CLOSED_BY_CLIENT);
     }
 }
