@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
+import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.polling.HttpClientFactoryImpl;
 import com.pushtechnology.adapters.rest.polling.PollClient;
 import com.pushtechnology.adapters.rest.polling.PollClientImpl;
@@ -111,41 +112,11 @@ public final class RESTAdapterClient {
             }
         };
 
-        model
-            .getServices()
-            .forEach(service -> {
-                synchronized (RESTAdapterClient.this) {
-                    final ServiceSession serviceSession =
-                        new ServiceSession(executor, pollClient, service, handlerFactory);
-                    topicManagementClient.addService(service);
-                    publishingClient.addService(service, serviceConfig -> {
-                        serviceConfig
-                            .getEndpoints()
-                            .forEach(endpoint -> {
-                                synchronized (RESTAdapterClient.this) {
-                                    topicManagementClient.addEndpoint(serviceConfig, endpoint, new AddCallback() {
-                                        @Override
-                                        public void onTopicAdded(String topicPath) {
-                                            serviceSession.addEndpoint(endpoint);
-                                        }
-
-                                        @Override
-                                        public void onTopicAddFailed(String topicPath, TopicAddFailReason reason) {
-                                            if (reason == TopicAddFailReason.EXISTS) {
-                                                onTopicAdded(topicPath);
-                                            }
-                                        }
-
-                                        @Override
-                                        public void onDiscard() {
-                                        }
-                                    });
-                                }
-                            });
-                        serviceSession.start();
-                    });
-                }
-            });
+        for (ServiceConfig service : model.getServices()) {
+            final ServiceSession serviceSession = new ServiceSession(executor, pollClient, service, handlerFactory);
+            topicManagementClient.addService(service);
+            publishingClient.addService(service, new ServiceReady(serviceSession));
+        }
     }
 
     /**
@@ -219,6 +190,42 @@ public final class RESTAdapterClient {
                     }
                 }
             }
+        }
+    }
+
+    private final class ServiceReady implements PublishingClient.ServiceReadyCallback {
+        private final ServiceSession serviceSession;
+
+        private ServiceReady(ServiceSession serviceSession) {
+            this.serviceSession = serviceSession;
+        }
+
+        @Override
+        public void onServiceReady(ServiceConfig serviceConfig) {
+            serviceConfig
+                .getEndpoints()
+                .forEach(endpoint -> {
+                    synchronized (RESTAdapterClient.this) {
+                        topicManagementClient.addEndpoint(serviceConfig, endpoint, new AddCallback() {
+                            @Override
+                            public void onTopicAdded(String topicPath) {
+                                serviceSession.addEndpoint(endpoint);
+                            }
+
+                            @Override
+                            public void onTopicAddFailed(String topicPath, TopicAddFailReason reason) {
+                                if (reason == TopicAddFailReason.EXISTS) {
+                                    onTopicAdded(topicPath);
+                                }
+                            }
+
+                            @Override
+                            public void onDiscard() {
+                            }
+                        });
+                    }
+                });
+            serviceSession.start();
         }
     }
 }
