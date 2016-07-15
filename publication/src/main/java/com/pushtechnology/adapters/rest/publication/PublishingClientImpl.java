@@ -19,6 +19,7 @@ import static com.pushtechnology.diffusion.client.topics.details.TopicType.JSON;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +31,6 @@ import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateCo
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.UpdateSource;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.ValueUpdater;
 import com.pushtechnology.diffusion.client.session.Session;
-import com.pushtechnology.diffusion.client.session.SessionFactory;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
 import net.jcip.annotations.GuardedBy;
@@ -46,29 +46,26 @@ import net.jcip.annotations.ThreadSafe;
 @ThreadSafe
 public final class PublishingClientImpl implements PublishingClient {
     private static final Logger LOG = LoggerFactory.getLogger(PublishingClientImpl.class);
-    private final SessionFactory sessionFactory;
-    @GuardedBy("this")
-    private Session session;
+    private final AtomicBoolean isRunning = new AtomicBoolean(false);
+    private final Session session;
     @GuardedBy("this")
     private Map<ServiceConfig, ValueUpdater<JSON>> updaters = new HashMap<>();
 
     /**
      * Constructor.
      */
-    public PublishingClientImpl(SessionFactory sessionFactory) {
-        this.sessionFactory = sessionFactory;
+    public PublishingClientImpl(Session session) {
+        this.session = session;
     }
 
     @Override
-    public synchronized void start(Session.Listener listener) {
-        session = sessionFactory
-            .listener(listener)
-            .open();
+    public synchronized void start() {
+        isRunning.set(true);
     }
 
     @Override
     public synchronized void initialise(ServiceConfig serviceConfig, InitialiseCallback callback) {
-        if (session == null) {
+        if (!isRunning.get()) {
             throw new IllegalStateException("Client has not started");
         }
 
@@ -89,17 +86,12 @@ public final class PublishingClientImpl implements PublishingClient {
 
     @Override
     public synchronized void stop() {
-        if (session == null) {
-            return;
-        }
-
-        session.close();
-        session = null;
+        isRunning.set(false);
     }
 
     @Override
     public synchronized void publish(ServiceConfig serviceConfig, EndpointConfig endpointConfig, JSON json) {
-        if (session == null) {
+        if (!isRunning.get()) {
             throw new IllegalStateException("Publishing client not started");
         }
 

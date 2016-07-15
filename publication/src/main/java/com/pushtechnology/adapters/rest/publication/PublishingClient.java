@@ -17,7 +17,6 @@ package com.pushtechnology.adapters.rest.publication;
 
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
 /**
@@ -28,9 +27,8 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
 public interface PublishingClient {
     /**
      * Start the client running. Connects the client to Diffusion.
-     * @param listener
      */
-    void start(Session.Listener listener);
+    void start();
 
     /**
      * Initialise a service to publish to.

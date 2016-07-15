@@ -55,18 +55,19 @@ public final class RESTAdapterClient {
     private static final Logger LOG = LoggerFactory.getLogger(RESTAdapterClient.class);
 
     private final Model model;
-    private final PublishingClient publishingClient;
     private final PollClient pollClient;
     @GuardedBy("this")
+    private PublishingClient publishingClient;
+    @GuardedBy("this")
     private ScheduledExecutorService currentExecutor;
+    @GuardedBy("this")
+    private Session session;
 
     private RESTAdapterClient(
             Model model,
-            PublishingClient publishingClient,
             PollClient pollClient) {
 
         this.model = model;
-        this.publishingClient = publishingClient;
         this.pollClient = pollClient;
     }
 
@@ -79,7 +80,9 @@ public final class RESTAdapterClient {
             throw new IllegalStateException("The client is already running");
         }
 
-        publishingClient.start(new Listener());
+        session = getSession(model.getDiffusion());
+        publishingClient = new PublishingClientImpl(session);
+        publishingClient.start();
         pollClient.start();
 
         final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
@@ -88,7 +91,9 @@ public final class RESTAdapterClient {
         final PollHandlerFactory handlerFactory = (serviceConfig, endpointConfig) -> new FutureCallback<JSON>() {
             @Override
             public void completed(JSON result) {
-                publishingClient.publish(serviceConfig, endpointConfig, result);
+                synchronized (RESTAdapterClient.this) {
+                    publishingClient.publish(serviceConfig, endpointConfig, result);
+                }
             }
 
             @Override
@@ -104,26 +109,30 @@ public final class RESTAdapterClient {
 
         model
             .getServices()
-            .forEach(service -> publishingClient.initialise(
-                service,
-                new InitialiseCallback() {
-                    private final ServiceSession serviceSession =
-                        new ServiceSession(executor, pollClient, service, handlerFactory);
+            .forEach(service -> {
+                synchronized (RESTAdapterClient.this) {
+                    publishingClient.initialise(
+                    service,
+                    new InitialiseCallback() {
+                        private final ServiceSession serviceSession =
+                            new ServiceSession(executor, pollClient, service, handlerFactory);
 
-                    @Override
-                    public void onEndpointAdded(ServiceConfig serviceConfig, EndpointConfig endpointConfig) {
-                        serviceSession.addEndpoint(endpointConfig);
-                    }
+                        @Override
+                        public void onEndpointAdded(ServiceConfig serviceConfig, EndpointConfig endpointConfig) {
+                            serviceSession.addEndpoint(endpointConfig);
+                        }
 
-                    @Override
-                    public void onEndpointFailed(ServiceConfig serviceConfig, EndpointConfig endpointConfig) {
-                    }
+                        @Override
+                        public void onEndpointFailed(ServiceConfig serviceConfig, EndpointConfig endpointConfig) {
+                        }
 
-                    @Override
-                    public void onServiceAdded(ServiceConfig serviceConfig) {
-                        serviceSession.start();
-                    }
-                }));
+                        @Override
+                        public void onServiceAdded(ServiceConfig serviceConfig) {
+                            serviceSession.start();
+                        }
+                    });
+                }
+            });
     }
 
     /**
@@ -138,6 +147,7 @@ public final class RESTAdapterClient {
 
         publishingClient.stop();
         pollClient.stop();
+        session.close();
         executor.shutdown();
         this.currentExecutor = null;
     }
@@ -149,28 +159,29 @@ public final class RESTAdapterClient {
      */
     public static RESTAdapterClient create(Model model) {
         LOG.debug("Creating REST adapter client with configuration: {}", model);
-        final PublishingClient diffusionClient = new PublishingClientImpl(getSessionFactory(model.getDiffusion()));
         final PollClient pollClient = new PollClientImpl(new HttpClientFactoryImpl());
 
-        return new RESTAdapterClient(model, diffusionClient, pollClient);
+        return new RESTAdapterClient(model, pollClient);
     }
 
-    private static SessionFactory getSessionFactory(DiffusionConfig diffusionConfig) {
+    private Session getSession(DiffusionConfig diffusionConfig) {
         final SessionFactory sessionFactory = Diffusion
             .sessions()
             .serverHost(diffusionConfig.getHost())
             .serverPort(diffusionConfig.getPort())
             .secureTransport(false)
             .transports(WEBSOCKET)
-            .reconnectionTimeout(5000);
+            .reconnectionTimeout(5000)
+            .listener(new Listener());
 
         if (diffusionConfig.getPrincipal() != null && diffusionConfig.getPassword() != null) {
             return sessionFactory
                 .principal(diffusionConfig.getPrincipal())
-                .password(diffusionConfig.getPassword());
+                .password(diffusionConfig.getPassword())
+                .open();
         }
         else  {
-            return sessionFactory;
+            return sessionFactory.open();
         }
     }
 
@@ -179,13 +190,13 @@ public final class RESTAdapterClient {
      */
     private final class Listener implements Session.Listener {
         @Override
-        public void onSessionStateChanged(Session session, Session.State oldState, Session.State newState) {
+        public void onSessionStateChanged(Session forSession, Session.State oldState, Session.State newState) {
             synchronized (RESTAdapterClient.this) {
                 if (currentExecutor == null) {
                     return;
                 }
 
-                LOG.warn("{} {} -> {}", session, oldState, newState);
+                LOG.warn("{} {} -> {}", forSession, oldState, newState);
                 if (newState.isClosed()) {
                     try {
                         stop();

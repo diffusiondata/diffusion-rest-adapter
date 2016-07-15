@@ -19,10 +19,10 @@ import org.mockito.Mock;
 
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.adapters.rest.publication.TopicCreationInitialisationAdapter;
 import com.pushtechnology.adapters.rest.publication.PublishingClient;
 import com.pushtechnology.adapters.rest.publication.PublishingClient.InitialiseCallback;
 import com.pushtechnology.adapters.rest.publication.PublishingClientImpl;
+import com.pushtechnology.adapters.rest.publication.TopicCreationInitialisationAdapter;
 import com.pushtechnology.adapters.rest.publication.UpdateTopicCallback;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
@@ -30,7 +30,6 @@ import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateCo
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.ValueUpdater;
 import com.pushtechnology.diffusion.client.session.Session;
-import com.pushtechnology.diffusion.client.session.SessionFactory;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
 /**
@@ -39,8 +38,6 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
  * @author Matt Champion on 13/07/2016
  */
 public final class PublishingClientImplTest {
-    @Mock
-    private SessionFactory sessionFactory;
     @Mock
     private Session session;
     @Mock
@@ -69,9 +66,6 @@ public final class PublishingClientImplTest {
     public void setUp() {
         initMocks(this);
 
-        when(sessionFactory.listener(isA(Session.Listener.class))).thenReturn(sessionFactory);
-        when(sessionFactory.open()).thenReturn(session);
-
         when(session.feature(TopicControl.class)).thenReturn(topicControl);
         when(session.feature(TopicUpdateControl.class)).thenReturn(updateControl);
         when(session.getState()).thenReturn(CONNECTED_ACTIVE);
@@ -96,34 +90,28 @@ public final class PublishingClientImplTest {
 
     @After
     public void postConditions() {
-        verifyNoMoreInteractions(sessionFactory, session, topicControl, updateControl, rawUpdater, updater, callback);
+        verifyNoMoreInteractions(session, topicControl, updateControl, rawUpdater, updater, callback);
     }
 
     @Test
     public void start() {
-        final PublishingClient client = new PublishingClientImpl(sessionFactory);
+        final PublishingClient client = new PublishingClientImpl(session);
 
-        client.start(listener);
-
-        verify(sessionFactory).listener(listener);
-        verify(sessionFactory).open();
+        client.start();
     }
 
     @Test(expected = IllegalStateException.class)
     public void initialiseBeforeStart() {
-        final PublishingClient client = new PublishingClientImpl(sessionFactory);
+        final PublishingClient client = new PublishingClientImpl(session);
 
         client.initialise(serviceConfig, callback);
     }
 
     @Test
     public void initialise() {
-        final PublishingClient client = new PublishingClientImpl(sessionFactory);
+        final PublishingClient client = new PublishingClientImpl(session);
 
-        client.start(listener);
-
-        verify(sessionFactory).listener(listener);
-        verify(sessionFactory).open();
+        client.start();
 
         client.initialise(serviceConfig, callback);
 
@@ -133,40 +121,32 @@ public final class PublishingClientImplTest {
 
     @Test
     public void stopBeforeStart() {
-        final PublishingClient client = new PublishingClientImpl(sessionFactory);
+        final PublishingClient client = new PublishingClientImpl(session);
 
         client.stop();
     }
 
     @Test
     public void stop() {
-        final PublishingClient client = new PublishingClientImpl(sessionFactory);
+        final PublishingClient client = new PublishingClientImpl(session);
 
-        client.start(listener);
-
-        verify(sessionFactory).listener(listener);
-        verify(sessionFactory).open();
+        client.start();
 
         client.stop();
-
-        verify(session).close();
     }
 
     @Test(expected = IllegalStateException.class)
     public void publishBeforeStart() {
-        final PublishingClient client = new PublishingClientImpl(sessionFactory);
+        final PublishingClient client = new PublishingClientImpl(session);
 
         client.publish(serviceConfig, endpointConfig, json);
     }
 
     @Test
     public void publish() {
-        final PublishingClient client = new PublishingClientImpl(sessionFactory);
+        final PublishingClient client = new PublishingClientImpl(session);
 
-        client.start(listener);
-
-        verify(sessionFactory).listener(listener);
-        verify(sessionFactory).open();
+        client.start();
 
         client.initialise(serviceConfig, callback);
 
