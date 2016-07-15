@@ -17,6 +17,7 @@ package com.pushtechnology.adapters.rest.topic.management;
 
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
+import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 
 /**
  * Topic management client for Diffusion server.
@@ -37,7 +38,7 @@ public interface TopicManagementClient {
     /**
      * Start managing the topics for a REST endpoint.
      */
-    void addEndpoint(EndpointConfig endpointConfig);
+    void addEndpoint(ServiceConfig serviceConfig, EndpointConfig endpointConfig, TopicControl.AddCallback callback);
 
     /**
      * Stop managing the topics for a REST endpoint.
