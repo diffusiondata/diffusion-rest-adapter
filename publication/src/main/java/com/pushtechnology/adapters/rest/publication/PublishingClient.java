@@ -15,6 +15,8 @@
 
 package com.pushtechnology.adapters.rest.publication;
 
+import java.util.concurrent.CompletableFuture;
+
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.diffusion.datatype.json.JSON;
@@ -33,7 +35,7 @@ public interface PublishingClient {
     /**
      * Add a service to publish to.
      */
-    void addService(ServiceConfig serviceConfig, ServiceReadyCallback callback);
+    CompletableFuture<ServiceConfig> addService(ServiceConfig serviceConfig);
 
     /**
      * Stop the client running.
@@ -44,14 +46,4 @@ public interface PublishingClient {
      * Update the topic associated with an endpoint.
      */
     void publish(ServiceConfig serviceConfig, EndpointConfig endpointConfig, JSON json);
-
-    /**
-     * Callback for when the service is ready.
-     */
-    interface ServiceReadyCallback {
-        /**
-         * Notified when the service is ready.
-         */
-        void onServiceReady(ServiceConfig serviceConfig);
-    }
 }

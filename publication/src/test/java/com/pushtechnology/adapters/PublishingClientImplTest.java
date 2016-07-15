@@ -2,12 +2,14 @@ package com.pushtechnology.adapters;
 
 import static com.pushtechnology.diffusion.client.session.Session.State.CONNECTED_ACTIVE;
 import static java.util.Collections.singletonList;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
+
+import java.util.concurrent.CompletableFuture;
 
 import org.junit.After;
 import org.junit.Before;
@@ -45,8 +47,6 @@ public final class PublishingClientImplTest {
     @Mock
     private ValueUpdater<JSON> updater;
     @Mock
-    private PublishingClient.ServiceReadyCallback callback;
-    @Mock
     private JSON json;
     @Captor
     private ArgumentCaptor<UpdateSource> updateSourceCaptor;
@@ -81,7 +81,7 @@ public final class PublishingClientImplTest {
 
     @After
     public void postConditions() {
-        verifyNoMoreInteractions(session, updateControl, rawUpdater, updater, callback);
+        verifyNoMoreInteractions(session, updateControl, rawUpdater, updater);
     }
 
     @Test
@@ -95,7 +95,7 @@ public final class PublishingClientImplTest {
     public void addServiceBeforeStart() {
         final PublishingClient client = new PublishingClientImpl(session);
 
-        client.addService(serviceConfig, callback);
+        client.addService(serviceConfig);
     }
 
     @Test
@@ -104,7 +104,7 @@ public final class PublishingClientImplTest {
 
         client.start();
 
-        client.addService(serviceConfig, callback);
+        client.addService(serviceConfig);
 
         verify(session).feature(TopicUpdateControl.class);
         verify(updateControl).registerUpdateSource(eq("a"), updateSourceCaptor.capture());
@@ -139,14 +139,14 @@ public final class PublishingClientImplTest {
 
         client.start();
 
-        client.addService(serviceConfig, callback);
+        final CompletableFuture<ServiceConfig> promise = client.addService(serviceConfig);
 
         verify(session).feature(TopicUpdateControl.class);
         verify(updateControl).registerUpdateSource(eq("a"), updateSourceCaptor.capture());
 
         updateSourceCaptor.getValue().onActive("a/topic", rawUpdater);
 
-        verify(callback).onServiceReady(serviceConfig);
+        assertTrue(promise.isDone());
 
         client.publish(serviceConfig, endpointConfig, json);
 

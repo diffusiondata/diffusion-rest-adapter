@@ -17,6 +17,7 @@ package com.pushtechnology.adapters.rest.publication;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.slf4j.Logger;
@@ -61,10 +62,12 @@ public final class PublishingClientImpl implements PublishingClient {
     }
 
     @Override
-    public synchronized void addService(ServiceConfig serviceConfig, ServiceReadyCallback readyCallback) {
+    public synchronized CompletableFuture<ServiceConfig> addService(ServiceConfig serviceConfig) {
         if (!isRunning.get()) {
             throw new IllegalStateException("Client has not started");
         }
+
+        final CompletableFuture<ServiceConfig> promise = new CompletableFuture<>();
 
         session
             .feature(TopicUpdateControl.class)
@@ -76,7 +79,7 @@ public final class PublishingClientImpl implements PublishingClient {
                         synchronized (PublishingClientImpl.this) {
                             LOG.warn("Active for service: {}", serviceConfig);
                             updaters.put(serviceConfig, updater.valueUpdater(JSON.class));
-                            readyCallback.onServiceReady(serviceConfig);
+                            promise.complete(serviceConfig);
                         }
                     }
 
@@ -85,6 +88,8 @@ public final class PublishingClientImpl implements PublishingClient {
                         LOG.warn("On standby for service: {}", serviceConfig);
                     }
                 });
+
+        return promise;
     }
 
     @Override

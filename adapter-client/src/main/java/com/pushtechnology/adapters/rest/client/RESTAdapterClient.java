@@ -20,6 +20,7 @@ import static com.pushtechnology.diffusion.client.session.SessionAttributes.Tran
 import java.io.IOException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.function.Consumer;
 
 import org.apache.http.concurrent.FutureCallback;
 import org.slf4j.Logger;
@@ -115,7 +116,9 @@ public final class RESTAdapterClient {
         for (ServiceConfig service : model.getServices()) {
             final ServiceSession serviceSession = new ServiceSession(executor, pollClient, service, handlerFactory);
             topicManagementClient.addService(service);
-            publishingClient.addService(service, new ServiceReady(serviceSession));
+            publishingClient
+                .addService(service)
+                .thenAccept(new ServiceReady(serviceSession));
         }
     }
 
@@ -193,7 +196,7 @@ public final class RESTAdapterClient {
         }
     }
 
-    private final class ServiceReady implements PublishingClient.ServiceReadyCallback {
+    private final class ServiceReady implements Consumer<ServiceConfig> {
         private final ServiceSession serviceSession;
 
         private ServiceReady(ServiceSession serviceSession) {
@@ -201,7 +204,7 @@ public final class RESTAdapterClient {
         }
 
         @Override
-        public void onServiceReady(ServiceConfig serviceConfig) {
+        public void accept(ServiceConfig serviceConfig) {
             serviceConfig
                 .getEndpoints()
                 .forEach(endpoint -> {
