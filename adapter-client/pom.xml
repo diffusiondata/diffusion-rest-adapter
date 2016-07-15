@@ -28,6 +28,11 @@
         </dependency>
 
         <dependency>
+            <groupId>com.pushtechnology.adapters.rest</groupId>
+            <artifactId>topic-management</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
         </dependency>

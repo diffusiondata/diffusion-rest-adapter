@@ -26,18 +26,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
-import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
-import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.polling.HttpClientFactoryImpl;
 import com.pushtechnology.adapters.rest.polling.PollClient;
 import com.pushtechnology.adapters.rest.polling.PollClientImpl;
 import com.pushtechnology.adapters.rest.polling.PollHandlerFactory;
 import com.pushtechnology.adapters.rest.polling.ServiceSession;
 import com.pushtechnology.adapters.rest.publication.PublishingClient;
-import com.pushtechnology.adapters.rest.publication.PublishingClient.InitialiseCallback;
 import com.pushtechnology.adapters.rest.publication.PublishingClientImpl;
+import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
+import com.pushtechnology.adapters.rest.topic.management.TopicManagementClientImpl;
 import com.pushtechnology.diffusion.client.Diffusion;
+import com.pushtechnology.diffusion.client.features.control.topics.TopicAddFailReason;
+import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.AddCallback;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.session.SessionFactory;
 import com.pushtechnology.diffusion.datatype.json.JSON;
@@ -58,6 +59,8 @@ public final class RESTAdapterClient {
     private final PollClient pollClient;
     @GuardedBy("this")
     private PublishingClient publishingClient;
+    @GuardedBy("this")
+    private TopicManagementClient topicManagementClient;
     @GuardedBy("this")
     private ScheduledExecutorService currentExecutor;
     @GuardedBy("this")
@@ -81,6 +84,7 @@ public final class RESTAdapterClient {
         }
 
         session = getSession(model.getDiffusion());
+        topicManagementClient = new TopicManagementClientImpl(session);
         publishingClient = new PublishingClientImpl(session);
         publishingClient.start();
         pollClient.start();
@@ -111,25 +115,34 @@ public final class RESTAdapterClient {
             .getServices()
             .forEach(service -> {
                 synchronized (RESTAdapterClient.this) {
-                    publishingClient.initialise(
-                    service,
-                    new InitialiseCallback() {
-                        private final ServiceSession serviceSession =
-                            new ServiceSession(executor, pollClient, service, handlerFactory);
+                    final ServiceSession serviceSession =
+                        new ServiceSession(executor, pollClient, service, handlerFactory);
+                    topicManagementClient.addService(service);
+                    publishingClient.addService(service, serviceConfig -> {
+                        serviceConfig
+                            .getEndpoints()
+                            .forEach(endpoint -> {
+                                synchronized (RESTAdapterClient.this) {
+                                    topicManagementClient.addEndpoint(serviceConfig, endpoint, new AddCallback() {
+                                        @Override
+                                        public void onTopicAdded(String topicPath) {
+                                            serviceSession.addEndpoint(endpoint);
+                                        }
 
-                        @Override
-                        public void onEndpointAdded(ServiceConfig serviceConfig, EndpointConfig endpointConfig) {
-                            serviceSession.addEndpoint(endpointConfig);
-                        }
+                                        @Override
+                                        public void onTopicAddFailed(String topicPath, TopicAddFailReason reason) {
+                                            if (reason == TopicAddFailReason.EXISTS) {
+                                                onTopicAdded(topicPath);
+                                            }
+                                        }
 
-                        @Override
-                        public void onEndpointFailed(ServiceConfig serviceConfig, EndpointConfig endpointConfig) {
-                        }
-
-                        @Override
-                        public void onServiceAdded(ServiceConfig serviceConfig) {
-                            serviceSession.start();
-                        }
+                                        @Override
+                                        public void onDiscard() {
+                                        }
+                                    });
+                                }
+                            });
+                        serviceSession.start();
                     });
                 }
             });

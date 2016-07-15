@@ -31,9 +31,9 @@ public interface PublishingClient {
     void start();
 
     /**
-     * Initialise a service to publish to.
+     * Add a service to publish to.
      */
-    void initialise(ServiceConfig serviceConfig, InitialiseCallback callback);
+    void addService(ServiceConfig serviceConfig, ServiceReadyCallback callback);
 
     /**
      * Stop the client running.
@@ -46,22 +46,12 @@ public interface PublishingClient {
     void publish(ServiceConfig serviceConfig, EndpointConfig endpointConfig, JSON json);
 
     /**
-     * Callback for initialising a service.
+     * Callback for when the service is ready.
      */
-    interface InitialiseCallback {
+    interface ServiceReadyCallback {
         /**
-         * Notification when an endpoint has been added.
+         * Notified when the service is ready.
          */
-        void onEndpointAdded(ServiceConfig serviceConfig, EndpointConfig endpointConfig);
-
-        /**
-         * Notification when an endpoint has failed.
-         */
-        void onEndpointFailed(ServiceConfig serviceConfig, EndpointConfig endpointConfig);
-
-        /**
-         * Notification when the service has been added.
-         */
-        void onServiceAdded(ServiceConfig serviceConfig);
+        void onServiceReady(ServiceConfig serviceConfig);
     }
 }

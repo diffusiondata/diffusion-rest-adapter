@@ -15,8 +15,6 @@
 
 package com.pushtechnology.adapters.rest.publication;
 
-import static com.pushtechnology.diffusion.client.topics.details.TopicType.JSON;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -26,7 +24,6 @@ import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.UpdateSource;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.ValueUpdater;
@@ -64,24 +61,30 @@ public final class PublishingClientImpl implements PublishingClient {
     }
 
     @Override
-    public synchronized void initialise(ServiceConfig serviceConfig, InitialiseCallback callback) {
+    public synchronized void addService(ServiceConfig serviceConfig, ServiceReadyCallback readyCallback) {
         if (!isRunning.get()) {
             throw new IllegalStateException("Client has not started");
         }
 
-        final TopicControl topicControl = session.feature(TopicControl.class);
+        session
+            .feature(TopicUpdateControl.class)
+            .registerUpdateSource(
+                serviceConfig.getTopicRoot(),
+                new UpdateSource.Default() {
+                    @Override
+                    public void onActive(String topicPath, TopicUpdateControl.Updater updater) {
+                        synchronized (PublishingClientImpl.this) {
+                            LOG.warn("Active for service: {}", serviceConfig);
+                            updaters.put(serviceConfig, updater.valueUpdater(JSON.class));
+                            readyCallback.onServiceReady(serviceConfig);
+                        }
+                    }
 
-        final TopicCreationInitialisationAdapter addCallback =
-            new TopicCreationInitialisationAdapter(serviceConfig, new Initialise(callback));
-
-        serviceConfig
-            .getEndpoints()
-            .stream()
-            .forEach(endpoint -> topicControl.addTopic(
-                serviceConfig.getTopicRoot() + "/" + endpoint.getTopic(),
-                JSON,
-                endpoint,
-                addCallback));
+                    @Override
+                    public void onStandby(String topicPath) {
+                        LOG.warn("On standby for service: {}", serviceConfig);
+                    }
+                });
     }
 
     @Override
@@ -110,48 +113,5 @@ public final class PublishingClientImpl implements PublishingClient {
                 json,
                 serviceConfig.getTopicRoot() + "/" + endpointConfig.getTopic(),
                 UpdateTopicCallback.INSTANCE);
-    }
-
-    private final class Initialise implements InitialiseCallback {
-        private final InitialiseCallback delegate;
-
-        private Initialise(InitialiseCallback delegate) {
-            this.delegate = delegate;
-        }
-
-        @Override
-        public void onEndpointAdded(ServiceConfig serviceConfig, EndpointConfig endpointConfig) {
-            delegate.onEndpointAdded(serviceConfig, endpointConfig);
-        }
-
-        @Override
-        public void onEndpointFailed(ServiceConfig serviceConfig, EndpointConfig endpointConfig) {
-            delegate.onEndpointFailed(serviceConfig, endpointConfig);
-        }
-
-        @Override
-        public void onServiceAdded(ServiceConfig serviceConfig) {
-            synchronized (PublishingClientImpl.this) {
-                session
-                    .feature(TopicUpdateControl.class)
-                    .registerUpdateSource(
-                        serviceConfig.getTopicRoot(),
-                        new UpdateSource.Default() {
-                            @Override
-                            public void onActive(String topicPath, TopicUpdateControl.Updater updater) {
-                                synchronized (PublishingClientImpl.this) {
-                                    LOG.warn("Active for service: {}", serviceConfig);
-                                    updaters.put(serviceConfig, updater.valueUpdater(JSON.class));
-                                    delegate.onServiceAdded(serviceConfig);
-                                }
-                            }
-
-                            @Override
-                            public void onStandby(String topicPath) {
-                                LOG.warn("On standby for service: {}", serviceConfig);
-                            }
-                        });
-            }
-        }
     }
 }
