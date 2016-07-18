@@ -31,17 +31,7 @@ public interface TopicManagementClient {
     void addService(ServiceConfig serviceConfig);
 
     /**
-     * Stop managing the topics for a REST service.
-     */
-    void removeService(ServiceConfig serviceConfig);
-
-    /**
      * Start managing the topics for a REST endpoint.
      */
     void addEndpoint(ServiceConfig serviceConfig, EndpointConfig endpointConfig, TopicControl.AddCallback callback);
-
-    /**
-     * Stop managing the topics for a REST endpoint.
-     */
-    void removeEndpoint(EndpointConfig endpointConfig);
 }

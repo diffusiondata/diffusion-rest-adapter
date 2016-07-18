@@ -45,11 +45,6 @@ public final class TopicManagementClientImpl implements TopicManagementClient {
     }
 
     @Override
-    public void removeService(ServiceConfig serviceConfig) {
-
-    }
-
-    @Override
     public void addEndpoint(
             ServiceConfig serviceConfig,
             EndpointConfig endpointConfig,
@@ -60,10 +55,5 @@ public final class TopicManagementClientImpl implements TopicManagementClient {
                 serviceConfig.getTopicRoot() + "/" + endpointConfig.getTopic(),
                 TopicType.JSON,
                 callback);
-    }
-
-    @Override
-    public void removeEndpoint(EndpointConfig endpointConfig) {
-
     }
 }
