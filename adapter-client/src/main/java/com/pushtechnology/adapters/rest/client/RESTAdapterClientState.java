@@ -67,11 +67,14 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
         session.close();
     }
 
-    private static final class ServiceReady implements Consumer<ServiceConfig> {
+    /**
+     * Handler for a service that is now ready for publishing to.
+     */
+    private static final class ServiceReadyPublishing implements Consumer<ServiceConfig> {
         private final TopicManagementClient topicManagementClient;
         private final ServiceSession serviceSession;
 
-        private ServiceReady(TopicManagementClient topicManagementClient, ServiceSession serviceSession) {
+        private ServiceReadyPublishing(TopicManagementClient topicManagementClient, ServiceSession serviceSession) {
             this.topicManagementClient = topicManagementClient;
             this.serviceSession = serviceSession;
         }
@@ -118,7 +121,7 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
             topicManagementClient.addService(service);
             publishingClient
                 .addService(service)
-                .thenAccept(new ServiceReady(topicManagementClient, serviceSession));
+                .thenAccept(new ServiceReadyPublishing(topicManagementClient, serviceSession));
         }
 
         return new RESTAdapterClientState(publishingClient, executor, session);
