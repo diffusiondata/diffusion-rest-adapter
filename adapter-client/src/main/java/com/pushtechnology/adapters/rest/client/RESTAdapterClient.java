@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
+import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.store.ModelStore;
 import com.pushtechnology.adapters.rest.polling.HttpClientFactoryImpl;
 import com.pushtechnology.adapters.rest.polling.PollClient;
@@ -64,21 +65,23 @@ public final class RESTAdapterClient {
         }
 
         pollClient.start();
-        modelStore.onModelChange(newModel -> {
-            // Modified services will be in standby until the old model is closed
-            final Session session = getSession(newModel.getDiffusion());
-            final RESTAdapterClientState oldState = state.getAndSet(
-                RESTAdapterClientState.create(newModel, pollClient, session));
+        modelStore.onModelChange(this::onModelChange);
+    }
 
-            if (oldState != null) {
-                try {
-                    oldState.close();
-                }
-                catch (IOException e) {
-                    LOG.warn("Failed to shutdown previous model on model change");
-                }
+    private void onModelChange(Model newModel) {
+        // Modified services will be in standby until the old model is closed
+        final Session session = getSession(newModel.getDiffusion());
+        final RESTAdapterClientState oldState = state.getAndSet(
+            RESTAdapterClientState.create(newModel, pollClient, session));
+
+        if (oldState != null) {
+            try {
+                oldState.close();
             }
-        });
+            catch (IOException e) {
+                LOG.warn("Failed to shutdown previous model on model change");
+            }
+        }
     }
 
     /**
