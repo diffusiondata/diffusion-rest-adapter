@@ -18,33 +18,20 @@ package com.pushtechnology.adapters.rest.client;
 import static com.pushtechnology.diffusion.client.session.SessionAttributes.Transport.WEBSOCKET;
 
 import java.io.IOException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Consumer;
+import java.util.concurrent.atomic.AtomicReference;
 
-import org.apache.http.concurrent.FutureCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
-import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.polling.HttpClientFactoryImpl;
 import com.pushtechnology.adapters.rest.polling.PollClient;
 import com.pushtechnology.adapters.rest.polling.PollClientImpl;
-import com.pushtechnology.adapters.rest.polling.PollHandlerFactory;
-import com.pushtechnology.adapters.rest.polling.ServiceSession;
-import com.pushtechnology.adapters.rest.publication.PublishingClient;
-import com.pushtechnology.adapters.rest.publication.PublishingClientImpl;
-import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
-import com.pushtechnology.adapters.rest.topic.management.TopicManagementClientImpl;
 import com.pushtechnology.diffusion.client.Diffusion;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicAddFailReason;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.AddCallback;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.session.SessionFactory;
-import com.pushtechnology.diffusion.datatype.json.JSON;
 
 import net.jcip.annotations.GuardedBy;
 import net.jcip.annotations.ThreadSafe;
@@ -58,22 +45,12 @@ import net.jcip.annotations.ThreadSafe;
 public final class RESTAdapterClient {
     private static final Logger LOG = LoggerFactory.getLogger(RESTAdapterClient.class);
 
+    private final AtomicReference<RESTAdapterClientState> state = new AtomicReference<>(null);
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
     private final Model model;
     private final PollClient pollClient;
-    @GuardedBy("this")
-    private PublishingClient publishingClient;
-    @GuardedBy("this")
-    private TopicManagementClient topicManagementClient;
-    @GuardedBy("this")
-    private ScheduledExecutorService currentExecutor;
-    @GuardedBy("this")
-    private Session session;
 
-    private RESTAdapterClient(
-            Model model,
-            PollClient pollClient) {
-
+    private RESTAdapterClient(Model model, PollClient pollClient) {
         this.model = model;
         this.pollClient = pollClient;
     }
@@ -87,41 +64,9 @@ public final class RESTAdapterClient {
             throw new IllegalStateException("The client is already running");
         }
 
-        session = getSession(model.getDiffusion());
-        topicManagementClient = new TopicManagementClientImpl(session);
-        publishingClient = new PublishingClientImpl(session);
-        publishingClient.start();
+        final Session session = getSession(model.getDiffusion());
         pollClient.start();
-
-        final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-        currentExecutor = executor;
-
-        final PollHandlerFactory handlerFactory = (serviceConfig, endpointConfig) -> new FutureCallback<JSON>() {
-            @Override
-            public void completed(JSON result) {
-                synchronized (RESTAdapterClient.this) {
-                    publishingClient.publish(serviceConfig, endpointConfig, result);
-                }
-            }
-
-            @Override
-            public void failed(Exception ex) {
-                LOG.warn("Failed to poll endpoint {}", endpointConfig, ex);
-            }
-
-            @Override
-            public void cancelled() {
-                LOG.debug("Polling cancelled for endpoint {}", endpointConfig);
-            }
-        };
-
-        for (ServiceConfig service : model.getServices()) {
-            final ServiceSession serviceSession = new ServiceSession(executor, pollClient, service, handlerFactory);
-            topicManagementClient.addService(service);
-            publishingClient
-                .addService(service)
-                .thenAccept(new ServiceReady(serviceSession));
-        }
+        state.set(RESTAdapterClientState.create(model, pollClient, session));
     }
 
     /**
@@ -133,10 +78,8 @@ public final class RESTAdapterClient {
             throw new IllegalStateException("The client is not running");
         }
 
-        publishingClient.stop();
+        state.get().close();
         pollClient.stop();
-        session.close();
-        currentExecutor.shutdown();
     }
 
     /**
@@ -197,42 +140,6 @@ public final class RESTAdapterClient {
                     }
                 }
             }
-        }
-    }
-
-    private final class ServiceReady implements Consumer<ServiceConfig> {
-        private final ServiceSession serviceSession;
-
-        private ServiceReady(ServiceSession serviceSession) {
-            this.serviceSession = serviceSession;
-        }
-
-        @Override
-        public void accept(ServiceConfig serviceConfig) {
-            serviceConfig
-                .getEndpoints()
-                .forEach(endpoint -> {
-                    synchronized (RESTAdapterClient.this) {
-                        topicManagementClient.addEndpoint(serviceConfig, endpoint, new AddCallback() {
-                            @Override
-                            public void onTopicAdded(String topicPath) {
-                                serviceSession.addEndpoint(endpoint);
-                            }
-
-                            @Override
-                            public void onTopicAddFailed(String topicPath, TopicAddFailReason reason) {
-                                if (reason == TopicAddFailReason.EXISTS) {
-                                    onTopicAdded(topicPath);
-                                }
-                            }
-
-                            @Override
-                            public void onDiscard() {
-                            }
-                        });
-                    }
-                });
-            serviceSession.start();
         }
     }
 }
