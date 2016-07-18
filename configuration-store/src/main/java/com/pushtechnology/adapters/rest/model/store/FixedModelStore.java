@@ -44,5 +44,6 @@ public class FixedModelStore implements ModelStore {
 
     @Override
     public void onModelChange(Consumer<Model> newModel) {
+        newModel.accept(model);
     }
 }

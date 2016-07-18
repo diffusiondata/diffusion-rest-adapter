@@ -17,6 +17,7 @@ package com.pushtechnology.adapters.rest.model.store;
 
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.MockitoAnnotations.initMocks;
 
@@ -93,5 +94,7 @@ public final class FixedModelStoreTest {
     @Test
     public void onModelChange() {
         modelStore.onModelChange(consumer);
+
+        verify(consumer).accept(model);
     }
 }

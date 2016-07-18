@@ -33,6 +33,8 @@ public interface ModelStore {
 
     /**
      * Add a listener for changes to the model.
+     * <P>
+     * The listener is notified of the current state when added.
      */
     void onModelChange(Consumer<Model> newModel);
 }
