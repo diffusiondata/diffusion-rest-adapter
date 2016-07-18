@@ -24,6 +24,7 @@ import org.apache.http.concurrent.FutureCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.polling.PollClient;
@@ -109,22 +110,8 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
 
         final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
-        final PollHandlerFactory handlerFactory = (serviceConfig, endpointConfig) -> new FutureCallback<JSON>() {
-            @Override
-            public void completed(JSON result) {
-                publishingClient.publish(serviceConfig, endpointConfig, result);
-            }
-
-            @Override
-            public void failed(Exception ex) {
-                LOG.warn("Failed to poll endpoint {}", endpointConfig, ex);
-            }
-
-            @Override
-            public void cancelled() {
-                LOG.debug("Polling cancelled for endpoint {}", endpointConfig);
-            }
-        };
+        final PollHandlerFactory handlerFactory = (serviceConfig, endpointConfig) -> new PollPublishingHandler(
+            publishingClient, serviceConfig, endpointConfig);
 
         for (ServiceConfig service : model.getServices()) {
             final ServiceSession serviceSession = new ServiceSession(executor, pollClient, service, handlerFactory);
@@ -135,5 +122,39 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
         }
 
         return new RESTAdapterClientState(publishingClient, executor, session);
+    }
+
+    /**
+     * Handler for a poll request that publishes the response.
+     */
+    private static final class PollPublishingHandler implements FutureCallback<JSON> {
+        private final PublishingClient publishingClient;
+        private final ServiceConfig serviceConfig;
+        private final EndpointConfig endpointConfig;
+
+        /*package*/ PollPublishingHandler(
+                PublishingClient publishingClient,
+                ServiceConfig serviceConfig,
+                EndpointConfig endpointConfig) {
+
+            this.publishingClient = publishingClient;
+            this.serviceConfig = serviceConfig;
+            this.endpointConfig = endpointConfig;
+        }
+
+        @Override
+        public void completed(JSON result) {
+            publishingClient.publish(serviceConfig, endpointConfig, result);
+        }
+
+        @Override
+        public void failed(Exception ex) {
+            LOG.warn("Failed to poll endpoint {}", endpointConfig, ex);
+        }
+
+        @Override
+        public void cancelled() {
+            LOG.debug("Polling cancelled for endpoint {}", endpointConfig);
+        }
     }
 }
