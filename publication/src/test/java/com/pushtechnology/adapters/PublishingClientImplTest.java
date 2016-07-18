@@ -33,7 +33,7 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
 /**
  * Unit tests for {@link PublishingClientImpl}.
  *
- * @author Push Technology Limited
+ * @author Matt Champion on 13/07/2016
  */
 public final class PublishingClientImplTest {
     @Mock
@@ -85,24 +85,8 @@ public final class PublishingClientImplTest {
     }
 
     @Test
-    public void start() {
-        final PublishingClient client = new PublishingClientImpl(session);
-
-        client.start();
-    }
-
-    @Test(expected = IllegalStateException.class)
-    public void addServiceBeforeStart() {
-        final PublishingClient client = new PublishingClientImpl(session);
-
-        client.addService(serviceConfig);
-    }
-
-    @Test
     public void addService() {
         final PublishingClient client = new PublishingClientImpl(session);
-
-        client.start();
 
         client.addService(serviceConfig);
 
@@ -111,33 +95,8 @@ public final class PublishingClientImplTest {
     }
 
     @Test
-    public void stopBeforeStart() {
-        final PublishingClient client = new PublishingClientImpl(session);
-
-        client.stop();
-    }
-
-    @Test
-    public void stop() {
-        final PublishingClient client = new PublishingClientImpl(session);
-
-        client.start();
-
-        client.stop();
-    }
-
-    @Test(expected = IllegalStateException.class)
-    public void publishBeforeStart() {
-        final PublishingClient client = new PublishingClientImpl(session);
-
-        client.publish(serviceConfig, endpointConfig, json);
-    }
-
-    @Test
     public void publish() {
         final PublishingClient client = new PublishingClientImpl(session);
-
-        client.start();
 
         final CompletableFuture<ServiceConfig> promise = client.addService(serviceConfig);
 

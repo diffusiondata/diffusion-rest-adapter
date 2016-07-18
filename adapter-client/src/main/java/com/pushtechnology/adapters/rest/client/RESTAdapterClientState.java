@@ -37,23 +37,19 @@ import com.pushtechnology.diffusion.client.session.Session;
  * @author Push Technology Limited
  */
 /*package*/ final class RESTAdapterClientState implements AutoCloseable {
-    private final PublishingClient publishingClient;
     private final ScheduledExecutorService currentExecutor;
     private final Session session;
 
     /*package*/ RESTAdapterClientState(
-            PublishingClient publishingClient,
             ScheduledExecutorService currentExecutor,
             Session session) {
 
-        this.publishingClient = publishingClient;
         this.currentExecutor = currentExecutor;
         this.session = session;
     }
 
     @Override
     public void close() throws IOException {
-        publishingClient.stop();
         currentExecutor.shutdown();
         session.close();
     }
@@ -61,7 +57,6 @@ import com.pushtechnology.diffusion.client.session.Session;
     /*package*/ static RESTAdapterClientState create(Model model, PollClient pollClient, Session session) {
         final TopicManagementClient topicManagementClient = new TopicManagementClientImpl(session);
         final PublishingClient publishingClient = new PublishingClientImpl(session);
-        publishingClient.start();
 
         final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
@@ -76,6 +71,6 @@ import com.pushtechnology.diffusion.client.session.Session;
                 .thenAccept(new ServiceReadyForPublishing(topicManagementClient, serviceSession));
         }
 
-        return new RESTAdapterClientState(publishingClient, executor, session);
+        return new RESTAdapterClientState(executor, session);
     }
 }

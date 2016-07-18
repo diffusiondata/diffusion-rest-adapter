@@ -18,7 +18,6 @@ package com.pushtechnology.adapters.rest.publication;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +43,6 @@ import net.jcip.annotations.ThreadSafe;
 @ThreadSafe
 public final class PublishingClientImpl implements PublishingClient {
     private static final Logger LOG = LoggerFactory.getLogger(PublishingClientImpl.class);
-    private final AtomicBoolean isRunning = new AtomicBoolean(false);
     private final Session session;
     @GuardedBy("this")
     private Map<ServiceConfig, ValueUpdater<JSON>> updaters = new HashMap<>();
@@ -57,16 +55,7 @@ public final class PublishingClientImpl implements PublishingClient {
     }
 
     @Override
-    public synchronized void start() {
-        isRunning.set(true);
-    }
-
-    @Override
     public synchronized CompletableFuture<ServiceConfig> addService(ServiceConfig serviceConfig) {
-        if (!isRunning.get()) {
-            throw new IllegalStateException("Client has not started");
-        }
-
         final CompletableFuture<ServiceConfig> promise = new CompletableFuture<>();
 
         session
@@ -93,16 +82,7 @@ public final class PublishingClientImpl implements PublishingClient {
     }
 
     @Override
-    public synchronized void stop() {
-        isRunning.set(false);
-    }
-
-    @Override
     public synchronized void publish(ServiceConfig serviceConfig, EndpointConfig endpointConfig, JSON json) {
-        if (!isRunning.get()) {
-            throw new IllegalStateException("Publishing client not started");
-        }
-
         final Session.State state = session.getState();
         if (state.isClosed()) {
             throw new IllegalStateException("Session closed");

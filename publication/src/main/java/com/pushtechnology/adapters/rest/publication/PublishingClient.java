@@ -28,19 +28,9 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
  */
 public interface PublishingClient {
     /**
-     * Start the client running. Connects the client to Diffusion.
-     */
-    void start();
-
-    /**
      * Add a service to publish to.
      */
     CompletableFuture<ServiceConfig> addService(ServiceConfig serviceConfig);
-
-    /**
-     * Stop the client running.
-     */
-    void stop();
 
     /**
      * Update the topic associated with an endpoint.
