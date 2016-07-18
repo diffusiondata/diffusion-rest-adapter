@@ -103,7 +103,6 @@ public final class PollingPersistedModelStoreTest {
 
         modelStore = new PollingPersistedModelStore(persistence, executor, 5000L);
         modelStore.onModelChange(listener);
-        verify(listener).accept(null);
     }
 
     @After

@@ -1,6 +1,7 @@
 package com.pushtechnology.adapters.rest.model.store;
 
 import static java.util.Collections.singletonList;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -72,24 +73,22 @@ public final class AbstractModelStoreTest {
     public void testListenerAdded() {
         modelStore.onModelChange(listener);
 
-        verify(listener).accept(null);
+        verify(listener).accept(model);
     }
 
     @Test
     public void testNotifyListeners() {
         modelStore.onModelChange(listener);
 
-        verify(listener).accept(null);
-
         modelStore.notifyListeners(model);
 
-        verify(listener).accept(model);
+        verify(listener, times(2)).accept(model);
     }
 
-    private static final class TestStore extends AbstractModelStore {
+    private final class TestStore extends AbstractModelStore {
         @Override
         public Model get() {
-            return null;
+            return model;
         }
     }
 }

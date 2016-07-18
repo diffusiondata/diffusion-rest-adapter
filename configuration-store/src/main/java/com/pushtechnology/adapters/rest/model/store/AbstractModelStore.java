@@ -39,7 +39,10 @@ import net.jcip.annotations.ThreadSafe;
     @Override
     public final synchronized void onModelChange(Consumer<Model> listener) {
         listeners.add(listener);
-        listener.accept(get());
+        final Model model = get();
+        if (model != null) {
+            listener.accept(model);
+        }
     }
 
     /**
