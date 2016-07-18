@@ -29,7 +29,7 @@ import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
 /**
- * Unit tests for {@link ServiceSession}.
+ * Unit tests for {@link ServiceSessionImpl}.
  *
  * @author Push Technology Limited
  */
@@ -74,7 +74,7 @@ public final class ServiceSessionTest {
     public void setUp() {
         initMocks(this);
 
-        serviceSession = new ServiceSession(executor, pollClient, serviceConfig, handlerFactory);
+        serviceSession = new ServiceSessionImpl(executor, pollClient, serviceConfig, handlerFactory);
         when(executor
             .scheduleWithFixedDelay(isA(Runnable.class), isA(Long.class), isA(Long.class), isA(TimeUnit.class)))
             .thenReturn(taskFuture);

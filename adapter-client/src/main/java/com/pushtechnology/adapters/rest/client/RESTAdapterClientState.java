@@ -24,6 +24,7 @@ import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.polling.PollClient;
 import com.pushtechnology.adapters.rest.polling.PollHandlerFactory;
 import com.pushtechnology.adapters.rest.polling.ServiceSession;
+import com.pushtechnology.adapters.rest.polling.ServiceSessionImpl;
 import com.pushtechnology.adapters.rest.publication.PublishingClient;
 import com.pushtechnology.adapters.rest.publication.PublishingClientImpl;
 import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
@@ -68,7 +69,7 @@ import com.pushtechnology.diffusion.client.session.Session;
             publishingClient, serviceConfig, endpointConfig);
 
         for (ServiceConfig service : model.getServices()) {
-            final ServiceSession serviceSession = new ServiceSession(executor, pollClient, service, handlerFactory);
+            final ServiceSession serviceSession = new ServiceSessionImpl(executor, pollClient, service, handlerFactory);
             topicManagementClient.addService(service);
             publishingClient
                 .addService(service)
