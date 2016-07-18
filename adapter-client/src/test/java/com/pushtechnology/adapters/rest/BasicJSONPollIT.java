@@ -28,6 +28,7 @@ import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
+import com.pushtechnology.adapters.rest.model.store.FixedModelStore;
 import com.pushtechnology.adapters.rest.resources.IncrementingResource;
 import com.pushtechnology.adapters.rest.resources.TimestampResource;
 import com.pushtechnology.diffusion.client.Diffusion;
@@ -130,7 +131,7 @@ public final class BasicJSONPollIT {
     }
 
     private static RESTAdapterClient startClient() {
-        final RESTAdapterClient client = RESTAdapterClient.create(MODEL);
+        final RESTAdapterClient client = RESTAdapterClient.create(new FixedModelStore(MODEL));
         client.start();
         return client;
     }

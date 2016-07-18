@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
+import com.pushtechnology.adapters.rest.model.store.ModelStore;
 import com.pushtechnology.adapters.rest.polling.HttpClientFactoryImpl;
 import com.pushtechnology.adapters.rest.polling.PollClient;
 import com.pushtechnology.adapters.rest.polling.PollClientImpl;
@@ -46,11 +47,11 @@ public final class RESTAdapterClient {
 
     private final AtomicReference<RESTAdapterClientState> state = new AtomicReference<>(null);
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
-    private final Model model;
+    private final ModelStore modelStore;
     private final PollClient pollClient;
 
-    private RESTAdapterClient(Model model, PollClient pollClient) {
-        this.model = model;
+    private RESTAdapterClient(ModelStore modelStore, PollClient pollClient) {
+        this.modelStore = modelStore;
         this.pollClient = pollClient;
     }
 
@@ -63,6 +64,7 @@ public final class RESTAdapterClient {
             throw new IllegalStateException("The client is already running");
         }
 
+        final Model model = modelStore.get();
         final Session session = getSession(model.getDiffusion());
         pollClient.start();
         state.set(RESTAdapterClientState.create(model, pollClient, session));
@@ -83,14 +85,14 @@ public final class RESTAdapterClient {
 
     /**
      * Factory method for {@link RESTAdapterClient}.
-     * @param model the configuration to use
+     * @param modelStore the configuration store to use
      * @return a new {@link RESTAdapterClient}
      */
-    public static RESTAdapterClient create(Model model) {
-        LOG.debug("Creating REST adapter client with configuration: {}", model);
+    public static RESTAdapterClient create(ModelStore modelStore) {
+        LOG.debug("Creating REST adapter client with configuration: {}", modelStore);
         final PollClient pollClient = new PollClientImpl(new HttpClientFactoryImpl());
 
-        return new RESTAdapterClient(model, pollClient);
+        return new RESTAdapterClient(modelStore, pollClient);
     }
 
     private Session getSession(DiffusionConfig diffusionConfig) {

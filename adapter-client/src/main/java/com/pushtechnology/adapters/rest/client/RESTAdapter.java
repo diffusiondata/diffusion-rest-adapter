@@ -27,6 +27,8 @@ import com.pushtechnology.adapters.rest.model.conversion.V2Converter;
 import com.pushtechnology.adapters.rest.model.conversion.V3Converter;
 import com.pushtechnology.adapters.rest.model.conversion.V4Converter;
 import com.pushtechnology.adapters.rest.model.latest.Model;
+import com.pushtechnology.adapters.rest.model.store.FixedModelStore;
+import com.pushtechnology.adapters.rest.model.store.ModelStore;
 import com.pushtechnology.adapters.rest.persistence.FileSystemPersistence;
 import com.pushtechnology.adapters.rest.persistence.Persistence;
 
@@ -84,8 +86,9 @@ public final class RESTAdapter {
         final Optional<Model> config = fileSystemPersistence.loadModel();
 
         final Model model = config.orElseThrow(() -> new IllegalStateException("No model found to use"));
+        final ModelStore modelStore = new FixedModelStore(model);
 
-        final RESTAdapterClient adapterClient = RESTAdapterClient.create(model);
+        final RESTAdapterClient adapterClient = RESTAdapterClient.create(modelStore);
 
         adapterClient.start();
     }

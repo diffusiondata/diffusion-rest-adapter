@@ -33,6 +33,11 @@
         </dependency>
 
         <dependency>
+            <groupId>com.pushtechnology.adapters.rest</groupId>
+            <artifactId>configuration-store</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
         </dependency>
