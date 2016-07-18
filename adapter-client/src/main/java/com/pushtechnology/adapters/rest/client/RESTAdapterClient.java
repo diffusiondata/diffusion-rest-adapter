@@ -39,7 +39,7 @@ import net.jcip.annotations.ThreadSafe;
 public final class RESTAdapterClient {
     private static final Logger LOG = LoggerFactory.getLogger(RESTAdapterClient.class);
 
-    private final AtomicReference<RESTAdapterClientState> state = new AtomicReference<>(null);
+    private final AtomicReference<RESTAdapterClientSnapshot> state = new AtomicReference<>(null);
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
     private final ModelStore modelStore;
     private final PollClient pollClient;
@@ -66,8 +66,8 @@ public final class RESTAdapterClient {
         LOG.debug("Running REST adapter client with model : {}", newModel);
 
         // Modified services will be in standby until the old model is closed
-        final RESTAdapterClientState oldState = state.getAndSet(
-            RESTAdapterClientState.create(newModel, pollClient, this));
+        final RESTAdapterClientSnapshot oldState = state.getAndSet(
+            RESTAdapterClientSnapshot.create(newModel, pollClient, this));
 
         if (oldState != null) {
             try {

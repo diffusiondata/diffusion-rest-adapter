@@ -40,21 +40,25 @@ import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.session.SessionFactory;
 
+import net.jcip.annotations.ThreadSafe;
+
 /**
- * The current state of the {@link RESTAdapterClient}.
+ * The snapshot of the {@link RESTAdapterClient} for a configuration model.
  *
  * @author Push Technology Limited
  */
-/*package*/ final class RESTAdapterClientState implements AutoCloseable {
-    private static final Logger LOG = LoggerFactory.getLogger(RESTAdapterClientState.class);
+@ThreadSafe
+/*package*/ final class RESTAdapterClientSnapshot implements AutoCloseable {
+    private static final Logger LOG = LoggerFactory.getLogger(RESTAdapterClientSnapshot.class);
 
     private final ScheduledExecutorService currentExecutor;
     private final Session session;
     private final AtomicBoolean isActive;
 
-    /*package*/ RESTAdapterClientState(
-        ScheduledExecutorService currentExecutor,
-        Session session, AtomicBoolean isActive) {
+    /*package*/ RESTAdapterClientSnapshot(
+            ScheduledExecutorService currentExecutor,
+            Session session,
+            AtomicBoolean isActive) {
 
         this.currentExecutor = currentExecutor;
         this.session = session;
@@ -68,7 +72,7 @@ import com.pushtechnology.diffusion.client.session.SessionFactory;
         session.close();
     }
 
-    /*package*/ static RESTAdapterClientState create(
+    /*package*/ static RESTAdapterClientSnapshot create(
             Model model,
             PollClient pollClient,
             RESTAdapterClient client) {
@@ -91,7 +95,7 @@ import com.pushtechnology.diffusion.client.session.SessionFactory;
                 .thenAccept(new ServiceReadyForPublishing(topicManagementClient, serviceSession));
         }
 
-        return new RESTAdapterClientState(executor, session, isActive);
+        return new RESTAdapterClientSnapshot(executor, session, isActive);
     }
 
     private static Session getSession(
