@@ -18,7 +18,7 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
 /**
  * Unit tests for {@link PollPublishingHandler}.
  *
- * @author Matt Champion on 18/07/2016
+ * @author Push Technology Limited
  */
 public final class PollPublishingHandlerTest {
     @Mock

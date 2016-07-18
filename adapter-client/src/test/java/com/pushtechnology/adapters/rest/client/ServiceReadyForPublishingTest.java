@@ -24,7 +24,7 @@ import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 /**
  * Unit tests for {@link ServiceReadyForPublishing}.
  *
- * @author Matt Champion on 18/07/2016
+ * @author Push Technology Limited
  */
 public final class ServiceReadyForPublishingTest {
     @Mock
