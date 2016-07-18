@@ -15,8 +15,6 @@
 
 package com.pushtechnology.adapters.rest.client;
 
-import static java.util.Collections.singletonList;
-
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Optional;
@@ -28,9 +26,7 @@ import com.pushtechnology.adapters.rest.model.conversion.V1Converter;
 import com.pushtechnology.adapters.rest.model.conversion.V2Converter;
 import com.pushtechnology.adapters.rest.model.conversion.V3Converter;
 import com.pushtechnology.adapters.rest.model.conversion.V4Converter;
-import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
-import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.persistence.FileSystemPersistence;
 import com.pushtechnology.adapters.rest.persistence.Persistence;
 
@@ -87,27 +83,7 @@ public final class RESTAdapter {
 
         final Optional<Model> config = fileSystemPersistence.loadModel();
 
-        final Model model = config.orElse(
-            Model
-                .builder()
-                .services(
-                    singletonList(
-                        ServiceConfig
-                            .builder()
-                            .host("petition.parliament.uk")
-                            .port(80)
-                            .endpoints(
-                                singletonList(
-                                    EndpointConfig
-                                        .builder()
-                                        .name("endpoint-0")
-                                        .url("/petitions/131215.json")
-                                        .topic("petitions/131215")
-                                        .build()))
-                            .build()))
-                .build());
-
-        fileSystemPersistence.storeModel(model);
+        final Model model = config.orElseThrow(() -> new IllegalStateException("No model found to use"));
 
         final RESTAdapterClient adapterClient = RESTAdapterClient.create(model);
 
