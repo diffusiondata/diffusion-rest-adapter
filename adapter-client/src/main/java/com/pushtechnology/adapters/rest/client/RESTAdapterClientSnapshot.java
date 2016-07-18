@@ -16,38 +16,13 @@
 package com.pushtechnology.adapters.rest.client;
 
 import java.io.IOException;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import com.pushtechnology.diffusion.client.session.Session;
-
-import net.jcip.annotations.ThreadSafe;
 
 /**
  * The snapshot of the {@link RESTAdapterClient} for a configuration model.
  *
  * @author Push Technology Limited
  */
-@ThreadSafe
-/*package*/ final class RESTAdapterClientSnapshot implements AutoCloseable {
-    private final ScheduledExecutorService currentExecutor;
-    private final Session session;
-    private final AtomicBoolean isActive;
-
-    /*package*/ RESTAdapterClientSnapshot(
-        ScheduledExecutorService currentExecutor,
-        Session session,
-        AtomicBoolean isActive) {
-
-        this.currentExecutor = currentExecutor;
-        this.session = session;
-        this.isActive = isActive;
-    }
-
+public interface RESTAdapterClientSnapshot extends AutoCloseable {
     @Override
-    public void close() throws IOException {
-        isActive.set(false);
-        currentExecutor.shutdown();
-        session.close();
-    }
+    void close() throws IOException;
 }

@@ -74,7 +74,7 @@ public final class RESTAdapterClientSnapshotFactory {
                 .thenAccept(new ServiceReadyForPublishing(topicManagementClient, serviceSession));
         }
 
-        return new RESTAdapterClientSnapshot(executor, session, isActive);
+        return new ActiveRESTAdapterClientSnapshot(executor, session, isActive);
     }
 
     private static Session getSession(
