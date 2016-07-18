@@ -18,13 +18,7 @@ package com.pushtechnology.adapters.rest.client;
 import java.io.IOException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.function.Consumer;
 
-import org.apache.http.concurrent.FutureCallback;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.polling.PollClient;
@@ -34,10 +28,7 @@ import com.pushtechnology.adapters.rest.publication.PublishingClient;
 import com.pushtechnology.adapters.rest.publication.PublishingClientImpl;
 import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
 import com.pushtechnology.adapters.rest.topic.management.TopicManagementClientImpl;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicAddFailReason;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 import com.pushtechnology.diffusion.client.session.Session;
-import com.pushtechnology.diffusion.datatype.json.JSON;
 
 /**
  * The current state of the {@link RESTAdapterClient}.
@@ -45,7 +36,6 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
  * @author Push Technology Limited
  */
 /*package*/ final class RESTAdapterClientState implements AutoCloseable {
-    private static final Logger LOG = LoggerFactory.getLogger(RESTAdapterClient.class);
     private final PublishingClient publishingClient;
     private final ScheduledExecutorService currentExecutor;
     private final Session session;
@@ -67,45 +57,6 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
         session.close();
     }
 
-    /**
-     * Handler for a service that is now ready for publishing to.
-     */
-    private static final class ServiceReadyPublishing implements Consumer<ServiceConfig> {
-        private final TopicManagementClient topicManagementClient;
-        private final ServiceSession serviceSession;
-
-        private ServiceReadyPublishing(TopicManagementClient topicManagementClient, ServiceSession serviceSession) {
-            this.topicManagementClient = topicManagementClient;
-            this.serviceSession = serviceSession;
-        }
-
-        @Override
-        public void accept(ServiceConfig serviceConfig) {
-            serviceConfig
-                .getEndpoints()
-                .forEach(endpoint -> {
-                    topicManagementClient.addEndpoint(serviceConfig, endpoint, new TopicControl.AddCallback() {
-                        @Override
-                        public void onTopicAdded(String topicPath) {
-                            serviceSession.addEndpoint(endpoint);
-                        }
-
-                        @Override
-                        public void onTopicAddFailed(String topicPath, TopicAddFailReason reason) {
-                            if (reason == TopicAddFailReason.EXISTS) {
-                                onTopicAdded(topicPath);
-                            }
-                        }
-
-                        @Override
-                        public void onDiscard() {
-                        }
-                    });
-                });
-            serviceSession.start();
-        }
-    }
-
     /*package*/ static RESTAdapterClientState create(Model model, PollClient pollClient, Session session) {
         final TopicManagementClient topicManagementClient = new TopicManagementClientImpl(session);
         final PublishingClient publishingClient = new PublishingClientImpl(session);
@@ -125,39 +76,5 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
         }
 
         return new RESTAdapterClientState(publishingClient, executor, session);
-    }
-
-    /**
-     * Handler for a poll request that publishes the response.
-     */
-    private static final class PollPublishingHandler implements FutureCallback<JSON> {
-        private final PublishingClient publishingClient;
-        private final ServiceConfig serviceConfig;
-        private final EndpointConfig endpointConfig;
-
-        /*package*/ PollPublishingHandler(
-                PublishingClient publishingClient,
-                ServiceConfig serviceConfig,
-                EndpointConfig endpointConfig) {
-
-            this.publishingClient = publishingClient;
-            this.serviceConfig = serviceConfig;
-            this.endpointConfig = endpointConfig;
-        }
-
-        @Override
-        public void completed(JSON result) {
-            publishingClient.publish(serviceConfig, endpointConfig, result);
-        }
-
-        @Override
-        public void failed(Exception ex) {
-            LOG.warn("Failed to poll endpoint {}", endpointConfig, ex);
-        }
-
-        @Override
-        public void cancelled() {
-            LOG.debug("Polling cancelled for endpoint {}", endpointConfig);
-        }
     }
 }
