@@ -15,9 +15,10 @@
 
 package com.pushtechnology.adapters.rest.client;
 
+import static java.util.concurrent.Executors.newSingleThreadScheduledExecutor;
+
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.Optional;
 
 import com.pushtechnology.adapters.rest.model.conversion.ConversionContext;
 import com.pushtechnology.adapters.rest.model.conversion.LatestConverter;
@@ -27,8 +28,7 @@ import com.pushtechnology.adapters.rest.model.conversion.V2Converter;
 import com.pushtechnology.adapters.rest.model.conversion.V3Converter;
 import com.pushtechnology.adapters.rest.model.conversion.V4Converter;
 import com.pushtechnology.adapters.rest.model.latest.Model;
-import com.pushtechnology.adapters.rest.model.store.FixedModelStore;
-import com.pushtechnology.adapters.rest.model.store.ModelStore;
+import com.pushtechnology.adapters.rest.model.store.PollingPersistedModelStore;
 import com.pushtechnology.adapters.rest.persistence.FileSystemPersistence;
 import com.pushtechnology.adapters.rest.persistence.Persistence;
 
@@ -82,11 +82,12 @@ public final class RESTAdapter {
             .build();
 
         final Persistence fileSystemPersistence = new FileSystemPersistence(Paths.get("."), conversionContext);
+        final PollingPersistedModelStore modelStore = new PollingPersistedModelStore(
+            fileSystemPersistence,
+            newSingleThreadScheduledExecutor(),
+            1000L);
 
-        final Optional<Model> config = fileSystemPersistence.loadModel();
-
-        final Model model = config.orElseThrow(() -> new IllegalStateException("No model found to use"));
-        final ModelStore modelStore = new FixedModelStore(model);
+        modelStore.start();
 
         final RESTAdapterClient adapterClient = RESTAdapterClient.create(modelStore);
 
