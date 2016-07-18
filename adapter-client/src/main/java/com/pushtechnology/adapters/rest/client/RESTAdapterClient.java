@@ -40,7 +40,8 @@ public final class RESTAdapterClient {
     private static final Logger LOG = LoggerFactory.getLogger(RESTAdapterClient.class);
 
     private final RESTAdapterClientSnapshotFactory snapshotFactory = new RESTAdapterClientSnapshotFactory();
-    private final AtomicReference<RESTAdapterClientSnapshot> state = new AtomicReference<>(null);
+    private final AtomicReference<RESTAdapterClientSnapshot> state =
+        new AtomicReference<>(InactiveRESTAdapterClientSnapshot.INSTANCE);
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
     private final ModelStore modelStore;
     private final PollClient pollClient;

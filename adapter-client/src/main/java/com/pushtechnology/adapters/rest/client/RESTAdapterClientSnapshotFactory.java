@@ -56,8 +56,13 @@ public final class RESTAdapterClientSnapshotFactory {
             PollClient pollClient,
             RESTAdapterClient client) {
 
+        final DiffusionConfig diffusionConfig = model.getDiffusion();
+        if (diffusionConfig == null) {
+            return InactiveRESTAdapterClientSnapshot.INSTANCE;
+        }
+
         final AtomicBoolean isActive = new AtomicBoolean(true);
-        final Session session = getSession(model.getDiffusion(), isActive, client);
+        final Session session = getSession(diffusionConfig, isActive, client);
         final TopicManagementClient topicManagementClient = new TopicManagementClientImpl(session);
         final PublishingClient publishingClient = new PublishingClientImpl(session);
 
@@ -128,4 +133,5 @@ public final class RESTAdapterClientSnapshotFactory {
             }
         }
     }
+
 }
