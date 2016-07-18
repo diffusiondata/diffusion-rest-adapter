@@ -15,13 +15,15 @@
 
 package com.pushtechnology.adapters.rest.client;
 
+import static com.pushtechnology.diffusion.client.features.control.topics.TopicAddFailReason.EXISTS;
+
 import java.util.function.Consumer;
 
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.polling.ServiceSession;
 import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicAddFailReason;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
+import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.AddCallback;
 
 /**
  * Handler for a service that is now ready for publishing to.
@@ -41,25 +43,23 @@ import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
     public void accept(ServiceConfig serviceConfig) {
         serviceConfig
             .getEndpoints()
-            .forEach(endpoint -> {
-                topicManagementClient.addEndpoint(serviceConfig, endpoint, new TopicControl.AddCallback() {
-                    @Override
-                    public void onTopicAdded(String topicPath) {
-                        serviceSession.addEndpoint(endpoint);
-                    }
+            .forEach(endpoint -> topicManagementClient.addEndpoint(serviceConfig, endpoint, new AddCallback() {
+                @Override
+                public void onTopicAdded(String topicPath) {
+                    serviceSession.addEndpoint(endpoint);
+                }
 
-                    @Override
-                    public void onTopicAddFailed(String topicPath, TopicAddFailReason reason) {
-                        if (reason == TopicAddFailReason.EXISTS) {
-                            onTopicAdded(topicPath);
-                        }
+                @Override
+                public void onTopicAddFailed(String topicPath, TopicAddFailReason reason) {
+                    if (reason == EXISTS) {
+                        onTopicAdded(topicPath);
                     }
+                }
 
-                    @Override
-                    public void onDiscard() {
-                    }
-                });
-            });
+                @Override
+                public void onDiscard() {
+                }
+            }));
         serviceSession.start();
     }
 }
