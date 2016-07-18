@@ -20,6 +20,7 @@ import static com.pushtechnology.diffusion.client.session.SessionAttributes.Tran
 import java.io.IOException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 import org.apache.http.concurrent.FutureCallback;
@@ -57,6 +58,7 @@ import net.jcip.annotations.ThreadSafe;
 public final class RESTAdapterClient {
     private static final Logger LOG = LoggerFactory.getLogger(RESTAdapterClient.class);
 
+    private final AtomicBoolean isRunning = new AtomicBoolean(false);
     private final Model model;
     private final PollClient pollClient;
     @GuardedBy("this")
@@ -81,7 +83,7 @@ public final class RESTAdapterClient {
      * @throws IllegalStateException if the client is running
      */
     public synchronized void start() {
-        if (currentExecutor != null) {
+        if (!isRunning.compareAndSet(false, true)) {
             throw new IllegalStateException("The client is already running");
         }
 
@@ -127,16 +129,14 @@ public final class RESTAdapterClient {
      * @throws IllegalStateException if the client is not running
      */
     public synchronized void stop() throws IOException {
-        final ScheduledExecutorService executor = this.currentExecutor;
-        if (executor == null) {
+        if (!isRunning.compareAndSet(true, false)) {
             throw new IllegalStateException("The client is not running");
         }
 
         publishingClient.stop();
         pollClient.stop();
         session.close();
-        executor.shutdown();
-        this.currentExecutor = null;
+        currentExecutor.shutdown();
     }
 
     /**
@@ -173,17 +173,21 @@ public final class RESTAdapterClient {
     }
 
     /**
-     * A simple session state listener that logs out state changes.
+     * A {@link Session.Listener} to handle session closes.
+     * <p>
+     * Ignores state transitions while the client is running. If the session closes when the client is running the
+     * connection and recovery must have failed, stop the client.
      */
     private final class Listener implements Session.Listener {
         @Override
         public void onSessionStateChanged(Session forSession, Session.State oldState, Session.State newState) {
             synchronized (RESTAdapterClient.this) {
-                if (currentExecutor == null) {
+                if (!isRunning.get()) {
                     return;
                 }
 
                 LOG.warn("{} {} -> {}", forSession, oldState, newState);
+
                 if (newState.isClosed()) {
                     try {
                         stop();
