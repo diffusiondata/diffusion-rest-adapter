@@ -73,7 +73,7 @@ import com.pushtechnology.diffusion.client.session.Session;
             topicManagementClient.addService(service);
             publishingClient
                 .addService(service)
-                .thenAccept(new ServiceReadyPublishing(topicManagementClient, serviceSession));
+                .thenAccept(new ServiceReadyForPublishing(topicManagementClient, serviceSession));
         }
 
         return new RESTAdapterClientState(publishingClient, executor, session);

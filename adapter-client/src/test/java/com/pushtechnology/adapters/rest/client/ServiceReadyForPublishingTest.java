@@ -22,11 +22,11 @@ import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 
 /**
- * Unit tests for {@link ServiceReadyPublishing}.
+ * Unit tests for {@link ServiceReadyForPublishing}.
  *
  * @author Matt Champion on 18/07/2016
  */
-public final class ServiceReadyPublishingTest {
+public final class ServiceReadyForPublishingTest {
     @Mock
     private TopicManagementClient managementClient;
     @Mock
@@ -50,13 +50,13 @@ public final class ServiceReadyPublishingTest {
         .topicRoot("a")
         .build();
 
-    private ServiceReadyPublishing serviceReadyHandler;
+    private ServiceReadyForPublishing serviceReadyHandler;
 
     @Before
     public void setUp() {
         initMocks(this);
 
-        serviceReadyHandler = new ServiceReadyPublishing(managementClient, serviceSession);
+        serviceReadyHandler = new ServiceReadyForPublishing(managementClient, serviceSession);
     }
 
     @After

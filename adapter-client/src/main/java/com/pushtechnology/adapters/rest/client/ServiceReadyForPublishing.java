@@ -28,11 +28,11 @@ import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
  *
  * @author Push Technology Limited
  */
-/*package*/ final class ServiceReadyPublishing implements Consumer<ServiceConfig> {
+/*package*/ final class ServiceReadyForPublishing implements Consumer<ServiceConfig> {
     private final TopicManagementClient topicManagementClient;
     private final ServiceSession serviceSession;
 
-    /*package*/ ServiceReadyPublishing(TopicManagementClient topicManagementClient, ServiceSession serviceSession) {
+    /*package*/ ServiceReadyForPublishing(TopicManagementClient topicManagementClient, ServiceSession serviceSession) {
         this.topicManagementClient = topicManagementClient;
         this.serviceSession = serviceSession;
     }
