@@ -15,8 +15,6 @@
 
 package com.pushtechnology.adapters.rest.client;
 
-import static com.pushtechnology.diffusion.client.session.SessionAttributes.Transport.WEBSOCKET;
-
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -24,15 +22,11 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.store.ModelStore;
 import com.pushtechnology.adapters.rest.polling.HttpClientFactoryImpl;
 import com.pushtechnology.adapters.rest.polling.PollClient;
 import com.pushtechnology.adapters.rest.polling.PollClientImpl;
-import com.pushtechnology.diffusion.client.Diffusion;
-import com.pushtechnology.diffusion.client.session.Session;
-import com.pushtechnology.diffusion.client.session.SessionFactory;
 
 import net.jcip.annotations.ThreadSafe;
 
@@ -69,10 +63,11 @@ public final class RESTAdapterClient {
     }
 
     private void onModelChange(Model newModel) {
+        LOG.debug("Running REST adapter client with model : {}", newModel);
+
         // Modified services will be in standby until the old model is closed
-        final Session session = getSession(newModel.getDiffusion());
         final RESTAdapterClientState oldState = state.getAndSet(
-            RESTAdapterClientState.create(newModel, pollClient, session));
+            RESTAdapterClientState.create(newModel, pollClient, this));
 
         if (oldState != null) {
             try {
@@ -103,58 +98,9 @@ public final class RESTAdapterClient {
      * @return a new {@link RESTAdapterClient}
      */
     public static RESTAdapterClient create(ModelStore modelStore) {
-        LOG.debug("Creating REST adapter client with configuration: {}", modelStore);
+        LOG.debug("Creating REST adapter client with model store: {}", modelStore);
         final PollClient pollClient = new PollClientImpl(new HttpClientFactoryImpl());
 
         return new RESTAdapterClient(modelStore, pollClient);
-    }
-
-    private Session getSession(DiffusionConfig diffusionConfig) {
-        final SessionFactory sessionFactory = Diffusion
-            .sessions()
-            .serverHost(diffusionConfig.getHost())
-            .serverPort(diffusionConfig.getPort())
-            .secureTransport(false)
-            .transports(WEBSOCKET)
-            .reconnectionTimeout(5000)
-            .listener(new Listener());
-
-        if (diffusionConfig.getPrincipal() != null && diffusionConfig.getPassword() != null) {
-            return sessionFactory
-                .principal(diffusionConfig.getPrincipal())
-                .password(diffusionConfig.getPassword())
-                .open();
-        }
-        else  {
-            return sessionFactory.open();
-        }
-    }
-
-    /**
-     * A {@link Session.Listener} to handle session closes.
-     * <p>
-     * Ignores state transitions while the client is running. If the session closes when the client is running the
-     * connection and recovery must have failed, stop the client.
-     */
-    private final class Listener implements Session.Listener {
-        @Override
-        public void onSessionStateChanged(Session forSession, Session.State oldState, Session.State newState) {
-            synchronized (RESTAdapterClient.this) {
-                if (!isRunning.get()) {
-                    return;
-                }
-
-                LOG.warn("{} {} -> {}", forSession, oldState, newState);
-
-                if (newState.isClosed()) {
-                    try {
-                        stop();
-                    }
-                    catch (IOException e) {
-                        LOG.warn("Exception stopping client", e);
-                    }
-                }
-            }
-        }
     }
 }
