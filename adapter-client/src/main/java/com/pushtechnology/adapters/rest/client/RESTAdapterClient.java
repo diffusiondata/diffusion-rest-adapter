@@ -39,6 +39,7 @@ import net.jcip.annotations.ThreadSafe;
 public final class RESTAdapterClient {
     private static final Logger LOG = LoggerFactory.getLogger(RESTAdapterClient.class);
 
+    private final RESTAdapterClientSnapshotFactory snapshotFactory = new RESTAdapterClientSnapshotFactory();
     private final AtomicReference<RESTAdapterClientSnapshot> state = new AtomicReference<>(null);
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
     private final ModelStore modelStore;
@@ -67,7 +68,7 @@ public final class RESTAdapterClient {
 
         // Modified services will be in standby until the old model is closed
         final RESTAdapterClientSnapshot oldState = state.getAndSet(
-            RESTAdapterClientSnapshot.create(newModel, pollClient, this));
+            snapshotFactory.create(newModel, pollClient, this));
 
         if (oldState != null) {
             try {
