@@ -13,22 +13,21 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.client;
+package com.pushtechnology.adapters.rest.component;
 
-import com.pushtechnology.adapters.rest.model.latest.Model;
-import com.pushtechnology.adapters.rest.polling.PollClient;
+import java.io.IOException;
 
 /**
- * Factory for snapshots of the {@link RESTAdapterClient} for a configuration model.
+ * Component of the client.
  *
  * @author Push Technology Limited
  */
-public interface RESTAdapterClientSnapshotFactory {
+public interface Component extends AutoCloseable {
     /**
-     * @return a new snapshot
+     * The inactive component.
      */
-    RESTAdapterClientSnapshot create(
-        Model model,
-        PollClient pollClient,
-        RESTAdapterClientCloseHandle client);
+    Component INACTIVE = () -> { };
+
+    @Override
+    void close() throws IOException;
 }

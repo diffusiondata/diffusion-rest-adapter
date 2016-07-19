@@ -15,12 +15,13 @@
 
 package com.pushtechnology.adapters.rest.client;
 
-import static com.pushtechnology.adapters.rest.client.RESTAdapterClientSnapshot.INACTIVE;
+import static com.pushtechnology.adapters.rest.component.Component.INACTIVE;
 import static java.util.stream.Collectors.counting;
 
 import java.util.Collection;
 import java.util.List;
 
+import com.pushtechnology.adapters.rest.component.Component;
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
@@ -34,18 +35,18 @@ import com.pushtechnology.adapters.rest.polling.PollClient;
  *
  * @author Push Technology Limited
  */
-public final class RESTAdapterClientSnapshotFactoryImpl implements RESTAdapterClientSnapshotFactory {
-    private final RESTAdapterClientSnapshotFactory activeSnapshotFactory;
+public final class RESTAdapterComponentFactoryImpl implements RESTAdapterComponentFactory {
+    private final RESTAdapterComponentFactory activeSnapshotFactory;
 
     /**
      * Constructor.
      */
-    /*package*/ RESTAdapterClientSnapshotFactoryImpl(RESTAdapterClientSnapshotFactory activeSnapshotFactory) {
+    /*package*/ RESTAdapterComponentFactoryImpl(RESTAdapterComponentFactory activeSnapshotFactory) {
         this.activeSnapshotFactory = activeSnapshotFactory;
     }
 
     @Override
-    public RESTAdapterClientSnapshot create(
+    public Component create(
         Model model,
         PollClient pollClient,
         RESTAdapterClientCloseHandle client) {

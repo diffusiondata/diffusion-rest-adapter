@@ -15,7 +15,7 @@
 
 package com.pushtechnology.adapters.rest.client;
 
-import static com.pushtechnology.adapters.rest.client.RESTAdapterClientSnapshot.INACTIVE;
+import static com.pushtechnology.adapters.rest.component.Component.INACTIVE;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -24,6 +24,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.pushtechnology.adapters.rest.component.Component;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.store.ModelStore;
 import com.pushtechnology.adapters.rest.polling.HttpClientFactoryImpl;
@@ -41,9 +42,9 @@ import net.jcip.annotations.ThreadSafe;
 public final class RESTAdapterClient implements RESTAdapterClientCloseHandle {
     private static final Logger LOG = LoggerFactory.getLogger(RESTAdapterClient.class);
 
-    private final RESTAdapterClientSnapshotFactory snapshotFactory =
-        new RESTAdapterClientSnapshotFactoryImpl(new ActiveRESTAdapterClientSnapshotFactory());
-    private final AtomicReference<RESTAdapterClientSnapshot> state = new AtomicReference<>(INACTIVE);
+    private final RESTAdapterComponentFactory snapshotFactory =
+        new RESTAdapterComponentFactoryImpl(new ActiveClientComponentFactory());
+    private final AtomicReference<Component> state = new AtomicReference<>(INACTIVE);
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
     private final ModelStore modelStore;
     private final PollClient pollClient;
@@ -70,7 +71,7 @@ public final class RESTAdapterClient implements RESTAdapterClientCloseHandle {
         LOG.debug("Running REST adapter client with model : {}", newModel);
 
         // Modified services will be in standby until the old model is closed
-        final RESTAdapterClientSnapshot oldState = state.getAndSet(
+        final Component oldState = state.getAndSet(
             snapshotFactory.create(newModel, pollClient, this));
 
         if (oldState != null) {

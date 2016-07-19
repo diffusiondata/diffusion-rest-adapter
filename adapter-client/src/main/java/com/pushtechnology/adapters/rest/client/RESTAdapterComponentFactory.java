@@ -15,19 +15,21 @@
 
 package com.pushtechnology.adapters.rest.client;
 
-import java.io.IOException;
+import com.pushtechnology.adapters.rest.component.Component;
+import com.pushtechnology.adapters.rest.model.latest.Model;
+import com.pushtechnology.adapters.rest.polling.PollClient;
 
 /**
- * The snapshot of the {@link RESTAdapterClient} for a configuration model.
+ * Factory for snapshots of the {@link RESTAdapterClient} for a configuration model.
  *
  * @author Push Technology Limited
  */
-public interface RESTAdapterClientSnapshot extends AutoCloseable {
+public interface RESTAdapterComponentFactory {
     /**
-     * The inactive snapshot.
+     * @return a new snapshot
      */
-    RESTAdapterClientSnapshot INACTIVE = () -> { };
-
-    @Override
-    void close() throws IOException;
+    Component create(
+        Model model,
+        PollClient pollClient,
+        RESTAdapterClientCloseHandle client);
 }

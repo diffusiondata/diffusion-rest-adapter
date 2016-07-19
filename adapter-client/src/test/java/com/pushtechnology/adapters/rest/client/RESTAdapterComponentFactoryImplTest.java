@@ -15,6 +15,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 
+import com.pushtechnology.adapters.rest.component.Component;
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
@@ -22,33 +23,33 @@ import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.polling.PollClient;
 
 /**
- * Unit tests for {@link RESTAdapterClientSnapshotFactoryImpl}.
+ * Unit tests for {@link RESTAdapterComponentFactoryImpl}.
  *
  * @author Push Technology Limited
  */
-public final class RESTAdapterClientSnapshotFactoryImplTest {
+public final class RESTAdapterComponentFactoryImplTest {
     @Mock
-    private RESTAdapterClientSnapshotFactory delegateFactory;
+    private RESTAdapterComponentFactory delegateFactory;
     @Mock
     private PollClient pollClient;
     @Mock
     private RESTAdapterClientCloseHandle closeHandle;
     @Mock
-    private RESTAdapterClientSnapshot snapshot;
+    private Component component;
 
-    private RESTAdapterClientSnapshotFactory factory;
+    private RESTAdapterComponentFactory factory;
 
     @Before
     public void setUp() {
         initMocks(this);
 
-        factory = new RESTAdapterClientSnapshotFactoryImpl(delegateFactory);
-        when(delegateFactory.create(isA(Model.class), eq(pollClient), eq(closeHandle))).thenReturn(snapshot);
+        factory = new RESTAdapterComponentFactoryImpl(delegateFactory);
+        when(delegateFactory.create(isA(Model.class), eq(pollClient), eq(closeHandle))).thenReturn(component);
     }
 
     @After
     public void postConditions() {
-        verifyNoMoreInteractions(delegateFactory, pollClient, closeHandle, snapshot);
+        verifyNoMoreInteractions(delegateFactory, pollClient, closeHandle, component);
     }
 
     @Test
@@ -57,9 +58,9 @@ public final class RESTAdapterClientSnapshotFactoryImplTest {
             .builder()
             .build();
 
-        final RESTAdapterClientSnapshot restAdapterClientSnapshot = factory.create(model, pollClient, closeHandle);
+        final Component restAdapterClientSnapshot = factory.create(model, pollClient, closeHandle);
 
-        assertEquals(RESTAdapterClientSnapshot.INACTIVE, restAdapterClientSnapshot);
+        assertEquals(Component.INACTIVE, restAdapterClientSnapshot);
     }
 
     @Test
@@ -71,9 +72,9 @@ public final class RESTAdapterClientSnapshotFactoryImplTest {
                 .build())
             .build();
 
-        final RESTAdapterClientSnapshot restAdapterClientSnapshot = factory.create(model, pollClient, closeHandle);
+        final Component restAdapterClientSnapshot = factory.create(model, pollClient, closeHandle);
 
-        assertEquals(RESTAdapterClientSnapshot.INACTIVE, restAdapterClientSnapshot);
+        assertEquals(Component.INACTIVE, restAdapterClientSnapshot);
     }
 
     @Test
@@ -86,9 +87,9 @@ public final class RESTAdapterClientSnapshotFactoryImplTest {
             .services(emptyList())
             .build();
 
-        final RESTAdapterClientSnapshot restAdapterClientSnapshot = factory.create(model, pollClient, closeHandle);
+        final Component restAdapterClientSnapshot = factory.create(model, pollClient, closeHandle);
 
-        assertEquals(RESTAdapterClientSnapshot.INACTIVE, restAdapterClientSnapshot);
+        assertEquals(Component.INACTIVE, restAdapterClientSnapshot);
     }
 
     @Test
@@ -104,9 +105,9 @@ public final class RESTAdapterClientSnapshotFactoryImplTest {
                 .build()))
             .build();
 
-        final RESTAdapterClientSnapshot restAdapterClientSnapshot = factory.create(model, pollClient, closeHandle);
+        final Component restAdapterClientSnapshot = factory.create(model, pollClient, closeHandle);
 
-        assertEquals(RESTAdapterClientSnapshot.INACTIVE, restAdapterClientSnapshot);
+        assertEquals(Component.INACTIVE, restAdapterClientSnapshot);
     }
 
     @Test
@@ -122,9 +123,9 @@ public final class RESTAdapterClientSnapshotFactoryImplTest {
                 .build()))
             .build();
 
-        final RESTAdapterClientSnapshot restAdapterClientSnapshot = factory.create(model, pollClient, closeHandle);
+        final Component restAdapterClientSnapshot = factory.create(model, pollClient, closeHandle);
 
-        assertEquals(snapshot, restAdapterClientSnapshot);
+        assertEquals(component, restAdapterClientSnapshot);
         verify(delegateFactory).create(model, pollClient, closeHandle);
     }
 }

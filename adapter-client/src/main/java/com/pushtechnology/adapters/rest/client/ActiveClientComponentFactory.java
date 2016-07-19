@@ -25,6 +25,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.pushtechnology.adapters.rest.component.Component;
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
@@ -41,15 +42,15 @@ import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.session.SessionFactory;
 
 /**
- * Factory for active snapshots of the {@link RESTAdapterClient}.
+ * Factory for active components for the {@link RESTAdapterClient}.
  *
  * @author Push Technology Limited
  */
-public final class ActiveRESTAdapterClientSnapshotFactory implements RESTAdapterClientSnapshotFactory {
-    private static final Logger LOG = LoggerFactory.getLogger(ActiveRESTAdapterClientSnapshotFactory.class);
+public final class ActiveClientComponentFactory implements RESTAdapterComponentFactory {
+    private static final Logger LOG = LoggerFactory.getLogger(ActiveClientComponentFactory.class);
 
     @Override
-    public RESTAdapterClientSnapshot create(Model model, PollClient pollClient, RESTAdapterClientCloseHandle client) {
+    public Component create(Model model, PollClient pollClient, RESTAdapterClientCloseHandle client) {
         final AtomicBoolean isActive = new AtomicBoolean(true);
         final Session session = getSession(model.getDiffusion(), isActive, client);
         final TopicManagementClient topicManagementClient = new TopicManagementClientImpl(session);
