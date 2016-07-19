@@ -39,9 +39,9 @@ import net.jcip.annotations.ThreadSafe;
 public final class RESTAdapterClient {
     private static final Logger LOG = LoggerFactory.getLogger(RESTAdapterClient.class);
 
-    private final RESTAdapterClientSnapshotFactory snapshotFactory = new RESTAdapterClientSnapshotFactoryImpl();
-    private final AtomicReference<RESTAdapterClientSnapshot> state =
-        new AtomicReference<>(InactiveRESTAdapterClientSnapshot.INSTANCE);
+    private final RESTAdapterClientSnapshotFactory snapshotFactory =
+        new RESTAdapterClientSnapshotFactoryImpl(new ActiveRESTAdapterClientSnapshotFactory());
+    private final AtomicReference<RESTAdapterClientSnapshot> state = new AtomicReference<>(() -> { });
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
     private final ModelStore modelStore;
     private final PollClient pollClient;

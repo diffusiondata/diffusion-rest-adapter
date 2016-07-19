@@ -40,41 +40,16 @@ import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.session.SessionFactory;
 
-import net.jcip.annotations.ThreadSafe;
-
 /**
- * The snapshot of the {@link RESTAdapterClient} for a configuration model that is actively polling.
+ * Factory for active snapshots of the {@link RESTAdapterClient}.
  *
  * @author Push Technology Limited
  */
-@ThreadSafe
-/*package*/ final class ActiveRESTAdapterClientSnapshot implements RESTAdapterClientSnapshot {
-    private static final Logger LOG = LoggerFactory.getLogger(ActiveRESTAdapterClientSnapshot.class);
-    private final ScheduledExecutorService currentExecutor;
-    private final Session session;
-    private final AtomicBoolean isActive;
-
-    private ActiveRESTAdapterClientSnapshot(
-        ScheduledExecutorService currentExecutor,
-        Session session,
-        AtomicBoolean isActive) {
-
-        this.currentExecutor = currentExecutor;
-        this.session = session;
-        this.isActive = isActive;
-    }
+public final class ActiveRESTAdapterClientSnapshotFactory implements RESTAdapterClientSnapshotFactory {
+    private static final Logger LOG = LoggerFactory.getLogger(ActiveRESTAdapterClientSnapshotFactory.class);
 
     @Override
-    public void close() throws IOException {
-        isActive.set(false);
-        currentExecutor.shutdown();
-        session.close();
-    }
-
-    /**
-     * @return a new snapshot
-     */
-    /*package*/ static RESTAdapterClientSnapshot create(Model model, PollClient pollClient, RESTAdapterClient client) {
+    public RESTAdapterClientSnapshot create(Model model, PollClient pollClient, RESTAdapterClient client) {
         final AtomicBoolean isActive = new AtomicBoolean(true);
         final Session session = getSession(model.getDiffusion(), isActive, client);
         final TopicManagementClient topicManagementClient = new TopicManagementClientImpl(session);
@@ -93,7 +68,11 @@ import net.jcip.annotations.ThreadSafe;
                 .thenAccept(new ServiceReadyForPublishing(topicManagementClient, serviceSession));
         }
 
-        return new ActiveRESTAdapterClientSnapshot(executor, session, isActive);
+        return () -> {
+            isActive.set(false);
+            executor.shutdown();
+            session.close();
+        };
     }
 
     private static Session getSession(

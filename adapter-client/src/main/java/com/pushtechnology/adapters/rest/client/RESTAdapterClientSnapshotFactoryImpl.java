@@ -29,12 +29,20 @@ import com.pushtechnology.adapters.rest.polling.PollClient;
  * Factory for snapshots of the {@link RESTAdapterClient} for a configuration model.
  * <P>
  * If either there is no Diffusion configuration or nothing to poll is configured the
- * {@link InactiveRESTAdapterClientSnapshot} is returned. Otherwise an {@link ActiveRESTAdapterClientSnapshot} is
- * created.
+ * inactive snapshot is returned. Otherwise an active snapshot is created.
  *
  * @author Push Technology Limited
  */
 public final class RESTAdapterClientSnapshotFactoryImpl implements RESTAdapterClientSnapshotFactory {
+    private final RESTAdapterClientSnapshotFactory activeSnapshotFactory;
+
+    /**
+     * Constructor.
+     */
+    /*package*/ RESTAdapterClientSnapshotFactoryImpl(RESTAdapterClientSnapshotFactory activeSnapshotFactory) {
+        this.activeSnapshotFactory = activeSnapshotFactory;
+    }
+
     @Override
     public RESTAdapterClientSnapshot create(
         Model model,
@@ -49,9 +57,9 @@ public final class RESTAdapterClientSnapshotFactoryImpl implements RESTAdapterCl
             services.size() == 0 ||
             services.stream().map(ServiceConfig::getEndpoints).flatMap(Collection::stream).collect(counting()) == 0L) {
 
-            return InactiveRESTAdapterClientSnapshot.INSTANCE;
+            return () -> { };
         }
 
-        return ActiveRESTAdapterClientSnapshot.create(model, pollClient, client);
+        return activeSnapshotFactory.create(model, pollClient, client);
     }
 }
