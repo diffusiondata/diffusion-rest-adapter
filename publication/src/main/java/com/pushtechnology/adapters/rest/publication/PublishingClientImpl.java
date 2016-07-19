@@ -92,7 +92,14 @@ public final class PublishingClientImpl implements PublishingClient {
             return;
         }
 
-        updaters.get(serviceConfig)
+        final ValueUpdater<JSON> updater = updaters.get(serviceConfig);
+
+        if (updater == null) {
+            LOG.debug("The service has not been added or is not active, no updater found");
+            return;
+        }
+
+        updater
             .update(
                 serviceConfig.getTopicRoot() + "/" + endpointConfig.getTopic(),
                 json,

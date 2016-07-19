@@ -113,4 +113,13 @@ public final class PublishingClientImplTest {
         verify(rawUpdater).valueUpdater(JSON.class);
         verify(updater).update("a/topic", json, "a/topic", UpdateTopicCallback.INSTANCE);
     }
+
+    @Test
+    public void publishWhenServiceNotAdded() {
+        final PublishingClient client = new PublishingClientImpl(session);
+
+        client.publish(serviceConfig, endpointConfig, json);
+
+        verify(session).getState();
+    }
 }
