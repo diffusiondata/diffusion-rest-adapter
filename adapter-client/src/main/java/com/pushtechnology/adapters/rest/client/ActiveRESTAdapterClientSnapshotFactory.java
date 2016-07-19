@@ -49,7 +49,7 @@ public final class ActiveRESTAdapterClientSnapshotFactory implements RESTAdapter
     private static final Logger LOG = LoggerFactory.getLogger(ActiveRESTAdapterClientSnapshotFactory.class);
 
     @Override
-    public RESTAdapterClientSnapshot create(Model model, PollClient pollClient, RESTAdapterClient client) {
+    public RESTAdapterClientSnapshot create(Model model, PollClient pollClient, RESTAdapterClientCloseHandle client) {
         final AtomicBoolean isActive = new AtomicBoolean(true);
         final Session session = getSession(model.getDiffusion(), isActive, client);
         final TopicManagementClient topicManagementClient = new TopicManagementClientImpl(session);
@@ -78,7 +78,7 @@ public final class ActiveRESTAdapterClientSnapshotFactory implements RESTAdapter
     private static Session getSession(
         DiffusionConfig diffusionConfig,
         AtomicBoolean isActive,
-        RESTAdapterClient client) {
+        RESTAdapterClientCloseHandle client) {
 
         final SessionFactory sessionFactory = Diffusion
             .sessions()
@@ -107,9 +107,9 @@ public final class ActiveRESTAdapterClientSnapshotFactory implements RESTAdapter
      */
     private static final class Listener implements Session.Listener {
         private final AtomicBoolean isActive;
-        private final RESTAdapterClient client;
+        private final RESTAdapterClientCloseHandle client;
 
-        public Listener(AtomicBoolean isActive, RESTAdapterClient client) {
+        public Listener(AtomicBoolean isActive, RESTAdapterClientCloseHandle client) {
             this.isActive = isActive;
             this.client = client;
         }
@@ -118,7 +118,7 @@ public final class ActiveRESTAdapterClientSnapshotFactory implements RESTAdapter
         public void onSessionStateChanged(Session forSession, Session.State oldState, Session.State newState) {
             if (isActive.get() && newState.isClosed()) {
                 try {
-                    client.stop();
+                    client.close();
                 }
                 catch (IOException e) {
                     LOG.warn("Exception stopping client", e);

@@ -38,7 +38,7 @@ import net.jcip.annotations.ThreadSafe;
  * @author Push Technology Limited
  */
 @ThreadSafe
-public final class RESTAdapterClient {
+public final class RESTAdapterClient implements RESTAdapterClientCloseHandle {
     private static final Logger LOG = LoggerFactory.getLogger(RESTAdapterClient.class);
 
     private final RESTAdapterClientSnapshotFactory snapshotFactory =
@@ -87,7 +87,7 @@ public final class RESTAdapterClient {
      * Stop the client.
      * @throws IllegalStateException if the client is not running
      */
-    public synchronized void stop() throws IOException {
+    public synchronized void close() throws IOException {
         if (!isRunning.compareAndSet(true, false)) {
             throw new IllegalStateException("The client is not running");
         }

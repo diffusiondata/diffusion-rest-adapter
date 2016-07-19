@@ -123,7 +123,7 @@ public final class BasicJSONPollIT {
         verify(stream, timed()).onSubscription(eq("rest/increment"), isA(TopicSpecification.class));
 
         stopSession(session);
-        client.stop();
+        client.close();
     }
 
     private static VerificationWithTimeout timed() {

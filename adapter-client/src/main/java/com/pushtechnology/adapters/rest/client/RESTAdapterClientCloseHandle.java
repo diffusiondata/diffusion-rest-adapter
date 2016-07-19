@@ -15,20 +15,16 @@
 
 package com.pushtechnology.adapters.rest.client;
 
-import com.pushtechnology.adapters.rest.model.latest.Model;
-import com.pushtechnology.adapters.rest.polling.PollClient;
+import java.io.IOException;
 
 /**
- * Factory for snapshots of the {@link RESTAdapterClient} for a configuration model.
+ * Close handle for the client.
+ * <P>
+ * Closing this will disconnect from Diffusion, stop polling, close the thread polls and should end the JVM process.
  *
  * @author Push Technology Limited
  */
-public interface RESTAdapterClientSnapshotFactory {
-    /**
-     * @return a new snapshot
-     */
-    RESTAdapterClientSnapshot create(
-        Model model,
-        PollClient pollClient,
-        RESTAdapterClientCloseHandle client);
+public interface RESTAdapterClientCloseHandle extends AutoCloseable {
+    @Override
+    void close() throws IOException;
 }

@@ -48,7 +48,7 @@ public final class RESTAdapterClientSnapshotFactoryImpl implements RESTAdapterCl
     public RESTAdapterClientSnapshot create(
         Model model,
         PollClient pollClient,
-        RESTAdapterClient client) {
+        RESTAdapterClientCloseHandle client) {
 
         final DiffusionConfig diffusionConfig = model.getDiffusion();
         final List<ServiceConfig> services = model.getServices();
