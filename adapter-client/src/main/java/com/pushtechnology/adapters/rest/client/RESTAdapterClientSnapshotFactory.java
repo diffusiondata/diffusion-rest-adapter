@@ -59,7 +59,7 @@ public final class RESTAdapterClientSnapshotFactory {
 
         final DiffusionConfig diffusionConfig = model.getDiffusion();
         final List<ServiceConfig> services = model.getServices();
-        if (diffusionConfig == null || services.size() == 0) {
+        if (diffusionConfig == null || services == null || services.size() == 0) {
             return InactiveRESTAdapterClientSnapshot.INSTANCE;
         }
 
