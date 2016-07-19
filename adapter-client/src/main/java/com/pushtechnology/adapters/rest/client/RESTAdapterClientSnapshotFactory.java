@@ -16,8 +16,10 @@
 package com.pushtechnology.adapters.rest.client;
 
 import static com.pushtechnology.diffusion.client.session.SessionAttributes.Transport.WEBSOCKET;
+import static java.util.stream.Collectors.counting;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -60,6 +62,10 @@ public final class RESTAdapterClientSnapshotFactory {
         final DiffusionConfig diffusionConfig = model.getDiffusion();
         final List<ServiceConfig> services = model.getServices();
         if (diffusionConfig == null || services == null || services.size() == 0) {
+            return InactiveRESTAdapterClientSnapshot.INSTANCE;
+        }
+
+        if (services.stream().map(ServiceConfig::getEndpoints).flatMap(Collection::stream).collect(counting()) == 0L) {
             return InactiveRESTAdapterClientSnapshot.INSTANCE;
         }
 
