@@ -18,6 +18,7 @@ package com.pushtechnology.adapters.rest.client;
 import static com.pushtechnology.diffusion.client.session.SessionAttributes.Transport.WEBSOCKET;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -57,7 +58,8 @@ public final class RESTAdapterClientSnapshotFactory {
             RESTAdapterClient client) {
 
         final DiffusionConfig diffusionConfig = model.getDiffusion();
-        if (diffusionConfig == null) {
+        final List<ServiceConfig> services = model.getServices();
+        if (diffusionConfig == null || services.size() == 0) {
             return InactiveRESTAdapterClientSnapshot.INSTANCE;
         }
 
@@ -71,7 +73,7 @@ public final class RESTAdapterClientSnapshotFactory {
         final PollHandlerFactory handlerFactory = (serviceConfig, endpointConfig) -> new PollPublishingHandler(
             publishingClient, serviceConfig, endpointConfig);
 
-        for (ServiceConfig service : model.getServices()) {
+        for (ServiceConfig service : services) {
             final ServiceSession serviceSession = new ServiceSessionImpl(executor, pollClient, service, handlerFactory);
             topicManagementClient.addService(service);
             publishingClient
