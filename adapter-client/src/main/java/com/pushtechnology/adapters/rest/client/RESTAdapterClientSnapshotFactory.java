@@ -15,45 +15,20 @@
 
 package com.pushtechnology.adapters.rest.client;
 
-import static java.util.stream.Collectors.counting;
-
-import java.util.Collection;
-import java.util.List;
-
-import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
-import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.polling.PollClient;
 
 /**
  * Factory for snapshots of the {@link RESTAdapterClient} for a configuration model.
- * <P>
- * If either there is no Diffusion configuration or nothing to poll is configured the
- * {@link InactiveRESTAdapterClientSnapshot} is returned. Otherwise an {@link ActiveRESTAdapterClientSnapshot} is
- * created.
  *
  * @author Push Technology Limited
  */
-public final class RESTAdapterClientSnapshotFactory {
+public interface RESTAdapterClientSnapshotFactory {
     /**
      * @return a new snapshot
      */
-    public RESTAdapterClientSnapshot create(
-            Model model,
-            PollClient pollClient,
-            RESTAdapterClient client) {
-
-        final DiffusionConfig diffusionConfig = model.getDiffusion();
-        final List<ServiceConfig> services = model.getServices();
-
-        if (diffusionConfig == null ||
-            services == null ||
-            services.size() == 0 ||
-            services.stream().map(ServiceConfig::getEndpoints).flatMap(Collection::stream).collect(counting()) == 0L) {
-
-            return InactiveRESTAdapterClientSnapshot.INSTANCE;
-        }
-
-        return ActiveRESTAdapterClientSnapshot.create(model, pollClient, client);
-    }
+    RESTAdapterClientSnapshot create(
+        Model model,
+        PollClient pollClient,
+        RESTAdapterClient client);
 }
