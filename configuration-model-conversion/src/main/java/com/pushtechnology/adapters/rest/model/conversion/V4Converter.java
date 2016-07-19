@@ -17,8 +17,6 @@ package com.pushtechnology.adapters.rest.model.conversion;
 
 import static java.util.stream.Collectors.toList;
 
-import java.util.stream.Collectors;
-
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
@@ -62,7 +60,7 @@ public final class V4Converter extends AbstractModelConverter<com.pushtechnology
                             .url(oldEndpoint.getUrl())
                             .topic(oldEndpoint.getTopic())
                             .build())
-                        .collect(Collectors.toList()))
+                        .collect(toList()))
                     .pollPeriod(oldService.getPollPeriod())
                     .topicRoot("")
                     .build())

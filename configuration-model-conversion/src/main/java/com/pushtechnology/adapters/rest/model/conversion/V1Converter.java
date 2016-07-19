@@ -17,10 +17,8 @@ package com.pushtechnology.adapters.rest.model.conversion;
 
 import static java.util.stream.Collectors.toList;
 
-import java.util.stream.Collectors;
-
-import com.pushtechnology.adapters.rest.model.v2.Model;
 import com.pushtechnology.adapters.rest.model.v2.EndpointConfig;
+import com.pushtechnology.adapters.rest.model.v2.Model;
 import com.pushtechnology.adapters.rest.model.v2.ServiceConfig;
 
 import net.jcip.annotations.Immutable;
@@ -63,7 +61,7 @@ public final class V1Converter extends AbstractModelConverter<com.pushtechnology
                             .url(oldEndpoint.getUrl())
                             .topic(oldEndpoint.getTopic())
                             .build())
-                        .collect(Collectors.toList()))
+                        .collect(toList()))
                     .pollPeriod(DEFAULT_POLL_PERIOD)
                     .build())
                 .collect(toList()))
