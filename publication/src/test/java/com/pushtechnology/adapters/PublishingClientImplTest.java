@@ -1,9 +1,12 @@
 package com.pushtechnology.adapters;
 
+import static com.pushtechnology.diffusion.client.session.Session.State.CLOSED_FAILED;
 import static com.pushtechnology.diffusion.client.session.Session.State.CONNECTED_ACTIVE;
+import static com.pushtechnology.diffusion.client.session.Session.State.RECOVERING_RECONNECT;
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.isA;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -23,6 +26,7 @@ import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.publication.PublishingClient;
 import com.pushtechnology.adapters.rest.publication.PublishingClientImpl;
 import com.pushtechnology.adapters.rest.publication.UpdateTopicCallback;
+import com.pushtechnology.diffusion.client.callbacks.ErrorReason;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.UpdateSource;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater;
@@ -91,11 +95,25 @@ public final class PublishingClientImplTest {
         client.addService(serviceConfig);
 
         verify(session).feature(TopicUpdateControl.class);
-        verify(updateControl).registerUpdateSource(eq("a"), updateSourceCaptor.capture());
+        verify(updateControl).registerUpdateSource(eq("a"), isA(UpdateSource.class));
     }
 
     @Test
-    public void publish() {
+    public void addServiceStandby() {
+        final PublishingClient client = new PublishingClientImpl(session);
+
+        client.addService(serviceConfig);
+
+        verify(session).feature(TopicUpdateControl.class);
+        verify(updateControl).registerUpdateSource(eq("a"), updateSourceCaptor.capture());
+
+        final UpdateSource value = updateSourceCaptor.getValue();
+
+        value.onStandby("a");
+    }
+
+    @Test
+    public void publishSuccess() {
         final PublishingClient client = new PublishingClientImpl(session);
 
         final CompletableFuture<ServiceConfig> promise = client.addService(serviceConfig);
@@ -112,6 +130,30 @@ public final class PublishingClientImplTest {
         verify(session).getState();
         verify(rawUpdater).valueUpdater(JSON.class);
         verify(updater).update("a/topic", json, "a/topic", UpdateTopicCallback.INSTANCE);
+
+        UpdateTopicCallback.INSTANCE.onSuccess("a/topic");
+    }
+
+    @Test
+    public void publishFailure() {
+        final PublishingClient client = new PublishingClientImpl(session);
+
+        final CompletableFuture<ServiceConfig> promise = client.addService(serviceConfig);
+
+        verify(session).feature(TopicUpdateControl.class);
+        verify(updateControl).registerUpdateSource(eq("a"), updateSourceCaptor.capture());
+
+        updateSourceCaptor.getValue().onActive("a/topic", rawUpdater);
+
+        assertTrue(promise.isDone());
+
+        client.publish(serviceConfig, endpointConfig, json);
+
+        verify(session).getState();
+        verify(rawUpdater).valueUpdater(JSON.class);
+        verify(updater).update("a/topic", json, "a/topic", UpdateTopicCallback.INSTANCE);
+
+        UpdateTopicCallback.INSTANCE.onError("a/topic", ErrorReason.COMMUNICATION_FAILURE);
     }
 
     @Test
@@ -121,5 +163,30 @@ public final class PublishingClientImplTest {
         client.publish(serviceConfig, endpointConfig, json);
 
         verify(session).getState();
+    }
+
+    @Test
+    public void publishWhenRecovering() {
+        when(session.getState()).thenReturn(RECOVERING_RECONNECT);
+
+        final PublishingClient client = new PublishingClientImpl(session);
+
+        client.publish(serviceConfig, endpointConfig, json);
+
+        verify(session).getState();
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void publishWhenClosed() {
+        when(session.getState()).thenReturn(CLOSED_FAILED);
+
+        final PublishingClient client = new PublishingClientImpl(session);
+
+        try {
+            client.publish(serviceConfig, endpointConfig, json);
+        }
+        finally {
+            verify(session).getState();
+        }
     }
 }
