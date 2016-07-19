@@ -58,8 +58,7 @@ public final class ActiveClientComponentFactory implements RESTAdapterComponentF
 
         final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
-        final PollHandlerFactory handlerFactory = (serviceConfig, endpointConfig) -> new PollPublishingHandler(
-            publishingClient, serviceConfig, endpointConfig);
+        final PollHandlerFactory handlerFactory = new PollHandlerFactoryImpl(publishingClient);
 
         for (ServiceConfig service : model.getServices()) {
             final ServiceSession serviceSession = new ServiceSessionImpl(executor, pollClient, service, handlerFactory);
@@ -127,4 +126,5 @@ public final class ActiveClientComponentFactory implements RESTAdapterComponentF
             }
         }
     }
+
 }
