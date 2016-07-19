@@ -21,7 +21,7 @@ import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 /**
  * Unit tests for {@link AbstractModelStore}.
  *
- * @author Matt Champion on 18/07/2016
+ * @author Push Technology Limited
  */
 public final class AbstractModelStoreTest {
     @Mock

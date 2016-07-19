@@ -37,7 +37,7 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
 /**
  * Unit tests for {@link PublishingClientImpl}.
  *
- * @author Matt Champion on 13/07/2016
+ * @author Push Technology Limited
  */
 public final class PublishingClientImplTest {
     @Mock
