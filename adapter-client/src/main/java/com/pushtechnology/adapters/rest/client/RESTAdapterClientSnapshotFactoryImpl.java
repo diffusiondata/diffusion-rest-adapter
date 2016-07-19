@@ -15,6 +15,7 @@
 
 package com.pushtechnology.adapters.rest.client;
 
+import static com.pushtechnology.adapters.rest.client.RESTAdapterClientSnapshot.INACTIVE;
 import static java.util.stream.Collectors.counting;
 
 import java.util.Collection;
@@ -57,7 +58,7 @@ public final class RESTAdapterClientSnapshotFactoryImpl implements RESTAdapterCl
             services.size() == 0 ||
             services.stream().map(ServiceConfig::getEndpoints).flatMap(Collection::stream).collect(counting()) == 0L) {
 
-            return () -> { };
+            return INACTIVE;
         }
 
         return activeSnapshotFactory.create(model, pollClient, client);

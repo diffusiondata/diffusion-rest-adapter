@@ -23,6 +23,11 @@ import java.io.IOException;
  * @author Push Technology Limited
  */
 public interface RESTAdapterClientSnapshot extends AutoCloseable {
+    /**
+     * The inactive snapshot.
+     */
+    RESTAdapterClientSnapshot INACTIVE = () -> { };
+
     @Override
     void close() throws IOException;
 }

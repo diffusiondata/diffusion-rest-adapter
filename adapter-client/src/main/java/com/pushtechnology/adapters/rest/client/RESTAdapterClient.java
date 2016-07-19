@@ -15,6 +15,8 @@
 
 package com.pushtechnology.adapters.rest.client;
 
+import static com.pushtechnology.adapters.rest.client.RESTAdapterClientSnapshot.INACTIVE;
+
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -41,7 +43,7 @@ public final class RESTAdapterClient {
 
     private final RESTAdapterClientSnapshotFactory snapshotFactory =
         new RESTAdapterClientSnapshotFactoryImpl(new ActiveRESTAdapterClientSnapshotFactory());
-    private final AtomicReference<RESTAdapterClientSnapshot> state = new AtomicReference<>(() -> { });
+    private final AtomicReference<RESTAdapterClientSnapshot> state = new AtomicReference<>(INACTIVE);
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
     private final ModelStore modelStore;
     private final PollClient pollClient;
