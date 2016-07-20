@@ -16,6 +16,7 @@
 package com.pushtechnology.adapters.rest.polling;
 
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
+import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
 import org.apache.http.impl.nio.client.HttpAsyncClients;
 
 import com.pushtechnology.adapters.rest.model.latest.Model;
@@ -29,11 +30,12 @@ public final class HttpComponentFactory {
      * @return a new {@link HttpComponent}
      */
     public HttpComponent create(Model model) {
-        final CloseableHttpAsyncClient client = HttpAsyncClients
+        final HttpAsyncClientBuilder builder = HttpAsyncClients
             .custom()
             .disableCookieManagement()
-            .disableAuthCaching()
-            .build();
+            .disableAuthCaching();
+
+        final CloseableHttpAsyncClient client = builder.build();
         client.start();
         return new HttpComponentImpl(client);
     }
