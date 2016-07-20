@@ -4,11 +4,13 @@ import static com.pushtechnology.adapters.rest.model.conversion.V6Converter.INST
 import static org.junit.Assert.assertEquals;
 
 import java.util.Collections;
+import java.util.List;
 
 import org.junit.Test;
 
+import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
+import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
-import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 
 /**
  * Unit tests for {@link V5Converter}.
@@ -26,8 +28,14 @@ public final class V6ConverterTest {
                         .builder()
                         .host("localhost")
                         .port(80)
-                        .endpoints(Collections.<com.pushtechnology.adapters.rest.model.v6.EndpointConfig>emptyList())
+                        .endpoints(Collections.singletonList(com.pushtechnology.adapters.rest.model.v6.EndpointConfig
+                            .builder()
+                            .name("endpoint")
+                            .topic("topic")
+                            .url("/url")
+                            .build()))
                         .pollPeriod(5000)
+                        .topicRoot("a")
                         .build()
                 ))
                 .diffusion(com.pushtechnology.adapters.rest.model.v6.DiffusionConfig
@@ -38,15 +46,20 @@ public final class V6ConverterTest {
                 .build());
 
         assertEquals(1, model.getServices().size());
-        final ServiceConfig service = model.getServices().get(0);
+        final DiffusionConfig diffusion = model.getDiffusion();
+        final com.pushtechnology.adapters.rest.model.latest.ServiceConfig service = model.getServices().get(0);
+        final List<EndpointConfig> endpoints = service.getEndpoints();
 
         assertEquals("localhost", service.getHost());
         assertEquals(80, service.getPort());
-        assertEquals(0, service.getEndpoints().size());
+        assertEquals(1, endpoints.size());
         assertEquals(5000, service.getPollPeriod());
-        assertEquals("", service.getTopicRoot());
-        assertEquals("localhost", model.getDiffusion().getHost());
-        assertEquals(8080, model.getDiffusion().getPort());
+        assertEquals("a", service.getTopicRoot());
+        assertEquals("localhost", diffusion.getHost());
+        assertEquals(8080, diffusion.getPort());
+        assertEquals("endpoint", endpoints.get(0).getName());
+        assertEquals("topic", endpoints.get(0).getTopic());
+        assertEquals("/url", endpoints.get(0).getUrl());
     }
 
     @Test(expected = IllegalArgumentException.class)

@@ -62,7 +62,7 @@ public final class V6Converter extends AbstractModelConverter<com.pushtechnology
                             .build())
                         .collect(toList()))
                     .pollPeriod(oldService.getPollPeriod())
-                    .topicRoot("")
+                    .topicRoot(oldService.getTopicRoot())
                     .build())
                 .collect(toList()))
             .diffusion(DiffusionConfig
