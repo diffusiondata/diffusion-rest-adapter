@@ -13,33 +13,37 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.model.latest;
+package com.pushtechnology.adapters.rest.model.v5;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Value;
 
 /**
- * Endpoint configuration. Version 6.
+ * Diffusion configuration. Version 5.
  * <p>
- * Description of a REST endpoint to poll.
+ * Description of a Diffusion server to publish to.
  *
  * @author Push Technology Limited
  */
 @Value
 @Builder
 @AllArgsConstructor
-public class EndpointConfig {
+public class DiffusionConfig {
     /**
-     * The name of the endpoint.
+     * The host of the Diffusion server.
      */
-    String name;
+    String host;
     /**
-     * The URL of the endpoint.
+     * The port the Diffusion server listens on.
      */
-    String url;
+    int port;
     /**
-     * The topic to map the endpoint to.
+     * The principal. Can be {@code null}.
      */
-    String topic;
+    String principal;
+    /**
+     * The password. Can be {@code null}.
+     */
+    String password;
 }

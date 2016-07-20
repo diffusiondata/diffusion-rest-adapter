@@ -20,7 +20,7 @@ import lombok.Builder;
 import lombok.Value;
 
 /**
- * Diffusion configuration. Version 5.
+ * Diffusion configuration. Version 6.
  * <p>
  * Description of a Diffusion server to publish to.
  *
@@ -39,6 +39,10 @@ public class DiffusionConfig {
      */
     int port;
     /**
+     * If a secure connection should be used.
+     */
+    boolean secure;
+    /**
      * The principal. Can be {@code null}.
      */
     String principal;
@@ -46,4 +50,8 @@ public class DiffusionConfig {
      * The password. Can be {@code null}.
      */
     String password;
+    /**
+     * The location of the trust store.
+     */
+    String truststore;
 }

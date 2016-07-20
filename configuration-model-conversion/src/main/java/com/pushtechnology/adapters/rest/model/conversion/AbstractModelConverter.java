@@ -42,7 +42,7 @@ public abstract class AbstractModelConverter<M extends AnyModel, N extends AnyMo
             return convertFrom(supportedModel.cast(model));
         }
         else {
-            throw new IllegalArgumentException("The argument " + model + " cannot be converted");
+            throw new IllegalArgumentException("The argument " + model + " cannot be converted by " + this);
         }
     }
 

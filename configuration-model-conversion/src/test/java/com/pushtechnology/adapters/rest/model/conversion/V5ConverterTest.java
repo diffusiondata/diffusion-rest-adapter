@@ -1,36 +1,36 @@
 package com.pushtechnology.adapters.rest.model.conversion;
 
-import static com.pushtechnology.adapters.rest.model.conversion.V4Converter.INSTANCE;
+import static com.pushtechnology.adapters.rest.model.conversion.V5Converter.INSTANCE;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Collections;
 
 import org.junit.Test;
 
-import com.pushtechnology.adapters.rest.model.v5.Model;
-import com.pushtechnology.adapters.rest.model.v5.ServiceConfig;
+import com.pushtechnology.adapters.rest.model.latest.Model;
+import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 
 /**
- * Unit tests for {@link V4Converter}.
+ * Unit tests for {@link V5Converter}.
  *
  * @author Push Technology Limited
  */
-public final class V4ConverterTest {
+public final class V5ConverterTest {
     @Test
     public void testConvert() {
         final Model model = INSTANCE.convert(
-            com.pushtechnology.adapters.rest.model.v4.Model
+            com.pushtechnology.adapters.rest.model.v5.Model
                 .builder()
                 .services(Collections.singletonList(
-                    com.pushtechnology.adapters.rest.model.v4.ServiceConfig
+                    com.pushtechnology.adapters.rest.model.v5.ServiceConfig
                         .builder()
                         .host("localhost")
                         .port(80)
-                        .endpoints(Collections.<com.pushtechnology.adapters.rest.model.v4.EndpointConfig>emptyList())
+                        .endpoints(Collections.<com.pushtechnology.adapters.rest.model.v5.EndpointConfig>emptyList())
                         .pollPeriod(5000)
                         .build()
                 ))
-                .diffusion(com.pushtechnology.adapters.rest.model.v4.DiffusionConfig
+                .diffusion(com.pushtechnology.adapters.rest.model.v5.DiffusionConfig
                     .builder()
                     .host("localhost")
                     .port(8080)

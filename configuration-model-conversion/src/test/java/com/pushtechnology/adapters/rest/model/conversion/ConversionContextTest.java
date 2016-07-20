@@ -41,6 +41,14 @@ public final class ConversionContextTest {
                 com.pushtechnology.adapters.rest.model.v3.Model.class,
                 V3Converter.INSTANCE)
             .register(
+                com.pushtechnology.adapters.rest.model.v4.Model.VERSION,
+                com.pushtechnology.adapters.rest.model.v4.Model.class,
+                V4Converter.INSTANCE)
+            .register(
+                com.pushtechnology.adapters.rest.model.v5.Model.VERSION,
+                com.pushtechnology.adapters.rest.model.v5.Model.class,
+                V5Converter.INSTANCE)
+            .register(
                 Model.VERSION,
                 Model.class,
                 LatestConverter.INSTANCE)

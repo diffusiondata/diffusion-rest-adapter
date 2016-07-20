@@ -17,31 +17,31 @@ package com.pushtechnology.adapters.rest.model.conversion;
 
 import static java.util.stream.Collectors.toList;
 
-import com.pushtechnology.adapters.rest.model.v5.DiffusionConfig;
-import com.pushtechnology.adapters.rest.model.v5.EndpointConfig;
-import com.pushtechnology.adapters.rest.model.v5.Model;
-import com.pushtechnology.adapters.rest.model.v5.ServiceConfig;
+import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
+import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
+import com.pushtechnology.adapters.rest.model.latest.Model;
+import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 
 import net.jcip.annotations.Immutable;
 
 /**
- * Converter between different version 4 of the model and version 5.
+ * Converter between different version 5 of the model and version 6.
  *
  * @author Push Technology Limited
  */
 @Immutable
-public final class V4Converter extends AbstractModelConverter<com.pushtechnology.adapters.rest.model.v4.Model, Model> {
+public final class V5Converter extends AbstractModelConverter<com.pushtechnology.adapters.rest.model.v5.Model, Model> {
     /**
      * The converter.
      */
-    public static final V4Converter INSTANCE = new V4Converter();
+    public static final V5Converter INSTANCE = new V5Converter();
 
-    private V4Converter() {
-        super(V5Converter.INSTANCE, com.pushtechnology.adapters.rest.model.v4.Model.class);
+    private V5Converter() {
+        super(LatestConverter.INSTANCE, com.pushtechnology.adapters.rest.model.v5.Model.class);
     }
 
     @Override
-    protected Model convertFrom(com.pushtechnology.adapters.rest.model.v4.Model model) {
+    protected Model convertFrom(com.pushtechnology.adapters.rest.model.v5.Model model) {
         return Model
             .builder()
             .services(model
@@ -69,6 +69,8 @@ public final class V4Converter extends AbstractModelConverter<com.pushtechnology
                 .builder()
                 .host(model.getDiffusion().getHost())
                 .port(model.getDiffusion().getPort())
+                .secure(false)
+                .truststore(null)
                 .build())
             .build();
     }
