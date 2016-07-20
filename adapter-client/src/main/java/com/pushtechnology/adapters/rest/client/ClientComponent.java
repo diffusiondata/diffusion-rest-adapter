@@ -42,6 +42,8 @@ import net.jcip.annotations.ThreadSafe;
 public final class ClientComponent implements Component {
     private static final Logger LOG = LoggerFactory.getLogger(ClientComponent.class);
 
+    private final PublicationComponentFactory publicationComponentFactory = new PublicationComponentFactory();
+
     @GuardedBy("this")
     private PublicationComponent publicationComponent = PublicationComponent.INACTIVE;
     @GuardedBy("this")
@@ -87,7 +89,7 @@ public final class ClientComponent implements Component {
             pollingComponent.close();
             publicationComponent.close();
 
-            publicationComponent = PublicationComponentImpl.create(model, client);
+            publicationComponent = publicationComponentFactory.create(model, client);
             pollingComponent = publicationComponent.createPolling(model, pollClient);
             currentModel = model;
             return;
