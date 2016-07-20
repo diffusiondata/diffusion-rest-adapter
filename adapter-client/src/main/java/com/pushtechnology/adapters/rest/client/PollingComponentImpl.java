@@ -15,24 +15,25 @@
 
 package com.pushtechnology.adapters.rest.client;
 
-import com.pushtechnology.adapters.rest.component.Component;
-import com.pushtechnology.adapters.rest.model.latest.Model;
-import com.pushtechnology.adapters.rest.polling.PollClient;
+import java.util.concurrent.ScheduledExecutorService;
 
 /**
- * Factory for active components for the {@link RESTAdapterClient}.
+ * The {@link com.pushtechnology.adapters.rest.component.Component} responsible for polling REST services.
  *
  * @author Push Technology Limited
  */
-public final class ActiveClientComponentFactory implements RESTAdapterComponentFactory {
-    @Override
-    public Component create(Model model, PollClient pollClient, RESTAdapterClientCloseHandle client) {
-        final PublicationComponent publicationComponent = PublicationComponentImpl.create(model, client);
-        final PollingComponent publishingComponent = publicationComponent.createPolling(model, pollClient);
+public final class PollingComponentImpl implements PollingComponent {
+    private final ScheduledExecutorService executor;
 
-        return () -> {
-            publishingComponent.close();
-            publicationComponent.close();
-        };
+    /**
+     * Constructor.
+     */
+    public PollingComponentImpl(ScheduledExecutorService executor) {
+        this.executor = executor;
+    }
+
+    @Override
+    public void close() {
+        executor.shutdown();
     }
 }

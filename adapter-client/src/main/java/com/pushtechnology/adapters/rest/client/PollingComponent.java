@@ -16,23 +16,22 @@
 package com.pushtechnology.adapters.rest.client;
 
 import com.pushtechnology.adapters.rest.component.Component;
-import com.pushtechnology.adapters.rest.model.latest.Model;
-import com.pushtechnology.adapters.rest.polling.PollClient;
 
 /**
- * Factory for active components for the {@link RESTAdapterClient}.
+ * The {@link Component} responsible for polling REST services.
  *
  * @author Push Technology Limited
  */
-public final class ActiveClientComponentFactory implements RESTAdapterComponentFactory {
-    @Override
-    public Component create(Model model, PollClient pollClient, RESTAdapterClientCloseHandle client) {
-        final PublicationComponent publicationComponent = PublicationComponentImpl.create(model, client);
-        final PollingComponent publishingComponent = publicationComponent.createPolling(model, pollClient);
+public interface PollingComponent extends Component {
+    /**
+     * Inactive component.
+     */
+    PollingComponent INACTIVE = new PollingComponent() {
+        @Override
+        public void close() {
+        }
+    };
 
-        return () -> {
-            publishingComponent.close();
-            publicationComponent.close();
-        };
-    }
+    @Override
+    void close();
 }

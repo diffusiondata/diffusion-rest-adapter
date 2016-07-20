@@ -15,24 +15,34 @@
 
 package com.pushtechnology.adapters.rest.client;
 
+import java.io.IOException;
+
 import com.pushtechnology.adapters.rest.component.Component;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.polling.PollClient;
 
 /**
- * Factory for active components for the {@link RESTAdapterClient}.
+ * The {@link Component} responsible for polling REST services.
  *
  * @author Push Technology Limited
  */
-public final class ActiveClientComponentFactory implements RESTAdapterComponentFactory {
-    @Override
-    public Component create(Model model, PollClient pollClient, RESTAdapterClientCloseHandle client) {
-        final PublicationComponent publicationComponent = PublicationComponentImpl.create(model, client);
-        final PollingComponent publishingComponent = publicationComponent.createPolling(model, pollClient);
+public interface PublicationComponent extends Component {
+    /**
+     * Inactive component.
+     */
+    PublicationComponent INACTIVE = new PublicationComponent() {
+        @Override
+        public PollingComponent createPolling(Model model, PollClient pollClient) {
+            throw new UnsupportedOperationException("A PollingComponent cannot be created from the inactive component");
+        }
 
-        return () -> {
-            publishingComponent.close();
-            publicationComponent.close();
-        };
-    }
+        @Override
+        public void close() throws IOException {
+        }
+    };
+
+    /**
+     * @return A new {@link PollingComponentImpl}
+     */
+    PollingComponent createPolling(Model model, PollClient pollClient);
 }
