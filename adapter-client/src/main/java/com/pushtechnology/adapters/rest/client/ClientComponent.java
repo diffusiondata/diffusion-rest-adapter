@@ -29,7 +29,7 @@ import com.pushtechnology.adapters.rest.component.Component;
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.adapters.rest.polling.PollClient;
+import com.pushtechnology.adapters.rest.polling.HttpComponent;
 
 import net.jcip.annotations.GuardedBy;
 import net.jcip.annotations.ThreadSafe;
@@ -58,7 +58,7 @@ public final class ClientComponent implements Component {
      */
     public synchronized void reconfigure(
             Model model,
-            PollClient pollClient,
+            HttpComponent httpComponent,
             RESTAdapterClientCloseHandle client) throws IOException {
 
         final DiffusionConfig diffusionConfig = model.getDiffusion();
@@ -92,7 +92,7 @@ public final class ClientComponent implements Component {
             publicationComponent.close();
 
             publicationComponent = publicationComponentFactory.create(model, client);
-            pollingComponent = publicationComponent.createPolling(model, pollClient);
+            pollingComponent = publicationComponent.createPolling(model, httpComponent);
             currentModel = model;
             return;
         }
@@ -103,7 +103,7 @@ public final class ClientComponent implements Component {
 
             pollingComponent.close();
 
-            pollingComponent = publicationComponent.createPolling(model, pollClient);
+            pollingComponent = publicationComponent.createPolling(model, httpComponent);
             currentModel = model;
         }
     }

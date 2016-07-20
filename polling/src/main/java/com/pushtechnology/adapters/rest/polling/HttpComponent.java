@@ -15,20 +15,21 @@
 
 package com.pushtechnology.adapters.rest.polling;
 
-import java.io.IOException;
 import java.util.concurrent.Future;
 
 import org.apache.http.concurrent.FutureCallback;
 
+import com.pushtechnology.adapters.rest.component.Component;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
 /**
- * Poll client for endpoints.
+ * HTTP component for requesting for endpoints.
+ *
  * @author Push Technology Limited
  */
-public interface PollClient {
+public interface HttpComponent extends Component {
     /**
      * Start the client.
      */
@@ -43,9 +44,4 @@ public interface PollClient {
      * @throws IllegalStateException if the client is not running
      */
     Future<?> request(ServiceConfig serviceConfig, EndpointConfig endpointConfig, FutureCallback<JSON> callback);
-
-    /**
-     * Stop the client.
-     */
-    void stop() throws IOException;
 }

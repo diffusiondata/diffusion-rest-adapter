@@ -36,7 +36,7 @@ import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.adapters.rest.polling.PollClient;
+import com.pushtechnology.adapters.rest.polling.HttpComponent;
 import com.pushtechnology.adapters.rest.publication.PublishingClient;
 import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
 import com.pushtechnology.diffusion.client.session.Session;
@@ -54,7 +54,7 @@ public final class PublicationComponentImplTest {
     @Mock
     private PublishingClient publishingClient;
     @Mock
-    private PollClient pollClient;
+    private HttpComponent httpComponent;
     @Mock
     private CompletableFuture<ServiceConfig> completableFuture;
     @Mock
@@ -110,7 +110,7 @@ public final class PublicationComponentImplTest {
 
     @After
     public void postConditions() {
-        verifyNoMoreInteractions(session, topicManagementClient, publishingClient, pollClient, executor);
+        verifyNoMoreInteractions(session, topicManagementClient, publishingClient, httpComponent, executor);
     }
 
     @Test
@@ -123,7 +123,7 @@ public final class PublicationComponentImplTest {
 
     @Test
     public void createPolling() {
-        final PollingComponent pollingComponent = publicationComponent.createPolling(model, pollClient);
+        final PollingComponent pollingComponent = publicationComponent.createPolling(model, httpComponent);
         pollingComponent.close();
 
         verify(executor).shutdown();
@@ -138,6 +138,6 @@ public final class PublicationComponentImplTest {
 
     @Test(expected = UnsupportedOperationException.class)
     public void createPollingInactive() {
-        PublicationComponent.INACTIVE.createPolling(model, pollClient);
+        PublicationComponent.INACTIVE.createPolling(model, httpComponent);
     }
 }

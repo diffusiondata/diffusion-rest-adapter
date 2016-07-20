@@ -39,17 +39,17 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
 import net.jcip.annotations.ThreadSafe;
 
 /**
- * Implementation of {@link PollClient}.
+ * Implementation of {@link HttpComponent}.
  * <p>
- * Synchronises on the instance for the {@link #start()} and {@link #stop()} methods. Calls to the
+ * Synchronises on the instance for the {@link #start()} and {@link #close()} methods. Calls to the
  * {@link #request(ServiceConfig, EndpointConfig, FutureCallback)} may happen concurrently and atomically access state
- * modified by the {@link #start()} and {@link #stop()} methods. The request may complete after the {@link PollClient}
- * is stopped.
+ * modified by the {@link #start()} and {@link #close()} methods. The request may complete after the
+ * {@link HttpComponent} is stopped.
  *
  * @author Push Technology Limited
  */
 @ThreadSafe
-public final class PollClientImpl implements PollClient {
+public final class HttpComponentImpl implements HttpComponent {
     private static final Pattern CHARSET_PATTERN = Pattern.compile(".+; charset=(\\S+)");
     private final HttpClientFactory httpClientFactory;
     private volatile CloseableHttpAsyncClient currentClient;
@@ -57,7 +57,7 @@ public final class PollClientImpl implements PollClient {
     /**
      * Constructor.
      */
-    public PollClientImpl(HttpClientFactory httpClientFactory) {
+    public HttpComponentImpl(HttpClientFactory httpClientFactory) {
         this.httpClientFactory = httpClientFactory;
     }
 
@@ -124,7 +124,7 @@ public final class PollClientImpl implements PollClient {
     }
 
     @Override
-    public synchronized void stop() throws IOException {
+    public synchronized void close() throws IOException {
         final CloseableHttpAsyncClient client = currentClient;
         if (client == null) {
             return;

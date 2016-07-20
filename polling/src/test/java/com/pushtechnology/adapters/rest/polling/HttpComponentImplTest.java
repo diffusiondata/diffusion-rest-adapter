@@ -25,11 +25,11 @@ import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
 /**
- * Unit tests for {@link PollClientImpl}.
+ * Unit tests for {@link HttpComponentImpl}.
  *
  * @author Push Technology Limited
  */
-public final class PollClientImplTest {
+public final class HttpComponentImplTest {
     @Mock
     private CloseableHttpAsyncClient httpClient;
     @Mock
@@ -42,7 +42,7 @@ public final class PollClientImplTest {
     private final ServiceConfig serviceConfig = ServiceConfig.builder().host("localhost").port(8080).build();
     private final EndpointConfig endpointConfig = EndpointConfig.builder().url("/a/url.json").build();
 
-    private PollClientImpl pollClient;
+    private HttpComponentImpl pollClient;
 
     @SuppressWarnings("unchecked")
     @Before
@@ -53,7 +53,7 @@ public final class PollClientImplTest {
         when(httpClient.execute(isA(HttpHost.class), isA(HttpRequest.class), isA(FutureCallback.class)))
             .thenReturn(future);
 
-        pollClient = new PollClientImpl(httpClientFactory);
+        pollClient = new HttpComponentImpl(httpClientFactory);
     }
 
     @After
@@ -75,8 +75,8 @@ public final class PollClientImplTest {
     }
 
     @Test
-    public void stopBeforeRunning() throws IOException {
-        pollClient.stop();
+    public void closeBeforeRunning() throws IOException {
+        pollClient.close();
     }
 
     @SuppressWarnings("unchecked")
@@ -91,10 +91,10 @@ public final class PollClientImplTest {
     }
 
     @Test
-    public void stop() throws IOException {
+    public void close() throws IOException {
         start();
 
-        pollClient.stop();
+        pollClient.close();
 
         verify(httpClient).close();
     }

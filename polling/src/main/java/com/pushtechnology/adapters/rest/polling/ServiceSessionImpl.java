@@ -45,7 +45,7 @@ public final class ServiceSessionImpl implements ServiceSession {
     @GuardedBy("this")
     private final Map<EndpointConfig, PollHandle> endpointPollers = new HashMap<>();
     private final ScheduledExecutorService executor;
-    private final PollClient pollClient;
+    private final HttpComponent httpComponent;
     private final ServiceConfig serviceConfig;
     private final PollHandlerFactory handlerFactory;
     @GuardedBy("this")
@@ -56,12 +56,12 @@ public final class ServiceSessionImpl implements ServiceSession {
      */
     public ServiceSessionImpl(
             ScheduledExecutorService executor,
-            PollClient pollClient,
+            HttpComponent httpComponent,
             ServiceConfig serviceConfig,
             PollHandlerFactory handlerFactory) {
 
         this.executor = executor;
-        this.pollClient = pollClient;
+        this.httpComponent = httpComponent;
         this.serviceConfig = serviceConfig;
         this.handlerFactory = handlerFactory;
     }
@@ -137,7 +137,7 @@ public final class ServiceSessionImpl implements ServiceSession {
         @Override
         public void run() {
             synchronized (ServiceSessionImpl.this) {
-                endpointPollers.get(endpointConfig).currentPollHandle = pollClient.request(
+                endpointPollers.get(endpointConfig).currentPollHandle = httpComponent.request(
                     serviceConfig,
                     endpointConfig,
                     handler);

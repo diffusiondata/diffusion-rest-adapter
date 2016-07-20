@@ -20,7 +20,7 @@ import java.util.function.Supplier;
 
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.adapters.rest.polling.PollClient;
+import com.pushtechnology.adapters.rest.polling.HttpComponent;
 import com.pushtechnology.adapters.rest.polling.PollHandlerFactory;
 import com.pushtechnology.adapters.rest.polling.ServiceSession;
 import com.pushtechnology.adapters.rest.polling.ServiceSessionImpl;
@@ -47,7 +47,7 @@ public final class PollingComponentFactory {
      */
     public PollingComponent create(
             Model model,
-            PollClient pollClient,
+            HttpComponent httpComponent,
             PublishingClient publishingClient,
             TopicManagementClient topicManagementClient) {
         final ScheduledExecutorService executor = executorSupplier.get();
@@ -55,7 +55,11 @@ public final class PollingComponentFactory {
         final PollHandlerFactory handlerFactory = new PollHandlerFactoryImpl(publishingClient);
 
         for (ServiceConfig service : model.getServices()) {
-            final ServiceSession serviceSession = new ServiceSessionImpl(executor, pollClient, service, handlerFactory);
+            final ServiceSession serviceSession = new ServiceSessionImpl(
+                executor,
+                httpComponent,
+                service,
+                handlerFactory);
             topicManagementClient.addService(service);
             publishingClient
                 .addService(service)

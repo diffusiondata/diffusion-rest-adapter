@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.pushtechnology.adapters.rest.model.latest.Model;
-import com.pushtechnology.adapters.rest.polling.PollClient;
+import com.pushtechnology.adapters.rest.polling.HttpComponent;
 import com.pushtechnology.adapters.rest.publication.PublishingClient;
 import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
 import com.pushtechnology.diffusion.client.session.Session;
@@ -59,7 +59,7 @@ import com.pushtechnology.diffusion.client.session.Session;
     }
 
     @Override
-    public PollingComponent createPolling(Model model, PollClient pollClient) {
-        return pollingComponentFactory.create(model, pollClient, publishingClient, topicManagementClient);
+    public PollingComponent createPolling(Model model, HttpComponent httpComponent) {
+        return pollingComponentFactory.create(model, httpComponent, publishingClient, topicManagementClient);
     }
 }

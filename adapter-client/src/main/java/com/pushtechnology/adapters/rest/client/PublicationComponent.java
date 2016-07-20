@@ -19,7 +19,7 @@ import java.io.IOException;
 
 import com.pushtechnology.adapters.rest.component.Component;
 import com.pushtechnology.adapters.rest.model.latest.Model;
-import com.pushtechnology.adapters.rest.polling.PollClient;
+import com.pushtechnology.adapters.rest.polling.HttpComponent;
 
 /**
  * The {@link Component} responsible for polling REST services.
@@ -32,7 +32,7 @@ public interface PublicationComponent extends Component {
      */
     PublicationComponent INACTIVE = new PublicationComponent() {
         @Override
-        public PollingComponent createPolling(Model model, PollClient pollClient) {
+        public PollingComponent createPolling(Model model, HttpComponent httpComponent) {
             throw new UnsupportedOperationException("A PollingComponent cannot be created from the inactive component");
         }
 
@@ -44,5 +44,5 @@ public interface PublicationComponent extends Component {
     /**
      * @return A new {@link PollingComponentImpl}
      */
-    PollingComponent createPolling(Model model, PollClient pollClient);
+    PollingComponent createPolling(Model model, HttpComponent httpComponent);
 }

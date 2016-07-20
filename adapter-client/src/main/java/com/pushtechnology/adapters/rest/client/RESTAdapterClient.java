@@ -24,8 +24,8 @@ import org.slf4j.LoggerFactory;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.store.ModelStore;
 import com.pushtechnology.adapters.rest.polling.HttpClientFactoryImpl;
-import com.pushtechnology.adapters.rest.polling.PollClient;
-import com.pushtechnology.adapters.rest.polling.PollClientImpl;
+import com.pushtechnology.adapters.rest.polling.HttpComponent;
+import com.pushtechnology.adapters.rest.polling.HttpComponentImpl;
 
 import net.jcip.annotations.ThreadSafe;
 
@@ -41,11 +41,11 @@ public final class RESTAdapterClient implements RESTAdapterClientCloseHandle {
     private final ClientComponent clientComponent = new ClientComponent();
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
     private final ModelStore modelStore;
-    private final PollClient pollClient;
+    private final HttpComponent httpComponent;
 
-    private RESTAdapterClient(ModelStore modelStore, PollClient pollClient) {
+    private RESTAdapterClient(ModelStore modelStore, HttpComponent httpComponent) {
         this.modelStore = modelStore;
-        this.pollClient = pollClient;
+        this.httpComponent = httpComponent;
     }
 
     /**
@@ -57,7 +57,7 @@ public final class RESTAdapterClient implements RESTAdapterClientCloseHandle {
             throw new IllegalStateException("The client is already running");
         }
 
-        pollClient.start();
+        httpComponent.start();
         modelStore.onModelChange(this::onModelChange);
     }
 
@@ -65,7 +65,7 @@ public final class RESTAdapterClient implements RESTAdapterClientCloseHandle {
         LOG.debug("Running REST adapter client with model : {}", newModel);
 
         try {
-            clientComponent.reconfigure(newModel, pollClient, this);
+            clientComponent.reconfigure(newModel, httpComponent, this);
         }
         catch (IOException e) {
             LOG.warn("Failed to shutdown previous model on model change");
@@ -82,7 +82,7 @@ public final class RESTAdapterClient implements RESTAdapterClientCloseHandle {
         }
 
         clientComponent.close();
-        pollClient.stop();
+        httpComponent.close();
     }
 
     /**
@@ -92,8 +92,8 @@ public final class RESTAdapterClient implements RESTAdapterClientCloseHandle {
      */
     public static RESTAdapterClient create(ModelStore modelStore) {
         LOG.debug("Creating REST adapter client with model store: {}", modelStore);
-        final PollClient pollClient = new PollClientImpl(new HttpClientFactoryImpl());
+        final HttpComponent httpComponent = new HttpComponentImpl(new HttpClientFactoryImpl());
 
-        return new RESTAdapterClient(modelStore, pollClient);
+        return new RESTAdapterClient(modelStore, httpComponent);
     }
 }
