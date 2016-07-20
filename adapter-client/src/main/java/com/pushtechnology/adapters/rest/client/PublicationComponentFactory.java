@@ -115,20 +115,15 @@ public final class PublicationComponentFactory {
     }
 
     private static SSLContext createTruststore(DiffusionConfig diffusionConfig) {
-        try {
-            final String truststoreLocation = diffusionConfig.getTruststore();
-            InputStream stream = Thread.currentThread().getContextClassLoader().getResourceAsStream(truststoreLocation);
-            if (stream == null) {
-                stream = Files.newInputStream(Paths.get(truststoreLocation));
-            }
-
-            final KeyStore keyStore = KeyStore.getInstance(getDefaultType());
-            keyStore.load(stream, null);
-            final TrustManagerFactory trustManagerFactory = getInstance(getDefaultAlgorithm());
-            trustManagerFactory.init(keyStore);
-            final SSLContext sslContext = SSLContext.getInstance("SSL");
-            sslContext.init(null, trustManagerFactory.getTrustManagers(), null);
-            return sslContext;
+        final String truststoreLocation = diffusionConfig.getTruststore();
+        try (InputStream stream = resolveTruststore(truststoreLocation)) {
+                final KeyStore keyStore = KeyStore.getInstance(getDefaultType());
+                keyStore.load(stream, null);
+                final TrustManagerFactory trustManagerFactory = getInstance(getDefaultAlgorithm());
+                trustManagerFactory.init(keyStore);
+                final SSLContext sslContext = SSLContext.getInstance("SSL");
+                sslContext.init(null, trustManagerFactory.getTrustManagers(), null);
+                return sslContext;
         }
         catch (KeyStoreException |
             CertificateException |
@@ -139,6 +134,18 @@ public final class PublicationComponentFactory {
             throw new IllegalArgumentException("An SSLContext could not be created as requested in the" +
                 " configuration");
         }
+    }
+
+    private static InputStream resolveTruststore(String truststoreLocation) throws IOException {
+        final InputStream stream = Thread
+            .currentThread()
+            .getContextClassLoader()
+            .getResourceAsStream(truststoreLocation);
+
+        if (stream == null) {
+            return Files.newInputStream(Paths.get(truststoreLocation));
+        }
+        return stream;
     }
 
     /**
