@@ -22,13 +22,13 @@ import java.util.concurrent.ScheduledExecutorService;
  *
  * @author Push Technology Limited
  */
-public final class PollingComponentImpl implements PollingComponent {
+/*package*/ final class PollingComponentImpl implements PollingComponent {
     private final ScheduledExecutorService executor;
 
     /**
      * Constructor.
      */
-    public PollingComponentImpl(ScheduledExecutorService executor) {
+    /*package*/ PollingComponentImpl(ScheduledExecutorService executor) {
         this.executor = executor;
     }
 

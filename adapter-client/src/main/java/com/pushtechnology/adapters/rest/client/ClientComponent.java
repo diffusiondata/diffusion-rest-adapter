@@ -20,6 +20,7 @@ import static java.util.stream.Collectors.counting;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.Executors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +43,8 @@ import net.jcip.annotations.ThreadSafe;
 public final class ClientComponent implements Component {
     private static final Logger LOG = LoggerFactory.getLogger(ClientComponent.class);
 
-    private final PublicationComponentFactory publicationComponentFactory = new PublicationComponentFactory();
+    private final PublicationComponentFactory publicationComponentFactory = new PublicationComponentFactory(
+        new PollingComponentFactory(Executors::newSingleThreadScheduledExecutor));
 
     @GuardedBy("this")
     private PublicationComponent publicationComponent = PublicationComponent.INACTIVE;

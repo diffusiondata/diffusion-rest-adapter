@@ -41,6 +41,15 @@ import com.pushtechnology.diffusion.client.session.SessionFactory;
 public final class PublicationComponentFactory {
     private static final Logger LOG = LoggerFactory.getLogger(PublicationComponentFactory.class);
 
+    private final PollingComponentFactory pollingComponentFactory;
+
+    /**
+     * Constructor.
+     */
+    public PublicationComponentFactory(PollingComponentFactory pollingComponentFactory) {
+        this.pollingComponentFactory = pollingComponentFactory;
+    }
+
     /**
      * @return A new {@link PublicationComponent}
      */
@@ -50,7 +59,12 @@ public final class PublicationComponentFactory {
         final TopicManagementClient topicManagementClient = new TopicManagementClientImpl(session);
         final PublishingClient publishingClient = new PublishingClientImpl(session);
 
-        return new PublicationComponentImpl(isActive, session, topicManagementClient, publishingClient);
+        return new PublicationComponentImpl(
+            isActive,
+            session,
+            topicManagementClient,
+            publishingClient,
+            pollingComponentFactory);
     }
 
     private static Session getSession(

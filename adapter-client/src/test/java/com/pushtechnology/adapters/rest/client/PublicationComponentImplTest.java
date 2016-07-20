@@ -24,6 +24,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.After;
@@ -56,6 +57,8 @@ public final class PublicationComponentImplTest {
     private PollClient pollClient;
     @Mock
     private CompletableFuture<ServiceConfig> completableFuture;
+    @Mock
+    private ScheduledExecutorService executor;
 
     private final EndpointConfig endpointConfig = EndpointConfig
         .builder()
@@ -97,12 +100,17 @@ public final class PublicationComponentImplTest {
         when(publishingClient.addService(serviceConfig)).thenReturn(completableFuture);
 
         isActive = new AtomicBoolean(true);
-        publicationComponent = new PublicationComponentImpl(isActive, session, topicManagementClient, publishingClient);
+        publicationComponent = new PublicationComponentImpl(
+            isActive,
+            session,
+            topicManagementClient,
+            publishingClient,
+            new PollingComponentFactory(() -> executor));
     }
 
     @After
     public void postConditions() {
-        verifyNoMoreInteractions(session, topicManagementClient, publishingClient, pollClient);
+        verifyNoMoreInteractions(session, topicManagementClient, publishingClient, pollClient, executor);
     }
 
     @Test
@@ -118,6 +126,7 @@ public final class PublicationComponentImplTest {
         final PollingComponent pollingComponent = publicationComponent.createPolling(model, pollClient);
         pollingComponent.close();
 
+        verify(executor).shutdown();
         verify(topicManagementClient).addService(serviceConfig);
         verify(publishingClient).addService(serviceConfig);
     }

@@ -16,16 +16,10 @@
 package com.pushtechnology.adapters.rest.client;
 
 import java.io.IOException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.pushtechnology.adapters.rest.model.latest.Model;
-import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.polling.PollClient;
-import com.pushtechnology.adapters.rest.polling.PollHandlerFactory;
-import com.pushtechnology.adapters.rest.polling.ServiceSession;
-import com.pushtechnology.adapters.rest.polling.ServiceSessionImpl;
 import com.pushtechnology.adapters.rest.publication.PublishingClient;
 import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
 import com.pushtechnology.diffusion.client.session.Session;
@@ -40,6 +34,7 @@ import com.pushtechnology.diffusion.client.session.Session;
     private final Session session;
     private final TopicManagementClient topicManagementClient;
     private final PublishingClient publishingClient;
+    private final PollingComponentFactory pollingComponentFactory;
 
     /**
      * Constructor.
@@ -48,11 +43,13 @@ import com.pushtechnology.diffusion.client.session.Session;
             AtomicBoolean isActive,
             Session session,
             TopicManagementClient topicManagementClient,
-            PublishingClient publishingClient) {
+            PublishingClient publishingClient,
+            PollingComponentFactory pollingComponentFactory) {
         this.isActive = isActive;
         this.session = session;
         this.topicManagementClient = topicManagementClient;
         this.publishingClient = publishingClient;
+        this.pollingComponentFactory = pollingComponentFactory;
     }
 
     @Override
@@ -63,18 +60,6 @@ import com.pushtechnology.diffusion.client.session.Session;
 
     @Override
     public PollingComponent createPolling(Model model, PollClient pollClient) {
-        final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-
-        final PollHandlerFactory handlerFactory = new PollHandlerFactoryImpl(publishingClient);
-
-        for (ServiceConfig service : model.getServices()) {
-            final ServiceSession serviceSession = new ServiceSessionImpl(executor, pollClient, service, handlerFactory);
-            topicManagementClient.addService(service);
-            publishingClient
-                .addService(service)
-                .thenAccept(new ServiceReadyForPublishing(topicManagementClient, serviceSession));
-        }
-
-        return new PollingComponentImpl(executor);
+        return pollingComponentFactory.create(model, pollClient, publishingClient, topicManagementClient);
     }
 }
