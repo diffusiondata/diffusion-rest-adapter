@@ -134,7 +134,7 @@ public final class PublicationComponentFactory {
             KeyManagementException e) {
 
             throw new IllegalArgumentException("An SSLContext could not be created as requested in the" +
-                " configuration");
+                " configuration for the Diffusion client", e);
         }
     }
 
