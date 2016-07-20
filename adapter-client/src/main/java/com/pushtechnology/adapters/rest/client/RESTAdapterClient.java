@@ -15,16 +15,12 @@
 
 package com.pushtechnology.adapters.rest.client;
 
-import static com.pushtechnology.adapters.rest.component.Component.INACTIVE;
-
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.pushtechnology.adapters.rest.component.Component;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.store.ModelStore;
 import com.pushtechnology.adapters.rest.polling.HttpClientFactoryImpl;
@@ -44,7 +40,7 @@ public final class RESTAdapterClient implements RESTAdapterClientCloseHandle {
 
     private final RESTAdapterComponentFactory snapshotFactory =
         new RESTAdapterComponentFactoryImpl(new ActiveClientComponentFactory());
-    private final AtomicReference<Component> state = new AtomicReference<>(INACTIVE);
+    private final ClientComponent clientComponent = new ClientComponent();
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
     private final ModelStore modelStore;
     private final PollClient pollClient;
@@ -70,17 +66,11 @@ public final class RESTAdapterClient implements RESTAdapterClientCloseHandle {
     private void onModelChange(Model newModel) {
         LOG.debug("Running REST adapter client with model : {}", newModel);
 
-        // Modified services will be in standby until the old model is closed
-        final Component oldState = state.getAndSet(
-            snapshotFactory.create(newModel, pollClient, this));
-
-        if (oldState != null) {
-            try {
-                oldState.close();
-            }
-            catch (IOException e) {
-                LOG.warn("Failed to shutdown previous model on model change");
-            }
+        try {
+            clientComponent.reconfigure(newModel, pollClient, this);
+        }
+        catch (IOException e) {
+            LOG.warn("Failed to shutdown previous model on model change");
         }
     }
 
@@ -93,7 +83,7 @@ public final class RESTAdapterClient implements RESTAdapterClientCloseHandle {
             throw new IllegalStateException("The client is not running");
         }
 
-        state.get().close();
+        clientComponent.close();
         pollClient.stop();
     }
 
