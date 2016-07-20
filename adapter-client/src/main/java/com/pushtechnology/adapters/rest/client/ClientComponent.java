@@ -30,6 +30,7 @@ import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.polling.HttpComponent;
+import com.pushtechnology.adapters.rest.polling.HttpComponentFactory;
 
 import net.jcip.annotations.GuardedBy;
 import net.jcip.annotations.ThreadSafe;
@@ -43,9 +44,12 @@ import net.jcip.annotations.ThreadSafe;
 public final class ClientComponent implements Component {
     private static final Logger LOG = LoggerFactory.getLogger(ClientComponent.class);
 
-    private final PublicationComponentFactory publicationComponentFactory = new PublicationComponentFactory(
+    private static final HttpComponentFactory HTTP_COMPONENT_FACTORY = new HttpComponentFactory();
+    private static final PublicationComponentFactory PUBLICATION_COMPONENT_FACTORY = new PublicationComponentFactory(
         new PollingComponentFactory(Executors::newSingleThreadScheduledExecutor));
 
+    @GuardedBy("this")
+    private HttpComponent httpComponent = HttpComponent.INACTIVE;
     @GuardedBy("this")
     private PublicationComponent publicationComponent = PublicationComponent.INACTIVE;
     @GuardedBy("this")
@@ -58,59 +62,80 @@ public final class ClientComponent implements Component {
      */
     public synchronized void reconfigure(
             Model model,
-            HttpComponent httpComponent,
             RESTAdapterClientCloseHandle client) throws IOException {
 
         final DiffusionConfig diffusionConfig = model.getDiffusion();
         final List<ServiceConfig> services = model.getServices();
 
-        // Check to see if the new configuration performs useful work
-        if (diffusionConfig == null ||
+        if (currentModel == null) {
+            initialConfiguration(model, client);
+        }
+        else if (diffusionConfig == null ||
+            // Check to see if the new configuration performs useful work
             services == null ||
             services.size() == 0 ||
             services.stream().map(ServiceConfig::getEndpoints).flatMap(Collection::stream).collect(counting()) == 0L) {
 
-            LOG.info("Switching to inactive components");
-
-            pollingComponent.close();
-            publicationComponent.close();
-
-            publicationComponent = PublicationComponent.INACTIVE;
-            pollingComponent = PollingComponent.INACTIVE;
-            currentModel = model;
-            return;
+            switchToInactiveComponents(model);
         }
+        else if (currentModel.getDiffusion().equals(diffusionConfig) ||
+                publicationComponent == PublicationComponent.INACTIVE) {
 
-        // Check if the Diffusion configuration has changed and if it has replace all child components
-        if (currentModel == null ||
-            !currentModel.getDiffusion().equals(diffusionConfig) ||
-            publicationComponent == PublicationComponent.INACTIVE) {
-
-            LOG.info("Switching the polling and publishing components");
-
-            pollingComponent.close();
-            publicationComponent.close();
-
-            publicationComponent = publicationComponentFactory.create(model, client);
-            pollingComponent = publicationComponent.createPolling(model, httpComponent);
-            currentModel = model;
-            return;
+            reconfigurePollingAndPublishing(model, client);
         }
+        else if (!currentModel.getServices().equals(services) || pollingComponent == PollingComponent.INACTIVE) {
 
-        // Check if the services configuration has changed and if it has replace just the polling component
-        if (!currentModel.getServices().equals(services) || pollingComponent == PollingComponent.INACTIVE) {
-            LOG.info("Switching the polling component");
-
-            pollingComponent.close();
-
-            pollingComponent = publicationComponent.createPolling(model, httpComponent);
-            currentModel = model;
+            reconfigurePolling(model);
         }
+    }
+
+    private void initialConfiguration(Model model, RESTAdapterClientCloseHandle client) {
+        LOG.info("Setting up components for the first time");
+
+        httpComponent = HTTP_COMPONENT_FACTORY.create(model);
+        httpComponent.start();
+        publicationComponent = PUBLICATION_COMPONENT_FACTORY.create(model, client);
+        pollingComponent = publicationComponent.createPolling(model, httpComponent);
+        currentModel = model;
+    }
+
+
+
+    private void switchToInactiveComponents(Model model) throws IOException {
+        LOG.info("Replacing with inactive components");
+
+        pollingComponent.close();
+        publicationComponent.close();
+
+        publicationComponent = PublicationComponent.INACTIVE;
+        pollingComponent = PollingComponent.INACTIVE;
+        currentModel = model;
+    }
+
+    private void reconfigurePollingAndPublishing(Model model, RESTAdapterClientCloseHandle client) throws IOException {
+        LOG.info("Replacing the polling and publishing components");
+
+        pollingComponent.close();
+        publicationComponent.close();
+
+        publicationComponent = PUBLICATION_COMPONENT_FACTORY.create(model, client);
+        pollingComponent = publicationComponent.createPolling(model, httpComponent);
+        currentModel = model;
+    }
+
+    private void reconfigurePolling(Model model) {
+        LOG.info("Replacing the polling component");
+
+        pollingComponent.close();
+
+        pollingComponent = publicationComponent.createPolling(model, httpComponent);
+        currentModel = model;
     }
 
     @Override
     public synchronized void close() throws IOException {
         pollingComponent.close();
+        httpComponent.close();
         publicationComponent.close();
     }
 }

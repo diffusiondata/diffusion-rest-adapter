@@ -15,6 +15,7 @@
 
 package com.pushtechnology.adapters.rest.polling;
 
+import java.io.IOException;
 import java.util.concurrent.Future;
 
 import org.apache.http.concurrent.FutureCallback;
@@ -30,6 +31,27 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
  * @author Push Technology Limited
  */
 public interface HttpComponent extends Component {
+    /**
+     * An inactive {@link HttpComponent}.
+     */
+    HttpComponent INACTIVE = new HttpComponent() {
+        @Override
+        public void start() {
+        }
+
+        @Override
+        public Future<?> request(
+                ServiceConfig serviceConfig,
+                EndpointConfig endpointConfig,
+                FutureCallback<JSON> callback) {
+            throw new UnsupportedOperationException("A request cannot be set from an inactive component");
+        }
+
+        @Override
+        public void close() throws IOException {
+        }
+    };
+
     /**
      * Start the client.
      */
