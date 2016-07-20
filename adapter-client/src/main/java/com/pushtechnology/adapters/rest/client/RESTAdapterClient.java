@@ -38,8 +38,6 @@ import net.jcip.annotations.ThreadSafe;
 public final class RESTAdapterClient implements RESTAdapterClientCloseHandle {
     private static final Logger LOG = LoggerFactory.getLogger(RESTAdapterClient.class);
 
-    private final RESTAdapterComponentFactory snapshotFactory =
-        new RESTAdapterComponentFactoryImpl(new ActiveClientComponentFactory());
     private final ClientComponent clientComponent = new ClientComponent();
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
     private final ModelStore modelStore;
