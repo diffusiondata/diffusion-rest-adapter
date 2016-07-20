@@ -4,7 +4,6 @@ import static com.pushtechnology.diffusion.client.session.Session.State.CLOSED_B
 import static com.pushtechnology.diffusion.client.session.Session.State.CONNECTED_ACTIVE;
 import static com.pushtechnology.diffusion.client.session.Session.State.CONNECTING;
 import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.isA;
 import static org.mockito.Mockito.timeout;
@@ -13,9 +12,16 @@ import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.io.IOException;
 
+import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.HttpConfiguration;
+import org.eclipse.jetty.server.HttpConnectionFactory;
+import org.eclipse.jetty.server.SecureRequestCustomizer;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -52,7 +58,7 @@ public final class BasicJSONPollIT {
             .principal("control")
             .password("password")
             .build())
-        .services(singletonList(
+        .services(asList(
             ServiceConfig
                 .builder()
                 .host("localhost")
@@ -73,7 +79,29 @@ public final class BasicJSONPollIT {
                         .url("/rest/timestamp")
                         .build()
                 ))
+                .build(),
+            ServiceConfig
+                .builder()
+                .host("localhost")
+                .port(8444)
+                .pollPeriod(500)
+                .topicRoot("restSSL")
+                .endpoints(asList(
+                    EndpointConfig
+                        .builder()
+                        .name("increment")
+                        .topic("increment")
+                        .url("/rest/increment")
+                        .build(),
+                    EndpointConfig
+                        .builder()
+                        .name("timestamp")
+                        .topic("timestamp")
+                        .url("/rest/timestamp")
+                        .build()
+                ))
                 .build()))
+        .truststore("testKeystore.jks")
         .build();
 
     private static Server jettyServer;
@@ -94,10 +122,26 @@ public final class BasicJSONPollIT {
         jerseyServlet.setInitParameter(
             "jersey.config.server.provider.classnames",
             TimestampResource.class.getCanonicalName() + "," + IncrementingResource.class.getCanonicalName());
-        jettyServer = new Server(8081);
-        jettyServer.setHandler(context);
-        jettyServer.start();
 
+        jettyServer = new Server();
+        jettyServer.setHandler(context);
+
+        final ServerConnector httpConnector = new ServerConnector(jettyServer);
+        httpConnector.setPort(8081);
+
+        final HttpConfiguration httpsConfiguration = new HttpConfiguration();
+        httpsConfiguration.addCustomizer(new SecureRequestCustomizer());
+        SslContextFactory sslContextFactory = new SslContextFactory();
+        sslContextFactory.setKeyStorePath(BasicJSONPollIT.class.getResource("/testKeystore.jks").toExternalForm());
+
+        final ServerConnector httpsConnector = new ServerConnector(jettyServer,
+            new SslConnectionFactory(sslContextFactory, "http/1.1"),
+            new HttpConnectionFactory(httpsConfiguration));
+        httpsConnector.setPort(8444);
+
+        jettyServer.setConnectors(new Connector[] { httpConnector, httpsConnector });
+
+        jettyServer.start();
     }
 
     @AfterClass
