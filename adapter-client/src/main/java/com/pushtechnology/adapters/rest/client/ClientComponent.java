@@ -93,7 +93,6 @@ public final class ClientComponent implements Component {
         LOG.info("Setting up components for the first time");
 
         httpComponent = HTTP_COMPONENT_FACTORY.create(model);
-        httpComponent.start();
         publicationComponent = PUBLICATION_COMPONENT_FACTORY.create(model, client);
         pollingComponent = publicationComponent.createPolling(model, httpComponent);
         currentModel = model;

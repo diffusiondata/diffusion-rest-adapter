@@ -33,8 +33,6 @@ public final class HttpComponentImplTest {
     @Mock
     private CloseableHttpAsyncClient httpClient;
     @Mock
-    private HttpClientFactory httpClientFactory;
-    @Mock
     private FutureCallback<JSON> callback;
     @Mock
     private Future<HttpResponse> future;
@@ -42,49 +40,28 @@ public final class HttpComponentImplTest {
     private final ServiceConfig serviceConfig = ServiceConfig.builder().host("localhost").port(8080).build();
     private final EndpointConfig endpointConfig = EndpointConfig.builder().url("/a/url.json").build();
 
-    private HttpComponentImpl pollClient;
+    private HttpComponentImpl httpComponent;
 
     @SuppressWarnings("unchecked")
     @Before
     public void setUp() {
         initMocks(this);
 
-        when(httpClientFactory.create()).thenReturn(httpClient);
         when(httpClient.execute(isA(HttpHost.class), isA(HttpRequest.class), isA(FutureCallback.class)))
             .thenReturn(future);
 
-        pollClient = new HttpComponentImpl(httpClientFactory);
+        httpComponent = new HttpComponentImpl(httpClient);
     }
 
     @After
     public void postConditions() {
-        verifyNoMoreInteractions(httpClient, httpClientFactory, callback);
-    }
-
-    @Test
-    public void start() {
-        pollClient.start();
-
-        verify(httpClientFactory).create();
-        verify(httpClient).start();
-    }
-
-    @Test(expected = IllegalStateException.class)
-    public void requestBeforeStart() {
-        pollClient.request(serviceConfig, endpointConfig, callback);
-    }
-
-    @Test
-    public void closeBeforeRunning() throws IOException {
-        pollClient.close();
+        verifyNoMoreInteractions(httpClient, callback);
     }
 
     @SuppressWarnings("unchecked")
     @Test
     public void request() {
-        start();
-
-        final Future<?> handle = pollClient.request(serviceConfig, endpointConfig, callback);
+        final Future<?> handle = httpComponent.request(serviceConfig, endpointConfig, callback);
 
         assertEquals(future, handle);
         verify(httpClient).execute(isA(HttpHost.class), isA(HttpRequest.class), isA(FutureCallback.class));
@@ -92,9 +69,7 @@ public final class HttpComponentImplTest {
 
     @Test
     public void close() throws IOException {
-        start();
-
-        pollClient.close();
+        httpComponent.close();
 
         verify(httpClient).close();
     }

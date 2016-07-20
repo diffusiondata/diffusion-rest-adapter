@@ -40,37 +40,19 @@ import net.jcip.annotations.ThreadSafe;
 
 /**
  * Implementation of {@link HttpComponent}.
- * <p>
- * Synchronises on the instance for the {@link #start()} and {@link #close()} methods. Calls to the
- * {@link #request(ServiceConfig, EndpointConfig, FutureCallback)} may happen concurrently and atomically access state
- * modified by the {@link #start()} and {@link #close()} methods. The request may complete after the
- * {@link HttpComponent} is stopped.
  *
  * @author Push Technology Limited
  */
 @ThreadSafe
 public final class HttpComponentImpl implements HttpComponent {
     private static final Pattern CHARSET_PATTERN = Pattern.compile(".+; charset=(\\S+)");
-    private final HttpClientFactory httpClientFactory;
-    private volatile CloseableHttpAsyncClient currentClient;
+    private final CloseableHttpAsyncClient client;
 
     /**
      * Constructor.
      */
-    public HttpComponentImpl(HttpClientFactory httpClientFactory) {
-        this.httpClientFactory = httpClientFactory;
-    }
-
-    @Override
-    public synchronized void start() {
-        if (currentClient != null) {
-            return;
-        }
-
-        final CloseableHttpAsyncClient client = httpClientFactory.create();
-        currentClient = client;
-
-        client.start();
+    public HttpComponentImpl(CloseableHttpAsyncClient client) {
+        this.client = client;
     }
 
     @Override
@@ -78,7 +60,6 @@ public final class HttpComponentImpl implements HttpComponent {
             ServiceConfig serviceConfig,
             EndpointConfig endpointConfig,
             final FutureCallback<JSON> callback) {
-        final CloseableHttpAsyncClient client = this.currentClient;
         if (client == null) {
             throw new IllegalStateException("Client not running");
         }
@@ -124,14 +105,8 @@ public final class HttpComponentImpl implements HttpComponent {
     }
 
     @Override
-    public synchronized void close() throws IOException {
-        final CloseableHttpAsyncClient client = currentClient;
-        if (client == null) {
-            return;
-        }
-
+    public void close() throws IOException {
         client.close();
-        currentClient = null;
     }
 
     private Charset getResponseCharset(HttpResponse response) {

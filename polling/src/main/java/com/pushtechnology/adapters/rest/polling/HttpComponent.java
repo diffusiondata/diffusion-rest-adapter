@@ -36,10 +36,6 @@ public interface HttpComponent extends Component {
      */
     HttpComponent INACTIVE = new HttpComponent() {
         @Override
-        public void start() {
-        }
-
-        @Override
         public Future<?> request(
                 ServiceConfig serviceConfig,
                 EndpointConfig endpointConfig,
@@ -51,11 +47,6 @@ public interface HttpComponent extends Component {
         public void close() throws IOException {
         }
     };
-
-    /**
-     * Start the client.
-     */
-    void start();
 
     /**
      * Poll an endpoint using the client.
