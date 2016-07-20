@@ -78,7 +78,10 @@ public final class ClientComponent implements Component {
         }
 
         // Check if the Diffusion configuration has changed and if it has replace all child components
-        if (currentModel == null || !currentModel.getDiffusion().equals(diffusionConfig)) {
+        if (currentModel == null ||
+            !currentModel.getDiffusion().equals(diffusionConfig) ||
+            publicationComponent == PublicationComponent.INACTIVE) {
+
             LOG.info("Switching the polling and publishing components");
 
             pollingComponent.close();
@@ -91,7 +94,7 @@ public final class ClientComponent implements Component {
         }
 
         // Check if the services configuration has changed and if it has replace just the polling component
-        if (!currentModel.getServices().equals(services)) {
+        if (!currentModel.getServices().equals(services) || pollingComponent == PollingComponent.INACTIVE) {
             LOG.info("Switching the polling component");
 
             pollingComponent.close();
