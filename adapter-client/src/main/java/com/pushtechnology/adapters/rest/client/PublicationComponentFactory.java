@@ -69,7 +69,7 @@ public final class PublicationComponentFactory {
      */
     public PublicationComponent create(Model model, RESTAdapterClientCloseHandle client) {
         final AtomicBoolean isActive = new AtomicBoolean(true);
-        final Session session = getSession(model.getDiffusion(), isActive, client);
+        final Session session = getSession(model, isActive, client);
         final TopicManagementClient topicManagementClient = new TopicManagementClientImpl(session);
         final PublishingClient publishingClient = new PublishingClientImpl(session);
 
@@ -82,9 +82,11 @@ public final class PublicationComponentFactory {
     }
 
     private static Session getSession(
-        DiffusionConfig diffusionConfig,
+        Model model,
         AtomicBoolean isActive,
         RESTAdapterClientCloseHandle client) {
+
+        final DiffusionConfig diffusionConfig = model.getDiffusion();
 
         SessionFactory sessionFactory = Diffusion
             .sessions()
@@ -98,8 +100,8 @@ public final class PublicationComponentFactory {
         if (diffusionConfig.isSecure()) {
             sessionFactory = sessionFactory.secureTransport(true);
 
-            if (diffusionConfig.getTruststore() != null) {
-                final SSLContext sslContext = createTruststore(diffusionConfig);
+            if (model.getTruststore() != null) {
+                final SSLContext sslContext = createTruststore(model);
 
                 sessionFactory = sessionFactory.sslContext(sslContext);
             }
@@ -114,8 +116,8 @@ public final class PublicationComponentFactory {
         return sessionFactory.open();
     }
 
-    private static SSLContext createTruststore(DiffusionConfig diffusionConfig) {
-        final String truststoreLocation = diffusionConfig.getTruststore();
+    private static SSLContext createTruststore(Model model) {
+        final String truststoreLocation = model.getTruststore();
         try (InputStream stream = resolveTruststore(truststoreLocation)) {
                 final KeyStore keyStore = KeyStore.getInstance(getDefaultType());
                 keyStore.load(stream, null);

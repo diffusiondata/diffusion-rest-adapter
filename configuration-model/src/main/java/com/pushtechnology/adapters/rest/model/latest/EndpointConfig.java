@@ -20,7 +20,7 @@ import lombok.Builder;
 import lombok.Value;
 
 /**
- * Endpoint configuration. Version 6.
+ * Endpoint configuration. Version 7.
  * <p>
  * Description of a REST endpoint to poll.
  *

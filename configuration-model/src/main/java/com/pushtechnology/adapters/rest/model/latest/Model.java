@@ -24,7 +24,7 @@ import lombok.Builder;
 import lombok.Value;
 
 /**
- * Configuration model. Version 6.
+ * Configuration model. Version 7.
  *
  * @author Push Technology Limited
  */
@@ -35,7 +35,7 @@ public class Model implements AnyModel {
     /**
      * The version of the model.
      */
-    public static final int VERSION = 6;
+    public static final int VERSION = 7;
 
     /**
      * The Diffusion server.
@@ -46,4 +46,9 @@ public class Model implements AnyModel {
      * The REST services to poll.
      */
     List<ServiceConfig> services;
+
+    /**
+     * The location of the trust store.
+     */
+    String truststore;
 }

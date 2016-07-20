@@ -13,47 +13,45 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.model.latest;
-
-import java.util.List;
+package com.pushtechnology.adapters.rest.model.v6;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Value;
 
 /**
- * Service configuration. Version 7.
+ * Diffusion configuration. Version 6.
  * <p>
- * Description of a REST service to poll.
+ * Description of a Diffusion server to publish to.
  *
  * @author Push Technology Limited
  */
 @Value
 @Builder
 @AllArgsConstructor
-public class ServiceConfig {
+public class DiffusionConfig {
     /**
-     * The host of the service.
+     * The host of the Diffusion server.
      */
     String host;
-
     /**
-     * The port to connect to.
+     * The port the Diffusion server listens on.
      */
     int port;
-
     /**
-     * The endpoints the service makes available.
+     * If a secure connection should be used.
      */
-    List<EndpointConfig> endpoints;
-
+    boolean secure;
     /**
-     * The time in milliseconds between polls.
+     * The principal. Can be {@code null}.
      */
-    long pollPeriod;
-
+    String principal;
     /**
-     * The topic root.
+     * The password. Can be {@code null}.
      */
-    String topicRoot;
+    String password;
+    /**
+     * The location of the trust store.
+     */
+    String truststore;
 }

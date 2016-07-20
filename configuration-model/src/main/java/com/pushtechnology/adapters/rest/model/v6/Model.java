@@ -13,47 +13,37 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.model.latest;
+package com.pushtechnology.adapters.rest.model.v6;
 
 import java.util.List;
+
+import com.pushtechnology.adapters.rest.model.AnyModel;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Value;
 
 /**
- * Service configuration. Version 7.
- * <p>
- * Description of a REST service to poll.
+ * Configuration model. Version 6.
  *
  * @author Push Technology Limited
  */
 @Value
 @Builder
 @AllArgsConstructor
-public class ServiceConfig {
+public class Model implements AnyModel {
     /**
-     * The host of the service.
+     * The version of the model.
      */
-    String host;
+    public static final int VERSION = 6;
 
     /**
-     * The port to connect to.
+     * The Diffusion server.
      */
-    int port;
+    private DiffusionConfig diffusion;
 
     /**
-     * The endpoints the service makes available.
+     * The REST services to poll.
      */
-    List<EndpointConfig> endpoints;
-
-    /**
-     * The time in milliseconds between polls.
-     */
-    long pollPeriod;
-
-    /**
-     * The topic root.
-     */
-    String topicRoot;
+    List<ServiceConfig> services;
 }
