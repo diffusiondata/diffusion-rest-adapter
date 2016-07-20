@@ -21,6 +21,7 @@ import static javax.net.ssl.TrustManagerFactory.getDefaultAlgorithm;
 import static javax.net.ssl.TrustManagerFactory.getInstance;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.KeyManagementException;
@@ -115,8 +116,14 @@ public final class PublicationComponentFactory {
 
     private static SSLContext createTruststore(DiffusionConfig diffusionConfig) {
         try {
+            final String truststoreLocation = diffusionConfig.getTruststore();
+            InputStream stream = Thread.currentThread().getContextClassLoader().getResourceAsStream(truststoreLocation);
+            if (stream == null) {
+                stream = Files.newInputStream(Paths.get(truststoreLocation));
+            }
+
             final KeyStore keyStore = KeyStore.getInstance(getDefaultType());
-            keyStore.load(Files.newInputStream(Paths.get(diffusionConfig.getTruststore())), null);
+            keyStore.load(stream, null);
             final TrustManagerFactory trustManagerFactory = getInstance(getDefaultAlgorithm());
             trustManagerFactory.init(keyStore);
             final SSLContext sslContext = SSLContext.getInstance("SSL");
