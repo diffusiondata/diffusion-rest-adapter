@@ -16,9 +16,22 @@
 package com.pushtechnology.adapters.rest.client;
 
 import static com.pushtechnology.diffusion.client.session.SessionAttributes.Transport.WEBSOCKET;
+import static java.security.KeyStore.getDefaultType;
+import static javax.net.ssl.TrustManagerFactory.getDefaultAlgorithm;
+import static javax.net.ssl.TrustManagerFactory.getInstance;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManagerFactory;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,7 +85,7 @@ public final class PublicationComponentFactory {
         AtomicBoolean isActive,
         RESTAdapterClientCloseHandle client) {
 
-        final SessionFactory sessionFactory = Diffusion
+        SessionFactory sessionFactory = Diffusion
             .sessions()
             .serverHost(diffusionConfig.getHost())
             .serverPort(diffusionConfig.getPort())
@@ -81,14 +94,43 @@ public final class PublicationComponentFactory {
             .reconnectionTimeout(5000)
             .listener(new Listener(isActive, client));
 
-        if (diffusionConfig.getPrincipal() != null && diffusionConfig.getPassword() != null) {
-            return sessionFactory
-                .principal(diffusionConfig.getPrincipal())
-                .password(diffusionConfig.getPassword())
-                .open();
+        if (diffusionConfig.isSecure()) {
+            sessionFactory = sessionFactory.secureTransport(true);
+
+            if (diffusionConfig.getTruststore() != null) {
+                final SSLContext sslContext = createTruststore(diffusionConfig);
+
+                sessionFactory = sessionFactory.sslContext(sslContext);
+            }
         }
-        else  {
-            return sessionFactory.open();
+
+        if (diffusionConfig.getPrincipal() != null && diffusionConfig.getPassword() != null) {
+            sessionFactory = sessionFactory
+                .principal(diffusionConfig.getPrincipal())
+                .password(diffusionConfig.getPassword());
+        }
+
+        return sessionFactory.open();
+    }
+
+    private static SSLContext createTruststore(DiffusionConfig diffusionConfig) {
+        try {
+            final KeyStore keyStore = KeyStore.getInstance(getDefaultType());
+            keyStore.load(Files.newInputStream(Paths.get(diffusionConfig.getTruststore())), null);
+            final TrustManagerFactory trustManagerFactory = getInstance(getDefaultAlgorithm());
+            trustManagerFactory.init(keyStore);
+            final SSLContext sslContext = SSLContext.getInstance("SSL");
+            sslContext.init(null, trustManagerFactory.getTrustManagers(), null);
+            return sslContext;
+        }
+        catch (KeyStoreException |
+            CertificateException |
+            NoSuchAlgorithmException |
+            IOException |
+            KeyManagementException e) {
+
+            throw new IllegalArgumentException("An SSLContext could not be created as requested in the" +
+                " configuration");
         }
     }
 
