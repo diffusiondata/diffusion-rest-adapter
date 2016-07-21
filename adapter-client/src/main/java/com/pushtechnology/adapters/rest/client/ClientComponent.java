@@ -83,6 +83,12 @@ public final class ClientComponent implements AutoCloseable {
         else if (isModelInactive(model)) {
             switchToInactiveComponents(model);
         }
+        else if (wasInactive()) {
+            reconfigureAll(model, client);
+        }
+        else if (hasTruststoreChanged(model)) {
+            reconfigureAll(model, client);
+        }
         else if (hasDiffusionChanged(model)) {
             reconfigurePollingAndPublishing(model, client);
         }
@@ -108,25 +114,45 @@ public final class ClientComponent implements AutoCloseable {
     private void switchToInactiveComponents(Model model) throws IOException {
         LOG.info("Replacing with inactive components");
 
-        final PollingComponent oldPollingComponent = this.pollingComponent;
-        final PublicationComponent oldPublicationComponent = this.publicationComponent;
+        final PollingComponent oldPollingComponent = pollingComponent;
+        final PublicationComponent oldPublicationComponent = publicationComponent;
+        final HttpComponent oldHttpComponent = httpComponent;
 
+        httpComponent = HttpComponent.INACTIVE;
         publicationComponent = PublicationComponent.INACTIVE;
         pollingComponent = PollingComponent.INACTIVE;
         currentModel = model;
 
         oldPollingComponent.close();
         oldPublicationComponent.close();
+        oldHttpComponent.close();
+    }
+
+    private void reconfigureAll(Model model, RESTAdapterClientCloseHandle client) throws IOException {
+        LOG.info("Replacing all components");
+
+        final PollingComponent oldPollingComponent = pollingComponent;
+        final PublicationComponent oldPublicationComponent = publicationComponent;
+        final HttpComponent oldHttpComponent = httpComponent;
+
+        httpComponent = HTTP_COMPONENT_FACTORY.create(sslContext);
+        publicationComponent = publicationComponentFactory.create(model, client, sslContext);
+        pollingComponent = publicationComponent.createPolling(model, httpComponent);
+        currentModel = model;
+
+        oldPollingComponent.close();
+        oldPublicationComponent.close();
+        oldHttpComponent.close();
     }
 
     private void reconfigurePollingAndPublishing(Model model, RESTAdapterClientCloseHandle client) throws IOException {
         LOG.info("Replacing the polling and publishing components");
 
-        final PollingComponent oldPollingComponent = this.pollingComponent;
-        final PublicationComponent oldPublicationComponent = this.publicationComponent;
+        final PollingComponent oldPollingComponent = pollingComponent;
+        final PublicationComponent oldPublicationComponent = publicationComponent;
 
-        this.publicationComponent = publicationComponentFactory.create(model, client, sslContext);
-        this.pollingComponent = this.publicationComponent.createPolling(model, httpComponent);
+        publicationComponent = publicationComponentFactory.create(model, client, sslContext);
+        pollingComponent = publicationComponent.createPolling(model, httpComponent);
         currentModel = model;
 
         oldPollingComponent.close();
@@ -136,7 +162,7 @@ public final class ClientComponent implements AutoCloseable {
     private void reconfigurePolling(Model model) {
         LOG.info("Replacing the polling component");
 
-        final PollingComponent oldPollingComponent = this.pollingComponent;
+        final PollingComponent oldPollingComponent = pollingComponent;
 
         pollingComponent = publicationComponent.createPolling(model, httpComponent);
         currentModel = model;
@@ -158,21 +184,28 @@ public final class ClientComponent implements AutoCloseable {
             services.stream().map(ServiceConfig::getEndpoints).flatMap(Collection::stream).collect(counting()) == 0L;
     }
 
+    private boolean wasInactive() {
+        return httpComponent == HttpComponent.INACTIVE ||
+            publicationComponent == PublicationComponent.INACTIVE ||
+            pollingComponent == PollingComponent.INACTIVE;
+    }
+
+    private boolean hasTruststoreChanged(Model newModel) {
+        return (currentModel.getTruststore() == null && newModel.getTruststore() != null) ||
+            !currentModel.getTruststore().equals(newModel.getTruststore());
+    }
+
     private boolean hasDiffusionChanged(Model model) {
         final DiffusionConfig diffusionConfig = model.getDiffusion();
 
-        return currentModel.getDiffusion() == null ||
-            !currentModel.getDiffusion().equals(diffusionConfig) ||
-            publicationComponent == PublicationComponent.INACTIVE;
+        return currentModel.getDiffusion() == null || !currentModel.getDiffusion().equals(diffusionConfig);
     }
 
     private boolean haveServicesChanged(Model model) {
         final List<ServiceConfig> newServices = model.getServices();
         final List<ServiceConfig> oldServices = model.getServices();
 
-        return oldServices == null ||
-            oldServices.equals(newServices) ||
-            pollingComponent == PollingComponent.INACTIVE;
+        return oldServices == null || oldServices.equals(newServices);
     }
 
     @Override
