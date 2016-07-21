@@ -85,7 +85,7 @@ public final class ClientComponent implements Component {
 
             switchToInactiveComponents(model);
         }
-        else if (currentModel.getDiffusion().equals(diffusionConfig) ||
+        else if (!currentModel.getDiffusion().equals(diffusionConfig) ||
                 publicationComponent == PublicationComponent.INACTIVE) {
 
             reconfigurePollingAndPublishing(model, client);
