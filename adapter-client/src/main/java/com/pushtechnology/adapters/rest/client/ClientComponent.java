@@ -191,7 +191,7 @@ public final class ClientComponent implements AutoCloseable {
     }
 
     private boolean hasTruststoreChanged(Model newModel) {
-        return (currentModel.getTruststore() == null && newModel.getTruststore() != null) ||
+        return currentModel.getTruststore() == null && newModel.getTruststore() != null ||
             !currentModel.getTruststore().equals(newModel.getTruststore());
     }
 
