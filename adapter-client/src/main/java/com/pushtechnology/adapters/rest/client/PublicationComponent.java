@@ -17,16 +17,15 @@ package com.pushtechnology.adapters.rest.client;
 
 import java.io.IOException;
 
-import com.pushtechnology.adapters.rest.component.Component;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.polling.HttpComponent;
 
 /**
- * The {@link Component} responsible for polling REST services.
+ * The component responsible for polling REST services.
  *
  * @author Push Technology Limited
  */
-public interface PublicationComponent extends Component {
+public interface PublicationComponent extends AutoCloseable {
     /**
      * Inactive component.
      */
@@ -45,4 +44,7 @@ public interface PublicationComponent extends Component {
      * @return A new {@link PollingComponentImpl}
      */
     PollingComponent createPolling(Model model, HttpComponent httpComponent);
+
+    @Override
+    void close() throws IOException;
 }

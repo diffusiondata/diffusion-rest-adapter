@@ -20,7 +20,6 @@ import java.util.concurrent.Future;
 
 import org.apache.http.concurrent.FutureCallback;
 
-import com.pushtechnology.adapters.rest.component.Component;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.diffusion.datatype.json.JSON;
@@ -30,7 +29,7 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
  *
  * @author Push Technology Limited
  */
-public interface HttpComponent extends Component {
+public interface HttpComponent extends AutoCloseable {
     /**
      * An inactive {@link HttpComponent}.
      */
@@ -57,4 +56,7 @@ public interface HttpComponent extends Component {
      * @throws IllegalStateException if the client is not running
      */
     Future<?> request(ServiceConfig serviceConfig, EndpointConfig endpointConfig, FutureCallback<JSON> callback);
+
+    @Override
+    void close() throws IOException;
 }

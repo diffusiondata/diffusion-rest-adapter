@@ -27,7 +27,6 @@ import javax.net.ssl.SSLContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.pushtechnology.adapters.rest.component.Component;
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
@@ -38,12 +37,12 @@ import net.jcip.annotations.GuardedBy;
 import net.jcip.annotations.ThreadSafe;
 
 /**
- * The {@link Component} that wires together the different components.
+ * The component that wires together the different components.
  *
  * @author Push Technology Limited
  */
 @ThreadSafe
-public final class ClientComponent implements Component {
+public final class ClientComponent implements AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(ClientComponent.class);
 
     private static final SSLContextFactory SSL_CONTEXT_FACTORY = new SSLContextFactory();

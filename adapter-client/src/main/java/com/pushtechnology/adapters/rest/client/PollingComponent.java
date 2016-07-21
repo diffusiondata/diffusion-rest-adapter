@@ -15,14 +15,12 @@
 
 package com.pushtechnology.adapters.rest.client;
 
-import com.pushtechnology.adapters.rest.component.Component;
-
 /**
- * The {@link Component} responsible for polling REST services.
+ * The component responsible for polling REST services.
  *
  * @author Push Technology Limited
  */
-public interface PollingComponent extends Component {
+public interface PollingComponent extends AutoCloseable {
     /**
      * Inactive component.
      */
