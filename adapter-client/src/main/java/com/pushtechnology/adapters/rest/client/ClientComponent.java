@@ -76,35 +76,37 @@ public final class ClientComponent implements Component {
             Model model,
             RESTAdapterClientCloseHandle client) throws IOException {
 
+        sslContext = SSL_CONTEXT_FACTORY.create(model);
+
+        if (isFirstConfiguration()) {
+            initialConfiguration(model, client);
+        }
+        else if (isModelInactive(model)) {
+            switchToInactiveComponents(model);
+        }
+        else if (hasDiffusionChanged(model)) {
+            reconfigurePollingAndPublishing(model, client);
+        }
+        else if (haveServicesChanged(model)) {
+            reconfigurePolling(model);
+        }
+    }
+
+    private void initialConfiguration(Model model, RESTAdapterClientCloseHandle client) throws IOException {
+        LOG.info("Setting up components for the first time");
+
         final DiffusionConfig diffusionConfig = model.getDiffusion();
         final List<ServiceConfig> services = model.getServices();
 
-        sslContext = SSL_CONTEXT_FACTORY.create(model);
-
-        if (currentModel == null) {
-            initialConfiguration(model, client);
-        }
-        else if (diffusionConfig == null ||
+        if (diffusionConfig == null ||
             // Check to see if the new configuration performs useful work
             services == null ||
             services.size() == 0 ||
             services.stream().map(ServiceConfig::getEndpoints).flatMap(Collection::stream).collect(counting()) == 0L) {
 
             switchToInactiveComponents(model);
+            return;
         }
-        else if (!currentModel.getDiffusion().equals(diffusionConfig) ||
-                publicationComponent == PublicationComponent.INACTIVE) {
-
-            reconfigurePollingAndPublishing(model, client);
-        }
-        else if (!currentModel.getServices().equals(services) || pollingComponent == PollingComponent.INACTIVE) {
-
-            reconfigurePolling(model);
-        }
-    }
-
-    private void initialConfiguration(Model model, RESTAdapterClientCloseHandle client) {
-        LOG.info("Setting up components for the first time");
 
         httpComponent = HTTP_COMPONENT_FACTORY.create(sslContext);
         publicationComponent = publicationComponentFactory.create(model, client, sslContext);
@@ -141,6 +143,37 @@ public final class ClientComponent implements Component {
 
         pollingComponent = publicationComponent.createPolling(model, httpComponent);
         currentModel = model;
+    }
+
+    private boolean isFirstConfiguration() {
+        return currentModel == null;
+    }
+
+    private boolean isModelInactive(Model model) {
+        final DiffusionConfig diffusionConfig = model.getDiffusion();
+        final List<ServiceConfig> services = model.getServices();
+
+        return diffusionConfig == null ||
+            services == null ||
+            services.size() == 0 ||
+            services.stream().map(ServiceConfig::getEndpoints).flatMap(Collection::stream).collect(counting()) == 0L;
+    }
+
+    private boolean hasDiffusionChanged(Model model) {
+        final DiffusionConfig diffusionConfig = model.getDiffusion();
+
+        return currentModel.getDiffusion() == null ||
+            !currentModel.getDiffusion().equals(diffusionConfig) ||
+            publicationComponent == PublicationComponent.INACTIVE;
+    }
+
+    private boolean haveServicesChanged(Model model) {
+        final List<ServiceConfig> newServices = model.getServices();
+        final List<ServiceConfig> oldServices = model.getServices();
+
+        return oldServices == null ||
+            oldServices.equals(newServices) ||
+            pollingComponent == PollingComponent.INACTIVE;
     }
 
     @Override
