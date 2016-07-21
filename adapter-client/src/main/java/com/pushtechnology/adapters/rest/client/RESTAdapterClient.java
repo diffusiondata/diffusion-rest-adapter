@@ -61,6 +61,9 @@ public final class RESTAdapterClient implements RESTAdapterClientCloseHandle {
         try {
             clientComponent.reconfigure(newModel, this);
         }
+        catch (IllegalArgumentException e) {
+            LOG.warn("The new model is not valid", e);
+        }
         catch (IOException e) {
             LOG.warn("Failed to shutdown previous model on model change");
         }
