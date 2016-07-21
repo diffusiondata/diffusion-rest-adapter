@@ -15,6 +15,8 @@
 
 package com.pushtechnology.adapters.rest.client;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 
 import com.pushtechnology.adapters.rest.model.latest.Model;
@@ -52,6 +54,7 @@ public final class PollingComponentFactory {
 
         final PollHandlerFactory handlerFactory = new PollHandlerFactoryImpl(publishingClient);
 
+        final List<ServiceSession> serviceSessions = new ArrayList<>();
         for (ServiceConfig service : model.getServices()) {
             final ServiceSession serviceSession = new ServiceSessionImpl(
                 executor,
@@ -62,8 +65,9 @@ public final class PollingComponentFactory {
             publishingClient
                 .addService(service)
                 .thenAccept(new ServiceReadyForPublishing(topicManagementClient, serviceSession));
+            serviceSessions.add(serviceSession);
         }
 
-        return new PollingComponentImpl();
+        return new PollingComponentImpl(publishingClient, model.getServices(), serviceSessions);
     }
 }

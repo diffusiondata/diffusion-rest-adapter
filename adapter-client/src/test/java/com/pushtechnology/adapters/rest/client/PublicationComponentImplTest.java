@@ -124,10 +124,12 @@ public final class PublicationComponentImplTest {
     @Test
     public void createPolling() {
         final PollingComponent pollingComponent = publicationComponent.createPolling(model, httpComponent);
-        pollingComponent.close();
 
         verify(topicManagementClient).addService(serviceConfig);
         verify(publishingClient).addService(serviceConfig);
+
+        pollingComponent.close();
+        verify(publishingClient).removeService(serviceConfig);
     }
 
     @Test

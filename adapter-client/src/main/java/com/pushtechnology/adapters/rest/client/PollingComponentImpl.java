@@ -15,19 +15,37 @@
 
 package com.pushtechnology.adapters.rest.client;
 
+import java.util.List;
+
+import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
+import com.pushtechnology.adapters.rest.polling.ServiceSession;
+import com.pushtechnology.adapters.rest.publication.PublishingClient;
+
 /**
  * The {@link com.pushtechnology.adapters.rest.component.Component} responsible for polling REST services.
  *
  * @author Push Technology Limited
  */
 /*package*/ final class PollingComponentImpl implements PollingComponent {
+    private final PublishingClient publishingClient;
+    private final List<ServiceConfig> services;
+    private final List<ServiceSession> serviceSessions;
+
     /**
      * Constructor.
      */
-    /*package*/ PollingComponentImpl() {
+    /*package*/ PollingComponentImpl(
+            PublishingClient publishingClient,
+            List<ServiceConfig> services,
+            List<ServiceSession> serviceSessions) {
+        this.publishingClient = publishingClient;
+        this.services = services;
+        this.serviceSessions = serviceSessions;
     }
 
     @Override
     public void close() {
+        serviceSessions.forEach(ServiceSession::stop);
+        services.forEach(publishingClient::removeService);
     }
 }

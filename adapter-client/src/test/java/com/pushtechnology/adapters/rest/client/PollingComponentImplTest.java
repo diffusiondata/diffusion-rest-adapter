@@ -15,16 +15,17 @@
 
 package com.pushtechnology.adapters.rest.client;
 
+import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-import java.util.concurrent.ScheduledExecutorService;
-
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
+
+import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
+import com.pushtechnology.adapters.rest.polling.ServiceSession;
+import com.pushtechnology.adapters.rest.publication.PublishingClient;
 
 /**
  * Unit tests for {@link PollingComponentImpl}.
@@ -33,6 +34,14 @@ import org.mockito.Mock;
  */
 public final class PollingComponentImplTest {
 
+    @Mock
+    private PublishingClient publishingClient;
+
+    @Mock
+    private ServiceSession serviceSession;
+
+    private ServiceConfig serviceConfig = ServiceConfig.builder().build();
+
     @Before
     public void setUp() {
         initMocks(this);
@@ -40,9 +49,14 @@ public final class PollingComponentImplTest {
 
     @Test
     public void close() {
-        final PollingComponent component = new PollingComponentImpl();
+        final PollingComponent component = new PollingComponentImpl(
+            publishingClient,
+            singletonList(serviceConfig),
+            singletonList(serviceSession));
 
         component.close();
+
+        verify(publishingClient).removeService(serviceConfig);
     }
 
     @Test
