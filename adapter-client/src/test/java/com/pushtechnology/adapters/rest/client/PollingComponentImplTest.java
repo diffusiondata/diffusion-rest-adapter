@@ -32,26 +32,17 @@ import org.mockito.Mock;
  * @author Push Technology Limited
  */
 public final class PollingComponentImplTest {
-    @Mock
-    private ScheduledExecutorService executor;
 
     @Before
     public void setUp() {
         initMocks(this);
     }
 
-    @After
-    public void postConditions() {
-        verifyNoMoreInteractions(executor);
-    }
-
     @Test
     public void close() {
-        final PollingComponent component = new PollingComponentImpl(executor);
+        final PollingComponent component = new PollingComponentImpl();
 
         component.close();
-
-        verify(executor).shutdown();
     }
 
     @Test

@@ -15,25 +15,19 @@
 
 package com.pushtechnology.adapters.rest.client;
 
-import java.util.concurrent.ScheduledExecutorService;
-
 /**
  * The {@link com.pushtechnology.adapters.rest.component.Component} responsible for polling REST services.
  *
  * @author Push Technology Limited
  */
 /*package*/ final class PollingComponentImpl implements PollingComponent {
-    private final ScheduledExecutorService executor;
-
     /**
      * Constructor.
      */
-    /*package*/ PollingComponentImpl(ScheduledExecutorService executor) {
-        this.executor = executor;
+    /*package*/ PollingComponentImpl() {
     }
 
     @Override
     public void close() {
-        executor.shutdown();
     }
 }

@@ -64,6 +64,6 @@ public final class PollingComponentFactory {
                 .thenAccept(new ServiceReadyForPublishing(topicManagementClient, serviceSession));
         }
 
-        return new PollingComponentImpl(executor);
+        return new PollingComponentImpl();
     }
 }

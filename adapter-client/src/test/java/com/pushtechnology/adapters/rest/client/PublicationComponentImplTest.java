@@ -126,7 +126,6 @@ public final class PublicationComponentImplTest {
         final PollingComponent pollingComponent = publicationComponent.createPolling(model, httpComponent);
         pollingComponent.close();
 
-        verify(executor).shutdown();
         verify(topicManagementClient).addService(serviceConfig);
         verify(publishingClient).addService(serviceConfig);
     }
