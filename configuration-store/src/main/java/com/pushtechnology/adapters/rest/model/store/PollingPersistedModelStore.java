@@ -89,11 +89,6 @@ public final class PollingPersistedModelStore extends AbstractModelStore {
         return latestModel;
     }
 
-    @Override
-    public void close() {
-        executor.shutdown();
-    }
-
     private final class Poll implements Runnable {
         @Override
         public void run() {

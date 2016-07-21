@@ -220,11 +220,4 @@ public final class PollingPersistedModelStoreTest {
 
         verify(persistence, times(3)).loadModel();
     }
-
-    @Test
-    public void testClose() {
-        modelStore.close();
-
-        verify(executor).shutdown();
-    }
 }

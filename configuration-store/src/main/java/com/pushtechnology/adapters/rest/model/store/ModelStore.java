@@ -24,7 +24,7 @@ import com.pushtechnology.adapters.rest.model.latest.Model;
  *
  * @author Push Technology Limited
  */
-public interface ModelStore extends AutoCloseable {
+public interface ModelStore {
 
     /**
      * @return the current model in the store
@@ -37,7 +37,4 @@ public interface ModelStore extends AutoCloseable {
      * The listener is notified of the current state when added.
      */
     void onModelChange(Consumer<Model> newModel);
-
-    @Override
-    void close();
 }

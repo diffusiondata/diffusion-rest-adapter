@@ -85,11 +85,6 @@ public final class AbstractModelStoreTest {
         verify(listener, times(2)).accept(model);
     }
 
-    @Test
-    public void testClose() {
-        modelStore.close();
-    }
-
     private final class TestStore extends AbstractModelStore {
         @Override
         public Model get() {
