@@ -13,11 +13,11 @@ import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 
 /**
- * Unit tests for {@link V6Converter}.
+ * Unit tests for {@link V7Converter}.
  *
  * @author Push Technology Limited
  */
-public final class V6ConverterTest {
+public final class V7ConverterTest {
     @Test
     public void testConvert() {
         final Model model = INSTANCE.convert(

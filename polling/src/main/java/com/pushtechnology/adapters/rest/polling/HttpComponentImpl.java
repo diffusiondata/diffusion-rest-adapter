@@ -65,7 +65,7 @@ public final class HttpComponentImpl implements HttpComponent {
         }
 
         return client.execute(
-            new HttpHost(serviceConfig.getHost(), serviceConfig.getPort(), "http"),
+            new HttpHost(serviceConfig.getHost(), serviceConfig.getPort(), serviceConfig.isSecure() ? "https" : "http"),
             new HttpGet(endpointConfig.getUrl()),
             new FutureCallback<HttpResponse>() {
                 @Override

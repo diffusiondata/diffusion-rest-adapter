@@ -84,8 +84,9 @@ public final class BasicJSONPollIT {
                 .builder()
                 .host("localhost")
                 .port(8444)
+                .secure(true)
                 .pollPeriod(500)
-                .topicRoot("restSSL")
+                .topicRoot("restTLS")
                 .endpoints(asList(
                     EndpointConfig
                         .builder()
@@ -131,8 +132,11 @@ public final class BasicJSONPollIT {
 
         final HttpConfiguration httpsConfiguration = new HttpConfiguration();
         httpsConfiguration.addCustomizer(new SecureRequestCustomizer());
-        SslContextFactory sslContextFactory = new SslContextFactory();
+        SslContextFactory sslContextFactory = new SslContextFactory(true);
         sslContextFactory.setKeyStorePath(BasicJSONPollIT.class.getResource("/testKeystore.jks").toExternalForm());
+        sslContextFactory.setKeyStorePassword("password");
+        sslContextFactory.setExcludeProtocols();
+        sslContextFactory.setExcludeCipherSuites();
 
         final ServerConnector httpsConnector = new ServerConnector(jettyServer,
             new SslConnectionFactory(sslContextFactory, "http/1.1"),
@@ -162,9 +166,13 @@ public final class BasicJSONPollIT {
         final Topics topics = session.feature(Topics.class);
         topics.addFallbackStream(JSON.class, stream);
         topics.subscribe("?rest/", callback);
+        topics.subscribe("?restTLS/", callback);
 
-        verify(callback, timed()).onComplete();
+        verify(callback, timed().times(2)).onComplete();
+        verify(stream, timed()).onSubscription(eq("rest/timestamp"), isA(TopicSpecification.class));
         verify(stream, timed()).onSubscription(eq("rest/increment"), isA(TopicSpecification.class));
+        verify(stream, timed()).onSubscription(eq("restTLS/timestamp"), isA(TopicSpecification.class));
+        verify(stream, timed()).onSubscription(eq("restTLS/increment"), isA(TopicSpecification.class));
 
         stopSession(session);
         client.close();

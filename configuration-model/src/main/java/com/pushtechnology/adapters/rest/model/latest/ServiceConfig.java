@@ -22,7 +22,7 @@ import lombok.Builder;
 import lombok.Value;
 
 /**
- * Service configuration. Version 7.
+ * Service configuration. Version 8.
  * <p>
  * Description of a REST service to poll.
  *
@@ -41,6 +41,11 @@ public class ServiceConfig {
      * The port to connect to.
      */
     int port;
+
+    /**
+     * If a secure transport should be used.
+     */
+    boolean secure;
 
     /**
      * The endpoints the service makes available.

@@ -29,6 +29,7 @@ import com.pushtechnology.adapters.rest.model.conversion.V3Converter;
 import com.pushtechnology.adapters.rest.model.conversion.V4Converter;
 import com.pushtechnology.adapters.rest.model.conversion.V5Converter;
 import com.pushtechnology.adapters.rest.model.conversion.V6Converter;
+import com.pushtechnology.adapters.rest.model.conversion.V7Converter;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.store.PollingPersistedModelStore;
 import com.pushtechnology.adapters.rest.persistence.FileSystemPersistence;
@@ -85,6 +86,10 @@ public final class RESTAdapter {
                 com.pushtechnology.adapters.rest.model.v6.Model.VERSION,
                 com.pushtechnology.adapters.rest.model.v6.Model.class,
                 V6Converter.INSTANCE)
+            .register(
+                com.pushtechnology.adapters.rest.model.v7.Model.VERSION,
+                com.pushtechnology.adapters.rest.model.v7.Model.class,
+                V7Converter.INSTANCE)
             .register(
                 Model.VERSION,
                 Model.class,

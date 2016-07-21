@@ -17,10 +17,10 @@ package com.pushtechnology.adapters.rest.model.conversion;
 
 import static java.util.stream.Collectors.toList;
 
-import com.pushtechnology.adapters.rest.model.v7.DiffusionConfig;
-import com.pushtechnology.adapters.rest.model.v7.EndpointConfig;
-import com.pushtechnology.adapters.rest.model.v7.Model;
-import com.pushtechnology.adapters.rest.model.v7.ServiceConfig;
+import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
+import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
+import com.pushtechnology.adapters.rest.model.latest.Model;
+import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 
 import net.jcip.annotations.Immutable;
 
@@ -30,18 +30,18 @@ import net.jcip.annotations.Immutable;
  * @author Push Technology Limited
  */
 @Immutable
-public final class V6Converter extends AbstractModelConverter<com.pushtechnology.adapters.rest.model.v6.Model, Model> {
+public final class V7Converter extends AbstractModelConverter<com.pushtechnology.adapters.rest.model.v7.Model, Model> {
     /**
      * The converter.
      */
-    public static final V6Converter INSTANCE = new V6Converter();
+    public static final V7Converter INSTANCE = new V7Converter();
 
-    private V6Converter() {
-        super(V7Converter.INSTANCE, com.pushtechnology.adapters.rest.model.v6.Model.class);
+    private V7Converter() {
+        super(LatestConverter.INSTANCE, com.pushtechnology.adapters.rest.model.v7.Model.class);
     }
 
     @Override
-    protected Model convertFrom(com.pushtechnology.adapters.rest.model.v6.Model model) {
+    protected Model convertFrom(com.pushtechnology.adapters.rest.model.v7.Model model) {
         return Model
             .builder()
             .services(model
@@ -51,6 +51,7 @@ public final class V6Converter extends AbstractModelConverter<com.pushtechnology
                     .builder()
                     .host(oldService.getHost())
                     .port(oldService.getPort())
+                    .secure(false)
                     .endpoints(oldService
                         .getEndpoints()
                         .stream()
@@ -71,7 +72,7 @@ public final class V6Converter extends AbstractModelConverter<com.pushtechnology
                 .port(model.getDiffusion().getPort())
                 .secure(model.getDiffusion().isSecure())
                 .build())
-            .truststore(model.getDiffusion().getTruststore())
+            .truststore(model.getTruststore())
             .build();
     }
 }

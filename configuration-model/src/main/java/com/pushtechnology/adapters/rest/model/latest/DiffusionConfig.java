@@ -20,7 +20,7 @@ import lombok.Builder;
 import lombok.Value;
 
 /**
- * Diffusion configuration. Version 7.
+ * Diffusion configuration. Version 8.
  * <p>
  * Description of a Diffusion server to publish to.
  *
