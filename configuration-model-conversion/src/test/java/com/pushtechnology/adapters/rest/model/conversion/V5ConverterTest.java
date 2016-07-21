@@ -44,6 +44,8 @@ public final class V5ConverterTest {
                     .builder()
                     .host("localhost")
                     .port(8080)
+                    .principal("control")
+                    .password("password")
                     .build())
                 .build());
 
@@ -59,6 +61,8 @@ public final class V5ConverterTest {
         assertEquals("a", service.getTopicRoot());
         assertEquals("localhost", diffusion.getHost());
         assertEquals(8080, diffusion.getPort());
+        assertEquals("control", model.getDiffusion().getPrincipal());
+        assertEquals("password", model.getDiffusion().getPassword());
         assertEquals("endpoint", endpoints.get(0).getName());
         assertEquals("topic", endpoints.get(0).getTopic());
         assertEquals("/url", endpoints.get(0).getUrl());

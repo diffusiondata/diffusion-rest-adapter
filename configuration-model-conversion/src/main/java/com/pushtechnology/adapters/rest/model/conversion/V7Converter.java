@@ -70,6 +70,8 @@ public final class V7Converter extends AbstractModelConverter<com.pushtechnology
                 .builder()
                 .host(model.getDiffusion().getHost())
                 .port(model.getDiffusion().getPort())
+                .principal(model.getDiffusion().getPrincipal())
+                .password(model.getDiffusion().getPassword())
                 .secure(model.getDiffusion().isSecure())
                 .build())
             .truststore(model.getTruststore())

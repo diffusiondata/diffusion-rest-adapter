@@ -34,6 +34,8 @@ public final class V4ConverterTest {
                     .builder()
                     .host("localhost")
                     .port(8080)
+                    .principal("control")
+                    .password("password")
                     .build())
                 .build());
 
@@ -47,6 +49,8 @@ public final class V4ConverterTest {
         assertEquals("", service.getTopicRoot());
         assertEquals("localhost", model.getDiffusion().getHost());
         assertEquals(8080, model.getDiffusion().getPort());
+        assertEquals("control", model.getDiffusion().getPrincipal());
+        assertEquals("password", model.getDiffusion().getPassword());
     }
 
     @Test(expected = IllegalArgumentException.class)
