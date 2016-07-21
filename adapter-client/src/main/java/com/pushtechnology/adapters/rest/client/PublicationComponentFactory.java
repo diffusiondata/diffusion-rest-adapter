@@ -57,22 +57,6 @@ public final class PublicationComponentFactory {
      */
     public PublicationComponent create(Model model, RESTAdapterClientCloseHandle client, SSLContext sslContext) {
         final AtomicBoolean isActive = new AtomicBoolean(true);
-        final Session session = getSession(model, new Listener(isActive, client), sslContext);
-        final TopicManagementClient topicManagementClient = new TopicManagementClientImpl(session);
-        final PublishingClient publishingClient = new PublishingClientImpl(session);
-
-        return new PublicationComponentImpl(
-            isActive,
-            session,
-            topicManagementClient,
-            publishingClient,
-            pollingComponentFactory);
-    }
-
-    private static Session getSession(
-        Model model,
-        Session.Listener listener,
-        SSLContext sslContext) {
 
         final DiffusionConfig diffusionConfig = model.getDiffusion();
 
@@ -83,7 +67,7 @@ public final class PublicationComponentFactory {
             .secureTransport(false)
             .transports(WEBSOCKET)
             .reconnectionTimeout(5000)
-            .listener(listener);
+            .listener(new Listener(isActive, client));
 
         if (diffusionConfig.isSecure()) {
             sessionFactory = sessionFactory.secureTransport(true);
@@ -99,7 +83,16 @@ public final class PublicationComponentFactory {
                 .password(diffusionConfig.getPassword());
         }
 
-        return sessionFactory.open();
+        final Session session = sessionFactory.open();
+        final TopicManagementClient topicManagementClient = new TopicManagementClientImpl(session);
+        final PublishingClient publishingClient = new PublishingClientImpl(session);
+
+        return new PublicationComponentImpl(
+            isActive,
+            session,
+            topicManagementClient,
+            publishingClient,
+            pollingComponentFactory);
     }
 
     /**
