@@ -11,6 +11,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.io.IOException;
+import java.util.concurrent.Executors;
 
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.HttpConfiguration;
@@ -183,7 +184,9 @@ public final class BasicJSONPollIT {
     }
 
     private static RESTAdapterClient startClient() {
-        final RESTAdapterClient client = RESTAdapterClient.create(new FixedModelStore(MODEL));
+        final RESTAdapterClient client = RESTAdapterClient.create(
+            new FixedModelStore(MODEL),
+            Executors.newSingleThreadScheduledExecutor());
         client.start();
         return client;
     }

@@ -16,6 +16,7 @@
 package com.pushtechnology.adapters.rest.client;
 
 import java.io.IOException;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.slf4j.Logger;
@@ -35,12 +36,13 @@ import net.jcip.annotations.ThreadSafe;
 public final class RESTAdapterClient implements RESTAdapterClientCloseHandle {
     private static final Logger LOG = LoggerFactory.getLogger(RESTAdapterClient.class);
 
-    private final ClientComponent clientComponent = new ClientComponent();
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
+    private final ClientComponent clientComponent;
     private final ModelStore modelStore;
 
-    private RESTAdapterClient(ModelStore modelStore) {
+    private RESTAdapterClient(ModelStore modelStore, ScheduledExecutorService executor) {
         this.modelStore = modelStore;
+        clientComponent = new ClientComponent(executor);
     }
 
     /**
@@ -84,10 +86,11 @@ public final class RESTAdapterClient implements RESTAdapterClientCloseHandle {
     /**
      * Factory method for {@link RESTAdapterClient}.
      * @param modelStore the configuration store to use
+     * @param executor executor to use to schedule poll requests
      * @return a new {@link RESTAdapterClient}
      */
-    public static RESTAdapterClient create(ModelStore modelStore) {
+    public static RESTAdapterClient create(ModelStore modelStore, ScheduledExecutorService executor) {
         LOG.debug("Creating REST adapter client with model store: {}", modelStore);
-        return new RESTAdapterClient(modelStore);
+        return new RESTAdapterClient(modelStore, executor);
     }
 }

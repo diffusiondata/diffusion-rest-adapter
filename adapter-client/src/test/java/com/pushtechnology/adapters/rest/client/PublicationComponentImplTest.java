@@ -105,7 +105,7 @@ public final class PublicationComponentImplTest {
             session,
             topicManagementClient,
             publishingClient,
-            new PollingComponentFactory(() -> executor));
+            new PollingComponentFactory(executor));
     }
 
     @After

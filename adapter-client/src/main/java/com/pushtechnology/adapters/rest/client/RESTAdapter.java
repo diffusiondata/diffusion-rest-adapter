@@ -19,6 +19,7 @@ import static java.util.concurrent.Executors.newSingleThreadScheduledExecutor;
 
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.concurrent.ScheduledExecutorService;
 
 import com.pushtechnology.adapters.rest.model.conversion.ConversionContext;
 import com.pushtechnology.adapters.rest.model.conversion.LatestConverter;
@@ -97,14 +98,15 @@ public final class RESTAdapter {
             .build();
 
         final Persistence fileSystemPersistence = new FileSystemPersistence(Paths.get("."), conversionContext);
+        final ScheduledExecutorService executor = newSingleThreadScheduledExecutor();
         final PollingPersistedModelStore modelStore = new PollingPersistedModelStore(
             fileSystemPersistence,
-            newSingleThreadScheduledExecutor(),
+            executor,
             1000L);
 
         modelStore.start();
 
-        final RESTAdapterClient adapterClient = RESTAdapterClient.create(modelStore);
+        final RESTAdapterClient adapterClient = RESTAdapterClient.create(modelStore, executor);
 
         adapterClient.start();
     }

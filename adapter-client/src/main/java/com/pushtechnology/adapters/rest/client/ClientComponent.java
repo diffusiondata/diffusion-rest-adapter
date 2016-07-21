@@ -20,7 +20,7 @@ import static java.util.stream.Collectors.counting;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 import javax.net.ssl.SSLContext;
 
@@ -48,8 +48,8 @@ public final class ClientComponent implements Component {
 
     private static final SSLContextFactory SSL_CONTEXT_FACTORY = new SSLContextFactory();
     private static final HttpComponentFactory HTTP_COMPONENT_FACTORY = new HttpComponentFactory();
-    private static final PublicationComponentFactory PUBLICATION_COMPONENT_FACTORY = new PublicationComponentFactory(
-        new PollingComponentFactory(Executors::newSingleThreadScheduledExecutor));
+
+    private final PublicationComponentFactory publicationComponentFactory;
 
     @GuardedBy("this")
     private SSLContext sslContext = null;
@@ -61,6 +61,13 @@ public final class ClientComponent implements Component {
     private PollingComponent pollingComponent = PollingComponent.INACTIVE;
     @GuardedBy("this")
     private Model currentModel = null;
+
+    /**
+     * Constructor.
+     */
+    public ClientComponent(ScheduledExecutorService executor) {
+        publicationComponentFactory = new PublicationComponentFactory(new PollingComponentFactory(executor));
+    }
 
     /**
      * Reconfigure the component.
@@ -100,7 +107,7 @@ public final class ClientComponent implements Component {
         LOG.info("Setting up components for the first time");
 
         httpComponent = HTTP_COMPONENT_FACTORY.create(sslContext);
-        publicationComponent = PUBLICATION_COMPONENT_FACTORY.create(model, client, sslContext);
+        publicationComponent = publicationComponentFactory.create(model, client, sslContext);
         pollingComponent = publicationComponent.createPolling(model, httpComponent);
         currentModel = model;
     }
@@ -122,7 +129,7 @@ public final class ClientComponent implements Component {
         pollingComponent.close();
         publicationComponent.close();
 
-        publicationComponent = PUBLICATION_COMPONENT_FACTORY.create(model, client, sslContext);
+        publicationComponent = publicationComponentFactory.create(model, client, sslContext);
         pollingComponent = publicationComponent.createPolling(model, httpComponent);
         currentModel = model;
     }

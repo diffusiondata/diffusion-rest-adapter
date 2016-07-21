@@ -16,7 +16,6 @@
 package com.pushtechnology.adapters.rest.client;
 
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.function.Supplier;
 
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
@@ -33,13 +32,13 @@ import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
  * @author Push Technology Limited
  */
 public final class PollingComponentFactory {
-    private final Supplier<ScheduledExecutorService> executorSupplier;
+    private final ScheduledExecutorService executor;
 
     /**
      * Constructor.
      */
-    /*package*/ PollingComponentFactory(Supplier<ScheduledExecutorService> executorSupplier) {
-        this.executorSupplier = executorSupplier;
+    /*package*/ PollingComponentFactory(ScheduledExecutorService executor) {
+        this.executor = executor;
     }
 
     /**
@@ -50,7 +49,6 @@ public final class PollingComponentFactory {
             HttpComponent httpComponent,
             PublishingClient publishingClient,
             TopicManagementClient topicManagementClient) {
-        final ScheduledExecutorService executor = executorSupplier.get();
 
         final PollHandlerFactory handlerFactory = new PollHandlerFactoryImpl(publishingClient);
 
