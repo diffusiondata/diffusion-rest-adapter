@@ -15,8 +15,6 @@
 
 package com.pushtechnology.adapters.rest.model.store;
 
-import java.util.function.Consumer;
-
 import com.pushtechnology.adapters.rest.model.latest.Model;
 
 import net.jcip.annotations.Immutable;
@@ -27,7 +25,7 @@ import net.jcip.annotations.Immutable;
  * @author Push Technology Limited
  */
 @Immutable
-public class FixedModelStore implements ModelStore {
+public final class FixedModelStore extends AbstractModelStore {
     private final Model model;
 
     /**
@@ -40,10 +38,5 @@ public class FixedModelStore implements ModelStore {
     @Override
     public Model get() {
         return model;
-    }
-
-    @Override
-    public void onModelChange(Consumer<Model> newModel) {
-        newModel.accept(model);
     }
 }

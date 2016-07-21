@@ -97,4 +97,9 @@ public final class FixedModelStoreTest {
 
         verify(consumer).accept(model);
     }
+
+    @Test
+    public void testClose() {
+        modelStore.close();
+    }
 }

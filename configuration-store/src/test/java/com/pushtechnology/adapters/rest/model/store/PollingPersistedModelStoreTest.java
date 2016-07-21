@@ -196,4 +196,11 @@ public final class PollingPersistedModelStoreTest {
         verify(persistence, times(2)).loadModel();
         verify(listener).accept(model);
     }
+
+    @Test
+    public void testClose() {
+        modelStore.close();
+
+        verify(executor).shutdown();
+    }
 }

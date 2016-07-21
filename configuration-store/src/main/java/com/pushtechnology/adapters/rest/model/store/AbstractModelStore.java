@@ -52,4 +52,8 @@ import net.jcip.annotations.ThreadSafe;
     protected final synchronized void notifyListeners(Model newModel) {
         listeners.forEach(listeners -> listeners.accept(newModel));
     }
+
+    @Override
+    public void close() {
+    }
 }
