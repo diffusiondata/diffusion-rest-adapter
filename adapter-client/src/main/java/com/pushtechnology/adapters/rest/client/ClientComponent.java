@@ -22,6 +22,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Executors;
 
+import javax.net.ssl.SSLContext;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,10 +46,13 @@ import net.jcip.annotations.ThreadSafe;
 public final class ClientComponent implements Component {
     private static final Logger LOG = LoggerFactory.getLogger(ClientComponent.class);
 
+    private static final SSLContextFactory SSL_CONTEXT_FACTORY = new SSLContextFactory();
     private static final HttpComponentFactory HTTP_COMPONENT_FACTORY = new HttpComponentFactory();
     private static final PublicationComponentFactory PUBLICATION_COMPONENT_FACTORY = new PublicationComponentFactory(
         new PollingComponentFactory(Executors::newSingleThreadScheduledExecutor));
 
+    @GuardedBy("this")
+    private SSLContext sslContext = null;
     @GuardedBy("this")
     private HttpComponent httpComponent = HttpComponent.INACTIVE;
     @GuardedBy("this")
@@ -66,6 +71,8 @@ public final class ClientComponent implements Component {
 
         final DiffusionConfig diffusionConfig = model.getDiffusion();
         final List<ServiceConfig> services = model.getServices();
+
+        sslContext = SSL_CONTEXT_FACTORY.create(model);
 
         if (currentModel == null) {
             initialConfiguration(model, client);
@@ -92,13 +99,11 @@ public final class ClientComponent implements Component {
     private void initialConfiguration(Model model, RESTAdapterClientCloseHandle client) {
         LOG.info("Setting up components for the first time");
 
-        httpComponent = HTTP_COMPONENT_FACTORY.create(model);
-        publicationComponent = PUBLICATION_COMPONENT_FACTORY.create(model, client);
+        httpComponent = HTTP_COMPONENT_FACTORY.create(sslContext);
+        publicationComponent = PUBLICATION_COMPONENT_FACTORY.create(model, client, sslContext);
         pollingComponent = publicationComponent.createPolling(model, httpComponent);
         currentModel = model;
     }
-
-
 
     private void switchToInactiveComponents(Model model) throws IOException {
         LOG.info("Replacing with inactive components");
@@ -117,7 +122,7 @@ public final class ClientComponent implements Component {
         pollingComponent.close();
         publicationComponent.close();
 
-        publicationComponent = PUBLICATION_COMPONENT_FACTORY.create(model, client);
+        publicationComponent = PUBLICATION_COMPONENT_FACTORY.create(model, client, sslContext);
         pollingComponent = publicationComponent.createPolling(model, httpComponent);
         currentModel = model;
     }

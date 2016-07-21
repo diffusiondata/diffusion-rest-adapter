@@ -16,23 +16,11 @@
 package com.pushtechnology.adapters.rest.client;
 
 import static com.pushtechnology.diffusion.client.session.SessionAttributes.Transport.WEBSOCKET;
-import static java.security.KeyStore.getDefaultType;
-import static javax.net.ssl.TrustManagerFactory.getDefaultAlgorithm;
-import static javax.net.ssl.TrustManagerFactory.getInstance;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.security.KeyManagementException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManagerFactory;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,9 +55,9 @@ public final class PublicationComponentFactory {
     /**
      * @return A new {@link PublicationComponent}
      */
-    public PublicationComponent create(Model model, RESTAdapterClientCloseHandle client) {
+    public PublicationComponent create(Model model, RESTAdapterClientCloseHandle client, SSLContext sslContext) {
         final AtomicBoolean isActive = new AtomicBoolean(true);
-        final Session session = getSession(model, isActive, client);
+        final Session session = getSession(model, isActive, client, sslContext);
         final TopicManagementClient topicManagementClient = new TopicManagementClientImpl(session);
         final PublishingClient publishingClient = new PublishingClientImpl(session);
 
@@ -84,7 +72,8 @@ public final class PublicationComponentFactory {
     private static Session getSession(
         Model model,
         AtomicBoolean isActive,
-        RESTAdapterClientCloseHandle client) {
+        RESTAdapterClientCloseHandle client,
+        SSLContext sslContext) {
 
         final DiffusionConfig diffusionConfig = model.getDiffusion();
 
@@ -99,12 +88,10 @@ public final class PublicationComponentFactory {
 
         if (diffusionConfig.isSecure()) {
             sessionFactory = sessionFactory.secureTransport(true);
+        }
 
-            if (model.getTruststore() != null) {
-                final SSLContext sslContext = createTruststore(model);
-
-                sessionFactory = sessionFactory.sslContext(sslContext);
-            }
+        if (sslContext != null) {
+            sessionFactory = sessionFactory.sslContext(sslContext);
         }
 
         if (diffusionConfig.getPrincipal() != null && diffusionConfig.getPassword() != null) {
@@ -114,40 +101,6 @@ public final class PublicationComponentFactory {
         }
 
         return sessionFactory.open();
-    }
-
-    private static SSLContext createTruststore(Model model) {
-        final String truststoreLocation = model.getTruststore();
-        try (InputStream stream = resolveTruststore(truststoreLocation)) {
-                final KeyStore keyStore = KeyStore.getInstance(getDefaultType());
-                keyStore.load(stream, null);
-                final TrustManagerFactory trustManagerFactory = getInstance(getDefaultAlgorithm());
-                trustManagerFactory.init(keyStore);
-                final SSLContext sslContext = SSLContext.getInstance("SSL");
-                sslContext.init(null, trustManagerFactory.getTrustManagers(), null);
-                return sslContext;
-        }
-        catch (KeyStoreException |
-            CertificateException |
-            NoSuchAlgorithmException |
-            IOException |
-            KeyManagementException e) {
-
-            throw new IllegalArgumentException("An SSLContext could not be created as requested in the" +
-                " configuration for the Diffusion client", e);
-        }
-    }
-
-    private static InputStream resolveTruststore(String truststoreLocation) throws IOException {
-        final InputStream stream = Thread
-            .currentThread()
-            .getContextClassLoader()
-            .getResourceAsStream(truststoreLocation);
-
-        if (stream == null) {
-            return Files.newInputStream(Paths.get(truststoreLocation));
-        }
-        return stream;
     }
 
     /**

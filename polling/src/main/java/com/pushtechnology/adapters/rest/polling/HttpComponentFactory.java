@@ -15,28 +15,11 @@
 
 package com.pushtechnology.adapters.rest.polling;
 
-import static java.security.KeyStore.getDefaultType;
-import static javax.net.ssl.TrustManagerFactory.getDefaultAlgorithm;
-import static javax.net.ssl.TrustManagerFactory.getInstance;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.security.KeyManagementException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
-
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManagerFactory;
 
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
 import org.apache.http.impl.nio.client.HttpAsyncClients;
-
-import com.pushtechnology.adapters.rest.model.latest.Model;
 
 /**
  * Factory for {@link HttpComponent}.
@@ -46,52 +29,18 @@ public final class HttpComponentFactory {
     /**
      * @return a new {@link HttpComponent}
      */
-    public HttpComponent create(Model model) {
+    public HttpComponent create(SSLContext sslContext) {
         HttpAsyncClientBuilder builder = HttpAsyncClients
             .custom()
             .disableCookieManagement()
             .disableAuthCaching();
 
-        if (model.getTruststore() != null) {
-            builder = builder.setSSLContext(createTruststore(model));
+        if (sslContext != null) {
+            builder = builder.setSSLContext(sslContext);
         }
 
         final CloseableHttpAsyncClient client = builder.build();
         client.start();
         return new HttpComponentImpl(client);
-    }
-
-    private static SSLContext createTruststore(Model model) {
-        final String truststoreLocation = model.getTruststore();
-        try (InputStream stream = resolveTruststore(truststoreLocation)) {
-            final KeyStore keyStore = KeyStore.getInstance(getDefaultType());
-            keyStore.load(stream, null);
-            final TrustManagerFactory trustManagerFactory = getInstance(getDefaultAlgorithm());
-            trustManagerFactory.init(keyStore);
-            final SSLContext sslContext = SSLContext.getInstance("SSL");
-            sslContext.init(null, trustManagerFactory.getTrustManagers(), null);
-            return sslContext;
-        }
-        catch (KeyStoreException |
-            CertificateException |
-            NoSuchAlgorithmException |
-            IOException |
-            KeyManagementException e) {
-
-            throw new IllegalArgumentException("An SSLContext could not be created as requested in the" +
-                " configuration for the HTTP client", e);
-        }
-    }
-
-    private static InputStream resolveTruststore(String truststoreLocation) throws IOException {
-        final InputStream stream = Thread
-            .currentThread()
-            .getContextClassLoader()
-            .getResourceAsStream(truststoreLocation);
-
-        if (stream == null) {
-            return Files.newInputStream(Paths.get(truststoreLocation));
-        }
-        return stream;
     }
 }
