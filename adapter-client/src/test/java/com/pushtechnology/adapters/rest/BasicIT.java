@@ -50,7 +50,7 @@ import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.adapters.rest.model.store.FixedModelStore;
+import com.pushtechnology.adapters.rest.model.store.MutableModelStore;
 import com.pushtechnology.adapters.rest.resources.IncrementingResource;
 import com.pushtechnology.adapters.rest.resources.TimestampResource;
 import com.pushtechnology.diffusion.client.Diffusion;
@@ -130,6 +130,8 @@ public final class BasicIT {
     @Mock
     private Topics.CompletionCallback callback;
 
+    private MutableModelStore modelStore;
+
     @BeforeClass
     public static void startApplicationServer() throws Exception {
         final ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
@@ -172,10 +174,13 @@ public final class BasicIT {
     @Before
     public void setup() {
         initMocks(this);
+
+        modelStore = new MutableModelStore();
+        modelStore.setModel(MODEL);
     }
 
     @Test
-    public void test() throws IOException {
+    public void testInitialisation() throws IOException {
         final RESTAdapterClient client = startClient();
         final Session session = startSession();
 
@@ -194,13 +199,37 @@ public final class BasicIT {
         client.close();
     }
 
+    @Test
+    public void testReconfigurationFromInactiveToActive() throws IOException {
+        modelStore.setModel(Model.builder().build());
+        final RESTAdapterClient client = startClient();
+        final Session session = startSession();
+
+        final Topics topics = session.feature(Topics.class);
+        topics.addFallbackStream(JSON.class, stream);
+        topics.subscribe("?rest/", callback);
+        topics.subscribe("?restTLS/", callback);
+
+        verify(callback, timed().times(2)).onComplete();
+
+        modelStore.setModel(MODEL);
+
+        verify(stream, timed()).onSubscription(eq("rest/timestamp"), isA(TopicSpecification.class));
+        verify(stream, timed()).onSubscription(eq("rest/increment"), isA(TopicSpecification.class));
+        verify(stream, timed()).onSubscription(eq("restTLS/timestamp"), isA(TopicSpecification.class));
+        verify(stream, timed()).onSubscription(eq("restTLS/increment"), isA(TopicSpecification.class));
+
+        stopSession(session);
+        client.close();
+    }
+
     private static VerificationWithTimeout timed() {
         return timeout(5000);
     }
 
-    private static RESTAdapterClient startClient() {
+    private RESTAdapterClient startClient() {
         final RESTAdapterClient client = RESTAdapterClient.create(
-            new FixedModelStore(MODEL),
+            modelStore,
             Executors.newSingleThreadScheduledExecutor());
         client.start();
         return client;
