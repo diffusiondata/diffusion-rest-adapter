@@ -33,6 +33,11 @@ public interface PublishingClient {
     CompletableFuture<ServiceConfig> addService(ServiceConfig serviceConfig);
 
     /**
+     * Remove a service.
+     */
+    void removeService(ServiceConfig serviceConfig);
+
+    /**
      * Update the topic associated with an endpoint.
      */
     void publish(ServiceConfig serviceConfig, EndpointConfig endpointConfig, JSON json);

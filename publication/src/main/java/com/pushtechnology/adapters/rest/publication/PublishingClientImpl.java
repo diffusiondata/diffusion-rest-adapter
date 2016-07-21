@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
+import com.pushtechnology.diffusion.client.callbacks.Registration;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.UpdateSource;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.ValueUpdater;
@@ -45,6 +46,8 @@ public final class PublishingClientImpl implements PublishingClient {
     private static final Logger LOG = LoggerFactory.getLogger(PublishingClientImpl.class);
     private final Session session;
     @GuardedBy("this")
+    private Map<ServiceConfig, Registration> updaterSources = new HashMap<>();
+    @GuardedBy("this")
     private Map<ServiceConfig, ValueUpdater<JSON>> updaters = new HashMap<>();
 
     /**
@@ -64,6 +67,13 @@ public final class PublishingClientImpl implements PublishingClient {
                 serviceConfig.getTopicRoot(),
                 new UpdateSource.Default() {
                     @Override
+                    public void onRegistered(String topicPath, Registration registration) {
+                        synchronized (PublishingClientImpl.this) {
+                            updaterSources.put(serviceConfig, registration);
+                        }
+                    }
+
+                    @Override
                     public void onActive(String topicPath, TopicUpdateControl.Updater updater) {
                         synchronized (PublishingClientImpl.this) {
                             LOG.warn("Active for service: {}", serviceConfig);
@@ -76,9 +86,26 @@ public final class PublishingClientImpl implements PublishingClient {
                     public void onStandby(String topicPath) {
                         LOG.warn("On standby for service: {}", serviceConfig);
                     }
+
+                    @Override
+                    public void onClose(String topicPath) {
+                        synchronized (PublishingClientImpl.this) {
+                            updaterSources.remove(serviceConfig);
+                            updaters.remove(serviceConfig);
+                        }
+                    }
                 });
 
         return promise;
+    }
+
+    @Override
+    public synchronized void removeService(ServiceConfig serviceConfig) {
+        final Registration registration = updaterSources.get(serviceConfig);
+
+        if (registration != null) {
+            registration.close();
+        }
     }
 
     @Override

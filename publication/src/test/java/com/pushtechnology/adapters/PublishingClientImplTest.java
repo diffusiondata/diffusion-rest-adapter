@@ -27,6 +27,7 @@ import com.pushtechnology.adapters.rest.publication.PublishingClient;
 import com.pushtechnology.adapters.rest.publication.PublishingClientImpl;
 import com.pushtechnology.adapters.rest.publication.UpdateTopicCallback;
 import com.pushtechnology.diffusion.client.callbacks.ErrorReason;
+import com.pushtechnology.diffusion.client.callbacks.Registration;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.UpdateSource;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater;
@@ -46,6 +47,8 @@ public final class PublishingClientImplTest {
     private Session.Listener listener;
     @Mock
     private TopicUpdateControl updateControl;
+    @Mock
+    private Registration registration;
     @Mock
     private Updater rawUpdater;
     @Mock
@@ -85,7 +88,7 @@ public final class PublishingClientImplTest {
 
     @After
     public void postConditions() {
-        verifyNoMoreInteractions(session, updateControl, rawUpdater, updater);
+        verifyNoMoreInteractions(session, updateControl, rawUpdater, updater, registration);
     }
 
     @Test
@@ -188,5 +191,30 @@ public final class PublishingClientImplTest {
         finally {
             verify(session).getState();
         }
+    }
+
+    @Test
+    public void removeService() {
+        final PublishingClient client = new PublishingClientImpl(session);
+
+        client.addService(serviceConfig);
+
+        verify(session).feature(TopicUpdateControl.class);
+        verify(updateControl).registerUpdateSource(eq("a"), updateSourceCaptor.capture());
+
+        final UpdateSource updateSource = updateSourceCaptor.getValue();
+
+        updateSource.onRegistered("a", registration);
+
+        client.removeService(serviceConfig);
+
+        verify(registration).close();
+    }
+
+    @Test
+    public void removeUnknownService() {
+        final PublishingClient client = new PublishingClientImpl(session);
+
+        client.removeService(serviceConfig);
     }
 }
