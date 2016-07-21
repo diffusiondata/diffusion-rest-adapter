@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright (C) 2016 Push Technology Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
+
 package com.pushtechnology.adapters.rest;
 
 import static com.pushtechnology.diffusion.client.session.Session.State.CLOSED_BY_CLIENT;
@@ -45,11 +60,11 @@ import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
 /**
- * Basic integration test for adapting JSON resources.
+ * Basic integration test for adapting resources.
  *
  * @author Push Technology Limited
  */
-public final class BasicJSONPollIT {
+public final class BasicIT {
     private static final Model MODEL = Model
         .builder()
         .diffusion(DiffusionConfig
@@ -134,7 +149,7 @@ public final class BasicJSONPollIT {
         final HttpConfiguration httpsConfiguration = new HttpConfiguration();
         httpsConfiguration.addCustomizer(new SecureRequestCustomizer());
         SslContextFactory sslContextFactory = new SslContextFactory(true);
-        sslContextFactory.setKeyStorePath(BasicJSONPollIT.class.getResource("/testKeystore.jks").toExternalForm());
+        sslContextFactory.setKeyStorePath(BasicIT.class.getResource("/testKeystore.jks").toExternalForm());
         sslContextFactory.setKeyStorePassword("password");
         sslContextFactory.setExcludeProtocols();
         sslContextFactory.setExcludeCipherSuites();
