@@ -57,10 +57,19 @@ public final class PollingPersistedModelStore extends AbstractModelStore {
 
     /**
      * Start polling.
+     *
+     * @throws IOException if there is a problem loading the model
+     * @throws IllegalStateException if there is no initial model
      */
-    public synchronized void start() {
+    public synchronized void start() throws IOException {
         stop();
-        future = executor.scheduleAtFixedRate(new Poll(), 0L, period, TimeUnit.MILLISECONDS);
+
+        // Initialise the model on start
+        final Optional<Model> model = persistence.loadModel();
+        latestModel = model.orElseThrow(() -> new IllegalStateException("No model found on startup"));
+        notifyListeners(latestModel);
+
+        future = executor.scheduleAtFixedRate(new Poll(), period, period, TimeUnit.MILLISECONDS);
     }
 
     /**

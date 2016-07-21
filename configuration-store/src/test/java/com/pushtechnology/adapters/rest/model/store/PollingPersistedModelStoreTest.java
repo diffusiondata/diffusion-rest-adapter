@@ -37,6 +37,8 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
@@ -95,11 +97,12 @@ public final class PollingPersistedModelStoreTest {
 
     @SuppressWarnings("unchecked")
     @Before
-    public void setUp() {
+    public void setUp() throws IOException {
         initMocks(this);
 
         when(executor.scheduleAtFixedRate(isA(Runnable.class), isA(Long.class), isA(Long.class), isA(TimeUnit.class)))
             .thenReturn(future);
+        when(persistence.loadModel()).thenReturn(Optional.of(model));
 
         modelStore = new PollingPersistedModelStore(persistence, executor, 5000L);
         modelStore.onModelChange(listener);
@@ -116,17 +119,21 @@ public final class PollingPersistedModelStoreTest {
     }
 
     @Test
-    public void start() {
+    public void start() throws IOException {
         modelStore.start();
 
-        verify(executor).scheduleAtFixedRate(isA(Runnable.class), eq(0L), eq(5000L), eq(TimeUnit.MILLISECONDS));
+        verify(listener).accept(model);
+        verify(persistence).loadModel();
+        verify(executor).scheduleAtFixedRate(isA(Runnable.class), eq(5000L), eq(5000L), eq(TimeUnit.MILLISECONDS));
     }
 
     @Test
-    public void startStop() {
+    public void startStop() throws IOException {
         modelStore.start();
 
-        verify(executor).scheduleAtFixedRate(isA(Runnable.class), eq(0L), eq(5000L), eq(TimeUnit.MILLISECONDS));
+        verify(persistence).loadModel();
+        verify(listener).accept(model);
+        verify(executor).scheduleAtFixedRate(isA(Runnable.class), eq(5000L), eq(5000L), eq(TimeUnit.MILLISECONDS));
 
         modelStore.stop();
 
@@ -134,67 +141,84 @@ public final class PollingPersistedModelStoreTest {
     }
 
     @Test
-    public void doubleStart() {
+    public void doubleStart() throws IOException {
         modelStore.start();
         modelStore.start();
 
+        verify(listener, times(2)).accept(model);
+        verify(persistence, times(2)).loadModel();
         verify(executor, times(2))
-            .scheduleAtFixedRate(isA(Runnable.class), eq(0L), eq(5000L), eq(TimeUnit.MILLISECONDS));
+            .scheduleAtFixedRate(isA(Runnable.class), eq(5000L), eq(5000L), eq(TimeUnit.MILLISECONDS));
         verify(future).cancel(false);
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void pollNone() throws IOException {
-        when(persistence.loadModel()).thenReturn(Optional.empty());
+        when(persistence.loadModel()).thenReturn(Optional.of(model), Optional.empty());
 
         modelStore.start();
 
-        verify(executor).scheduleAtFixedRate(runnableCaptor.capture(), eq(0L), eq(5000L), eq(TimeUnit.MILLISECONDS));
+        verify(listener).accept(model);
+        verify(persistence).loadModel();
+        verify(executor).scheduleAtFixedRate(runnableCaptor.capture(), eq(5000L), eq(5000L), eq(TimeUnit.MILLISECONDS));
 
         runnableCaptor.getValue().run();
-        verify(persistence).loadModel();
+        verify(persistence, times(2)).loadModel();
     }
 
     @Test
     public void pollModel() throws IOException {
-        when(persistence.loadModel()).thenReturn(Optional.of(model));
-
         modelStore.start();
-
-        verify(executor).scheduleAtFixedRate(runnableCaptor.capture(), eq(0L), eq(5000L), eq(TimeUnit.MILLISECONDS));
-
-        runnableCaptor.getValue().run();
 
         verify(persistence).loadModel();
         verify(listener).accept(model);
+        verify(executor).scheduleAtFixedRate(runnableCaptor.capture(), eq(5000L), eq(5000L), eq(TimeUnit.MILLISECONDS));
+
+        runnableCaptor.getValue().run();
+
+        verify(persistence, times(2)).loadModel();
     }
 
     @Test
     public void pollException() throws IOException {
-        when(persistence.loadModel()).thenThrow(new IOException("Intentional for test"));
+        when(persistence.loadModel()).then(new Answer<Optional<Model>>() {
+            private int count = 0;
+            @Override
+            public Optional<Model> answer(InvocationOnMock invocation) throws Throwable {
+                count += 1;
+
+                if (count >= 2) {
+                    throw new IOException("Intentional for test");
+                }
+
+                return Optional.of(model);
+            }
+        });
 
         modelStore.start();
 
-        verify(executor).scheduleAtFixedRate(runnableCaptor.capture(), eq(0L), eq(5000L), eq(TimeUnit.MILLISECONDS));
+        verify(persistence).loadModel();
+        verify(listener).accept(model);
+        verify(executor).scheduleAtFixedRate(runnableCaptor.capture(), eq(5000L), eq(5000L), eq(TimeUnit.MILLISECONDS));
 
         runnableCaptor.getValue().run();
 
-        verify(persistence).loadModel();
+        verify(persistence, times(2)).loadModel();
     }
 
     @Test
     public void pollSame() throws IOException {
-        when(persistence.loadModel()).thenReturn(Optional.of(model));
-
         modelStore.start();
 
-        verify(executor).scheduleAtFixedRate(runnableCaptor.capture(), eq(0L), eq(5000L), eq(TimeUnit.MILLISECONDS));
-
-        runnableCaptor.getValue().run();
-        runnableCaptor.getValue().run();
-
-        verify(persistence, times(2)).loadModel();
+        verify(persistence).loadModel();
         verify(listener).accept(model);
+        verify(executor).scheduleAtFixedRate(runnableCaptor.capture(), eq(5000L), eq(5000L), eq(TimeUnit.MILLISECONDS));
+
+        runnableCaptor.getValue().run();
+        runnableCaptor.getValue().run();
+
+        verify(persistence, times(3)).loadModel();
     }
 
     @Test
