@@ -108,32 +108,40 @@ public final class ClientComponent implements AutoCloseable {
     private void switchToInactiveComponents(Model model) throws IOException {
         LOG.info("Replacing with inactive components");
 
-        pollingComponent.close();
-        publicationComponent.close();
+        final PollingComponent oldPollingComponent = this.pollingComponent;
+        final PublicationComponent oldPublicationComponent = this.publicationComponent;
 
         publicationComponent = PublicationComponent.INACTIVE;
         pollingComponent = PollingComponent.INACTIVE;
         currentModel = model;
+
+        oldPollingComponent.close();
+        oldPublicationComponent.close();
     }
 
     private void reconfigurePollingAndPublishing(Model model, RESTAdapterClientCloseHandle client) throws IOException {
         LOG.info("Replacing the polling and publishing components");
 
-        pollingComponent.close();
-        publicationComponent.close();
+        final PollingComponent oldPollingComponent = this.pollingComponent;
+        final PublicationComponent oldPublicationComponent = this.publicationComponent;
 
-        publicationComponent = publicationComponentFactory.create(model, client, sslContext);
-        pollingComponent = publicationComponent.createPolling(model, httpComponent);
+        this.publicationComponent = publicationComponentFactory.create(model, client, sslContext);
+        this.pollingComponent = this.publicationComponent.createPolling(model, httpComponent);
         currentModel = model;
+
+        oldPollingComponent.close();
+        oldPublicationComponent.close();
     }
 
     private void reconfigurePolling(Model model) {
         LOG.info("Replacing the polling component");
 
-        pollingComponent.close();
+        final PollingComponent oldPollingComponent = this.pollingComponent;
 
         pollingComponent = publicationComponent.createPolling(model, httpComponent);
         currentModel = model;
+
+        oldPollingComponent.close();
     }
 
     private boolean isFirstConfiguration() {
