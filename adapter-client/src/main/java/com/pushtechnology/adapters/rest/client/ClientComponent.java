@@ -95,23 +95,15 @@ public final class ClientComponent implements Component {
     private void initialConfiguration(Model model, RESTAdapterClientCloseHandle client) throws IOException {
         LOG.info("Setting up components for the first time");
 
-        final DiffusionConfig diffusionConfig = model.getDiffusion();
-        final List<ServiceConfig> services = model.getServices();
-
-        if (diffusionConfig == null ||
-            // Check to see if the new configuration performs useful work
-            services == null ||
-            services.size() == 0 ||
-            services.stream().map(ServiceConfig::getEndpoints).flatMap(Collection::stream).collect(counting()) == 0L) {
-
-            switchToInactiveComponents(model);
-            return;
+        if (isModelInactive(model)) {
+            currentModel = model;
         }
-
-        httpComponent = HTTP_COMPONENT_FACTORY.create(sslContext);
-        publicationComponent = publicationComponentFactory.create(model, client, sslContext);
-        pollingComponent = publicationComponent.createPolling(model, httpComponent);
-        currentModel = model;
+        else {
+            httpComponent = HTTP_COMPONENT_FACTORY.create(sslContext);
+            publicationComponent = publicationComponentFactory.create(model, client, sslContext);
+            pollingComponent = publicationComponent.createPolling(model, httpComponent);
+            currentModel = model;
+        }
     }
 
     private void switchToInactiveComponents(Model model) throws IOException {
