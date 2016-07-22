@@ -27,10 +27,6 @@ import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
-import com.pushtechnology.adapters.rest.publication.PublishingClient;
-import com.pushtechnology.adapters.rest.publication.PublishingClientImpl;
-import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
-import com.pushtechnology.adapters.rest.topic.management.TopicManagementClientImpl;
 import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.session.SessionFactory;
@@ -43,13 +39,10 @@ import com.pushtechnology.diffusion.client.session.SessionFactory;
 public final class PublicationComponentFactory {
     private static final Logger LOG = LoggerFactory.getLogger(PublicationComponentFactory.class);
 
-    private final PollingComponentFactory pollingComponentFactory;
-
     /**
      * Constructor.
      */
-    public PublicationComponentFactory(PollingComponentFactory pollingComponentFactory) {
-        this.pollingComponentFactory = pollingComponentFactory;
+    public PublicationComponentFactory() {
     }
 
     /**
@@ -84,15 +77,10 @@ public final class PublicationComponentFactory {
         }
 
         final Session session = sessionFactory.open();
-        final TopicManagementClient topicManagementClient = new TopicManagementClientImpl(session);
-        final PublishingClient publishingClient = new PublishingClientImpl(session);
 
         return new PublicationComponentImpl(
             isActive,
-            session,
-            topicManagementClient,
-            publishingClient,
-            pollingComponentFactory);
+            session);
     }
 
     /**

@@ -32,6 +32,11 @@ import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.polling.HttpComponent;
 import com.pushtechnology.adapters.rest.polling.HttpComponentFactory;
+import com.pushtechnology.adapters.rest.publication.PublishingClient;
+import com.pushtechnology.adapters.rest.publication.PublishingClientImpl;
+import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
+import com.pushtechnology.adapters.rest.topic.management.TopicManagementClientImpl;
+import com.pushtechnology.diffusion.client.session.Session;
 
 import net.jcip.annotations.GuardedBy;
 import net.jcip.annotations.ThreadSafe;
@@ -48,7 +53,8 @@ public final class ClientComponent implements AutoCloseable {
     private static final SSLContextFactory SSL_CONTEXT_FACTORY = new SSLContextFactory();
     private static final HttpComponentFactory HTTP_COMPONENT_FACTORY = new HttpComponentFactory();
 
-    private final PublicationComponentFactory publicationComponentFactory;
+    private final PublicationComponentFactory publicationComponentFactory = new PublicationComponentFactory();
+    private final PollingComponentFactory pollingComponentFactory;
 
     @GuardedBy("this")
     private SSLContext sslContext;
@@ -56,6 +62,10 @@ public final class ClientComponent implements AutoCloseable {
     private HttpComponent httpComponent = HttpComponent.INACTIVE;
     @GuardedBy("this")
     private PublicationComponent publicationComponent = PublicationComponent.INACTIVE;
+    @GuardedBy("this")
+    private PublishingClient publishingClient;
+    @GuardedBy("this")
+    private TopicManagementClient topicManagementClient;
     @GuardedBy("this")
     private PollingComponent pollingComponent = PollingComponent.INACTIVE;
     @GuardedBy("this")
@@ -65,7 +75,7 @@ public final class ClientComponent implements AutoCloseable {
      * Constructor.
      */
     public ClientComponent(ScheduledExecutorService executor) {
-        publicationComponentFactory = new PublicationComponentFactory(new PollingComponentFactory(executor));
+        pollingComponentFactory = new PollingComponentFactory(executor);
     }
 
     /**
@@ -104,7 +114,13 @@ public final class ClientComponent implements AutoCloseable {
         else {
             httpComponent = HTTP_COMPONENT_FACTORY.create(sslContext);
             publicationComponent = publicationComponentFactory.create(model, client, sslContext);
-            pollingComponent = publicationComponent.createPolling(model, httpComponent);
+
+            final Session session = publicationComponent.getSession();
+            publishingClient = new PublishingClientImpl(session);
+            topicManagementClient = new TopicManagementClientImpl(session);
+
+            pollingComponent = pollingComponentFactory
+                .create(model, httpComponent, publishingClient, topicManagementClient);
             currentModel = model;
         }
     }
@@ -137,7 +153,13 @@ public final class ClientComponent implements AutoCloseable {
 
         httpComponent = HTTP_COMPONENT_FACTORY.create(sslContext);
         publicationComponent = publicationComponentFactory.create(model, client, sslContext);
-        pollingComponent = publicationComponent.createPolling(model, httpComponent);
+
+        final Session session = publicationComponent.getSession();
+        publishingClient = new PublishingClientImpl(session);
+        topicManagementClient = new TopicManagementClientImpl(session);
+
+        pollingComponent = pollingComponentFactory
+            .create(model, httpComponent, publishingClient, topicManagementClient);
         currentModel = model;
 
         oldPollingComponent.close();
@@ -152,7 +174,13 @@ public final class ClientComponent implements AutoCloseable {
         final PublicationComponent oldPublicationComponent = publicationComponent;
 
         publicationComponent = publicationComponentFactory.create(model, client, sslContext);
-        pollingComponent = publicationComponent.createPolling(model, httpComponent);
+
+        final Session session = publicationComponent.getSession();
+        publishingClient = new PublishingClientImpl(session);
+        topicManagementClient = new TopicManagementClientImpl(session);
+
+        pollingComponent = pollingComponentFactory
+            .create(model, httpComponent, publishingClient, topicManagementClient);
         currentModel = model;
 
         oldPollingComponent.close();
@@ -164,7 +192,8 @@ public final class ClientComponent implements AutoCloseable {
 
         final PollingComponent oldPollingComponent = pollingComponent;
 
-        pollingComponent = publicationComponent.createPolling(model, httpComponent);
+        pollingComponent = pollingComponentFactory
+            .create(model, httpComponent, publishingClient, topicManagementClient);
         currentModel = model;
 
         oldPollingComponent.close();

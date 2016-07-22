@@ -16,6 +16,7 @@
 package com.pushtechnology.adapters.rest.client;
 
 import static java.util.Collections.singletonList;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -100,12 +101,7 @@ public final class PublicationComponentImplTest {
         when(publishingClient.addService(serviceConfig)).thenReturn(completableFuture);
 
         isActive = new AtomicBoolean(true);
-        publicationComponent = new PublicationComponentImpl(
-            isActive,
-            session,
-            topicManagementClient,
-            publishingClient,
-            new PollingComponentFactory(executor));
+        publicationComponent = new PublicationComponentImpl(isActive, session);
     }
 
     @After
@@ -123,13 +119,7 @@ public final class PublicationComponentImplTest {
 
     @Test
     public void createPolling() {
-        final PollingComponent pollingComponent = publicationComponent.createPolling(model, httpComponent);
-
-        verify(topicManagementClient).addService(serviceConfig);
-        verify(publishingClient).addService(serviceConfig);
-
-        pollingComponent.close();
-        verify(publishingClient).removeService(serviceConfig);
+        assertEquals(session, publicationComponent.getSession());
     }
 
     @Test
@@ -139,6 +129,6 @@ public final class PublicationComponentImplTest {
 
     @Test(expected = UnsupportedOperationException.class)
     public void createPollingInactive() {
-        PublicationComponent.INACTIVE.createPolling(model, httpComponent);
+        PublicationComponent.INACTIVE.getSession();
     }
 }

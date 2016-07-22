@@ -17,8 +17,7 @@ package com.pushtechnology.adapters.rest.client;
 
 import java.io.IOException;
 
-import com.pushtechnology.adapters.rest.model.latest.Model;
-import com.pushtechnology.adapters.rest.polling.HttpComponent;
+import com.pushtechnology.diffusion.client.session.Session;
 
 /**
  * The component responsible for polling REST services.
@@ -31,7 +30,7 @@ public interface PublicationComponent extends AutoCloseable {
      */
     PublicationComponent INACTIVE = new PublicationComponent() {
         @Override
-        public PollingComponent createPolling(Model model, HttpComponent httpComponent) {
+        public Session getSession() {
             throw new UnsupportedOperationException("A PollingComponent cannot be created from the inactive component");
         }
 
@@ -41,9 +40,9 @@ public interface PublicationComponent extends AutoCloseable {
     };
 
     /**
-     * @return A new {@link PollingComponentImpl}
+     * @return the session
      */
-    PollingComponent createPolling(Model model, HttpComponent httpComponent);
+    Session getSession();
 
     @Override
     void close() throws IOException;

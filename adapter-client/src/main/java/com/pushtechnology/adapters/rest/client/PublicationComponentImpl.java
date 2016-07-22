@@ -18,10 +18,6 @@ package com.pushtechnology.adapters.rest.client;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.pushtechnology.adapters.rest.model.latest.Model;
-import com.pushtechnology.adapters.rest.polling.HttpComponent;
-import com.pushtechnology.adapters.rest.publication.PublishingClient;
-import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
 import com.pushtechnology.diffusion.client.session.Session;
 
 /**
@@ -32,34 +28,25 @@ import com.pushtechnology.diffusion.client.session.Session;
 /*package*/ final class PublicationComponentImpl implements PublicationComponent {
     private final AtomicBoolean isActive;
     private final Session session;
-    private final TopicManagementClient topicManagementClient;
-    private final PublishingClient publishingClient;
-    private final PollingComponentFactory pollingComponentFactory;
 
     /**
      * Constructor.
      */
     /*package*/ PublicationComponentImpl(
             AtomicBoolean isActive,
-            Session session,
-            TopicManagementClient topicManagementClient,
-            PublishingClient publishingClient,
-            PollingComponentFactory pollingComponentFactory) {
+            Session session) {
         this.isActive = isActive;
         this.session = session;
-        this.topicManagementClient = topicManagementClient;
-        this.publishingClient = publishingClient;
-        this.pollingComponentFactory = pollingComponentFactory;
+    }
+
+    @Override
+    public Session getSession() {
+        return session;
     }
 
     @Override
     public void close() throws IOException {
         isActive.set(false);
         session.close();
-    }
-
-    @Override
-    public PollingComponent createPolling(Model model, HttpComponent httpComponent) {
-        return pollingComponentFactory.create(model, httpComponent, publishingClient, topicManagementClient);
     }
 }
