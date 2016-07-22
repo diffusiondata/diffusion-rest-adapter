@@ -136,6 +136,10 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <plugin>
+                <artifactId>maven-pmd-plugin</artifactId>
+            </plugin>
         </plugins>
     </build>
 
