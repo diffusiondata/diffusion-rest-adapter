@@ -30,6 +30,49 @@ import net.jcip.annotations.Immutable;
  */
 @Immutable
 public final class ConversionContext implements ModelConverter {
+    /**
+     * A {@link ModelConverter} that can handle any type of model.
+     */
+    public static final ConversionContext FULL_CONTEXT = ConversionContext
+        .builder()
+        .register(
+            com.pushtechnology.adapters.rest.model.v0.Model.VERSION,
+            com.pushtechnology.adapters.rest.model.v0.Model.class,
+            V0Converter.INSTANCE)
+        .register(
+            com.pushtechnology.adapters.rest.model.v1.Model.VERSION,
+            com.pushtechnology.adapters.rest.model.v1.Model.class,
+            V1Converter.INSTANCE)
+        .register(
+            com.pushtechnology.adapters.rest.model.v2.Model.VERSION,
+            com.pushtechnology.adapters.rest.model.v2.Model.class,
+            V2Converter.INSTANCE)
+        .register(
+            com.pushtechnology.adapters.rest.model.v3.Model.VERSION,
+            com.pushtechnology.adapters.rest.model.v3.Model.class,
+            V3Converter.INSTANCE)
+        .register(
+            com.pushtechnology.adapters.rest.model.v4.Model.VERSION,
+            com.pushtechnology.adapters.rest.model.v4.Model.class,
+            V4Converter.INSTANCE)
+        .register(
+            com.pushtechnology.adapters.rest.model.v5.Model.VERSION,
+            com.pushtechnology.adapters.rest.model.v5.Model.class,
+            V5Converter.INSTANCE)
+        .register(
+            com.pushtechnology.adapters.rest.model.v6.Model.VERSION,
+            com.pushtechnology.adapters.rest.model.v6.Model.class,
+            V6Converter.INSTANCE)
+        .register(
+            com.pushtechnology.adapters.rest.model.v7.Model.VERSION,
+            com.pushtechnology.adapters.rest.model.v7.Model.class,
+            V7Converter.INSTANCE)
+        .register(
+            Model.VERSION,
+            Model.class,
+            LatestConverter.INSTANCE)
+        .build();
+
     private final Map<Integer, Class<? extends AnyModel>> modelVersions = new HashMap<>();
     private final Map<Class<? extends AnyModel>, ModelConverter> converters = new HashMap<>();
 
