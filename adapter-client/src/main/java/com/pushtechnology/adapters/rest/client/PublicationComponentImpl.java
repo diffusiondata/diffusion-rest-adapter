@@ -17,6 +17,9 @@ package com.pushtechnology.adapters.rest.client;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.pushtechnology.diffusion.client.session.Session;
 
 /**
@@ -25,6 +28,7 @@ import com.pushtechnology.diffusion.client.session.Session;
  * @author Push Technology Limited
  */
 /*package*/ final class PublicationComponentImpl implements PublicationComponent {
+    private static final Logger LOG = LoggerFactory.getLogger(PollingComponentImpl.class);
     private final AtomicBoolean isActive;
     private final Session session;
 
@@ -45,7 +49,9 @@ import com.pushtechnology.diffusion.client.session.Session;
 
     @Override
     public void close() {
+        LOG.info("Closing session component");
         isActive.set(false);
         session.close();
+        LOG.info("Closed session component");
     }
 }

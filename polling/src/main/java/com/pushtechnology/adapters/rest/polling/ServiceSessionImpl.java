@@ -100,7 +100,6 @@ public final class ServiceSessionImpl implements ServiceSession {
         assert endpointPollers.containsKey(endpointConfig) : "The endpoint has not been added";
 
         stopEndpoint(endpointPollers.remove(endpointConfig));
-
     }
 
     private void stopEndpoint(PollHandle pollHandle) {
@@ -114,12 +113,15 @@ public final class ServiceSessionImpl implements ServiceSession {
 
     @Override
     public synchronized void stop() {
+        LOG.info("Closing session service {}", this);
         isRunning = false;
 
         endpointPollers.replaceAll((endpointConfig, pollHandle) -> {
             stopEndpoint(pollHandle);
             return null;
         });
+
+        LOG.info("Closed session service {}", this);
     }
 
     /**

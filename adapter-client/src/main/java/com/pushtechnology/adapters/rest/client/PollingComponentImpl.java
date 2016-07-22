@@ -17,6 +17,9 @@ package com.pushtechnology.adapters.rest.client;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.polling.ServiceSession;
 import com.pushtechnology.adapters.rest.publication.PublishingClient;
@@ -27,6 +30,7 @@ import com.pushtechnology.adapters.rest.publication.PublishingClient;
  * @author Push Technology Limited
  */
 /*package*/ final class PollingComponentImpl implements PollingComponent {
+    private static final Logger LOG = LoggerFactory.getLogger(PollingComponentImpl.class);
     private final PublishingClient publishingClient;
     private final List<ServiceConfig> services;
     private final List<ServiceSession> serviceSessions;
@@ -45,7 +49,9 @@ import com.pushtechnology.adapters.rest.publication.PublishingClient;
 
     @Override
     public void close() {
+        LOG.info("Closing polling component");
         serviceSessions.forEach(ServiceSession::stop);
         services.forEach(publishingClient::removeService);
+        LOG.info("Closed polling component");
     }
 }

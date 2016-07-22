@@ -30,6 +30,8 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.concurrent.FutureCallback;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
@@ -45,6 +47,7 @@ import net.jcip.annotations.ThreadSafe;
  */
 @ThreadSafe
 public final class HttpComponentImpl implements HttpComponent {
+    private static final Logger LOG = LoggerFactory.getLogger(HttpComponentImpl.class);
     private static final Pattern CHARSET_PATTERN = Pattern.compile(".+; charset=(\\S+)");
     private final CloseableHttpAsyncClient client;
 
@@ -106,7 +109,9 @@ public final class HttpComponentImpl implements HttpComponent {
 
     @Override
     public void close() throws IOException {
+        LOG.info("Closing HTTP component");
         client.close();
+        LOG.info("Closed HTTP component");
     }
 
     private Charset getResponseCharset(HttpResponse response) {

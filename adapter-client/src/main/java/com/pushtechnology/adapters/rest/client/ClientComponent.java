@@ -261,8 +261,10 @@ public final class ClientComponent implements AutoCloseable {
 
     @Override
     public synchronized void close() throws IOException {
+        LOG.info("Closing client");
         pollingComponent.close();
         httpComponent.close();
         publicationComponent.close();
+        LOG.info("Closed client");
     }
 }
