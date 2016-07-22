@@ -101,13 +101,7 @@ public final class ClientComponent implements AutoCloseable {
         else if (isModelInactive(model)) {
             switchToInactiveComponents(model);
         }
-        else if (wasInactive()) {
-            reconfigureAll(model);
-        }
-        else if (hasTruststoreChanged(model)) {
-            reconfigureAll(model);
-        }
-        else if (hasSecurityChanged(model)) {
+        else if (wasInactive() || hasTruststoreChanged(model) || hasSecurityChanged(model)) {
             reconfigureAll(model);
         }
         else if (hasDiffusionChanged(model)) {
