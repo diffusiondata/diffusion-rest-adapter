@@ -55,7 +55,7 @@ public final class ClientComponent implements AutoCloseable {
 
     private final PublicationComponentFactory publicationComponentFactory = new PublicationComponentFactory();
     private final PollingComponentFactory pollingComponentFactory;
-    private final Runnable shutdownHandler;
+    private final Runnable shutdownTask;
 
     @GuardedBy("this")
     private SSLContext sslContext;
@@ -76,7 +76,7 @@ public final class ClientComponent implements AutoCloseable {
      * Constructor.
      */
     public ClientComponent(ScheduledExecutorService executor, Runnable shutdownHandler) {
-        this.shutdownHandler = () -> {
+        shutdownTask = () -> {
             try {
                 close();
             }
@@ -122,7 +122,7 @@ public final class ClientComponent implements AutoCloseable {
         }
         else {
             httpComponent = HTTP_COMPONENT_FACTORY.create(sslContext);
-            publicationComponent = publicationComponentFactory.create(model, shutdownHandler, sslContext);
+            publicationComponent = publicationComponentFactory.create(model, shutdownTask, sslContext);
 
             final Session session = publicationComponent.getSession();
             publishingClient = new PublishingClientImpl(session);
@@ -161,7 +161,7 @@ public final class ClientComponent implements AutoCloseable {
         final HttpComponent oldHttpComponent = httpComponent;
 
         httpComponent = HTTP_COMPONENT_FACTORY.create(sslContext);
-        publicationComponent = publicationComponentFactory.create(model, shutdownHandler, sslContext);
+        publicationComponent = publicationComponentFactory.create(model, shutdownTask, sslContext);
 
         final Session session = publicationComponent.getSession();
         publishingClient = new PublishingClientImpl(session);
@@ -182,7 +182,7 @@ public final class ClientComponent implements AutoCloseable {
         final PollingComponent oldPollingComponent = pollingComponent;
         final PublicationComponent oldPublicationComponent = publicationComponent;
 
-        publicationComponent = publicationComponentFactory.create(model, shutdownHandler, sslContext);
+        publicationComponent = publicationComponentFactory.create(model, shutdownTask, sslContext);
 
         final Session session = publicationComponent.getSession();
         publishingClient = new PublishingClientImpl(session);

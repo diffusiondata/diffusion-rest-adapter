@@ -43,7 +43,7 @@ public final class PublicationComponentFactory {
     /**
      * @return A new {@link PublicationComponent}
      */
-    public PublicationComponent create(Model model, Runnable shutdownHandler, SSLContext sslContext) {
+    public PublicationComponent create(Model model, Runnable shutdownTask, SSLContext sslContext) {
         final AtomicBoolean isActive = new AtomicBoolean(true);
 
         final DiffusionConfig diffusionConfig = model.getDiffusion();
@@ -55,7 +55,11 @@ public final class PublicationComponentFactory {
             .secureTransport(false)
             .transports(WEBSOCKET)
             .reconnectionTimeout(5000)
-            .listener(new Listener(isActive, shutdownHandler));
+            .listener((forSession, oldState, newState) -> {
+                if (isActive.get() && newState.isClosed()) {
+                    shutdownTask.run();
+                }
+            });
 
         if (diffusionConfig.isSecure()) {
             sessionFactory = sessionFactory.secureTransport(true);
@@ -76,27 +80,5 @@ public final class PublicationComponentFactory {
         return new PublicationComponentImpl(
             isActive,
             session);
-    }
-
-    /**
-     * A {@link Session.Listener} to handle session closes.
-     * <p>
-     * If the session closes when the state is active the connection and recovery must have failed, stop the client.
-     */
-    private static final class Listener implements Session.Listener {
-        private final AtomicBoolean isActive;
-        private final Runnable shutdownHandler;
-
-        public Listener(AtomicBoolean isActive, Runnable shutdownHandler) {
-            this.isActive = isActive;
-            this.shutdownHandler = shutdownHandler;
-        }
-
-        @Override
-        public void onSessionStateChanged(Session forSession, Session.State oldState, Session.State newState) {
-            if (isActive.get() && newState.isClosed()) {
-                shutdownHandler.run();
-            }
-        }
     }
 }
