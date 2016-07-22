@@ -49,7 +49,7 @@ public final class ServiceSessionImpl implements ServiceSession {
     private final ServiceConfig serviceConfig;
     private final PollHandlerFactory handlerFactory;
     @GuardedBy("this")
-    private boolean isRunning = false;
+    private boolean isRunning;
 
     /**
      * Constructor.

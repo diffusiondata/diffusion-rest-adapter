@@ -55,7 +55,7 @@ public final class PollingComponentFactory {
         final PollHandlerFactory handlerFactory = new PollHandlerFactoryImpl(publishingClient);
 
         final List<ServiceSession> serviceSessions = new ArrayList<>();
-        for (ServiceConfig service : model.getServices()) {
+        for (final ServiceConfig service : model.getServices()) {
             final ServiceSession serviceSession = new ServiceSessionImpl(
                 executor,
                 httpComponent,

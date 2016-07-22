@@ -51,7 +51,7 @@ public final class ClientComponent implements AutoCloseable {
     private final PublicationComponentFactory publicationComponentFactory;
 
     @GuardedBy("this")
-    private SSLContext sslContext = null;
+    private SSLContext sslContext;
     @GuardedBy("this")
     private HttpComponent httpComponent = HttpComponent.INACTIVE;
     @GuardedBy("this")
@@ -59,7 +59,7 @@ public final class ClientComponent implements AutoCloseable {
     @GuardedBy("this")
     private PollingComponent pollingComponent = PollingComponent.INACTIVE;
     @GuardedBy("this")
-    private Model currentModel = null;
+    private Model currentModel;
 
     /**
      * Constructor.
