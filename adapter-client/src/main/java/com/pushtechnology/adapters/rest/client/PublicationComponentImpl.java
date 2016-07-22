@@ -15,7 +15,6 @@
 
 package com.pushtechnology.adapters.rest.client;
 
-import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.pushtechnology.diffusion.client.session.Session;
@@ -45,7 +44,7 @@ import com.pushtechnology.diffusion.client.session.Session;
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         isActive.set(false);
         session.close();
     }

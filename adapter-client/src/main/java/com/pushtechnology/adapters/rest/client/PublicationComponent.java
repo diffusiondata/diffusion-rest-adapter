@@ -15,8 +15,6 @@
 
 package com.pushtechnology.adapters.rest.client;
 
-import java.io.IOException;
-
 import com.pushtechnology.diffusion.client.session.Session;
 
 /**
@@ -35,7 +33,7 @@ public interface PublicationComponent extends AutoCloseable {
         }
 
         @Override
-        public void close() throws IOException {
+        public void close() {
         }
     };
 
@@ -45,5 +43,5 @@ public interface PublicationComponent extends AutoCloseable {
     Session getSession();
 
     @Override
-    void close() throws IOException;
+    void close();
 }
