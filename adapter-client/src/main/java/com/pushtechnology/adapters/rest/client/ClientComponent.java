@@ -55,6 +55,7 @@ public final class ClientComponent implements AutoCloseable {
 
     private final PublicationComponentFactory publicationComponentFactory = new PublicationComponentFactory();
     private final PollingComponentFactory pollingComponentFactory;
+    private final RESTAdapterClientCloseHandle restAdapterClientCloseHandle;
 
     @GuardedBy("this")
     private SSLContext sslContext;
@@ -74,38 +75,42 @@ public final class ClientComponent implements AutoCloseable {
     /**
      * Constructor.
      */
-    public ClientComponent(ScheduledExecutorService executor) {
+    public ClientComponent(
+            ScheduledExecutorService executor,
+            RESTAdapterClientCloseHandle restAdapterClientCloseHandle) {
+        this.restAdapterClientCloseHandle = () -> {
+            restAdapterClientCloseHandle.close();
+            ClientComponent.this.close();
+        };
         pollingComponentFactory = new PollingComponentFactory(executor);
     }
 
     /**
      * Reconfigure the component.
      */
-    public synchronized void reconfigure(
-            Model model,
-            RESTAdapterClientCloseHandle client) throws IOException {
+    public synchronized void reconfigure(Model model) throws IOException {
 
         if (isFirstConfiguration()) {
-            initialConfiguration(model, client);
+            initialConfiguration(model);
         }
         else if (isModelInactive(model)) {
             switchToInactiveComponents(model);
         }
         else if (wasInactive()) {
-            reconfigureAll(model, client);
+            reconfigureAll(model);
         }
         else if (hasTruststoreChanged(model)) {
-            reconfigureAll(model, client);
+            reconfigureAll(model);
         }
         else if (hasDiffusionChanged(model)) {
-            reconfigurePollingAndPublishing(model, client);
+            reconfigurePollingAndPublishing(model);
         }
         else if (haveServicesChanged(model)) {
             reconfigurePolling(model);
         }
     }
 
-    private void initialConfiguration(Model model, RESTAdapterClientCloseHandle client) throws IOException {
+    private void initialConfiguration(Model model) throws IOException {
         LOG.info("Setting up components for the first time");
 
         if (isModelInactive(model)) {
@@ -113,7 +118,7 @@ public final class ClientComponent implements AutoCloseable {
         }
         else {
             httpComponent = HTTP_COMPONENT_FACTORY.create(sslContext);
-            publicationComponent = publicationComponentFactory.create(model, client, sslContext);
+            publicationComponent = publicationComponentFactory.create(model, restAdapterClientCloseHandle, sslContext);
 
             final Session session = publicationComponent.getSession();
             publishingClient = new PublishingClientImpl(session);
@@ -142,7 +147,7 @@ public final class ClientComponent implements AutoCloseable {
         oldHttpComponent.close();
     }
 
-    private void reconfigureAll(Model model, RESTAdapterClientCloseHandle client) throws IOException {
+    private void reconfigureAll(Model model) throws IOException {
         LOG.info("Replacing all components");
 
         sslContext = SSL_CONTEXT_FACTORY.create(model);
@@ -152,7 +157,7 @@ public final class ClientComponent implements AutoCloseable {
         final HttpComponent oldHttpComponent = httpComponent;
 
         httpComponent = HTTP_COMPONENT_FACTORY.create(sslContext);
-        publicationComponent = publicationComponentFactory.create(model, client, sslContext);
+        publicationComponent = publicationComponentFactory.create(model, restAdapterClientCloseHandle, sslContext);
 
         final Session session = publicationComponent.getSession();
         publishingClient = new PublishingClientImpl(session);
@@ -167,13 +172,13 @@ public final class ClientComponent implements AutoCloseable {
         oldHttpComponent.close();
     }
 
-    private void reconfigurePollingAndPublishing(Model model, RESTAdapterClientCloseHandle client) throws IOException {
+    private void reconfigurePollingAndPublishing(Model model) throws IOException {
         LOG.info("Replacing the polling and publishing components");
 
         final PollingComponent oldPollingComponent = pollingComponent;
         final PublicationComponent oldPublicationComponent = publicationComponent;
 
-        publicationComponent = publicationComponentFactory.create(model, client, sslContext);
+        publicationComponent = publicationComponentFactory.create(model, restAdapterClientCloseHandle, sslContext);
 
         final Session session = publicationComponent.getSession();
         publishingClient = new PublishingClientImpl(session);

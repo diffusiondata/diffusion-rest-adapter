@@ -33,7 +33,7 @@ import net.jcip.annotations.ThreadSafe;
  * @author Push Technology Limited
  */
 @ThreadSafe
-public final class RESTAdapterClient implements RESTAdapterClientCloseHandle {
+public final class RESTAdapterClient {
     private static final Logger LOG = LoggerFactory.getLogger(RESTAdapterClient.class);
 
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
@@ -42,7 +42,7 @@ public final class RESTAdapterClient implements RESTAdapterClientCloseHandle {
 
     private RESTAdapterClient(ModelStore modelStore, ScheduledExecutorService executor) {
         this.modelStore = modelStore;
-        clientComponent = new ClientComponent(executor);
+        clientComponent = new ClientComponent(executor, () -> isRunning.set(false));
     }
 
     /**
@@ -61,7 +61,7 @@ public final class RESTAdapterClient implements RESTAdapterClientCloseHandle {
         LOG.debug("Running REST adapter client with model : {}", newModel);
 
         try {
-            clientComponent.reconfigure(newModel, this);
+            clientComponent.reconfigure(newModel);
         }
         catch (IllegalArgumentException e) {
             LOG.warn("The new model is not valid", e);
