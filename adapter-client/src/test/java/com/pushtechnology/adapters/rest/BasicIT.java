@@ -23,6 +23,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.isA;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.io.IOException;
@@ -46,6 +47,7 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.security.Constraint;
 import org.eclipse.jetty.util.security.Credential;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -228,6 +230,11 @@ public final class BasicIT {
         modelStore.setModel(MODEL);
     }
 
+    @After
+    public void postConditions() {
+        verifyNoMoreInteractions(listener, callback);
+    }
+
     @Test
     public void testInitialisation() throws IOException {
         final RESTAdapterClient client = startClient();
@@ -243,6 +250,11 @@ public final class BasicIT {
         verify(stream, timed()).onSubscription(eq("rest/increment"), isA(TopicSpecification.class));
         verify(stream, timed()).onSubscription(eq("restTLS/timestamp"), isA(TopicSpecification.class));
         verify(stream, timed()).onSubscription(eq("restTLS/increment"), isA(TopicSpecification.class));
+
+        verify(stream, timed()).onValue(eq("rest/timestamp"), isA(TopicSpecification.class), isA(JSON.class), isA(JSON.class));
+        verify(stream, timed()).onValue(eq("rest/increment"), isA(TopicSpecification.class), isA(JSON.class), isA(JSON.class));
+        verify(stream, timed()).onValue(eq("restTLS/timestamp"), isA(TopicSpecification.class), isA(JSON.class), isA(JSON.class));
+        verify(stream, timed()).onValue(eq("restTLS/increment"), isA(TopicSpecification.class), isA(JSON.class), isA(JSON.class));
 
         stopSession(session);
         client.close();

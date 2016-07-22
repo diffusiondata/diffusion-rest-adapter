@@ -125,6 +125,8 @@ public final class ClientComponent implements AutoCloseable {
             currentModel = model;
         }
         else {
+            sslContext = SSL_CONTEXT_FACTORY.create(model);
+
             httpComponent = HTTP_COMPONENT_FACTORY.create(model, sslContext);
             publicationComponent = publicationComponentFactory.create(model, shutdownTask, sslContext);
 
