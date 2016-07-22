@@ -8,9 +8,10 @@ import java.util.List;
 
 import org.junit.Test;
 
-import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
-import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
-import com.pushtechnology.adapters.rest.model.latest.Model;
+import com.pushtechnology.adapters.rest.model.v8.DiffusionConfig;
+import com.pushtechnology.adapters.rest.model.v8.EndpointConfig;
+import com.pushtechnology.adapters.rest.model.v8.Model;
+import com.pushtechnology.adapters.rest.model.v8.ServiceConfig;
 
 /**
  * Unit tests for {@link V7Converter}.
@@ -49,7 +50,7 @@ public final class V7ConverterTest {
 
         assertEquals(1, model.getServices().size());
         final DiffusionConfig diffusion = model.getDiffusion();
-        final com.pushtechnology.adapters.rest.model.latest.ServiceConfig service = model.getServices().get(0);
+        final ServiceConfig service = model.getServices().get(0);
         final List<EndpointConfig> endpoints = service.getEndpoints();
 
         assertEquals("localhost", service.getHost());

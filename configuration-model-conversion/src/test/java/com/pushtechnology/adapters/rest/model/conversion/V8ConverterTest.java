@@ -1,6 +1,6 @@
 package com.pushtechnology.adapters.rest.model.conversion;
 
-import static com.pushtechnology.adapters.rest.model.conversion.V6Converter.INSTANCE;
+import static com.pushtechnology.adapters.rest.model.conversion.V8Converter.INSTANCE;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Collections;
@@ -8,28 +8,29 @@ import java.util.List;
 
 import org.junit.Test;
 
-import com.pushtechnology.adapters.rest.model.v7.DiffusionConfig;
-import com.pushtechnology.adapters.rest.model.v7.EndpointConfig;
-import com.pushtechnology.adapters.rest.model.v7.Model;
-import com.pushtechnology.adapters.rest.model.v7.ServiceConfig;
+import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
+import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
+import com.pushtechnology.adapters.rest.model.latest.Model;
+import com.pushtechnology.adapters.rest.model.latest.SecurityConfig;
+import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 
 /**
- * Unit tests for {@link V6Converter}.
+ * Unit tests for {@link V7Converter}.
  *
  * @author Push Technology Limited
  */
-public final class V6ConverterTest {
+public final class V8ConverterTest {
     @Test
     public void testConvert() {
         final Model model = INSTANCE.convert(
-            com.pushtechnology.adapters.rest.model.v6.Model
+            com.pushtechnology.adapters.rest.model.v8.Model
                 .builder()
                 .services(Collections.singletonList(
-                    com.pushtechnology.adapters.rest.model.v6.ServiceConfig
+                    com.pushtechnology.adapters.rest.model.v8.ServiceConfig
                         .builder()
                         .host("localhost")
                         .port(80)
-                        .endpoints(Collections.singletonList(com.pushtechnology.adapters.rest.model.v6.EndpointConfig
+                        .endpoints(Collections.singletonList(com.pushtechnology.adapters.rest.model.v8.EndpointConfig
                             .builder()
                             .name("endpoint")
                             .topic("topic")
@@ -39,7 +40,7 @@ public final class V6ConverterTest {
                         .topicRoot("a")
                         .build()
                 ))
-                .diffusion(com.pushtechnology.adapters.rest.model.v6.DiffusionConfig
+                .diffusion(com.pushtechnology.adapters.rest.model.v8.DiffusionConfig
                     .builder()
                     .host("localhost")
                     .port(8080)
@@ -58,6 +59,7 @@ public final class V6ConverterTest {
         assertEquals(1, endpoints.size());
         assertEquals(5000, service.getPollPeriod());
         assertEquals("a", service.getTopicRoot());
+        assertEquals(SecurityConfig.builder().build(), service.getSecurity());
         assertEquals("localhost", diffusion.getHost());
         assertEquals(8080, diffusion.getPort());
         assertEquals("control", model.getDiffusion().getPrincipal());

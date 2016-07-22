@@ -22,7 +22,7 @@ import lombok.Builder;
 import lombok.Value;
 
 /**
- * Service configuration. Version 8.
+ * Service configuration. Version 9.
  * <p>
  * Description of a REST service to poll.
  *
@@ -61,4 +61,9 @@ public class ServiceConfig {
      * The topic root.
      */
     String topicRoot;
+
+    /**
+     * The security configuration for the service.
+     */
+    SecurityConfig security;
 }

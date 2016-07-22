@@ -20,26 +20,16 @@ import lombok.Builder;
 import lombok.Value;
 
 /**
- * Endpoint configuration. Version 9.
+ * Basic authentication configuration. Version 9.
  * <p>
- * Description of a REST endpoint to poll.
+ * Description of the basic authentication parameters.
  *
  * @author Push Technology Limited
  */
 @Value
 @Builder
 @AllArgsConstructor
-public class EndpointConfig {
-    /**
-     * The name of the endpoint.
-     */
-    String name;
-    /**
-     * The URL of the endpoint.
-     */
-    String url;
-    /**
-     * The topic to map the endpoint to.
-     */
-    String topic;
+public class BasicAuthenticationConfig {
+    String principal;
+    String credential;
 }
