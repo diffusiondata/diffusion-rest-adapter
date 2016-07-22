@@ -75,8 +75,6 @@ public final class ClientComponent implements AutoCloseable {
             Model model,
             RESTAdapterClientCloseHandle client) throws IOException {
 
-        sslContext = SSL_CONTEXT_FACTORY.create(model);
-
         if (isFirstConfiguration()) {
             initialConfiguration(model, client);
         }
@@ -130,6 +128,8 @@ public final class ClientComponent implements AutoCloseable {
 
     private void reconfigureAll(Model model, RESTAdapterClientCloseHandle client) throws IOException {
         LOG.info("Replacing all components");
+
+        sslContext = SSL_CONTEXT_FACTORY.create(model);
 
         final PollingComponent oldPollingComponent = pollingComponent;
         final PublicationComponent oldPublicationComponent = publicationComponent;
