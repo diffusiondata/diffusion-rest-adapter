@@ -60,3 +60,13 @@ configured to use the old model is then torn down.
 
 The new session will be delayed by conflicting update source registrations. Requesting that the topics are removed with
 the new session will prevent their removal when the old session closes.
+
+## Building
+
+### Running integration tests
+
+The integration tests require a Diffusion server to run against. They are run by the profile, `integration-test`,
+enabled when the environmental property `DIFFUSION_HOME` is set. They use the `diffusion-maven-plugin` to start up and
+shutdown the the Diffusion server. The `diffusion-maven-plugin` requires a system dependency to run, these `systemPath`
+for this dependency is relative to the `DIFFUSION_HOME` environmental variable. Any REST service is started embedded
+within the JVM process.
