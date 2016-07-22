@@ -27,6 +27,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.io.IOException;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.HttpConfiguration;
@@ -228,9 +229,11 @@ public final class BasicIT {
     }
 
     private RESTAdapterClient startClient() {
+        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
         final RESTAdapterClient client = RESTAdapterClient.create(
             modelStore,
-            Executors.newSingleThreadScheduledExecutor());
+            executor,
+            executor::shutdown);
         client.start();
         return client;
     }

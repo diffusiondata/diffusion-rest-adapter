@@ -39,10 +39,15 @@ public final class RESTAdapterClient {
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
     private final ClientComponent clientComponent;
     private final ModelStore modelStore;
+    private final Runnable shutdownHandler;
 
-    private RESTAdapterClient(ModelStore modelStore, ScheduledExecutorService executor) {
+    private RESTAdapterClient(ModelStore modelStore, ScheduledExecutorService executor, Runnable shutdownHandler) {
         this.modelStore = modelStore;
-        clientComponent = new ClientComponent(executor, () -> isRunning.set(false));
+        this.shutdownHandler = shutdownHandler;
+        clientComponent = new ClientComponent(executor, () -> {
+            isRunning.set(false);
+            shutdownHandler.run();
+        });
     }
 
     /**
@@ -81,6 +86,8 @@ public final class RESTAdapterClient {
         }
 
         clientComponent.close();
+
+        shutdownHandler.run();
     }
 
     /**
@@ -89,8 +96,11 @@ public final class RESTAdapterClient {
      * @param executor executor to use to schedule poll requests
      * @return a new {@link RESTAdapterClient}
      */
-    public static RESTAdapterClient create(ModelStore modelStore, ScheduledExecutorService executor) {
+    public static RESTAdapterClient create(
+            ModelStore modelStore,
+            ScheduledExecutorService executor,
+            Runnable shutdownHandler) {
         LOG.debug("Creating REST adapter client with model store: {}", modelStore);
-        return new RESTAdapterClient(modelStore, executor);
+        return new RESTAdapterClient(modelStore, executor, shutdownHandler);
     }
 }

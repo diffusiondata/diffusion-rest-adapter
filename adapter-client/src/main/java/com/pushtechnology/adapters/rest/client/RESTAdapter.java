@@ -57,7 +57,10 @@ public final class RESTAdapter {
 
         modelStore.start();
 
-        final RESTAdapterClient adapterClient = RESTAdapterClient.create(modelStore, executor);
+        final RESTAdapterClient adapterClient = RESTAdapterClient.create(modelStore, executor, () -> {
+            modelStore.stop();
+            executor.shutdown();
+        });
 
         adapterClient.start();
     }
