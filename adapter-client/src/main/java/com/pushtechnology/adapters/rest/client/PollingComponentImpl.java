@@ -22,7 +22,7 @@ import com.pushtechnology.adapters.rest.polling.ServiceSession;
 import com.pushtechnology.adapters.rest.publication.PublishingClient;
 
 /**
- * The {@link com.pushtechnology.adapters.rest.component.Component} responsible for polling REST services.
+ * The component responsible for polling REST services.
  *
  * @author Push Technology Limited
  */

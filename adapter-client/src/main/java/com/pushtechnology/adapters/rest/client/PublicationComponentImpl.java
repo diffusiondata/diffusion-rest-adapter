@@ -25,7 +25,7 @@ import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
 import com.pushtechnology.diffusion.client.session.Session;
 
 /**
- * The {@link com.pushtechnology.adapters.rest.component.Component} responsible for publishing to a Diffusion server.
+ * The component responsible for publishing to a Diffusion server.
  *
  * @author Push Technology Limited
  */
