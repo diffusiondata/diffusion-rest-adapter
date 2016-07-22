@@ -45,6 +45,7 @@ public final class HttpComponentFactory {
         model
             .getServices()
             .stream()
+            .filter(ServiceConfig::isSecure)
             .filter(serviceConfig -> serviceConfig.getSecurity() != null)
             .filter(serviceConfig -> serviceConfig.getSecurity().getBasic() != null)
             .forEach(serviceConfig -> {
