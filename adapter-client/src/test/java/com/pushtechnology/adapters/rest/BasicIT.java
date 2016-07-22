@@ -29,6 +29,10 @@ import java.io.IOException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.eclipse.jetty.security.ConstraintMapping;
+import org.eclipse.jetty.security.ConstraintSecurityHandler;
+import org.eclipse.jetty.security.HashLoginService;
+import org.eclipse.jetty.security.authentication.BasicAuthenticator;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
@@ -36,8 +40,11 @@ import org.eclipse.jetty.server.SecureRequestCustomizer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.SslConnectionFactory;
+import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.util.security.Constraint;
+import org.eclipse.jetty.util.security.Credential;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -47,9 +54,11 @@ import org.mockito.Mock;
 import org.mockito.verification.VerificationWithTimeout;
 
 import com.pushtechnology.adapters.rest.client.RESTAdapterClient;
+import com.pushtechnology.adapters.rest.model.latest.BasicAuthenticationConfig;
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
+import com.pushtechnology.adapters.rest.model.latest.SecurityConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.model.store.MutableModelStore;
 import com.pushtechnology.adapters.rest.resources.IncrementingResource;
@@ -104,18 +113,26 @@ public final class BasicIT {
                 .secure(true)
                 .pollPeriod(500)
                 .topicRoot("restTLS")
+                .security(SecurityConfig
+                    .builder()
+                    .basic(BasicAuthenticationConfig
+                        .builder()
+                        .principal("principal")
+                        .credential("credential")
+                        .build())
+                    .build())
                 .endpoints(asList(
                     EndpointConfig
                         .builder()
                         .name("increment")
                         .topic("increment")
-                        .url("/rest/increment")
+                        .url("/auth/rest/increment")
                         .build(),
                     EndpointConfig
                         .builder()
                         .name("timestamp")
                         .topic("timestamp")
-                        .url("/rest/timestamp")
+                        .url("/auth/rest/timestamp")
                         .build()
                 ))
                 .build()))
@@ -135,16 +152,47 @@ public final class BasicIT {
 
     @BeforeClass
     public static void startApplicationServer() throws Exception {
-        final ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
-        context.setContextPath("/rest");
-        final ServletHolder jerseyServlet = context.addServlet(org.glassfish.jersey.servlet.ServletContainer.class, "/*");
-        jerseyServlet.setInitOrder(0);
-        jerseyServlet.setInitParameter(
+        final ServletContextHandler context0 = new ServletContextHandler(ServletContextHandler.SESSIONS);
+        context0.setContextPath("/rest");
+        final ServletHolder jerseyServlet0 = context0.addServlet(org.glassfish.jersey.servlet.ServletContainer.class, "/*");
+        jerseyServlet0.setInitOrder(0);
+        jerseyServlet0.setInitParameter(
             "jersey.config.server.provider.classnames",
             TimestampResource.class.getCanonicalName() + "," + IncrementingResource.class.getCanonicalName());
 
+        final Constraint constraint = new Constraint();
+        constraint.setName("constraint-0");
+        constraint.setRoles(new String[]{ "test" });
+        constraint.setAuthenticate(true);
+
+        final ConstraintMapping constraintMapping = new ConstraintMapping();
+        constraintMapping.setConstraint(constraint);
+        constraintMapping.setPathSpec("/*");
+
+        final HashLoginService loginService = new HashLoginService("login-service-0");
+        loginService.putUser("principal", Credential.getCredential("credential"), new String[]{ "test" });
+
+        final ConstraintSecurityHandler securityHandler = new ConstraintSecurityHandler();
+        securityHandler.setAuthenticator(new BasicAuthenticator());
+        securityHandler.addConstraintMapping(constraintMapping);
+        securityHandler.setLoginService(loginService);
+        securityHandler.setRealmName("realm-name0");
+
+        final ServletContextHandler context1 = new ServletContextHandler(ServletContextHandler.SESSIONS);
+        context1.setContextPath("/auth/rest");
+        context1.setSecurityHandler(securityHandler);
+        final ServletHolder jerseyServlet1 = context1.addServlet(org.glassfish.jersey.servlet.ServletContainer.class, "/*");
+        jerseyServlet1.setInitOrder(0);
+        jerseyServlet1.setInitParameter(
+            "jersey.config.server.provider.classnames",
+            TimestampResource.class.getCanonicalName() + "," + IncrementingResource.class.getCanonicalName());
+
+        final HandlerCollection handlers = new HandlerCollection();
+        handlers.addHandler(context0);
+        handlers.addHandler(context1);
+
         jettyServer = new Server();
-        jettyServer.setHandler(context);
+        jettyServer.setHandler(handlers);
 
         final ServerConnector httpConnector = new ServerConnector(jettyServer);
         httpConnector.setPort(8081);
@@ -219,6 +267,11 @@ public final class BasicIT {
         verify(stream, timed()).onSubscription(eq("rest/increment"), isA(TopicSpecification.class));
         verify(stream, timed()).onSubscription(eq("restTLS/timestamp"), isA(TopicSpecification.class));
         verify(stream, timed()).onSubscription(eq("restTLS/increment"), isA(TopicSpecification.class));
+
+        verify(stream, timed()).onValue(eq("rest/timestamp"), isA(TopicSpecification.class), isA(JSON.class), isA(JSON.class));
+        verify(stream, timed()).onValue(eq("rest/increment"), isA(TopicSpecification.class), isA(JSON.class), isA(JSON.class));
+        verify(stream, timed()).onValue(eq("restTLS/timestamp"), isA(TopicSpecification.class), isA(JSON.class), isA(JSON.class));
+        verify(stream, timed()).onValue(eq("restTLS/increment"), isA(TopicSpecification.class), isA(JSON.class), isA(JSON.class));
 
         stopSession(session);
         client.close();
