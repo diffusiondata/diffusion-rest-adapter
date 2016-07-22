@@ -23,23 +23,18 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 
-import javax.net.ssl.SSLContext;
-
+import org.picocontainer.DefaultPicoContainer;
+import org.picocontainer.MutablePicoContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.adapters.rest.polling.HttpComponent;
 import com.pushtechnology.adapters.rest.polling.HttpComponentFactory;
-import com.pushtechnology.adapters.rest.publication.PublishingClient;
 import com.pushtechnology.adapters.rest.publication.PublishingClientImpl;
-import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
 import com.pushtechnology.adapters.rest.topic.management.TopicManagementClientImpl;
-import com.pushtechnology.diffusion.client.session.Session;
 
-import net.jcip.annotations.GuardedBy;
 import net.jcip.annotations.ThreadSafe;
 
 /**
@@ -50,43 +45,31 @@ import net.jcip.annotations.ThreadSafe;
 @ThreadSafe
 public final class ClientComponent implements AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(ClientComponent.class);
-
-    private static final SSLContextFactory SSL_CONTEXT_FACTORY = new SSLContextFactory();
-    private static final HttpComponentFactory HTTP_COMPONENT_FACTORY = new HttpComponentFactory();
-
-    private final PublicationComponentFactory publicationComponentFactory = new PublicationComponentFactory();
     private final PollingComponentFactory pollingComponentFactory;
-    private final Runnable shutdownTask;
+    private final MutablePicoContainer topLevel = new DefaultPicoContainer();
 
-    @GuardedBy("this")
-    private SSLContext sslContext;
-    @GuardedBy("this")
-    private HttpComponent httpComponent = HttpComponent.INACTIVE;
-    @GuardedBy("this")
-    private PublicationComponent publicationComponent = PublicationComponent.INACTIVE;
-    @GuardedBy("this")
-    private PublishingClient publishingClient;
-    @GuardedBy("this")
-    private TopicManagementClient topicManagementClient;
-    @GuardedBy("this")
-    private PollingComponent pollingComponent = PollingComponent.INACTIVE;
-    @GuardedBy("this")
+    private MutablePicoContainer httpContainer;
+    private MutablePicoContainer diffusionContainer;
+    private MutablePicoContainer pollContainer;
     private Model currentModel;
 
     /**
      * Constructor.
      */
     public ClientComponent(ScheduledExecutorService executor, Runnable shutdownHandler) {
-        shutdownTask = () -> {
-            try {
-                close();
+        topLevel.addComponent(new SessionListener(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    close();
+                }
+                catch (IOException e) {
+                    // Not expected as no known implementation throws this
+                    LOG.warn("Exception during shutdown", e);
+                }
+                shutdownHandler.run();
             }
-            catch (IOException e) {
-                // Not expected as no known implementation throws this
-                LOG.warn("Exception during shutdown", e);
-            }
-            shutdownHandler.run();
-        };
+        }));
         pollingComponentFactory = new PollingComponentFactory(executor);
     }
 
@@ -99,7 +82,7 @@ public final class ClientComponent implements AutoCloseable {
             initialConfiguration(model);
         }
         else if (isModelInactive(model)) {
-            switchToInactiveComponents(model);
+            switchToInactiveComponents();
         }
         else if (wasInactive() || hasTruststoreChanged(model) || hasSecurityChanged(model)) {
             reconfigureAll(model);
@@ -110,102 +93,105 @@ public final class ClientComponent implements AutoCloseable {
         else if (haveServicesChanged(model)) {
             reconfigurePolling(model);
         }
+
+        currentModel = model;
     }
 
     private void initialConfiguration(Model model) throws IOException {
         LOG.info("Setting up components for the first time");
 
-        if (isModelInactive(model)) {
-            currentModel = model;
-        }
-        else {
-            sslContext = SSL_CONTEXT_FACTORY.create(model);
+        if (!isModelInactive(model)) {
+            httpContainer = newHttpContainer(model);
+            diffusionContainer = newDiffusionContainer(model);
+            pollContainer = newPollContainer(model);
 
-            httpComponent = HTTP_COMPONENT_FACTORY.create(model, sslContext);
-            publicationComponent = publicationComponentFactory.create(model, shutdownTask, sslContext);
-
-            final Session session = publicationComponent.getSession();
-            publishingClient = new PublishingClientImpl(session);
-            topicManagementClient = new TopicManagementClientImpl(session);
-
-            pollingComponent = pollingComponentFactory
-                .create(model, httpComponent, publishingClient, topicManagementClient);
-            currentModel = model;
+            topLevel.start();
         }
     }
 
-    private void switchToInactiveComponents(Model model) throws IOException {
+    private void switchToInactiveComponents() throws IOException {
         LOG.info("Replacing with inactive components");
 
-        final PollingComponent oldPollingComponent = pollingComponent;
-        final PublicationComponent oldPublicationComponent = publicationComponent;
-        final HttpComponent oldHttpComponent = httpComponent;
-
-        httpComponent = HttpComponent.INACTIVE;
-        publicationComponent = PublicationComponent.INACTIVE;
-        pollingComponent = PollingComponent.INACTIVE;
-        currentModel = model;
-
-        oldPollingComponent.close();
-        oldPublicationComponent.close();
-        oldHttpComponent.close();
+        if (httpContainer != null) {
+            topLevel.stop();
+            httpContainer = null;
+            diffusionContainer = null;
+            pollContainer = null;
+        }
     }
 
     private void reconfigureAll(Model model) throws IOException {
         LOG.info("Replacing all components");
 
-        sslContext = SSL_CONTEXT_FACTORY.create(model);
+        final MutablePicoContainer oldHttpContainer = httpContainer;
 
-        final PollingComponent oldPollingComponent = pollingComponent;
-        final PublicationComponent oldPublicationComponent = publicationComponent;
-        final HttpComponent oldHttpComponent = httpComponent;
+        httpContainer = newHttpContainer(model);
+        diffusionContainer = newDiffusionContainer(model);
+        pollContainer = newPollContainer(model);
 
-        httpComponent = HTTP_COMPONENT_FACTORY.create(model, sslContext);
-        publicationComponent = publicationComponentFactory.create(model, shutdownTask, sslContext);
+        topLevel.start();
 
-        final Session session = publicationComponent.getSession();
-        publishingClient = new PublishingClientImpl(session);
-        topicManagementClient = new TopicManagementClientImpl(session);
-
-        pollingComponent = pollingComponentFactory
-            .create(model, httpComponent, publishingClient, topicManagementClient);
-        currentModel = model;
-
-        oldPollingComponent.close();
-        oldPublicationComponent.close();
-        oldHttpComponent.close();
+        if (oldHttpContainer != null) {
+            oldHttpContainer.stop();
+            topLevel.removeChildContainer(oldHttpContainer);
+        }
     }
 
     private void reconfigurePollingAndPublishing(Model model) throws IOException {
         LOG.info("Replacing the polling and publishing components");
 
-        final PollingComponent oldPollingComponent = pollingComponent;
-        final PublicationComponent oldPublicationComponent = publicationComponent;
+        final MutablePicoContainer oldDiffusionContainer = diffusionContainer;
 
-        publicationComponent = publicationComponentFactory.create(model, shutdownTask, sslContext);
+        diffusionContainer = newDiffusionContainer(model);
+        pollContainer = newPollContainer(model);
 
-        final Session session = publicationComponent.getSession();
-        publishingClient = new PublishingClientImpl(session);
-        topicManagementClient = new TopicManagementClientImpl(session);
+        diffusionContainer.start();
 
-        pollingComponent = pollingComponentFactory
-            .create(model, httpComponent, publishingClient, topicManagementClient);
-        currentModel = model;
-
-        oldPollingComponent.close();
-        oldPublicationComponent.close();
+        if (oldDiffusionContainer != null) {
+            oldDiffusionContainer.stop();
+            httpContainer.removeChildContainer(oldDiffusionContainer);
+        }
     }
 
     private void reconfigurePolling(Model model) {
         LOG.info("Replacing the polling component");
 
-        final PollingComponent oldPollingComponent = pollingComponent;
+        final MutablePicoContainer oldPollContainer = pollContainer;
 
-        pollingComponent = pollingComponentFactory
-            .create(model, httpComponent, publishingClient, topicManagementClient);
-        currentModel = model;
+        pollContainer = newPollContainer(model);
 
-        oldPollingComponent.close();
+        if (oldPollContainer != null) {
+            oldPollContainer.stop();
+            diffusionContainer.removeChildContainer(oldPollContainer);
+        }
+    }
+
+    private MutablePicoContainer newHttpContainer(Model model) {
+        return topLevel.makeChildContainer()
+            .addAdapter(new SSLContextFactory())
+            .addAdapter(new HttpComponentFactory())
+            .addComponent(model);
+    }
+
+    private MutablePicoContainer newDiffusionContainer(Model model) {
+        return httpContainer
+            .makeChildContainer()
+            .addAdapter(new SessionFactory())
+            .addAdapter(new PublicationComponentFactory())
+            .addComponent(PublishingClientImpl.class)
+            .addComponent(TopicManagementClientImpl.class)
+            .addComponent(model);
+    }
+
+    private MutablePicoContainer newPollContainer(Model model) {
+        final MutablePicoContainer newContainer = diffusionContainer
+            .makeChildContainer()
+            .addAdapter(pollingComponentFactory)
+            .addComponent(model);
+
+        newContainer.getComponent(PollingComponent.class);
+
+        return newContainer;
     }
 
     private boolean isFirstConfiguration() {
@@ -223,9 +209,9 @@ public final class ClientComponent implements AutoCloseable {
     }
 
     private boolean wasInactive() {
-        return httpComponent == HttpComponent.INACTIVE ||
-            publicationComponent == PublicationComponent.INACTIVE ||
-            pollingComponent == PollingComponent.INACTIVE;
+        return httpContainer == null ||
+            diffusionContainer == null ||
+            pollContainer == null;
     }
 
     private boolean hasTruststoreChanged(Model newModel) {
@@ -262,9 +248,7 @@ public final class ClientComponent implements AutoCloseable {
     @Override
     public synchronized void close() throws IOException {
         LOG.info("Closing client");
-        pollingComponent.close();
-        httpComponent.close();
-        publicationComponent.close();
+        topLevel.stop();
         LOG.info("Closed client");
     }
 }

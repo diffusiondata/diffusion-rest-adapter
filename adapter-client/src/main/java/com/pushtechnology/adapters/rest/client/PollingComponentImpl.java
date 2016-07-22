@@ -17,6 +17,8 @@ package com.pushtechnology.adapters.rest.client;
 
 import java.util.List;
 
+import javax.annotation.PreDestroy;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,6 +49,7 @@ import com.pushtechnology.adapters.rest.publication.PublishingClient;
         this.serviceSessions = serviceSessions;
     }
 
+    @PreDestroy
     @Override
     public void close() {
         LOG.info("Closing polling component");

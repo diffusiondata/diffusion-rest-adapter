@@ -15,24 +15,39 @@
 
 package com.pushtechnology.adapters.rest.client;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import javax.annotation.PreDestroy;
 
+import com.pushtechnology.diffusion.client.session.Session;
+
 /**
- * The component responsible for polling REST services.
+ * Listener for session.
  *
  * @author Push Technology Limited
  */
-public interface PollingComponent extends AutoCloseable {
+public final class SessionListener implements Session.Listener, AutoCloseable {
+    private final AtomicBoolean isActive = new AtomicBoolean(true);
+
+    private final Runnable shutdownTask;
+
     /**
-     * Inactive component.
+     * Constructor.
      */
-    PollingComponent INACTIVE = new PollingComponent() {
-        @Override
-        public void close() {
+    public SessionListener(Runnable shutdownTask) {
+        this.shutdownTask = shutdownTask;
+    }
+
+    @Override
+    public void onSessionStateChanged(Session session, Session.State oldState, Session.State newState) {
+        if (isActive.get() && newState.isClosed()) {
+            shutdownTask.run();
         }
-    };
+    }
 
     @PreDestroy
     @Override
-    void close();
+    public void close() {
+        isActive.set(false);
+    }
 }

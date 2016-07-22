@@ -17,6 +17,8 @@ package com.pushtechnology.adapters.rest.client;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import javax.annotation.PreDestroy;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,6 +49,7 @@ import com.pushtechnology.diffusion.client.session.Session;
         return session;
     }
 
+    @PreDestroy
     @Override
     public void close() {
         LOG.info("Closing session component");

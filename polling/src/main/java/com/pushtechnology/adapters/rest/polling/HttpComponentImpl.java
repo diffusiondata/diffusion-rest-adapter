@@ -23,6 +23,8 @@ import java.util.concurrent.Future;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.annotation.PreDestroy;
+
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
@@ -107,6 +109,7 @@ public final class HttpComponentImpl implements HttpComponent {
             });
     }
 
+    @PreDestroy
     @Override
     public void close() throws IOException {
         LOG.info("Closing HTTP component");

@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.picocontainer.injectors.ProviderAdapter;
+
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.polling.HttpComponent;
@@ -33,7 +35,7 @@ import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
  *s
  * @author Push Technology Limited
  */
-public final class PollingComponentFactory {
+public final class PollingComponentFactory extends ProviderAdapter {
     private final ScheduledExecutorService executor;
 
     /**
@@ -46,7 +48,7 @@ public final class PollingComponentFactory {
     /**
      * @return a new {@link PollingComponent}
      */
-    public PollingComponent create(
+    public PollingComponent provide(
             Model model,
             HttpComponent httpComponent,
             PublishingClient publishingClient,

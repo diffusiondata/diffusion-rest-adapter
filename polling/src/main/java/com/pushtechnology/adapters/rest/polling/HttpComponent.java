@@ -18,6 +18,8 @@ package com.pushtechnology.adapters.rest.polling;
 import java.io.IOException;
 import java.util.concurrent.Future;
 
+import javax.annotation.PreDestroy;
+
 import org.apache.http.concurrent.FutureCallback;
 
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
@@ -57,6 +59,7 @@ public interface HttpComponent extends AutoCloseable {
      */
     Future<?> request(ServiceConfig serviceConfig, EndpointConfig endpointConfig, FutureCallback<JSON> callback);
 
+    @PreDestroy
     @Override
     void close() throws IOException;
 }

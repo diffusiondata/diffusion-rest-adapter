@@ -25,6 +25,7 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
 import org.apache.http.impl.nio.client.HttpAsyncClients;
+import org.picocontainer.injectors.ProviderAdapter;
 
 import com.pushtechnology.adapters.rest.model.latest.BasicAuthenticationConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
@@ -34,11 +35,11 @@ import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
  * Factory for {@link HttpComponent}.
  * @author Push Technology Limited
  */
-public final class HttpComponentFactory {
+public final class HttpComponentFactory extends ProviderAdapter {
     /**
      * @return a new {@link HttpComponent}
      */
-    public HttpComponent create(Model model, SSLContext sslContext) {
+    public HttpComponent provide(Model model, SSLContext sslContext) {
         final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
 
         // Configure client with Basic authentication credentials
