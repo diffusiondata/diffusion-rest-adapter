@@ -55,7 +55,7 @@ public final class ClientComponent implements AutoCloseable {
 
     private final PublicationComponentFactory publicationComponentFactory = new PublicationComponentFactory();
     private final PollingComponentFactory pollingComponentFactory;
-    private final RESTAdapterClientCloseHandle restAdapterClientCloseHandle;
+    private final Runnable shutdownHandler;
 
     @GuardedBy("this")
     private SSLContext sslContext;
@@ -75,12 +75,16 @@ public final class ClientComponent implements AutoCloseable {
     /**
      * Constructor.
      */
-    public ClientComponent(
-            ScheduledExecutorService executor,
-            RESTAdapterClientCloseHandle restAdapterClientCloseHandle) {
-        this.restAdapterClientCloseHandle = () -> {
-            restAdapterClientCloseHandle.close();
-            ClientComponent.this.close();
+    public ClientComponent(ScheduledExecutorService executor, Runnable shutdownHandler) {
+        this.shutdownHandler = () -> {
+            try {
+                close();
+            }
+            catch (IOException e) {
+                // Not expected as no known implementation throws this
+                LOG.warn("Exception during shutdown", e);
+            }
+            shutdownHandler.run();
         };
         pollingComponentFactory = new PollingComponentFactory(executor);
     }
@@ -118,7 +122,7 @@ public final class ClientComponent implements AutoCloseable {
         }
         else {
             httpComponent = HTTP_COMPONENT_FACTORY.create(sslContext);
-            publicationComponent = publicationComponentFactory.create(model, restAdapterClientCloseHandle, sslContext);
+            publicationComponent = publicationComponentFactory.create(model, shutdownHandler, sslContext);
 
             final Session session = publicationComponent.getSession();
             publishingClient = new PublishingClientImpl(session);
@@ -157,7 +161,7 @@ public final class ClientComponent implements AutoCloseable {
         final HttpComponent oldHttpComponent = httpComponent;
 
         httpComponent = HTTP_COMPONENT_FACTORY.create(sslContext);
-        publicationComponent = publicationComponentFactory.create(model, restAdapterClientCloseHandle, sslContext);
+        publicationComponent = publicationComponentFactory.create(model, shutdownHandler, sslContext);
 
         final Session session = publicationComponent.getSession();
         publishingClient = new PublishingClientImpl(session);
@@ -178,7 +182,7 @@ public final class ClientComponent implements AutoCloseable {
         final PollingComponent oldPollingComponent = pollingComponent;
         final PublicationComponent oldPublicationComponent = publicationComponent;
 
-        publicationComponent = publicationComponentFactory.create(model, restAdapterClientCloseHandle, sslContext);
+        publicationComponent = publicationComponentFactory.create(model, shutdownHandler, sslContext);
 
         final Session session = publicationComponent.getSession();
         publishingClient = new PublishingClientImpl(session);

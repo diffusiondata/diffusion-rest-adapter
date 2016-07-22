@@ -17,13 +17,9 @@ package com.pushtechnology.adapters.rest.client;
 
 import static com.pushtechnology.diffusion.client.session.SessionAttributes.Transport.WEBSOCKET;
 
-import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.net.ssl.SSLContext;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
@@ -37,7 +33,6 @@ import com.pushtechnology.diffusion.client.session.SessionFactory;
  * @author Push Technology Limited
  */
 public final class PublicationComponentFactory {
-    private static final Logger LOG = LoggerFactory.getLogger(PublicationComponentFactory.class);
 
     /**
      * Constructor.
@@ -48,7 +43,7 @@ public final class PublicationComponentFactory {
     /**
      * @return A new {@link PublicationComponent}
      */
-    public PublicationComponent create(Model model, RESTAdapterClientCloseHandle client, SSLContext sslContext) {
+    public PublicationComponent create(Model model, Runnable shutdownHandler, SSLContext sslContext) {
         final AtomicBoolean isActive = new AtomicBoolean(true);
 
         final DiffusionConfig diffusionConfig = model.getDiffusion();
@@ -60,7 +55,7 @@ public final class PublicationComponentFactory {
             .secureTransport(false)
             .transports(WEBSOCKET)
             .reconnectionTimeout(5000)
-            .listener(new Listener(isActive, client));
+            .listener(new Listener(isActive, shutdownHandler));
 
         if (diffusionConfig.isSecure()) {
             sessionFactory = sessionFactory.secureTransport(true);
@@ -90,22 +85,17 @@ public final class PublicationComponentFactory {
      */
     private static final class Listener implements Session.Listener {
         private final AtomicBoolean isActive;
-        private final RESTAdapterClientCloseHandle client;
+        private final Runnable shutdownHandler;
 
-        public Listener(AtomicBoolean isActive, RESTAdapterClientCloseHandle client) {
+        public Listener(AtomicBoolean isActive, Runnable shutdownHandler) {
             this.isActive = isActive;
-            this.client = client;
+            this.shutdownHandler = shutdownHandler;
         }
 
         @Override
         public void onSessionStateChanged(Session forSession, Session.State oldState, Session.State newState) {
             if (isActive.get() && newState.isClosed()) {
-                try {
-                    client.close();
-                }
-                catch (IOException e) {
-                    LOG.warn("Exception stopping client", e);
-                }
+                shutdownHandler.run();
             }
         }
     }
