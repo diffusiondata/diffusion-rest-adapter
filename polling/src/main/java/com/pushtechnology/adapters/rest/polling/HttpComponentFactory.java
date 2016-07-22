@@ -17,9 +17,18 @@ package com.pushtechnology.adapters.rest.polling;
 
 import javax.net.ssl.SSLContext;
 
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.Credentials;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
 import org.apache.http.impl.nio.client.HttpAsyncClients;
+
+import com.pushtechnology.adapters.rest.model.latest.BasicAuthenticationConfig;
+import com.pushtechnology.adapters.rest.model.latest.Model;
+import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 
 /**
  * Factory for {@link HttpComponent}.
@@ -29,11 +38,24 @@ public final class HttpComponentFactory {
     /**
      * @return a new {@link HttpComponent}
      */
-    public HttpComponent create(SSLContext sslContext) {
+    public HttpComponent create(Model model, SSLContext sslContext) {
+        final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+
+        // Configure client with Basic authentication credentials
+        model
+            .getServices()
+            .stream()
+            .filter(serviceConfig -> serviceConfig.getSecurity() != null)
+            .filter(serviceConfig -> serviceConfig.getSecurity().getBasic() != null)
+            .forEach(serviceConfig -> {
+                final AuthScope authScope = getAuthScope(serviceConfig);
+                final Credentials credentials = getCredentials(serviceConfig.getSecurity().getBasic());
+                credentialsProvider.setCredentials(authScope, credentials);
+            });
+
         HttpAsyncClientBuilder builder = HttpAsyncClients
             .custom()
-            .disableCookieManagement()
-            .disableAuthCaching();
+            .setDefaultCredentialsProvider(credentialsProvider);
 
         if (sslContext != null) {
             builder = builder.setSSLContext(sslContext);
@@ -42,5 +64,15 @@ public final class HttpComponentFactory {
         final CloseableHttpAsyncClient client = builder.build();
         client.start();
         return new HttpComponentImpl(client);
+    }
+
+    private static AuthScope getAuthScope(ServiceConfig serviceConfig) {
+        return new AuthScope(serviceConfig.getHost(), serviceConfig.getPort());
+    }
+
+    private static Credentials getCredentials(BasicAuthenticationConfig basicAuthenticationConfig) {
+        return new UsernamePasswordCredentials(
+            basicAuthenticationConfig.getPrincipal(),
+            basicAuthenticationConfig.getCredential());
     }
 }

@@ -16,6 +16,7 @@
 package com.pushtechnology.adapters.rest.client;
 
 import static java.util.stream.Collectors.counting;
+import static java.util.stream.Collectors.toList;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -106,6 +107,9 @@ public final class ClientComponent implements AutoCloseable {
         else if (hasTruststoreChanged(model)) {
             reconfigureAll(model);
         }
+        else if (hasSecurityChanged(model)) {
+            reconfigureAll(model);
+        }
         else if (hasDiffusionChanged(model)) {
             reconfigurePollingAndPublishing(model);
         }
@@ -121,7 +125,7 @@ public final class ClientComponent implements AutoCloseable {
             currentModel = model;
         }
         else {
-            httpComponent = HTTP_COMPONENT_FACTORY.create(sslContext);
+            httpComponent = HTTP_COMPONENT_FACTORY.create(model, sslContext);
             publicationComponent = publicationComponentFactory.create(model, shutdownTask, sslContext);
 
             final Session session = publicationComponent.getSession();
@@ -160,7 +164,7 @@ public final class ClientComponent implements AutoCloseable {
         final PublicationComponent oldPublicationComponent = publicationComponent;
         final HttpComponent oldHttpComponent = httpComponent;
 
-        httpComponent = HTTP_COMPONENT_FACTORY.create(sslContext);
+        httpComponent = HTTP_COMPONENT_FACTORY.create(model, sslContext);
         publicationComponent = publicationComponentFactory.create(model, shutdownTask, sslContext);
 
         final Session session = publicationComponent.getSession();
@@ -231,6 +235,19 @@ public final class ClientComponent implements AutoCloseable {
     private boolean hasTruststoreChanged(Model newModel) {
         return currentModel.getTruststore() == null && newModel.getTruststore() != null ||
             !currentModel.getTruststore().equals(newModel.getTruststore());
+    }
+
+    private boolean hasSecurityChanged(Model newModel) {
+        return !currentModel
+            .getServices()
+            .stream()
+            .map(ServiceConfig::getSecurity)
+            .collect(toList())
+            .equals(newModel
+                .getServices()
+                .stream()
+                .map(ServiceConfig::getSecurity)
+                .collect(toList()));
     }
 
     private boolean hasDiffusionChanged(Model model) {
