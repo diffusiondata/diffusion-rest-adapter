@@ -20,6 +20,7 @@ import static com.pushtechnology.diffusion.client.session.Session.State.CONNECTE
 import static com.pushtechnology.diffusion.client.session.Session.State.CONNECTING;
 import static java.util.Arrays.asList;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.isA;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
@@ -251,10 +252,10 @@ public final class BasicIT {
         verify(stream, timed()).onSubscription(eq("restTLS/timestamp"), isA(TopicSpecification.class));
         verify(stream, timed()).onSubscription(eq("restTLS/increment"), isA(TopicSpecification.class));
 
-        verify(stream, timed()).onValue(eq("rest/timestamp"), isA(TopicSpecification.class), isA(JSON.class), isA(JSON.class));
-        verify(stream, timed()).onValue(eq("rest/increment"), isA(TopicSpecification.class), isA(JSON.class), isA(JSON.class));
-        verify(stream, timed()).onValue(eq("restTLS/timestamp"), isA(TopicSpecification.class), isA(JSON.class), isA(JSON.class));
-        verify(stream, timed()).onValue(eq("restTLS/increment"), isA(TopicSpecification.class), isA(JSON.class), isA(JSON.class));
+        verify(stream, timed()).onValue(eq("rest/timestamp"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
+        verify(stream, timed()).onValue(eq("rest/increment"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
+        verify(stream, timed()).onValue(eq("restTLS/timestamp"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
+        verify(stream, timed()).onValue(eq("restTLS/increment"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
 
         stopSession(session);
         client.close();
@@ -280,10 +281,10 @@ public final class BasicIT {
         verify(stream, timed()).onSubscription(eq("restTLS/timestamp"), isA(TopicSpecification.class));
         verify(stream, timed()).onSubscription(eq("restTLS/increment"), isA(TopicSpecification.class));
 
-        verify(stream, timed()).onValue(eq("rest/timestamp"), isA(TopicSpecification.class), isA(JSON.class), isA(JSON.class));
-        verify(stream, timed()).onValue(eq("rest/increment"), isA(TopicSpecification.class), isA(JSON.class), isA(JSON.class));
-        verify(stream, timed()).onValue(eq("restTLS/timestamp"), isA(TopicSpecification.class), isA(JSON.class), isA(JSON.class));
-        verify(stream, timed()).onValue(eq("restTLS/increment"), isA(TopicSpecification.class), isA(JSON.class), isA(JSON.class));
+        verify(stream, timed()).onValue(eq("rest/timestamp"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
+        verify(stream, timed()).onValue(eq("rest/increment"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
+        verify(stream, timed()).onValue(eq("restTLS/timestamp"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
+        verify(stream, timed()).onValue(eq("restTLS/increment"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
 
         stopSession(session);
         client.close();
