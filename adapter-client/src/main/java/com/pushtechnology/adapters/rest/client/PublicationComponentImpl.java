@@ -29,7 +29,7 @@ import com.pushtechnology.diffusion.client.session.Session;
  *
  * @author Push Technology Limited
  */
-/*package*/ final class PublicationComponentImpl implements PublicationComponent {
+public final class PublicationComponentImpl implements PublicationComponent {
     private static final Logger LOG = LoggerFactory.getLogger(PollingComponentImpl.class);
     private final AtomicBoolean isActive;
     private final Session session;
@@ -37,16 +37,20 @@ import com.pushtechnology.diffusion.client.session.Session;
     /**
      * Constructor.
      */
-    /*package*/ PublicationComponentImpl(
-            AtomicBoolean isActive,
-            Session session) {
-        this.isActive = isActive;
+    public PublicationComponentImpl(Session session) {
+        this.isActive = new AtomicBoolean(true);
         this.session = session;
     }
 
     @Override
     public Session getSession() {
         return session;
+    }
+
+    @Override
+    public void start() {
+        LOG.info("Opening session component");
+        LOG.info("Opened session component");
     }
 
     @PreDestroy

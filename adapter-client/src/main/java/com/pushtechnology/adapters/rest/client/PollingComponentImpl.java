@@ -15,46 +15,82 @@
 
 package com.pushtechnology.adapters.rest.client;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
+import com.pushtechnology.adapters.rest.polling.HttpComponent;
+import com.pushtechnology.adapters.rest.polling.PollHandlerFactory;
 import com.pushtechnology.adapters.rest.polling.ServiceSession;
+import com.pushtechnology.adapters.rest.polling.ServiceSessionImpl;
 import com.pushtechnology.adapters.rest.publication.PublishingClient;
+import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
 
 /**
  * The component responsible for polling REST services.
  *
  * @author Push Technology Limited
  */
-/*package*/ final class PollingComponentImpl implements PollingComponent {
+public final class PollingComponentImpl implements PollingComponent {
     private static final Logger LOG = LoggerFactory.getLogger(PollingComponentImpl.class);
+    private final Model model;
+    private final ScheduledExecutorService executor;
+    private final HttpComponent httpComponent;
+    private final TopicManagementClient topicManagementClient;
     private final PublishingClient publishingClient;
-    private final List<ServiceConfig> services;
     private final List<ServiceSession> serviceSessions;
 
     /**
      * Constructor.
      */
-    /*package*/ PollingComponentImpl(
-            PublishingClient publishingClient,
-            List<ServiceConfig> services,
-            List<ServiceSession> serviceSessions) {
+    public PollingComponentImpl(
+            Model model,
+            ScheduledExecutorService executor,
+            HttpComponent httpComponent,
+            TopicManagementClient topicManagementClient,
+            PublishingClient publishingClient) {
+        this.model = model;
+        this.executor = executor;
+        this.httpComponent = httpComponent;
+        this.topicManagementClient = topicManagementClient;
         this.publishingClient = publishingClient;
-        this.services = services;
-        this.serviceSessions = serviceSessions;
+        this.serviceSessions = new ArrayList<>();
+    }
+
+    @PostConstruct
+    @Override
+    public synchronized void start() {
+        LOG.info("Opening polling component");
+        final PollHandlerFactory handlerFactory = new PollHandlerFactoryImpl(publishingClient);
+        for (final ServiceConfig service : model.getServices()) {
+            final ServiceSession serviceSession = new ServiceSessionImpl(
+                executor,
+                httpComponent,
+                service,
+                handlerFactory);
+            topicManagementClient.addService(service);
+            publishingClient
+                .addService(service)
+                .thenAccept(new ServiceReadyForPublishing(topicManagementClient, serviceSession));
+            serviceSessions.add(serviceSession);
+        }
+        LOG.info("Opened polling component");
     }
 
     @PreDestroy
     @Override
-    public void close() {
+    public synchronized void close() {
         LOG.info("Closing polling component");
         serviceSessions.forEach(ServiceSession::stop);
-        services.forEach(publishingClient::removeService);
+        model.getServices().forEach(publishingClient::removeService);
         LOG.info("Closed polling component");
     }
 }

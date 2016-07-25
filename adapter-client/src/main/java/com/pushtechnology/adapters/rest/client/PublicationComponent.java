@@ -15,6 +15,7 @@
 
 package com.pushtechnology.adapters.rest.client;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import com.pushtechnology.diffusion.client.session.Session;
@@ -35,6 +36,10 @@ public interface PublicationComponent extends AutoCloseable {
         }
 
         @Override
+        public void start() {
+        }
+
+        @Override
         public void close() {
         }
     };
@@ -43,6 +48,12 @@ public interface PublicationComponent extends AutoCloseable {
      * @return the session
      */
     Session getSession();
+
+    /**
+     * Start component.
+     */
+    @PostConstruct
+    void start();
 
     @PreDestroy
     @Override

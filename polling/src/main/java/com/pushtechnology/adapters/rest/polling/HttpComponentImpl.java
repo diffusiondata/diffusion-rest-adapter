@@ -23,7 +23,9 @@ import java.util.concurrent.Future;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.net.ssl.SSLContext;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -36,6 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
+import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.datatype.json.JSON;
@@ -51,13 +54,18 @@ import net.jcip.annotations.ThreadSafe;
 public final class HttpComponentImpl implements HttpComponent {
     private static final Logger LOG = LoggerFactory.getLogger(HttpComponentImpl.class);
     private static final Pattern CHARSET_PATTERN = Pattern.compile(".+; charset=(\\S+)");
-    private final CloseableHttpAsyncClient client;
+    private final Model model;
+    private final SSLContext sslContext;
+    private final HttpClientFactory clientFactory;
+    private volatile CloseableHttpAsyncClient client;
 
     /**
      * Constructor.
      */
-    public HttpComponentImpl(CloseableHttpAsyncClient client) {
-        this.client = client;
+    public HttpComponentImpl(Model model, SSLContext sslContext, HttpClientFactory clientFactory) {
+        this.model = model;
+        this.sslContext = sslContext;
+        this.clientFactory = clientFactory;
     }
 
     @Override
@@ -65,6 +73,8 @@ public final class HttpComponentImpl implements HttpComponent {
             ServiceConfig serviceConfig,
             EndpointConfig endpointConfig,
             final FutureCallback<JSON> callback) {
+
+
         if (client == null) {
             throw new IllegalStateException("Client not running");
         }
@@ -107,6 +117,16 @@ public final class HttpComponentImpl implements HttpComponent {
                     callback.cancelled();
                 }
             });
+    }
+
+    @PostConstruct
+    @Override
+    public void start() {
+        LOG.info("Opening HTTP component");
+        final CloseableHttpAsyncClient newClient = clientFactory.create(model, sslContext);
+        newClient.start();
+        client = newClient;
+        LOG.info("Opened HTTP component");
     }
 
     @PreDestroy

@@ -13,34 +13,21 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.client;
+package com.pushtechnology.adapters.rest.polling;
 
-import java.util.concurrent.atomic.AtomicBoolean;
+import javax.net.ssl.SSLContext;
 
-import org.picocontainer.injectors.ProviderAdapter;
+import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 
-import com.pushtechnology.diffusion.client.session.Session;
+import com.pushtechnology.adapters.rest.model.latest.Model;
 
 /**
- * Factory for {@link PublicationComponent}.
- *s
+ * Factory for {@link CloseableHttpAsyncClient}.
  * @author Push Technology Limited
  */
-public final class PublicationComponentFactory extends ProviderAdapter {
+public interface HttpClientFactory {
     /**
-     * Constructor.
+     * @return a new {@link CloseableHttpAsyncClient}
      */
-    public PublicationComponentFactory() {
-    }
-
-    /**
-     * @return A new {@link PublicationComponent}
-     */
-    public PublicationComponent provide(Session session) {
-        final AtomicBoolean isActive = new AtomicBoolean(true);
-
-        return new PublicationComponentImpl(
-            isActive,
-            session);
-    }
+    CloseableHttpAsyncClient create(Model model, SSLContext sslContext);
 }

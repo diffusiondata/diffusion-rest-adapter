@@ -17,7 +17,6 @@ package com.pushtechnology.adapters.rest.client;
 
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -26,7 +25,6 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.After;
 import org.junit.Before;
@@ -91,7 +89,6 @@ public final class PublicationComponentImplTest {
         .services(singletonList(serviceConfig))
         .build();
 
-    private AtomicBoolean isActive;
     private PublicationComponent publicationComponent;
 
     @Before
@@ -100,8 +97,7 @@ public final class PublicationComponentImplTest {
 
         when(publishingClient.addService(serviceConfig)).thenReturn(completableFuture);
 
-        isActive = new AtomicBoolean(true);
-        publicationComponent = new PublicationComponentImpl(isActive, session);
+        publicationComponent = new PublicationComponentImpl(session);
     }
 
     @After
@@ -110,16 +106,25 @@ public final class PublicationComponentImplTest {
     }
 
     @Test
+    public void start() {
+        publicationComponent.start();
+    }
+
+    @Test
     public void close() throws IOException {
         publicationComponent.close();
 
-        assertFalse(isActive.get());
         verify(session).close();
     }
 
     @Test
     public void createPolling() {
         assertEquals(session, publicationComponent.getSession());
+    }
+
+    @Test
+    public void startInactive() {
+        PublicationComponent.INACTIVE.start();
     }
 
     @Test

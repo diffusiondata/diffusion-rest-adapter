@@ -15,6 +15,7 @@
 
 package com.pushtechnology.adapters.rest.client;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 /**
@@ -28,9 +29,19 @@ public interface PollingComponent extends AutoCloseable {
      */
     PollingComponent INACTIVE = new PollingComponent() {
         @Override
+        public void start() {
+        }
+
+        @Override
         public void close() {
         }
     };
+
+    /**
+     * Start component.
+     */
+    @PostConstruct
+    void start();
 
     @PreDestroy
     @Override

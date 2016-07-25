@@ -23,15 +23,16 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 
-import org.picocontainer.DefaultPicoContainer;
 import org.picocontainer.MutablePicoContainer;
+import org.picocontainer.PicoBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.adapters.rest.polling.HttpComponentFactory;
+import com.pushtechnology.adapters.rest.polling.HttpClientFactoryImpl;
+import com.pushtechnology.adapters.rest.polling.HttpComponentImpl;
 import com.pushtechnology.adapters.rest.publication.PublishingClientImpl;
 import com.pushtechnology.adapters.rest.topic.management.TopicManagementClientImpl;
 
@@ -45,8 +46,13 @@ import net.jcip.annotations.ThreadSafe;
 @ThreadSafe
 public final class ClientComponent implements AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(ClientComponent.class);
-    private final PollingComponentFactory pollingComponentFactory;
-    private final MutablePicoContainer topLevel = new DefaultPicoContainer();
+    private final MutablePicoContainer topLevel = new PicoBuilder()
+        .withCaching()
+        .withConstructorInjection()
+        //.withConsoleMonitor() // enable debug
+        .withJavaEE5Lifecycle()
+        .withLocking()
+        .build();
 
     private MutablePicoContainer httpContainer;
     private MutablePicoContainer diffusionContainer;
@@ -57,20 +63,22 @@ public final class ClientComponent implements AutoCloseable {
      * Constructor.
      */
     public ClientComponent(ScheduledExecutorService executor, Runnable shutdownHandler) {
-        topLevel.addComponent(new SessionListener(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    close();
+        topLevel
+            .addComponent(new SessionListener(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        close();
+                    }
+                    catch (IOException e) {
+                        // Not expected as no known implementation throws this
+                        LOG.warn("Exception during shutdown", e);
+                    }
+                    shutdownHandler.run();
                 }
-                catch (IOException e) {
-                    // Not expected as no known implementation throws this
-                    LOG.warn("Exception during shutdown", e);
-                }
-                shutdownHandler.run();
-            }
-        }));
-        pollingComponentFactory = new PollingComponentFactory(executor);
+            }))
+            .addComponent(executor)
+            .addComponent(HttpClientFactoryImpl.class);
     }
 
     /**
@@ -105,6 +113,7 @@ public final class ClientComponent implements AutoCloseable {
             diffusionContainer = newDiffusionContainer(model);
             pollContainer = newPollContainer(model);
 
+            LOG.info("Opening components");
             topLevel.start();
         }
     }
@@ -133,6 +142,7 @@ public final class ClientComponent implements AutoCloseable {
 
         if (oldHttpContainer != null) {
             oldHttpContainer.stop();
+            oldHttpContainer.dispose();
             topLevel.removeChildContainer(oldHttpContainer);
         }
     }
@@ -149,6 +159,7 @@ public final class ClientComponent implements AutoCloseable {
 
         if (oldDiffusionContainer != null) {
             oldDiffusionContainer.stop();
+            oldDiffusionContainer.dispose();
             httpContainer.removeChildContainer(oldDiffusionContainer);
         }
     }
@@ -158,36 +169,65 @@ public final class ClientComponent implements AutoCloseable {
 
         final MutablePicoContainer oldPollContainer = pollContainer;
 
+        LOG.info("Starting new polling component");
         pollContainer = newPollContainer(model);
+        pollContainer.start();
 
         if (oldPollContainer != null) {
+            LOG.info("Stopping old polling component");
             oldPollContainer.stop();
+            oldPollContainer.dispose();
             diffusionContainer.removeChildContainer(oldPollContainer);
         }
     }
 
     private MutablePicoContainer newHttpContainer(Model model) {
-        return topLevel.makeChildContainer()
+        final MutablePicoContainer newContainer = new PicoBuilder(topLevel)
+            .withCaching()
+            .withConstructorInjection()
+            // .withConsoleMonitor() // enable debug
+            .withJavaEE5Lifecycle()
+            .withLocking()
+            .build()
             .addAdapter(new SSLContextFactory())
-            .addAdapter(new HttpComponentFactory())
-            .addComponent(model);
+            .addComponent(model)
+            .addComponent(HttpComponentImpl.class);
+        topLevel.addChildContainer(newContainer);
+
+        return newContainer;
     }
 
     private MutablePicoContainer newDiffusionContainer(Model model) {
-        return httpContainer
-            .makeChildContainer()
+        final MutablePicoContainer newContainer = new PicoBuilder(httpContainer)
+            .withCaching()
+            .withConstructorInjection()
+             // .withConsoleMonitor() // enable debug
+            .withJavaEE5Lifecycle()
+            .withLocking()
+            .build()
             .addAdapter(new SessionFactory())
-            .addAdapter(new PublicationComponentFactory())
+            .addComponent(PublicationComponentImpl.class)
             .addComponent(PublishingClientImpl.class)
             .addComponent(TopicManagementClientImpl.class)
             .addComponent(model);
+        httpContainer.addChildContainer(newContainer);
+
+        newContainer.getComponent(PublicationComponent.class);
+
+        return newContainer;
     }
 
     private MutablePicoContainer newPollContainer(Model model) {
-        final MutablePicoContainer newContainer = diffusionContainer
-            .makeChildContainer()
-            .addAdapter(pollingComponentFactory)
-            .addComponent(model);
+        final MutablePicoContainer newContainer = new PicoBuilder(diffusionContainer)
+            .withCaching()
+            .withConstructorInjection()
+            // .withConsoleMonitor() // enable debug
+            .withJavaEE5Lifecycle()
+            .withLocking()
+            .build()
+            .addComponent(model)
+            .addComponent(PollingComponentImpl.class);
+        diffusionContainer.addChildContainer(newContainer);
 
         newContainer.getComponent(PollingComponent.class);
 

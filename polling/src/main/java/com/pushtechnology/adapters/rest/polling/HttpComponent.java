@@ -18,6 +18,7 @@ package com.pushtechnology.adapters.rest.polling;
 import java.io.IOException;
 import java.util.concurrent.Future;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.apache.http.concurrent.FutureCallback;
@@ -45,6 +46,10 @@ public interface HttpComponent extends AutoCloseable {
         }
 
         @Override
+        public void start() {
+        }
+
+        @Override
         public void close() throws IOException {
         }
     };
@@ -58,6 +63,12 @@ public interface HttpComponent extends AutoCloseable {
      * @throws IllegalStateException if the client is not running
      */
     Future<?> request(ServiceConfig serviceConfig, EndpointConfig endpointConfig, FutureCallback<JSON> callback);
+
+    /**
+     * Start component.
+     */
+    @PostConstruct
+    void start();
 
     @PreDestroy
     @Override
