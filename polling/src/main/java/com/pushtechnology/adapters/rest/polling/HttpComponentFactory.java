@@ -56,6 +56,7 @@ public final class HttpComponentFactory {
 
         HttpAsyncClientBuilder builder = HttpAsyncClients
             .custom()
+            .disableCookieManagement()
             .setDefaultCredentialsProvider(credentialsProvider);
 
         if (sslContext != null) {
