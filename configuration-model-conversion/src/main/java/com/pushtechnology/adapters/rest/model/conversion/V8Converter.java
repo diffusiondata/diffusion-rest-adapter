@@ -52,7 +52,7 @@ public final class V8Converter extends AbstractModelConverter<com.pushtechnology
                     .builder()
                     .host(oldService.getHost())
                     .port(oldService.getPort())
-                    .secure(false)
+                    .secure(oldService.isSecure())
                     .endpoints(oldService
                         .getEndpoints()
                         .stream()
