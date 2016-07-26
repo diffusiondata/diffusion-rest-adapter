@@ -34,8 +34,8 @@ import net.jcip.annotations.Immutable;
  * @author Push Technology Limited
  */
 @Immutable
-public final class RESTAdapter {
-    private RESTAdapter() {
+public final class RESTAdapterClientEntry {
+    private RESTAdapterClientEntry() {
     }
 
     /**
