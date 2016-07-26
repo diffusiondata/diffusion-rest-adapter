@@ -13,34 +13,50 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.client;
+package com.pushtechnology.adapters.rest.adapter;
 
 import org.apache.http.concurrent.FutureCallback;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.adapters.rest.polling.PollHandlerFactory;
 import com.pushtechnology.adapters.rest.publication.PublishingClient;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
 /**
- * Implementation of {@link PollHandlerFactory}.
+ * Handler for a poll request that publishes the response.
  *
  * @author Push Technology Limited
  */
-/*package*/ final class PollHandlerFactoryImpl implements PollHandlerFactory {
+/*package*/ final class PollPublishingHandler implements FutureCallback<JSON> {
+    private static final Logger LOG = LoggerFactory.getLogger(PollPublishingHandler.class);
     private final PublishingClient publishingClient;
+    private final ServiceConfig serviceConfig;
+    private final EndpointConfig endpointConfig;
 
-    /**
-     * Constructor.
-     */
-    /*package*/ PollHandlerFactoryImpl(PublishingClient publishingClient) {
+    /*package*/ PollPublishingHandler(
+            PublishingClient publishingClient,
+            ServiceConfig serviceConfig,
+            EndpointConfig endpointConfig) {
+
         this.publishingClient = publishingClient;
+        this.serviceConfig = serviceConfig;
+        this.endpointConfig = endpointConfig;
     }
 
     @Override
-    public FutureCallback<JSON> create(ServiceConfig serviceConfig, EndpointConfig endpointConfig) {
-        return new PollPublishingHandler(
-            publishingClient, serviceConfig, endpointConfig);
+    public void completed(JSON result) {
+        publishingClient.publish(serviceConfig, endpointConfig, result);
+    }
+
+    @Override
+    public void failed(Exception ex) {
+        LOG.warn("Failed to poll endpoint {}", endpointConfig, ex);
+    }
+
+    @Override
+    public void cancelled() {
+        LOG.debug("Polling cancelled for endpoint {}", endpointConfig);
     }
 }

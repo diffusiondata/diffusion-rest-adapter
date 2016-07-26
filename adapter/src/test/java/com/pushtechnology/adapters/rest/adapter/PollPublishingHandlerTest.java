@@ -1,4 +1,4 @@
-package com.pushtechnology.adapters.rest.client;
+package com.pushtechnology.adapters.rest.adapter;
 
 import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.verify;

@@ -14,14 +14,15 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>adapter</module>
+        <module>adapter-client</module>
         <module>build-rules</module>
         <module>configuration-model</module>
-        <module>configuration-store</module>
-        <module>configuration-persistence</module>
         <module>configuration-model-conversion</module>
-        <module>publication</module>
+        <module>configuration-persistence</module>
+        <module>configuration-store</module>
         <module>polling</module>
-        <module>adapter-client</module>
+        <module>publication</module>
         <module>topic-management</module>
     </modules>
 
@@ -36,7 +37,7 @@
         <dependencies>
             <dependency>
                 <groupId>com.pushtechnology.adapters.rest</groupId>
-                <artifactId>configuration-persistence</artifactId>
+                <artifactId>adapter</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
@@ -48,13 +49,19 @@
 
             <dependency>
                 <groupId>com.pushtechnology.adapters.rest</groupId>
-                <artifactId>configuration-store</artifactId>
+                <artifactId>configuration-model-conversion</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>com.pushtechnology.adapters.rest</groupId>
-                <artifactId>configuration-model-conversion</artifactId>
+                <artifactId>configuration-persistence</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.pushtechnology.adapters.rest</groupId>
+                <artifactId>configuration-store</artifactId>
                 <version>${project.version}</version>
             </dependency>
 

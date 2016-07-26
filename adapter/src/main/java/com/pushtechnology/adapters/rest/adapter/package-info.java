@@ -13,24 +13,9 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.client;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
 /**
- * A group of {@link com.pushtechnology.adapters.rest.polling.ServiceSession}s that are managed together.
+ * Package for adapter that polls REST services and republishes data to Diffusion servers or Reappt services.
  *
  * @author Push Technology Limited
  */
-public interface ServiceSessionGroup extends AutoCloseable {
-    /**
-     * Start component.
-     */
-    @PostConstruct
-    void start();
-
-    @PreDestroy
-    @Override
-    void close();
-}
+package com.pushtechnology.adapters.rest.adapter;

@@ -14,37 +14,12 @@
     <dependencies>
         <dependency>
             <groupId>com.pushtechnology.adapters.rest</groupId>
-            <artifactId>configuration-persistence</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.pushtechnology.adapters.rest</groupId>
-            <artifactId>polling</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.pushtechnology.adapters.rest</groupId>
-            <artifactId>publication</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.pushtechnology.adapters.rest</groupId>
-            <artifactId>topic-management</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.pushtechnology.adapters.rest</groupId>
-            <artifactId>configuration-store</artifactId>
+            <artifactId>adapter</artifactId>
         </dependency>
 
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.picocontainer</groupId>
-            <artifactId>picocontainer</artifactId>
         </dependency>
 
         <dependency>

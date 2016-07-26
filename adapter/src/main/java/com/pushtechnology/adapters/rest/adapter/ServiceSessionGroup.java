@@ -13,41 +13,24 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.client;
+package com.pushtechnology.adapters.rest.adapter;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
+import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
-import com.pushtechnology.diffusion.client.session.Session;
-
 /**
- * Listener for session.
+ * A group of {@link com.pushtechnology.adapters.rest.polling.ServiceSession}s that are managed together.
  *
  * @author Push Technology Limited
  */
-public final class SessionListener implements Session.Listener, AutoCloseable {
-    private final AtomicBoolean isActive = new AtomicBoolean(true);
-
-    private final Runnable shutdownTask;
-
+public interface ServiceSessionGroup extends AutoCloseable {
     /**
-     * Constructor.
+     * Start component.
      */
-    public SessionListener(Runnable shutdownTask) {
-        this.shutdownTask = shutdownTask;
-    }
-
-    @Override
-    public void onSessionStateChanged(Session session, Session.State oldState, Session.State newState) {
-        if (isActive.get() && newState.isClosed()) {
-            shutdownTask.run();
-        }
-    }
+    @PostConstruct
+    void start();
 
     @PreDestroy
     @Override
-    public void close() {
-        isActive.set(false);
-    }
+    void close();
 }

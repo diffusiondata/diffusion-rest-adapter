@@ -1,4 +1,4 @@
-package com.pushtechnology.adapters.rest.client;
+package com.pushtechnology.adapters.rest.adapter;
 
 import static com.pushtechnology.diffusion.client.features.control.topics.TopicAddFailReason.EXISTS;
 import static com.pushtechnology.diffusion.client.features.control.topics.TopicAddFailReason.PERMISSIONS_FAILURE;

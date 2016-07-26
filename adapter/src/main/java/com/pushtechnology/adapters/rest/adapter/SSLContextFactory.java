@@ -13,7 +13,7 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.client;
+package com.pushtechnology.adapters.rest.adapter;
 
 import static java.security.KeyStore.getDefaultType;
 import static javax.net.ssl.TrustManagerFactory.getDefaultAlgorithm;
