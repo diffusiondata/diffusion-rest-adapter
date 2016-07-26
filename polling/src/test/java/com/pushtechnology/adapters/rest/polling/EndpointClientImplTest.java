@@ -175,19 +175,4 @@ public final class EndpointClientImplTest {
 
         verify(httpClient).close();
     }
-
-    @Test(expected = UnsupportedOperationException.class)
-    public void requestInactive() {
-        EndpointClient.INACTIVE.request(serviceConfig, endpointConfig, callback);
-    }
-
-    @Test
-    public void startInactive() throws IOException {
-        EndpointClient.INACTIVE.start();
-    }
-
-    @Test
-    public void closeInactive() throws IOException {
-        EndpointClient.INACTIVE.close();
-    }
 }

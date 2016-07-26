@@ -34,27 +34,6 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
  */
 public interface EndpointClient extends AutoCloseable {
     /**
-     * An inactive {@link EndpointClient}.
-     */
-    EndpointClient INACTIVE = new EndpointClient() {
-        @Override
-        public Future<?> request(
-                ServiceConfig serviceConfig,
-                EndpointConfig endpointConfig,
-                FutureCallback<JSON> callback) {
-            throw new UnsupportedOperationException("A request cannot be set from an inactive component");
-        }
-
-        @Override
-        public void start() {
-        }
-
-        @Override
-        public void close() throws IOException {
-        }
-    };
-
-    /**
      * Poll an endpoint using the client.
      * @param serviceConfig the service
      * @param endpointConfig the endpoint
