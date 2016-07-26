@@ -68,6 +68,10 @@ public final class FileSystemPersistence implements Persistence {
         final int version = loadVersion();
         final Model model = conversionContext.convert(loadModel(conversionContext.modelVersion(version)));
 
+        if (version != Model.VERSION) {
+            storeModel(model);
+        }
+
         return Optional.of(model);
     }
 
