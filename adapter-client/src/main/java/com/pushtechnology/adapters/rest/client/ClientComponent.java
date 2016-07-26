@@ -32,7 +32,7 @@ import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.polling.HttpClientFactoryImpl;
-import com.pushtechnology.adapters.rest.polling.HttpComponentImpl;
+import com.pushtechnology.adapters.rest.polling.EndpointClientImpl;
 import com.pushtechnology.adapters.rest.publication.PublishingClientImpl;
 import com.pushtechnology.adapters.rest.topic.management.TopicManagementClientImpl;
 
@@ -225,7 +225,7 @@ public final class ClientComponent implements AutoCloseable {
             .build()
             .addAdapter(new SSLContextFactory())
             .addComponent(model)
-            .addComponent(HttpComponentImpl.class);
+            .addComponent(EndpointClientImpl.class);
         topLevelContainer.addChildContainer(newContainer);
 
         return newContainer;

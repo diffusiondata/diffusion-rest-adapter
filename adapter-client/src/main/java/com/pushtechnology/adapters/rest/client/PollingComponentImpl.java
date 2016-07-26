@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.adapters.rest.polling.HttpComponent;
+import com.pushtechnology.adapters.rest.polling.EndpointClient;
 import com.pushtechnology.adapters.rest.polling.PollHandlerFactory;
 import com.pushtechnology.adapters.rest.polling.ServiceSession;
 import com.pushtechnology.adapters.rest.polling.ServiceSessionImpl;
@@ -43,7 +43,7 @@ public final class PollingComponentImpl implements PollingComponent {
     private static final Logger LOG = LoggerFactory.getLogger(PollingComponentImpl.class);
     private final Model model;
     private final ScheduledExecutorService executor;
-    private final HttpComponent httpComponent;
+    private final EndpointClient endpointClient;
     private final TopicManagementClient topicManagementClient;
     private final PublishingClient publishingClient;
     private final List<ServiceSession> serviceSessions;
@@ -54,12 +54,12 @@ public final class PollingComponentImpl implements PollingComponent {
     public PollingComponentImpl(
             Model model,
             ScheduledExecutorService executor,
-            HttpComponent httpComponent,
+            EndpointClient endpointClient,
             TopicManagementClient topicManagementClient,
             PublishingClient publishingClient) {
         this.model = model;
         this.executor = executor;
-        this.httpComponent = httpComponent;
+        this.endpointClient = endpointClient;
         this.topicManagementClient = topicManagementClient;
         this.publishingClient = publishingClient;
         this.serviceSessions = new ArrayList<>();
@@ -73,7 +73,7 @@ public final class PollingComponentImpl implements PollingComponent {
         for (final ServiceConfig service : model.getServices()) {
             final ServiceSession serviceSession = new ServiceSessionImpl(
                 executor,
-                httpComponent,
+                endpointClient,
                 service,
                 handlerFactory);
             topicManagementClient.addService(service);

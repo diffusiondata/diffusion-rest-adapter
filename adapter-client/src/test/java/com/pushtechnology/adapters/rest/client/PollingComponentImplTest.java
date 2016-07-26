@@ -33,7 +33,7 @@ import org.mockito.Mock;
 
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.adapters.rest.polling.HttpComponent;
+import com.pushtechnology.adapters.rest.polling.EndpointClient;
 import com.pushtechnology.adapters.rest.publication.PublishingClient;
 import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
 
@@ -48,7 +48,7 @@ public final class PollingComponentImplTest {
     private ScheduledExecutorService executor;
 
     @Mock
-    private HttpComponent httpComponent;
+    private EndpointClient endpointClient;
 
     @Mock
     private TopicManagementClient topicManagementClient;
@@ -70,7 +70,7 @@ public final class PollingComponentImplTest {
 
     @After
     public void postConditions() {
-        verifyNoMoreInteractions(executor, httpComponent, topicManagementClient, publishingClient, future);
+        verifyNoMoreInteractions(executor, endpointClient, topicManagementClient, publishingClient, future);
     }
 
     @SuppressWarnings("unchecked")
@@ -79,7 +79,7 @@ public final class PollingComponentImplTest {
         final PollingComponent component = new PollingComponentImpl(
             Model.builder().services(singletonList(serviceConfig)).build(),
             executor,
-            httpComponent,
+            endpointClient,
             topicManagementClient,
             publishingClient);
 
@@ -95,7 +95,7 @@ public final class PollingComponentImplTest {
         final PollingComponent component = new PollingComponentImpl(
             Model.builder().services(singletonList(serviceConfig)).build(),
             executor,
-            httpComponent,
+            endpointClient,
             topicManagementClient,
             publishingClient);
 

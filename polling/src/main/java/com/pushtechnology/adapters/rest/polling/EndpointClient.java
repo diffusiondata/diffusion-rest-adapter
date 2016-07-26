@@ -28,15 +28,15 @@ import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
 /**
- * HTTP component for requesting for endpoints.
+ * Client for requesting for endpoints.
  *
  * @author Push Technology Limited
  */
-public interface HttpComponent extends AutoCloseable {
+public interface EndpointClient extends AutoCloseable {
     /**
-     * An inactive {@link HttpComponent}.
+     * An inactive {@link EndpointClient}.
      */
-    HttpComponent INACTIVE = new HttpComponent() {
+    EndpointClient INACTIVE = new EndpointClient() {
         @Override
         public Future<?> request(
                 ServiceConfig serviceConfig,

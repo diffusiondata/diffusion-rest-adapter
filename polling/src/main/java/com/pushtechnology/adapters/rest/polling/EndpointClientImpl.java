@@ -46,13 +46,13 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
 import net.jcip.annotations.ThreadSafe;
 
 /**
- * Implementation of {@link HttpComponent}.
+ * Implementation of {@link EndpointClient}.
  *
  * @author Push Technology Limited
  */
 @ThreadSafe
-public final class HttpComponentImpl implements HttpComponent {
-    private static final Logger LOG = LoggerFactory.getLogger(HttpComponentImpl.class);
+public final class EndpointClientImpl implements EndpointClient {
+    private static final Logger LOG = LoggerFactory.getLogger(EndpointClientImpl.class);
     private static final Pattern CHARSET_PATTERN = Pattern.compile(".+; charset=(\\S+)");
     private final Model model;
     private final SSLContext sslContext;
@@ -62,7 +62,7 @@ public final class HttpComponentImpl implements HttpComponent {
     /**
      * Constructor.
      */
-    public HttpComponentImpl(Model model, SSLContext sslContext, HttpClientFactory clientFactory) {
+    public EndpointClientImpl(Model model, SSLContext sslContext, HttpClientFactory clientFactory) {
         this.model = model;
         this.sslContext = sslContext;
         this.clientFactory = clientFactory;

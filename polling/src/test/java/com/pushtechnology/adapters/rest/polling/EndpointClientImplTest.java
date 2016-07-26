@@ -33,11 +33,11 @@ import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
 /**
- * Unit tests for {@link HttpComponentImpl}.
+ * Unit tests for {@link EndpointClientImpl}.
  *
  * @author Push Technology Limited
  */
-public final class HttpComponentImplTest {
+public final class EndpointClientImplTest {
     @Mock
     private HttpClientFactory clientFactory;
     @Mock
@@ -57,7 +57,7 @@ public final class HttpComponentImplTest {
     private final ServiceConfig serviceConfig = ServiceConfig.builder().host("localhost").port(8080).build();
     private final Model model = Model.builder().services(singletonList(serviceConfig)).build();
 
-    private HttpComponentImpl httpComponent;
+    private EndpointClientImpl httpComponent;
 
     @SuppressWarnings("unchecked")
     @Before
@@ -71,7 +71,7 @@ public final class HttpComponentImplTest {
         when(entity.getContent()).thenReturn(new ByteArrayInputStream("{}".getBytes()));
         when(response.getHeaders("content-type")).thenReturn(new Header[0]);
 
-        httpComponent = new HttpComponentImpl(model, null, clientFactory);
+        httpComponent = new EndpointClientImpl(model, null, clientFactory);
     }
 
     @After
@@ -178,16 +178,16 @@ public final class HttpComponentImplTest {
 
     @Test(expected = UnsupportedOperationException.class)
     public void requestInactive() {
-        HttpComponent.INACTIVE.request(serviceConfig, endpointConfig, callback);
+        EndpointClient.INACTIVE.request(serviceConfig, endpointConfig, callback);
     }
 
     @Test
     public void startInactive() throws IOException {
-        HttpComponent.INACTIVE.start();
+        EndpointClient.INACTIVE.start();
     }
 
     @Test
     public void closeInactive() throws IOException {
-        HttpComponent.INACTIVE.close();
+        EndpointClient.INACTIVE.close();
     }
 }

@@ -37,7 +37,7 @@ public final class ServiceSessionTest {
     @Mock
     private ScheduledExecutorService executor;
     @Mock
-    private HttpComponent httpComponent;
+    private EndpointClient endpointClient;
     @Mock
     private PollHandlerFactory handlerFactory;
     @Mock
@@ -74,11 +74,11 @@ public final class ServiceSessionTest {
     public void setUp() {
         initMocks(this);
 
-        serviceSession = new ServiceSessionImpl(executor, httpComponent, serviceConfig, handlerFactory);
+        serviceSession = new ServiceSessionImpl(executor, endpointClient, serviceConfig, handlerFactory);
         when(executor
             .scheduleWithFixedDelay(isA(Runnable.class), isA(Long.class), isA(Long.class), isA(TimeUnit.class)))
             .thenReturn(taskFuture);
-        when(httpComponent
+        when(endpointClient
             .request(isA(ServiceConfig.class), isA(EndpointConfig.class), isA(FutureCallback.class)))
             .thenReturn(pollFuture0, pollFuture1);
         when(handlerFactory.create(serviceConfig, endpointConfig)).thenReturn(handler);
@@ -86,7 +86,7 @@ public final class ServiceSessionTest {
 
     @After
     public void postConditions() {
-        verifyNoMoreInteractions(executor, httpComponent, handlerFactory, taskFuture);
+        verifyNoMoreInteractions(executor, endpointClient, handlerFactory, taskFuture);
     }
 
     @Test
@@ -101,7 +101,7 @@ public final class ServiceSessionTest {
 
         runnable.run();
 
-        verify(httpComponent).request(eq(serviceConfig), eq(endpointConfig), callbackCaptor.capture());
+        verify(endpointClient).request(eq(serviceConfig), eq(endpointConfig), callbackCaptor.capture());
 
         final FutureCallback<JSON> callback = callbackCaptor.getValue();
 
@@ -122,7 +122,7 @@ public final class ServiceSessionTest {
 
         runnable.run();
 
-        verify(httpComponent).request(eq(serviceConfig), eq(endpointConfig), callbackCaptor.capture());
+        verify(endpointClient).request(eq(serviceConfig), eq(endpointConfig), callbackCaptor.capture());
 
         final FutureCallback<JSON> callback = callbackCaptor.getValue();
 
@@ -157,7 +157,7 @@ public final class ServiceSessionTest {
 
         runnable.run();
 
-        verify(httpComponent).request(eq(serviceConfig), eq(endpointConfig), callbackCaptor.capture());
+        verify(endpointClient).request(eq(serviceConfig), eq(endpointConfig), callbackCaptor.capture());
 
         serviceSession.stop();
 
@@ -177,11 +177,11 @@ public final class ServiceSessionTest {
 
         runnable.run();
 
-        verify(httpComponent).request(eq(serviceConfig), eq(endpointConfig), callbackCaptor.capture());
+        verify(endpointClient).request(eq(serviceConfig), eq(endpointConfig), callbackCaptor.capture());
 
         runnable.run();
 
-        verify(httpComponent, times(2)).request(eq(serviceConfig), eq(endpointConfig), callbackCaptor.capture());
+        verify(endpointClient, times(2)).request(eq(serviceConfig), eq(endpointConfig), callbackCaptor.capture());
 
         serviceSession.stop();
 
@@ -201,7 +201,7 @@ public final class ServiceSessionTest {
 
         runnable.run();
 
-        verify(httpComponent).request(eq(serviceConfig), eq(endpointConfig), callbackCaptor.capture());
+        verify(endpointClient).request(eq(serviceConfig), eq(endpointConfig), callbackCaptor.capture());
 
         final FutureCallback<JSON> callback = callbackCaptor.getValue();
 
