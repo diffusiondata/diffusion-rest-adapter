@@ -103,14 +103,4 @@ public final class ServiceSessionGroupImplTest {
 
         verify(publishingClient).removeService(serviceConfig);
     }
-
-    @Test
-    public void closeInactive() {
-        ServiceSessionGroup.INACTIVE.close();
-    }
-
-    @Test
-    public void startInactive() {
-        ServiceSessionGroup.INACTIVE.start();
-    }
 }

@@ -18,27 +18,12 @@ package com.pushtechnology.adapters.rest.client;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
-import com.pushtechnology.adapters.rest.polling.ServiceSession;
-
 /**
- * A group of {@link ServiceSession}s that are managed together.
+ * A group of {@link com.pushtechnology.adapters.rest.polling.ServiceSession}s that are managed together.
  *
  * @author Push Technology Limited
  */
 public interface ServiceSessionGroup extends AutoCloseable {
-    /**
-     * Inactive component.
-     */
-    ServiceSessionGroup INACTIVE = new ServiceSessionGroup() {
-        @Override
-        public void start() {
-        }
-
-        @Override
-        public void close() {
-        }
-    };
-
     /**
      * Start component.
      */
