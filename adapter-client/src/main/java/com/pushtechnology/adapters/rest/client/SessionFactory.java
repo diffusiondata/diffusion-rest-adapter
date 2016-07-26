@@ -19,6 +19,7 @@ import static com.pushtechnology.diffusion.client.session.SessionAttributes.Tran
 
 import javax.net.ssl.SSLContext;
 
+import org.picocontainer.annotations.Nullable;
 import org.picocontainer.injectors.ProviderAdapter;
 
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
@@ -35,7 +36,7 @@ public final class SessionFactory extends ProviderAdapter {
     /**
      * @return an open session
      */
-    public Session provide(Model model, SessionListener listener, SSLContext sslContext) {
+    public Session provide(Model model, SessionListener listener, @Nullable SSLContext sslContext) {
         final DiffusionConfig diffusionConfig = model.getDiffusion();
 
         com.pushtechnology.diffusion.client.session.SessionFactory sessionFactory = Diffusion

@@ -25,6 +25,7 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
 import org.apache.http.impl.nio.client.HttpAsyncClients;
+import org.picocontainer.annotations.Nullable;
 
 import com.pushtechnology.adapters.rest.model.latest.BasicAuthenticationConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
@@ -37,7 +38,7 @@ import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
  */
 public final class HttpClientFactoryImpl implements HttpClientFactory {
     @Override
-    public CloseableHttpAsyncClient create(Model model, SSLContext sslContext) {
+    public CloseableHttpAsyncClient create(Model model, @Nullable SSLContext sslContext) {
         final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
 
         // Configure client with Basic authentication credentials
