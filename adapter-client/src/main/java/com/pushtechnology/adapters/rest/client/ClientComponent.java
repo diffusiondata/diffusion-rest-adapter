@@ -46,14 +46,17 @@ import net.jcip.annotations.ThreadSafe;
 @ThreadSafe
 public final class ClientComponent implements AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(ClientComponent.class);
-    private final MutablePicoContainer topLevel = new PicoBuilder()
+
+    private final ScheduledExecutorService executor;
+    private final SessionListener sessionListener;
+
+    private MutablePicoContainer topLevelContainer = new PicoBuilder()
         .withCaching()
         .withConstructorInjection()
         //.withConsoleMonitor() // enable debug
         .withJavaEE5Lifecycle()
         .withLocking()
         .build();
-
     private MutablePicoContainer httpContainer;
     private MutablePicoContainer diffusionContainer;
     private MutablePicoContainer pollContainer;
@@ -63,8 +66,9 @@ public final class ClientComponent implements AutoCloseable {
      * Constructor.
      */
     public ClientComponent(ScheduledExecutorService executor, Runnable shutdownHandler) {
-        topLevel
-            .addComponent(new SessionListener(new Runnable() {
+        this.executor = executor;
+        sessionListener = new SessionListener(
+            new Runnable() {
                 @Override
                 public void run() {
                     try {
@@ -76,9 +80,7 @@ public final class ClientComponent implements AutoCloseable {
                     }
                     shutdownHandler.run();
                 }
-            }))
-            .addComponent(executor)
-            .addComponent(HttpClientFactoryImpl.class);
+            });
     }
 
     /**
@@ -92,8 +94,11 @@ public final class ClientComponent implements AutoCloseable {
         else if (isModelInactive(model)) {
             switchToInactiveComponents();
         }
-        else if (wasInactive() || hasTruststoreChanged(model) || hasSecurityChanged(model)) {
+        else if (wasInactive()) {
             reconfigureAll(model);
+        }
+        else if (hasTruststoreChanged(model) || hasSecurityChanged(model)) {
+            reconfigureSecurity(model);
         }
         else if (hasDiffusionChanged(model)) {
             reconfigurePollingAndPublishing(model);
@@ -109,20 +114,22 @@ public final class ClientComponent implements AutoCloseable {
         LOG.info("Setting up components for the first time");
 
         if (!isModelInactive(model)) {
+            topLevelContainer = newTopLevelContainer();
             httpContainer = newHttpContainer(model);
             diffusionContainer = newDiffusionContainer(model);
             pollContainer = newPollContainer(model);
 
             LOG.info("Opening components");
-            topLevel.start();
+            topLevelContainer.start();
         }
     }
 
     private void switchToInactiveComponents() throws IOException {
         LOG.info("Replacing with inactive components");
 
-        if (httpContainer != null) {
-            topLevel.dispose();
+        if (topLevelContainer != null) {
+            topLevelContainer.dispose();
+            topLevelContainer = null;
             httpContainer = null;
             diffusionContainer = null;
             pollContainer = null;
@@ -132,17 +139,34 @@ public final class ClientComponent implements AutoCloseable {
     private void reconfigureAll(Model model) throws IOException {
         LOG.info("Replacing all components");
 
+        final MutablePicoContainer oldTopLevelContainer = topLevelContainer;
+
+        topLevelContainer = newTopLevelContainer();
+        httpContainer = newHttpContainer(model);
+        diffusionContainer = newDiffusionContainer(model);
+        pollContainer = newPollContainer(model);
+
+        topLevelContainer.start();
+
+        if (oldTopLevelContainer != null) {
+            oldTopLevelContainer.dispose();
+        }
+    }
+
+    private void reconfigureSecurity(Model model) throws IOException {
+        LOG.info("Updating security, replacing the polling and publishing components");
+
         final MutablePicoContainer oldHttpContainer = httpContainer;
 
         httpContainer = newHttpContainer(model);
         diffusionContainer = newDiffusionContainer(model);
         pollContainer = newPollContainer(model);
 
-        topLevel.start();
+        httpContainer.start();
 
         if (oldHttpContainer != null) {
             oldHttpContainer.dispose();
-            topLevel.removeChildContainer(oldHttpContainer);
+            topLevelContainer.removeChildContainer(oldHttpContainer);
         }
     }
 
@@ -178,8 +202,21 @@ public final class ClientComponent implements AutoCloseable {
         }
     }
 
+    private MutablePicoContainer newTopLevelContainer() {
+        return new PicoBuilder()
+            .withCaching()
+            .withConstructorInjection()
+            // .withConsoleMonitor() // enable debug
+            .withJavaEE5Lifecycle()
+            .withLocking()
+            .build()
+            .addComponent(sessionListener)
+            .addComponent(executor)
+            .addComponent(HttpClientFactoryImpl.class);
+    }
+
     private MutablePicoContainer newHttpContainer(Model model) {
-        final MutablePicoContainer newContainer = new PicoBuilder(topLevel)
+        final MutablePicoContainer newContainer = new PicoBuilder(topLevelContainer)
             .withCaching()
             .withConstructorInjection()
             // .withConsoleMonitor() // enable debug
@@ -189,7 +226,7 @@ public final class ClientComponent implements AutoCloseable {
             .addAdapter(new SSLContextFactory())
             .addComponent(model)
             .addComponent(HttpComponentImpl.class);
-        topLevel.addChildContainer(newContainer);
+        topLevelContainer.addChildContainer(newContainer);
 
         return newContainer;
     }
@@ -285,7 +322,7 @@ public final class ClientComponent implements AutoCloseable {
     @Override
     public synchronized void close() throws IOException {
         LOG.info("Closing client");
-        topLevel.dispose();
+        topLevelContainer.dispose();
         LOG.info("Closed client");
     }
 }
