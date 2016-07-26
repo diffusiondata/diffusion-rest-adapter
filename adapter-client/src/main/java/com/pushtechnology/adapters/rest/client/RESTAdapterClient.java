@@ -37,14 +37,14 @@ public final class RESTAdapterClient {
     private static final Logger LOG = LoggerFactory.getLogger(RESTAdapterClient.class);
 
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
-    private final ClientComponent clientComponent;
+    private final RESTAdapter restAdapter;
     private final ModelStore modelStore;
     private final Runnable shutdownHandler;
 
     private RESTAdapterClient(ModelStore modelStore, ScheduledExecutorService executor, Runnable shutdownHandler) {
         this.modelStore = modelStore;
         this.shutdownHandler = shutdownHandler;
-        clientComponent = new ClientComponent(executor, () -> {
+        restAdapter = new RESTAdapter(executor, () -> {
             isRunning.set(false);
             shutdownHandler.run();
         });
@@ -66,7 +66,7 @@ public final class RESTAdapterClient {
         LOG.debug("Running REST adapter client with model : {}", newModel);
 
         try {
-            clientComponent.reconfigure(newModel);
+            restAdapter.reconfigure(newModel);
         }
         catch (IllegalArgumentException e) {
             LOG.warn("The new model is not valid", e);
@@ -90,7 +90,7 @@ public final class RESTAdapterClient {
             throw new IllegalStateException("The client is not running");
         }
 
-        clientComponent.close();
+        restAdapter.close();
 
         shutdownHandler.run();
     }

@@ -40,13 +40,13 @@ import net.jcip.annotations.GuardedBy;
 import net.jcip.annotations.ThreadSafe;
 
 /**
- * The component that wires together the different components.
+ * The REST Adapter.
  *
  * @author Push Technology Limited
  */
 @ThreadSafe
-public final class ClientComponent implements AutoCloseable {
-    private static final Logger LOG = LoggerFactory.getLogger(ClientComponent.class);
+public final class RESTAdapter implements AutoCloseable {
+    private static final Logger LOG = LoggerFactory.getLogger(RESTAdapter.class);
 
     private final ScheduledExecutorService executor;
     private final SessionListener sessionListener;
@@ -65,7 +65,7 @@ public final class ClientComponent implements AutoCloseable {
     /**
      * Constructor.
      */
-    public ClientComponent(ScheduledExecutorService executor, Runnable shutdownHandler) {
+    public RESTAdapter(ScheduledExecutorService executor, Runnable shutdownHandler) {
         this.executor = executor;
         sessionListener = new SessionListener(
             new Runnable() {
