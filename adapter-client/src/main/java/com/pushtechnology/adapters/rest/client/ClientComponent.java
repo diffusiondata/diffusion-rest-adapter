@@ -257,10 +257,10 @@ public final class ClientComponent implements AutoCloseable {
             .withLocking()
             .build()
             .addComponent(model)
-            .addComponent(PollingComponentImpl.class);
+            .addComponent(ServiceSessionGroupImpl.class);
         diffusionContainer.addChildContainer(newContainer);
 
-        newContainer.getComponent(PollingComponent.class);
+        newContainer.getComponent(ServiceSessionGroup.class);
 
         return newContainer;
     }

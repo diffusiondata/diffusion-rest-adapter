@@ -38,11 +38,11 @@ import com.pushtechnology.adapters.rest.publication.PublishingClient;
 import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
 
 /**
- * Unit tests for {@link PollingComponentImpl}.
+ * Unit tests for {@link ServiceSessionGroupImpl}.
  *
  * @author Push Technology Limited
  */
-public final class PollingComponentImplTest {
+public final class ServiceSessionGroupImplTest {
 
     @Mock
     private ScheduledExecutorService executor;
@@ -76,7 +76,7 @@ public final class PollingComponentImplTest {
     @SuppressWarnings("unchecked")
     @Test
     public void start() {
-        final PollingComponent component = new PollingComponentImpl(
+        final ServiceSessionGroup component = new ServiceSessionGroupImpl(
             Model.builder().services(singletonList(serviceConfig)).build(),
             executor,
             endpointClient,
@@ -92,7 +92,7 @@ public final class PollingComponentImplTest {
 
     @Test
     public void close() {
-        final PollingComponent component = new PollingComponentImpl(
+        final ServiceSessionGroup component = new ServiceSessionGroupImpl(
             Model.builder().services(singletonList(serviceConfig)).build(),
             executor,
             endpointClient,
@@ -106,11 +106,11 @@ public final class PollingComponentImplTest {
 
     @Test
     public void closeInactive() {
-        PollingComponent.INACTIVE.close();
+        ServiceSessionGroup.INACTIVE.close();
     }
 
     @Test
     public void startInactive() {
-        PollingComponent.INACTIVE.start();
+        ServiceSessionGroup.INACTIVE.start();
     }
 }

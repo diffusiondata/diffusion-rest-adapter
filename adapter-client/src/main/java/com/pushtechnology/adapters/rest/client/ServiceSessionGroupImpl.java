@@ -35,12 +35,12 @@ import com.pushtechnology.adapters.rest.publication.PublishingClient;
 import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
 
 /**
- * The component responsible for polling REST services.
+ * Implementation for {@link ServiceSessionGroup}.
  *
  * @author Push Technology Limited
  */
-public final class PollingComponentImpl implements PollingComponent {
-    private static final Logger LOG = LoggerFactory.getLogger(PollingComponentImpl.class);
+public final class ServiceSessionGroupImpl implements ServiceSessionGroup {
+    private static final Logger LOG = LoggerFactory.getLogger(ServiceSessionGroupImpl.class);
     private final Model model;
     private final ScheduledExecutorService executor;
     private final EndpointClient endpointClient;
@@ -51,7 +51,7 @@ public final class PollingComponentImpl implements PollingComponent {
     /**
      * Constructor.
      */
-    public PollingComponentImpl(
+    public ServiceSessionGroupImpl(
             Model model,
             ScheduledExecutorService executor,
             EndpointClient endpointClient,
