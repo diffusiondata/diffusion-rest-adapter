@@ -31,11 +31,12 @@ import org.slf4j.LoggerFactory;
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.adapters.rest.polling.HttpClientFactoryImpl;
 import com.pushtechnology.adapters.rest.polling.EndpointClientImpl;
+import com.pushtechnology.adapters.rest.polling.HttpClientFactoryImpl;
 import com.pushtechnology.adapters.rest.publication.PublishingClientImpl;
 import com.pushtechnology.adapters.rest.topic.management.TopicManagementClientImpl;
 
+import net.jcip.annotations.GuardedBy;
 import net.jcip.annotations.ThreadSafe;
 
 /**
@@ -50,10 +51,15 @@ public final class ClientComponent implements AutoCloseable {
     private final ScheduledExecutorService executor;
     private final SessionListener sessionListener;
 
+    @GuardedBy("this")
     private MutablePicoContainer topLevelContainer;
+    @GuardedBy("this")
     private MutablePicoContainer httpContainer;
+    @GuardedBy("this")
     private MutablePicoContainer diffusionContainer;
+    @GuardedBy("this")
     private MutablePicoContainer pollContainer;
+    @GuardedBy("this")
     private Model currentModel;
 
     /**
@@ -80,6 +86,7 @@ public final class ClientComponent implements AutoCloseable {
     /**
      * Reconfigure the component.
      */
+    @GuardedBy("this")
     public synchronized void reconfigure(Model model) throws IOException {
 
         if (isFirstConfiguration()) {
@@ -104,6 +111,7 @@ public final class ClientComponent implements AutoCloseable {
         currentModel = model;
     }
 
+    @GuardedBy("this")
     private void initialConfiguration(Model model) throws IOException {
         LOG.info("Setting up components for the first time");
 
@@ -118,6 +126,7 @@ public final class ClientComponent implements AutoCloseable {
         }
     }
 
+    @GuardedBy("this")
     private void switchToInactiveComponents() throws IOException {
         LOG.info("Replacing with inactive components");
 
@@ -130,6 +139,7 @@ public final class ClientComponent implements AutoCloseable {
         }
     }
 
+    @GuardedBy("this")
     private void reconfigureAll(Model model) throws IOException {
         LOG.info("Replacing all components");
 
@@ -147,6 +157,7 @@ public final class ClientComponent implements AutoCloseable {
         }
     }
 
+    @GuardedBy("this")
     private void reconfigureSecurity(Model model) throws IOException {
         LOG.info("Updating security, replacing the polling and publishing components");
 
@@ -164,6 +175,7 @@ public final class ClientComponent implements AutoCloseable {
         }
     }
 
+    @GuardedBy("this")
     private void reconfigurePollingAndPublishing(Model model) throws IOException {
         LOG.info("Replacing the polling and publishing components");
 
@@ -180,6 +192,7 @@ public final class ClientComponent implements AutoCloseable {
         }
     }
 
+    @GuardedBy("this")
     private void reconfigurePolling(Model model) {
         LOG.info("Replacing the polling component");
 
@@ -196,6 +209,7 @@ public final class ClientComponent implements AutoCloseable {
         }
     }
 
+    @GuardedBy("this")
     private MutablePicoContainer newTopLevelContainer() {
         return new PicoBuilder()
             .withCaching()
@@ -209,6 +223,7 @@ public final class ClientComponent implements AutoCloseable {
             .addComponent(HttpClientFactoryImpl.class);
     }
 
+    @GuardedBy("this")
     private MutablePicoContainer newHttpContainer(Model model) {
         final MutablePicoContainer newContainer = new PicoBuilder(topLevelContainer)
             .withCaching()
@@ -225,6 +240,7 @@ public final class ClientComponent implements AutoCloseable {
         return newContainer;
     }
 
+    @GuardedBy("this")
     private MutablePicoContainer newDiffusionContainer(Model model) {
         final MutablePicoContainer newContainer = new PicoBuilder(httpContainer)
             .withCaching()
@@ -242,6 +258,7 @@ public final class ClientComponent implements AutoCloseable {
         return newContainer;
     }
 
+    @GuardedBy("this")
     private MutablePicoContainer newPollContainer(Model model) {
         final MutablePicoContainer newContainer = new PicoBuilder(diffusionContainer)
             .withCaching()
@@ -259,10 +276,12 @@ public final class ClientComponent implements AutoCloseable {
         return newContainer;
     }
 
+    @GuardedBy("this")
     private boolean isFirstConfiguration() {
         return currentModel == null;
     }
 
+    @GuardedBy("this")
     private boolean isModelInactive(Model model) {
         final DiffusionConfig diffusionConfig = model.getDiffusion();
         final List<ServiceConfig> services = model.getServices();
@@ -273,12 +292,14 @@ public final class ClientComponent implements AutoCloseable {
             services.stream().map(ServiceConfig::getEndpoints).flatMap(Collection::stream).collect(counting()) == 0L;
     }
 
+    @GuardedBy("this")
     private boolean wasInactive() {
         return httpContainer == null ||
             diffusionContainer == null ||
             pollContainer == null;
     }
 
+    @GuardedBy("this")
     private boolean hasTruststoreChanged(Model newModel) {
         return currentModel.getTruststore() == null && newModel.getTruststore() != null ||
             !currentModel.getTruststore().equals(newModel.getTruststore());
@@ -297,6 +318,7 @@ public final class ClientComponent implements AutoCloseable {
                 .collect(toList()));
     }
 
+    @GuardedBy("this")
     private boolean hasDiffusionChanged(Model model) {
         final DiffusionConfig diffusionConfig = model.getDiffusion();
 
@@ -311,6 +333,7 @@ public final class ClientComponent implements AutoCloseable {
     }
 
     @Override
+    @GuardedBy("this")
     public synchronized void close() throws IOException {
         LOG.info("Closing client");
         topLevelContainer.dispose();
