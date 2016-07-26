@@ -50,13 +50,7 @@ public final class ClientComponent implements AutoCloseable {
     private final ScheduledExecutorService executor;
     private final SessionListener sessionListener;
 
-    private MutablePicoContainer topLevelContainer = new PicoBuilder()
-        .withCaching()
-        .withConstructorInjection()
-        //.withConsoleMonitor() // enable debug
-        .withJavaEE5Lifecycle()
-        .withLocking()
-        .build();
+    private MutablePicoContainer topLevelContainer;
     private MutablePicoContainer httpContainer;
     private MutablePicoContainer diffusionContainer;
     private MutablePicoContainer pollContainer;
