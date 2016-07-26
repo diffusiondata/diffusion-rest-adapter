@@ -71,6 +71,9 @@ public final class RESTAdapterClient {
         catch (IllegalArgumentException e) {
             LOG.warn("The new model is not valid", e);
         }
+        catch (IllegalStateException | UnsupportedOperationException e) {
+            LOG.warn("There was a problem applying the new model", e);
+        }
         catch (IOException e) {
             LOG.warn("Failed to shutdown previous model on model change");
         }
