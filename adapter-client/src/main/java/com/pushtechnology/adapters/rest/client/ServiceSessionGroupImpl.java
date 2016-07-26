@@ -68,7 +68,7 @@ public final class ServiceSessionGroupImpl implements ServiceSessionGroup {
     @PostConstruct
     @Override
     public synchronized void start() {
-        LOG.info("Opening polling component");
+        LOG.info("Opening service session group");
         final PollHandlerFactory handlerFactory = new PollHandlerFactoryImpl(publishingClient);
         for (final ServiceConfig service : model.getServices()) {
             final ServiceSession serviceSession = new ServiceSessionImpl(
@@ -82,15 +82,15 @@ public final class ServiceSessionGroupImpl implements ServiceSessionGroup {
                 .thenAccept(new ServiceReadyForPublishing(topicManagementClient, serviceSession));
             serviceSessions.add(serviceSession);
         }
-        LOG.info("Opened polling component");
+        LOG.info("Opened service session group");
     }
 
     @PreDestroy
     @Override
     public synchronized void close() {
-        LOG.info("Closing polling component");
+        LOG.info("Closing service session group");
         serviceSessions.forEach(ServiceSession::stop);
         model.getServices().forEach(publishingClient::removeService);
-        LOG.info("Closed polling component");
+        LOG.info("Closed service session group");
     }
 }
