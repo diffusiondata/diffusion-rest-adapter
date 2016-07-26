@@ -240,13 +240,10 @@ public final class ClientComponent implements AutoCloseable {
             .withLocking()
             .build()
             .addAdapter(new SessionFactory())
-            .addComponent(PublicationComponentImpl.class)
             .addComponent(PublishingClientImpl.class)
             .addComponent(TopicManagementClientImpl.class)
             .addComponent(model);
         httpContainer.addChildContainer(newContainer);
-
-        newContainer.getComponent(PublicationComponent.class);
 
         return newContainer;
     }
