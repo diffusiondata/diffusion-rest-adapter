@@ -14,7 +14,10 @@
     <rule ref="rulesets/java/empty.xml"/>
     <rule ref="rulesets/java/junit.xml"/>
     <rule ref="rulesets/java/migrating.xml"/>
-    <rule ref="rulesets/java/strictexception.xml"/>
+    <rule ref="rulesets/java/strictexception.xml">
+        <!-- Also checked by checkstyle -->
+        <exclude name="AvoidCatchingGenericException"/>
+    </rule>
     <rule ref="rulesets/java/finalizers.xml"/>
     <rule ref="rulesets/java/imports.xml">
         <!-- Checkstyle catches unused imports, and we don't want additional
