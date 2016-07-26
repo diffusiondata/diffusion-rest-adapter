@@ -122,7 +122,6 @@ public final class ClientComponent implements AutoCloseable {
         LOG.info("Replacing with inactive components");
 
         if (httpContainer != null) {
-            topLevel.stop();
             topLevel.dispose();
             httpContainer = null;
             diffusionContainer = null;
@@ -142,7 +141,6 @@ public final class ClientComponent implements AutoCloseable {
         topLevel.start();
 
         if (oldHttpContainer != null) {
-            oldHttpContainer.stop();
             oldHttpContainer.dispose();
             topLevel.removeChildContainer(oldHttpContainer);
         }
@@ -159,7 +157,6 @@ public final class ClientComponent implements AutoCloseable {
         diffusionContainer.start();
 
         if (oldDiffusionContainer != null) {
-            oldDiffusionContainer.stop();
             oldDiffusionContainer.dispose();
             httpContainer.removeChildContainer(oldDiffusionContainer);
         }
@@ -176,7 +173,6 @@ public final class ClientComponent implements AutoCloseable {
 
         if (oldPollContainer != null) {
             LOG.info("Stopping old polling component");
-            oldPollContainer.stop();
             oldPollContainer.dispose();
             diffusionContainer.removeChildContainer(oldPollContainer);
         }
@@ -289,7 +285,7 @@ public final class ClientComponent implements AutoCloseable {
     @Override
     public synchronized void close() throws IOException {
         LOG.info("Closing client");
-        topLevel.stop();
+        topLevel.dispose();
         LOG.info("Closed client");
     }
 }
