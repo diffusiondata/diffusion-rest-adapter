@@ -57,7 +57,7 @@ public final class EndpointClientImplTest {
     private final ServiceConfig serviceConfig = ServiceConfig.builder().host("localhost").port(8080).build();
     private final Model model = Model.builder().services(singletonList(serviceConfig)).build();
 
-    private EndpointClientImpl httpComponent;
+    private EndpointClientImpl endpointClient;
 
     @SuppressWarnings("unchecked")
     @Before
@@ -71,7 +71,7 @@ public final class EndpointClientImplTest {
         when(entity.getContent()).thenReturn(new ByteArrayInputStream("{}".getBytes()));
         when(response.getHeaders("content-type")).thenReturn(new Header[0]);
 
-        httpComponent = new EndpointClientImpl(model, null, clientFactory);
+        endpointClient = new EndpointClientImpl(model, null, clientFactory);
     }
 
     @After
@@ -81,7 +81,7 @@ public final class EndpointClientImplTest {
 
     @Test
     public void start() {
-        httpComponent.start();
+        endpointClient.start();
 
         verify(clientFactory).create(model, null);
         verify(httpClient).start();
@@ -90,12 +90,12 @@ public final class EndpointClientImplTest {
     @SuppressWarnings("unchecked")
     @Test
     public void request() {
-        httpComponent.start();
+        endpointClient.start();
 
         verify(clientFactory).create(model, null);
         verify(httpClient).start();
 
-        final Future<?> handle =  httpComponent.request(serviceConfig, endpointConfig, callback);
+        final Future<?> handle =  endpointClient.request(serviceConfig, endpointConfig, callback);
 
         assertEquals(future, handle);
         verify(httpClient).execute(isA(HttpHost.class), isA(HttpRequest.class), isA(FutureCallback.class));
@@ -103,12 +103,12 @@ public final class EndpointClientImplTest {
 
     @Test
     public void requestResponse() {
-        httpComponent.start();
+        endpointClient.start();
 
         verify(clientFactory).create(model, null);
         verify(httpClient).start();
 
-        final Future<?> handle =  httpComponent.request(serviceConfig, endpointConfig, callback);
+        final Future<?> handle =  endpointClient.request(serviceConfig, endpointConfig, callback);
 
         assertEquals(future, handle);
         verify(httpClient).execute(isA(HttpHost.class), isA(HttpRequest.class), callbackCaptor.capture());
@@ -124,12 +124,12 @@ public final class EndpointClientImplTest {
 
     @Test
     public void requestResponseFailed() {
-        httpComponent.start();
+        endpointClient.start();
 
         verify(clientFactory).create(model, null);
         verify(httpClient).start();
 
-        final Future<?> handle =  httpComponent.request(serviceConfig, endpointConfig, callback);
+        final Future<?> handle =  endpointClient.request(serviceConfig, endpointConfig, callback);
 
         assertEquals(future, handle);
         verify(httpClient).execute(isA(HttpHost.class), isA(HttpRequest.class), callbackCaptor.capture());
@@ -143,12 +143,12 @@ public final class EndpointClientImplTest {
 
     @Test
     public void requestResponseCancelled() {
-        httpComponent.start();
+        endpointClient.start();
 
         verify(clientFactory).create(model, null);
         verify(httpClient).start();
 
-        final Future<?> handle =  httpComponent.request(serviceConfig, endpointConfig, callback);
+        final Future<?> handle =  endpointClient.request(serviceConfig, endpointConfig, callback);
 
         assertEquals(future, handle);
         verify(httpClient).execute(isA(HttpHost.class), isA(HttpRequest.class), callbackCaptor.capture());
@@ -161,17 +161,17 @@ public final class EndpointClientImplTest {
 
     @Test(expected = IllegalStateException.class)
     public void requestBeforeStart() {
-        httpComponent.request(serviceConfig, endpointConfig, callback);
+        endpointClient.request(serviceConfig, endpointConfig, callback);
     }
 
     @Test
     public void close() throws IOException {
-        httpComponent.start();
+        endpointClient.start();
 
         verify(clientFactory).create(model, null);
         verify(httpClient).start();
 
-        httpComponent.close();
+        endpointClient.close();
 
         verify(httpClient).close();
     }
