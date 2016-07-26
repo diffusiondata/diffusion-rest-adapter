@@ -90,6 +90,7 @@ public final class PublishingClientImpl implements PublishingClient {
                     @Override
                     public void onClose(String topicPath) {
                         synchronized (PublishingClientImpl.this) {
+                            LOG.warn("Closed for for service: {}", serviceConfig);
                             updaterSources.remove(serviceConfig);
                             updaters.remove(serviceConfig);
                         }

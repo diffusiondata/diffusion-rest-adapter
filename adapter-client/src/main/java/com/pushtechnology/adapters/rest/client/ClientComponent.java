@@ -123,6 +123,7 @@ public final class ClientComponent implements AutoCloseable {
 
         if (httpContainer != null) {
             topLevel.stop();
+            topLevel.dispose();
             httpContainer = null;
             diffusionContainer = null;
             pollContainer = null;
