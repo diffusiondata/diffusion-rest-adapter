@@ -78,67 +78,65 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
  * @author Push Technology Limited
  */
 public final class BasicIT {
+    private static final Model EMPTY_MODEL = Model.builder().build();
+    private static final DiffusionConfig DIFFUSION_CONFIG = DiffusionConfig
+        .builder()
+        .host("localhost")
+        .port(8080)
+        .principal("control")
+        .password("password")
+        .build();
+    private static final EndpointConfig INCREMENT_ENDPOINT = EndpointConfig
+        .builder()
+        .name("increment")
+        .topic("increment")
+        .url("/rest/increment")
+        .build();
+    private static final EndpointConfig TIMESTAMP_ENDPOINT = EndpointConfig
+        .builder()
+        .name("timestamp")
+        .topic("timestamp")
+        .url("/rest/timestamp")
+        .build();
+    private static final EndpointConfig AUTHENTICATED_INCREMENT_ENDPOINT = EndpointConfig
+        .builder()
+        .name("increment")
+        .topic("increment")
+        .url("/auth/rest/increment")
+        .build();
+    private static final EndpointConfig AUTHENTICATED_TIMESTAMP_ENDPOINT = EndpointConfig
+        .builder()
+        .name("timestamp")
+        .topic("timestamp")
+        .url("/auth/rest/timestamp")
+        .build();
+    private static final BasicAuthenticationConfig BASIC_AUTHENTICATION_CONFIG = BasicAuthenticationConfig
+        .builder()
+        .principal("principal")
+        .credential("credential")
+        .build();
+    private static final ServiceConfig INSECURE_SERVICE = ServiceConfig
+        .builder()
+        .host("localhost")
+        .port(8081)
+        .pollPeriod(500)
+        .topicRoot("rest")
+        .endpoints(asList(INCREMENT_ENDPOINT, TIMESTAMP_ENDPOINT))
+        .build();
+    private static final ServiceConfig SECURE_SERVICE = ServiceConfig
+        .builder()
+        .host("localhost")
+        .port(8444)
+        .secure(true)
+        .pollPeriod(500)
+        .topicRoot("restTLS")
+        .security(SecurityConfig.builder().basic(BASIC_AUTHENTICATION_CONFIG).build())
+        .endpoints(asList(AUTHENTICATED_INCREMENT_ENDPOINT, AUTHENTICATED_TIMESTAMP_ENDPOINT))
+        .build();
     private static final Model MODEL = Model
         .builder()
-        .diffusion(DiffusionConfig
-            .builder()
-            .host("localhost")
-            .port(8080)
-            .principal("control")
-            .password("password")
-            .build())
-        .services(asList(
-            ServiceConfig
-                .builder()
-                .host("localhost")
-                .port(8081)
-                .pollPeriod(500)
-                .topicRoot("rest")
-                .endpoints(asList(
-                    EndpointConfig
-                        .builder()
-                        .name("increment")
-                        .topic("increment")
-                        .url("/rest/increment")
-                        .build(),
-                    EndpointConfig
-                        .builder()
-                        .name("timestamp")
-                        .topic("timestamp")
-                        .url("/rest/timestamp")
-                        .build()
-                ))
-                .build(),
-            ServiceConfig
-                .builder()
-                .host("localhost")
-                .port(8444)
-                .secure(true)
-                .pollPeriod(500)
-                .topicRoot("restTLS")
-                .security(SecurityConfig
-                    .builder()
-                    .basic(BasicAuthenticationConfig
-                        .builder()
-                        .principal("principal")
-                        .credential("credential")
-                        .build())
-                    .build())
-                .endpoints(asList(
-                    EndpointConfig
-                        .builder()
-                        .name("increment")
-                        .topic("increment")
-                        .url("/auth/rest/increment")
-                        .build(),
-                    EndpointConfig
-                        .builder()
-                        .name("timestamp")
-                        .topic("timestamp")
-                        .url("/auth/rest/timestamp")
-                        .build()
-                ))
-                .build()))
+        .diffusion(DIFFUSION_CONFIG)
+        .services(asList(INSECURE_SERVICE, SECURE_SERVICE))
         .truststore("testKeystore.jks")
         .build();
 
@@ -263,7 +261,7 @@ public final class BasicIT {
 
     @Test
     public void testReconfigurationFromInactiveToActive() throws IOException {
-        modelStore.setModel(Model.builder().build());
+        modelStore.setModel(EMPTY_MODEL);
         final RESTAdapterClient client = startClient();
         final Session session = startSession();
 
