@@ -26,20 +26,21 @@ import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.session.Session;
+import com.pushtechnology.diffusion.client.session.SessionFactory;
 
 /**
  * Factory for session.
  *
  * @author Push Technology Limited
  */
-public final class SessionFactory extends ProviderAdapter {
+public final class DiffusionSessionFactory extends ProviderAdapter {
     /**
      * @return an open session
      */
     public Session provide(Model model, SessionLostListener listener, @Nullable SSLContext sslContext) {
         final DiffusionConfig diffusionConfig = model.getDiffusion();
 
-        com.pushtechnology.diffusion.client.session.SessionFactory sessionFactory = Diffusion
+        SessionFactory sessionFactory = Diffusion
             .sessions()
             .serverHost(diffusionConfig.getHost())
             .serverPort(diffusionConfig.getPort())
