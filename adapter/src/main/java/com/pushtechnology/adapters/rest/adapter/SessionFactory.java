@@ -43,14 +43,10 @@ public final class SessionFactory extends ProviderAdapter {
             .sessions()
             .serverHost(diffusionConfig.getHost())
             .serverPort(diffusionConfig.getPort())
-            .secureTransport(false)
+            .secureTransport(diffusionConfig.isSecure())
             .transports(WEBSOCKET)
             .reconnectionTimeout(5000)
             .listener(listener);
-
-        if (diffusionConfig.isSecure()) {
-            sessionFactory = sessionFactory.secureTransport(true);
-        }
 
         if (sslContext != null) {
             sessionFactory = sessionFactory.sslContext(sslContext);
