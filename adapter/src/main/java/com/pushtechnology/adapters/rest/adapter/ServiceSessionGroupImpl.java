@@ -47,6 +47,7 @@ public final class ServiceSessionGroupImpl implements ServiceSessionGroup {
     private final TopicManagementClient topicManagementClient;
     private final PublishingClient publishingClient;
     private final List<ServiceSession> serviceSessions;
+    private final PollHandlerFactory handlerFactory;
 
     /**
      * Constructor.
@@ -56,12 +57,14 @@ public final class ServiceSessionGroupImpl implements ServiceSessionGroup {
             ScheduledExecutorService executor,
             EndpointClient endpointClient,
             TopicManagementClient topicManagementClient,
-            PublishingClient publishingClient) {
+            PublishingClient publishingClient,
+            PollHandlerFactory handlerFactory) {
         this.model = model;
         this.executor = executor;
         this.endpointClient = endpointClient;
         this.topicManagementClient = topicManagementClient;
         this.publishingClient = publishingClient;
+        this.handlerFactory = handlerFactory;
         this.serviceSessions = new ArrayList<>();
     }
 
@@ -69,7 +72,6 @@ public final class ServiceSessionGroupImpl implements ServiceSessionGroup {
     @Override
     public synchronized void start() {
         LOG.info("Opening service session group");
-        final PollHandlerFactory handlerFactory = new PollHandlerFactoryImpl(publishingClient);
         for (final ServiceConfig service : model.getServices()) {
             final ServiceSession serviceSession = new ServiceSessionImpl(
                 executor,

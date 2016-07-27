@@ -250,6 +250,7 @@ public final class RESTAdapter implements AutoCloseable {
             .addAdapter(new SessionFactory())
             .addComponent(PublishingClientImpl.class)
             .addComponent(TopicManagementClientImpl.class)
+            .addComponent(PollHandlerFactoryImpl.class)
             .addComponent(model)
             .addComponent(shutdownTask)
             .addComponent(SessionLostListener.class)

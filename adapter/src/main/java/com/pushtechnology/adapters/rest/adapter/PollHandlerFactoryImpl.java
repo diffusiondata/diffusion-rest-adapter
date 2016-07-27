@@ -28,13 +28,13 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
  *
  * @author Push Technology Limited
  */
-/*package*/ final class PollHandlerFactoryImpl implements PollHandlerFactory {
+public final class PollHandlerFactoryImpl implements PollHandlerFactory {
     private final PublishingClient publishingClient;
 
     /**
      * Constructor.
      */
-    /*package*/ PollHandlerFactoryImpl(PublishingClient publishingClient) {
+    public PollHandlerFactoryImpl(PublishingClient publishingClient) {
         this.publishingClient = publishingClient;
     }
 

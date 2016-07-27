@@ -34,6 +34,7 @@ import org.mockito.Mock;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.polling.EndpointClient;
+import com.pushtechnology.adapters.rest.polling.PollHandlerFactory;
 import com.pushtechnology.adapters.rest.publication.PublishingClient;
 import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
 
@@ -43,6 +44,9 @@ import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
  * @author Push Technology Limited
  */
 public final class ServiceSessionGroupImplTest {
+
+    @Mock
+    private PollHandlerFactory handlerFactory;
 
     @Mock
     private ScheduledExecutorService executor;
@@ -81,7 +85,8 @@ public final class ServiceSessionGroupImplTest {
             executor,
             endpointClient,
             topicManagementClient,
-            publishingClient);
+            publishingClient,
+            handlerFactory);
 
         component.start();
 
@@ -97,7 +102,8 @@ public final class ServiceSessionGroupImplTest {
             executor,
             endpointClient,
             topicManagementClient,
-            publishingClient);
+            publishingClient,
+            handlerFactory);
 
         component.close();
 
