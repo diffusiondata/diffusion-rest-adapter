@@ -13,36 +13,9 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.adapter;
-
-import javax.annotation.PreDestroy;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.pushtechnology.diffusion.client.session.Session;
-
 /**
- * Manages the session. Responsible for closing it when no longer needed.
+ * Package for managing the Diffusion sessions.
  *
  * @author Push Technology Limited
  */
-public final class SessionWrapper implements AutoCloseable {
-    private static final Logger LOG = LoggerFactory.getLogger(SessionWrapper.class);
-    private final Session session;
-
-    /**
-     * Constructor.
-     */
-    public SessionWrapper(Session session) {
-        this.session = session;
-    }
-
-    @PreDestroy
-    @Override
-    public void close() {
-        LOG.info("Closing session wrapper");
-        session.close();
-        LOG.info("Closed session wrapper");
-    }
-}
+package com.pushtechnology.adapters.rest.session.management;

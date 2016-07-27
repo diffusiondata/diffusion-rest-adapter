@@ -23,6 +23,7 @@
         <module>configuration-store</module>
         <module>polling</module>
         <module>publication</module>
+        <module>session-management</module>
         <module>topic-management</module>
     </modules>
 
@@ -75,6 +76,12 @@
                 <groupId>com.pushtechnology.adapters.rest</groupId>
                 <artifactId>publication</artifactId>
                 <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.pushtechnology.adapters.rest</groupId>
+                <artifactId>session-management</artifactId>
+                <version>1.0.0-SNAPSHOT</version>
             </dependency>
 
             <dependency>

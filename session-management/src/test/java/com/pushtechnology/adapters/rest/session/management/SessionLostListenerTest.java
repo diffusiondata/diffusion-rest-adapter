@@ -13,7 +13,7 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.adapter;
+package com.pushtechnology.adapters.rest.session.management;
 
 import static com.pushtechnology.diffusion.client.session.Session.State.CLOSED_BY_CLIENT;
 import static com.pushtechnology.diffusion.client.session.Session.State.CLOSED_BY_SERVER;
@@ -30,6 +30,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 
+import com.pushtechnology.adapters.rest.session.management.SessionLostListener;
 import com.pushtechnology.diffusion.client.session.Session;
 
 /**

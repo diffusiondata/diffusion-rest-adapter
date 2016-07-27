@@ -13,7 +13,7 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.adapter;
+package com.pushtechnology.adapters.rest.session.management;
 
 import static com.pushtechnology.diffusion.client.session.Session.State.CLOSED_BY_SERVER;
 import static com.pushtechnology.diffusion.client.session.Session.State.CLOSED_FAILED;

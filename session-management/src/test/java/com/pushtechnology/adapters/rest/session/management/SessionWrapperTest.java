@@ -13,34 +13,47 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.adapter;
+package com.pushtechnology.adapters.rest.session.management;
 
-import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.MockitoAnnotations.initMocks;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
 
-import com.pushtechnology.adapters.rest.model.latest.Model;
+import com.pushtechnology.adapters.rest.session.management.SessionWrapper;
+import com.pushtechnology.diffusion.client.session.Session;
 
 /**
- * Unit tests for {@link SSLContextFactory}.
+ * Unit tests for {@link SessionWrapper}.
  *
  * @author Push Technology Limited
  */
-public final class SSLContextFactoryTest {
+public final class SessionWrapperTest {
+    @Mock
+    private Session session;
 
-    private final Model model = Model.builder().build();
-
-    private final SSLContextFactory contextFactory = new SSLContextFactory();
+    private SessionWrapper sessionWrapper;
 
     @Before
     public void setUp() {
         initMocks(this);
+
+        sessionWrapper = new SessionWrapper(session);
+    }
+
+    @After
+    public void postConditions() {
+        verifyNoMoreInteractions(session);
     }
 
     @Test
-    public void provideNoTruststore() {
-        assertNull(contextFactory.provide(model));
+    public void close() {
+        sessionWrapper.close();
+
+        verify(session).close();
     }
 }

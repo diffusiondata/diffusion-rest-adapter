@@ -13,7 +13,7 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.adapter;
+package com.pushtechnology.adapters.rest.session.management;
 
 import static com.pushtechnology.diffusion.client.session.SessionAttributes.Transport.WEBSOCKET;
 

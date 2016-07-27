@@ -13,46 +13,36 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.adapter;
+package com.pushtechnology.adapters.rest.session.management;
 
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.MockitoAnnotations.initMocks;
+import javax.annotation.PreDestroy;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mock;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.diffusion.client.session.Session;
 
 /**
- * Unit tests for {@link SessionWrapper}.
+ * Manages the session. Responsible for closing it when no longer needed.
  *
  * @author Push Technology Limited
  */
-public final class SessionWrapperTest {
-    @Mock
-    private Session session;
+public final class SessionWrapper implements AutoCloseable {
+    private static final Logger LOG = LoggerFactory.getLogger(SessionWrapper.class);
+    private final Session session;
 
-    private SessionWrapper sessionWrapper;
-
-    @Before
-    public void setUp() {
-        initMocks(this);
-
-        sessionWrapper = new SessionWrapper(session);
+    /**
+     * Constructor.
+     */
+    public SessionWrapper(Session session) {
+        this.session = session;
     }
 
-    @After
-    public void postConditions() {
-        verifyNoMoreInteractions(session);
-    }
-
-    @Test
+    @PreDestroy
+    @Override
     public void close() {
-        sessionWrapper.close();
-
-        verify(session).close();
+        LOG.info("Closing session wrapper");
+        session.close();
+        LOG.info("Closed session wrapper");
     }
 }

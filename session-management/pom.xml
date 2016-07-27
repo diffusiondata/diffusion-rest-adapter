@@ -9,42 +9,27 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>adapter</artifactId>
+    <artifactId>session-management</artifactId>
 
     <dependencies>
         <dependency>
             <groupId>com.pushtechnology.adapters.rest</groupId>
-            <artifactId>configuration-persistence</artifactId>
+            <artifactId>configuration-model</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>com.pushtechnology.adapters.rest</groupId>
-            <artifactId>polling</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.pushtechnology.adapters.rest</groupId>
-            <artifactId>publication</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.pushtechnology.adapters.rest</groupId>
-            <artifactId>session-management</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.pushtechnology.adapters.rest</groupId>
-            <artifactId>topic-management</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.pushtechnology.adapters.rest</groupId>
-            <artifactId>configuration-store</artifactId>
+            <groupId>com.pushtechnology.diffusion</groupId>
+            <artifactId>diffusion-api</artifactId>
         </dependency>
 
         <dependency>
             <groupId>org.picocontainer</groupId>
             <artifactId>picocontainer</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>net.jcip</groupId>
+            <artifactId>jcip-annotations</artifactId>
         </dependency>
 
         <dependency>
