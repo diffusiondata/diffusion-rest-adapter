@@ -22,11 +22,11 @@ import javax.annotation.PreDestroy;
 import com.pushtechnology.diffusion.client.session.Session;
 
 /**
- * Listener for session.
+ * Listener for loss of the session. Invokes the task passed into it when the session closes before the listener.
  *
  * @author Push Technology Limited
  */
-public final class SessionListener implements Session.Listener, AutoCloseable {
+public final class SessionLostListener implements Session.Listener, AutoCloseable {
     private final AtomicBoolean isActive = new AtomicBoolean(true);
 
     private final Runnable shutdownTask;
@@ -34,7 +34,7 @@ public final class SessionListener implements Session.Listener, AutoCloseable {
     /**
      * Constructor.
      */
-    public SessionListener(Runnable shutdownTask) {
+    public SessionLostListener(Runnable shutdownTask) {
         this.shutdownTask = shutdownTask;
     }
 

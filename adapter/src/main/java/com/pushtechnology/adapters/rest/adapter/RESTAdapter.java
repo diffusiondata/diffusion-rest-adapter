@@ -49,7 +49,7 @@ public final class RESTAdapter implements AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(RESTAdapter.class);
 
     private final ScheduledExecutorService executor;
-    private final SessionListener sessionListener;
+    private final SessionLostListener sessionLostListener;
 
     @GuardedBy("this")
     private MutablePicoContainer topLevelContainer;
@@ -67,7 +67,7 @@ public final class RESTAdapter implements AutoCloseable {
      */
     public RESTAdapter(ScheduledExecutorService executor, Runnable shutdownHandler) {
         this.executor = executor;
-        sessionListener = new SessionListener(
+        sessionLostListener = new SessionLostListener(
             new Runnable() {
                 @Override
                 public void run() {
@@ -218,7 +218,7 @@ public final class RESTAdapter implements AutoCloseable {
             .withJavaEE5Lifecycle()
             .withLocking()
             .build()
-            .addComponent(sessionListener)
+            .addComponent(sessionLostListener)
             .addComponent(executor)
             .addComponent(HttpClientFactoryImpl.class);
     }

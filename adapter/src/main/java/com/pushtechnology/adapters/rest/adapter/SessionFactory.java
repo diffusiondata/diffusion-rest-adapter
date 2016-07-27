@@ -36,7 +36,7 @@ public final class SessionFactory extends ProviderAdapter {
     /**
      * @return an open session
      */
-    public Session provide(Model model, SessionListener listener, @Nullable SSLContext sslContext) {
+    public Session provide(Model model, SessionLostListener listener, @Nullable SSLContext sslContext) {
         final DiffusionConfig diffusionConfig = model.getDiffusion();
 
         com.pushtechnology.diffusion.client.session.SessionFactory sessionFactory = Diffusion
