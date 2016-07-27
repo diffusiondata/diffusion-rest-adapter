@@ -35,8 +35,8 @@ import com.pushtechnology.adapters.rest.polling.EndpointClientImpl;
 import com.pushtechnology.adapters.rest.polling.HttpClientFactoryImpl;
 import com.pushtechnology.adapters.rest.polling.ServiceSessionFactoryImpl;
 import com.pushtechnology.adapters.rest.publication.PublishingClientImpl;
-import com.pushtechnology.adapters.rest.session.management.SSLContextFactory;
 import com.pushtechnology.adapters.rest.session.management.DiffusionSessionFactory;
+import com.pushtechnology.adapters.rest.session.management.SSLContextFactory;
 import com.pushtechnology.adapters.rest.session.management.SessionLostListener;
 import com.pushtechnology.adapters.rest.session.management.SessionWrapper;
 import com.pushtechnology.adapters.rest.topic.management.TopicManagementClientImpl;
@@ -344,7 +344,9 @@ public final class RESTAdapter implements AutoCloseable {
     @GuardedBy("this")
     public synchronized void close() throws IOException {
         LOG.info("Closing adapter");
-        topLevelContainer.dispose();
+        if (!wasInactive()) {
+            topLevelContainer.dispose();
+        }
         LOG.info("Closed adapter");
     }
 }
