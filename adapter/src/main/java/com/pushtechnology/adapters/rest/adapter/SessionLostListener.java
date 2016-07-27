@@ -19,6 +19,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.annotation.PreDestroy;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.pushtechnology.diffusion.client.session.Session;
 
 /**
@@ -27,6 +30,7 @@ import com.pushtechnology.diffusion.client.session.Session;
  * @author Push Technology Limited
  */
 public final class SessionLostListener implements Session.Listener, AutoCloseable {
+    private static final Logger LOG = LoggerFactory.getLogger(SessionLostListener.class);
     private final AtomicBoolean isActive = new AtomicBoolean(true);
 
     private final Runnable shutdownTask;
@@ -41,6 +45,7 @@ public final class SessionLostListener implements Session.Listener, AutoCloseabl
     @Override
     public void onSessionStateChanged(Session session, Session.State oldState, Session.State newState) {
         if (isActive.get() && newState.isClosed()) {
+            LOG.warn("Session {} has been lost", session);
             shutdownTask.run();
         }
     }
@@ -48,6 +53,8 @@ public final class SessionLostListener implements Session.Listener, AutoCloseabl
     @PreDestroy
     @Override
     public void close() {
+        LOG.info("Closing session loss listener");
         isActive.set(false);
+        LOG.info("Closed session loss listener");
     }
 }
