@@ -49,7 +49,7 @@ public final class RESTAdapter implements AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(RESTAdapter.class);
 
     private final ScheduledExecutorService executor;
-    private final SessionLostListener sessionLostListener;
+    private final Runnable shutdownTask;
 
     @GuardedBy("this")
     private MutablePicoContainer topLevelContainer;
@@ -67,20 +67,19 @@ public final class RESTAdapter implements AutoCloseable {
      */
     public RESTAdapter(ScheduledExecutorService executor, Runnable shutdownHandler) {
         this.executor = executor;
-        sessionLostListener = new SessionLostListener(
-            new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        close();
-                    }
-                    catch (IOException e) {
-                        // Not expected as no known implementation throws this
-                        LOG.warn("Exception during shutdown", e);
-                    }
-                    shutdownHandler.run();
+        shutdownTask = new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    close();
                 }
-            });
+                catch (IOException e) {
+                    // Not expected as no known implementation throws this
+                    LOG.warn("Exception during shutdown", e);
+                }
+                shutdownHandler.run();
+            }
+        };
     }
 
     /**
@@ -218,7 +217,6 @@ public final class RESTAdapter implements AutoCloseable {
             .withJavaEE5Lifecycle()
             .withLocking()
             .build()
-            .addComponent(sessionLostListener)
             .addComponent(executor)
             .addComponent(HttpClientFactoryImpl.class);
     }
@@ -252,7 +250,10 @@ public final class RESTAdapter implements AutoCloseable {
             .addAdapter(new SessionFactory())
             .addComponent(PublishingClientImpl.class)
             .addComponent(TopicManagementClientImpl.class)
-            .addComponent(model);
+            .addComponent(model)
+            .addComponent(shutdownTask)
+            .addComponent(SessionLostListener.class)
+            .addComponent(SessionWrapper.class);
         httpContainer.addChildContainer(newContainer);
 
         return newContainer;
@@ -335,8 +336,8 @@ public final class RESTAdapter implements AutoCloseable {
     @Override
     @GuardedBy("this")
     public synchronized void close() throws IOException {
-        LOG.info("Closing client");
+        LOG.info("Closing adapter");
         topLevelContainer.dispose();
-        LOG.info("Closed client");
+        LOG.info("Closed adapter");
     }
 }

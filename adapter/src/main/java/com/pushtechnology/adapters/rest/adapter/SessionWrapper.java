@@ -15,8 +15,7 @@
 
 package com.pushtechnology.adapters.rest.adapter;
 
-import static com.pushtechnology.diffusion.client.session.Session.State.CLOSED_BY_SERVER;
-import static com.pushtechnology.diffusion.client.session.Session.State.CLOSED_FAILED;
+import javax.annotation.PreDestroy;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,27 +23,26 @@ import org.slf4j.LoggerFactory;
 import com.pushtechnology.diffusion.client.session.Session;
 
 /**
- * Listener for loss of the session. Invokes the shutdown task passed into it when the session closes unexpectedly.
+ * Manages the session. Responsible for closing it when no longer needed.
  *
  * @author Push Technology Limited
  */
-public final class SessionLostListener implements Session.Listener {
-    private static final Logger LOG = LoggerFactory.getLogger(SessionLostListener.class);
-
-    private final Runnable shutdownTask;
+public final class SessionWrapper implements AutoCloseable {
+    private static final Logger LOG = LoggerFactory.getLogger(SessionWrapper.class);
+    private final Session session;
 
     /**
      * Constructor.
      */
-    public SessionLostListener(Runnable shutdownTask) {
-        this.shutdownTask = shutdownTask;
+    public SessionWrapper(Session session) {
+        this.session = session;
     }
 
+    @PreDestroy
     @Override
-    public void onSessionStateChanged(Session session, Session.State oldState, Session.State newState) {
-        if (CLOSED_FAILED.equals(newState) || CLOSED_BY_SERVER.equals(newState)) {
-            LOG.warn("Session {} has been lost", session);
-            shutdownTask.run();
-        }
+    public void close() {
+        LOG.info("Closing session wrapper");
+        session.close();
+        LOG.info("Closed session wrapper");
     }
 }
