@@ -23,7 +23,6 @@ import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Consumer;
 
 import org.junit.After;
@@ -33,8 +32,8 @@ import org.mockito.Mock;
 
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.adapters.rest.polling.EndpointClient;
-import com.pushtechnology.adapters.rest.polling.PollHandlerFactory;
+import com.pushtechnology.adapters.rest.polling.ServiceSession;
+import com.pushtechnology.adapters.rest.polling.ServiceSessionFactory;
 import com.pushtechnology.adapters.rest.publication.PublishingClient;
 import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
 
@@ -46,19 +45,16 @@ import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
 public final class ServiceSessionGroupImplTest {
 
     @Mock
-    private PollHandlerFactory handlerFactory;
-
-    @Mock
-    private ScheduledExecutorService executor;
-
-    @Mock
-    private EndpointClient endpointClient;
-
-    @Mock
     private TopicManagementClient topicManagementClient;
 
     @Mock
     private PublishingClient publishingClient;
+
+    @Mock
+    private ServiceSession serviceSession;
+
+    @Mock
+    private ServiceSessionFactory serviceSessionFactory;
 
     @Mock
     private CompletableFuture<ServiceConfig> future;
@@ -70,26 +66,26 @@ public final class ServiceSessionGroupImplTest {
         initMocks(this);
 
         when(publishingClient.addService(serviceConfig)).thenReturn(future);
+        when(serviceSessionFactory.create(serviceConfig)).thenReturn(serviceSession);
     }
 
     @After
     public void postConditions() {
-        verifyNoMoreInteractions(executor, endpointClient, topicManagementClient, publishingClient, future);
+        verifyNoMoreInteractions(topicManagementClient, publishingClient, future, serviceSessionFactory, serviceSession);
     }
 
     @SuppressWarnings("unchecked")
     @Test
     public void start() {
-        final ServiceSessionGroup component = new ServiceSessionGroupImpl(
+        final ServiceSessionGroup serviceSessionGroup = new ServiceSessionGroupImpl(
             Model.builder().services(singletonList(serviceConfig)).build(),
-            executor,
-            endpointClient,
             topicManagementClient,
             publishingClient,
-            handlerFactory);
+            serviceSessionFactory);
 
-        component.start();
+        serviceSessionGroup.start();
 
+        verify(serviceSessionFactory).create(serviceConfig);
         verify(topicManagementClient).addService(serviceConfig);
         verify(publishingClient).addService(serviceConfig);
         verify(future).thenAccept(isA(Consumer.class));
@@ -97,15 +93,13 @@ public final class ServiceSessionGroupImplTest {
 
     @Test
     public void close() {
-        final ServiceSessionGroup component = new ServiceSessionGroupImpl(
+        final ServiceSessionGroup serviceSessionGroup = new ServiceSessionGroupImpl(
             Model.builder().services(singletonList(serviceConfig)).build(),
-            executor,
-            endpointClient,
             topicManagementClient,
             publishingClient,
-            handlerFactory);
+            serviceSessionFactory);
 
-        component.close();
+        serviceSessionGroup.close();
 
         verify(publishingClient).removeService(serviceConfig);
     }

@@ -33,6 +33,7 @@ import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.polling.EndpointClientImpl;
 import com.pushtechnology.adapters.rest.polling.HttpClientFactoryImpl;
+import com.pushtechnology.adapters.rest.polling.ServiceSessionFactoryImpl;
 import com.pushtechnology.adapters.rest.publication.PublishingClientImpl;
 import com.pushtechnology.adapters.rest.topic.management.TopicManagementClientImpl;
 
@@ -270,6 +271,7 @@ public final class RESTAdapter implements AutoCloseable {
             .withLocking()
             .build()
             .addComponent(model)
+            .addComponent(ServiceSessionFactoryImpl.class)
             .addComponent(ServiceSessionGroupImpl.class);
         diffusionContainer.addChildContainer(newContainer);
 

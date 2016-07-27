@@ -17,7 +17,6 @@ package com.pushtechnology.adapters.rest.adapter;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -27,10 +26,8 @@ import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.adapters.rest.polling.EndpointClient;
-import com.pushtechnology.adapters.rest.polling.PollHandlerFactory;
 import com.pushtechnology.adapters.rest.polling.ServiceSession;
-import com.pushtechnology.adapters.rest.polling.ServiceSessionImpl;
+import com.pushtechnology.adapters.rest.polling.ServiceSessionFactory;
 import com.pushtechnology.adapters.rest.publication.PublishingClient;
 import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
 
@@ -42,29 +39,23 @@ import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
 public final class ServiceSessionGroupImpl implements ServiceSessionGroup {
     private static final Logger LOG = LoggerFactory.getLogger(ServiceSessionGroupImpl.class);
     private final Model model;
-    private final ScheduledExecutorService executor;
-    private final EndpointClient endpointClient;
     private final TopicManagementClient topicManagementClient;
     private final PublishingClient publishingClient;
     private final List<ServiceSession> serviceSessions;
-    private final PollHandlerFactory handlerFactory;
+    private final ServiceSessionFactory serviceSessionFactory;
 
     /**
      * Constructor.
      */
     public ServiceSessionGroupImpl(
             Model model,
-            ScheduledExecutorService executor,
-            EndpointClient endpointClient,
             TopicManagementClient topicManagementClient,
             PublishingClient publishingClient,
-            PollHandlerFactory handlerFactory) {
+            ServiceSessionFactory serviceSessionFactory) {
         this.model = model;
-        this.executor = executor;
-        this.endpointClient = endpointClient;
         this.topicManagementClient = topicManagementClient;
         this.publishingClient = publishingClient;
-        this.handlerFactory = handlerFactory;
+        this.serviceSessionFactory = serviceSessionFactory;
         this.serviceSessions = new ArrayList<>();
     }
 
@@ -73,11 +64,7 @@ public final class ServiceSessionGroupImpl implements ServiceSessionGroup {
     public synchronized void start() {
         LOG.info("Opening service session group");
         for (final ServiceConfig service : model.getServices()) {
-            final ServiceSession serviceSession = new ServiceSessionImpl(
-                executor,
-                endpointClient,
-                service,
-                handlerFactory);
+            final ServiceSession serviceSession = serviceSessionFactory.create(service);
             topicManagementClient.addService(service);
             publishingClient
                 .addService(service)
