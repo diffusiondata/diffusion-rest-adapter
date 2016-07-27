@@ -252,7 +252,7 @@ public final class RESTAdapter implements AutoCloseable {
             .withJavaEE5Lifecycle()
             .withLocking()
             .build()
-            .addAdapter(new DiffusionSessionFactory())
+            .addAdapter(DiffusionSessionFactory.create())
             .addComponent(PublishingClientImpl.class)
             .addComponent(TopicManagementClientImpl.class)
             .addComponent(PollHandlerFactoryImpl.class)

@@ -29,24 +29,32 @@ import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.session.SessionFactory;
 
 /**
- * Factory for session.
+ * Factory for {@link Session}s.
  *
  * @author Push Technology Limited
  */
 public final class DiffusionSessionFactory extends ProviderAdapter {
+    private final SessionFactory baseSessionFactory;
+
+    /**
+     * Constructor.
+     */
+    /*package*/ DiffusionSessionFactory(SessionFactory baseSessionFactory) {
+        this.baseSessionFactory = baseSessionFactory
+            .transports(WEBSOCKET)
+            .reconnectionTimeout(10000);
+    }
+
     /**
      * @return an open session
      */
     public Session provide(Model model, SessionLostListener listener, @Nullable SSLContext sslContext) {
         final DiffusionConfig diffusionConfig = model.getDiffusion();
 
-        SessionFactory sessionFactory = Diffusion
-            .sessions()
+        SessionFactory sessionFactory = baseSessionFactory
             .serverHost(diffusionConfig.getHost())
             .serverPort(diffusionConfig.getPort())
             .secureTransport(diffusionConfig.isSecure())
-            .transports(WEBSOCKET)
-            .reconnectionTimeout(5000)
             .listener(listener);
 
         if (sslContext != null) {
@@ -62,5 +70,12 @@ public final class DiffusionSessionFactory extends ProviderAdapter {
         }
 
         return sessionFactory.open();
+    }
+
+    /**
+     * @return a new {@link DiffusionSessionFactory}
+     */
+    public static DiffusionSessionFactory create() {
+        return new DiffusionSessionFactory(Diffusion.sessions());
     }
 }
