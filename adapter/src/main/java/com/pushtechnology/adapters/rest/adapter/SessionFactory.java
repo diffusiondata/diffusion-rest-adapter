@@ -52,10 +52,12 @@ public final class SessionFactory extends ProviderAdapter {
             sessionFactory = sessionFactory.sslContext(sslContext);
         }
 
-        if (diffusionConfig.getPrincipal() != null && diffusionConfig.getPassword() != null) {
-            sessionFactory = sessionFactory
-                .principal(diffusionConfig.getPrincipal())
-                .password(diffusionConfig.getPassword());
+        if (diffusionConfig.getPrincipal() != null) {
+            sessionFactory = sessionFactory.principal(diffusionConfig.getPrincipal());
+
+            if (diffusionConfig.getPassword() != null) {
+                sessionFactory = sessionFactory.password(diffusionConfig.getPassword());
+            }
         }
 
         return sessionFactory.open();
