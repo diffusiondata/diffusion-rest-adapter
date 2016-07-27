@@ -81,18 +81,9 @@ public final class TopicManagementClientImplTest {
     }
 
     @Test
-    public void removeService() {
-
-    }
-
-    @Test
     public void addEndpoint() {
         topicManagementClient.addEndpoint(serviceConfig, endpointConfig, addCallback);
 
         verify(topicControl).addTopic("service/endpoint", JSON, addCallback);
-    }
-
-    @Test
-    public void removeEndpoint() {
     }
 }
