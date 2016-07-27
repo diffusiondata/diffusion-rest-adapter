@@ -95,13 +95,6 @@ public final class ServiceSessionImpl implements ServiceSession {
         return new PollHandle(future);
     }
 
-    @Override
-    public synchronized void removeEndpoint(EndpointConfig endpointConfig) {
-        assert endpointPollers.containsKey(endpointConfig) : "The endpoint has not been added";
-
-        stopEndpoint(endpointPollers.remove(endpointConfig));
-    }
-
     private void stopEndpoint(PollHandle pollHandle) {
         if (pollHandle != null) {
             pollHandle.taskHandle.cancel(false);

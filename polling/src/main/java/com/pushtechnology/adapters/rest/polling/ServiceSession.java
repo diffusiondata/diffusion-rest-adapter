@@ -36,11 +36,6 @@ public interface ServiceSession {
     void addEndpoint(EndpointConfig endpointConfig);
 
     /**
-     * Remove an endpoint from the session.
-     */
-    void removeEndpoint(EndpointConfig endpointConfig);
-
-    /**
      * Start the session.
      */
     void stop();
