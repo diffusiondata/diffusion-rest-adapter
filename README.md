@@ -5,26 +5,39 @@ Diffusion REST Adapter
 
 ## Configuration Model
 
-The configuration model is made of two top level sections, Diffusion and Services.
+The configuration model is made of three top level sections, Diffusion, Services and Truststore.
 
 ### Diffusion
 
 The Diffusion section describes the server to connect the client to.
-It contains the `host`, `port`, `principal` and `password`. `TODO: More detail`
+It contains the `host`, `port`, `secure`, `principal` and `password`. `TODO: More detail`
 
 ### Services
 
 The Services section contains a list of services.
 
-### Service
+#### Service
 
 The Service describes a REST service to poll.
-It contains the `host`, `port`, `pollPeriod`, `topicRoot` and `endpoints`. `TODO: More detail`
+It contains the `host`, `port`, `secure`, `pollPeriod`, `topicRoot`, `endpoints` and `security`. `TODO: More detail`
 
-### Endpoint
+#### Endpoint
 
 The Endpoint describes an endpoint of a REST service to poll.
 It contains the `name`, `url` and `topic`. `TODO: More detail`
+
+#### Security
+
+The Security describes how to authenticate with the service. Currently supported is `basic` which contains the
+`principal` and `credential` used to respond to a basic authentication request. Basic authentication will not be
+performed over an insecure connection.
+
+### Truststore
+
+The truststore is a string identifying the location of a keystore containing the trusted certificates of both the
+Diffusion server and any REST services. An SSLContext is constructed from this. The string will first be resolved
+against the classpath to try to load the keystore as a resource. If the keystore is not present as a resource it will
+try to load the keystore from the filesystem relative to the current working directory.
 
 ## Filesystem configuration persistence
 
@@ -55,11 +68,9 @@ use the new model.
 
 ### Applying reconfiguration
 
-The client will establish a new session and set up the services and endpoints described in the new model. The session
-configured to use the old model is then torn down.
-
-The new session will be delayed by conflicting update source registrations. Requesting that the topics are removed with
-the new session will prevent their removal when the old session closes.
+The client will perform a partial reconfiguration to update only what has changed. On reconfiguration new components are
+first created and started. Once the new components are in place the old components are stopped and removed. The new
+components may be in standby until the old components are stopped.
 
 ## Building
 
