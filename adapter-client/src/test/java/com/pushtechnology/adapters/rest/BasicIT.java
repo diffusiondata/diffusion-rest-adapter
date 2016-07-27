@@ -15,6 +15,7 @@
 
 package com.pushtechnology.adapters.rest;
 
+import static com.pushtechnology.diffusion.client.features.Topics.UnsubscribeReason.REMOVAL;
 import static com.pushtechnology.diffusion.client.session.Session.State.CLOSED_BY_CLIENT;
 import static com.pushtechnology.diffusion.client.session.Session.State.CONNECTED_ACTIVE;
 import static com.pushtechnology.diffusion.client.session.Session.State.CONNECTING;
@@ -78,7 +79,6 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
  * @author Push Technology Limited
  */
 public final class BasicIT {
-    private static final Model EMPTY_MODEL = Model.builder().build();
     private static final DiffusionConfig DIFFUSION_CONFIG = DiffusionConfig
         .builder()
         .host("localhost")
@@ -133,7 +133,24 @@ public final class BasicIT {
         .security(SecurityConfig.builder().basic(BASIC_AUTHENTICATION_CONFIG).build())
         .endpoints(asList(AUTHENTICATED_INCREMENT_ENDPOINT, AUTHENTICATED_TIMESTAMP_ENDPOINT))
         .build();
-    private static final Model MODEL = Model
+    private static final Model EMPTY_MODEL = Model.builder().build();
+    private static final Model DIFFUSION_ONLY = Model
+        .builder()
+        .diffusion(DIFFUSION_CONFIG)
+        .truststore("testKeystore.jks")
+        .build();
+    private static final Model SERVICES_ONLY = Model
+        .builder()
+        .services(asList(INSECURE_SERVICE, SECURE_SERVICE))
+        .truststore("testKeystore.jks")
+        .build();
+    private static final Model INSECURE = Model
+        .builder()
+        .diffusion(DIFFUSION_CONFIG)
+        .services(asList(INSECURE_SERVICE))
+        .truststore("testKeystore.jks")
+        .build();
+    private static final Model FULL_MODEL = Model
         .builder()
         .diffusion(DIFFUSION_CONFIG)
         .services(asList(INSECURE_SERVICE, SECURE_SERVICE))
@@ -226,7 +243,7 @@ public final class BasicIT {
         initMocks(this);
 
         modelStore = new MutableModelStore();
-        modelStore.setModel(MODEL);
+        modelStore.setModel(FULL_MODEL);
     }
 
     @After
@@ -272,7 +289,7 @@ public final class BasicIT {
 
         verify(callback, timed().times(2)).onComplete();
 
-        modelStore.setModel(MODEL);
+        modelStore.setModel(FULL_MODEL);
 
         verify(stream, timed()).onSubscription(eq("rest/timestamp"), isA(TopicSpecification.class));
         verify(stream, timed()).onSubscription(eq("rest/increment"), isA(TopicSpecification.class));
@@ -283,6 +300,59 @@ public final class BasicIT {
         verify(stream, timed()).onValue(eq("rest/increment"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
         verify(stream, timed()).onValue(eq("restTLS/timestamp"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
         verify(stream, timed()).onValue(eq("restTLS/increment"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
+
+        stopSession(session);
+        client.close();
+    }
+
+    @Test
+    public void testReconfigurationFromDiffusionOnlyToInsecure() throws IOException {
+        modelStore.setModel(DIFFUSION_ONLY);
+        final RESTAdapterClient client = startClient();
+        final Session session = startSession();
+
+        final Topics topics = session.feature(Topics.class);
+        topics.addFallbackStream(JSON.class, stream);
+        topics.subscribe("?rest/", callback);
+        topics.subscribe("?restTLS/", callback);
+
+        verify(callback, timed().times(2)).onComplete();
+
+        modelStore.setModel(INSECURE);
+
+        verify(stream, timed()).onSubscription(eq("rest/timestamp"), isA(TopicSpecification.class));
+        verify(stream, timed()).onSubscription(eq("rest/increment"), isA(TopicSpecification.class));
+
+        verify(stream, timed()).onValue(eq("rest/timestamp"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
+        verify(stream, timed()).onValue(eq("rest/increment"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
+
+        stopSession(session);
+        client.close();
+    }
+
+    @Test
+    public void testReconfigurationFromInsecureToDiffusionOnly() throws IOException {
+        modelStore.setModel(INSECURE);
+        final RESTAdapterClient client = startClient();
+        final Session session = startSession();
+
+        final Topics topics = session.feature(Topics.class);
+        topics.addFallbackStream(JSON.class, stream);
+        topics.subscribe("?rest/", callback);
+        topics.subscribe("?restTLS/", callback);
+
+        verify(callback, timed().times(2)).onComplete();
+
+        verify(stream, timed()).onSubscription(eq("rest/timestamp"), isA(TopicSpecification.class));
+        verify(stream, timed()).onSubscription(eq("rest/increment"), isA(TopicSpecification.class));
+
+        verify(stream, timed()).onValue(eq("rest/timestamp"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
+        verify(stream, timed()).onValue(eq("rest/increment"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
+
+        modelStore.setModel(DIFFUSION_ONLY);
+
+        verify(stream, timed()).onUnsubscription(eq("rest/timestamp"), isA(TopicSpecification.class), eq(REMOVAL));
+        verify(stream, timed()).onUnsubscription(eq("rest/increment"), isA(TopicSpecification.class), eq(REMOVAL));
 
         stopSession(session);
         client.close();
