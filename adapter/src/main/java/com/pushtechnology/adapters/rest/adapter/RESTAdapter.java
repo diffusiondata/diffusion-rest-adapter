@@ -54,6 +54,7 @@ public final class RESTAdapter implements AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(RESTAdapter.class);
 
     private final ScheduledExecutorService executor;
+    private final ServiceListener serviceListener;
     private final Runnable shutdownTask;
 
     @GuardedBy("this")
@@ -70,8 +71,9 @@ public final class RESTAdapter implements AutoCloseable {
     /**
      * Constructor.
      */
-    public RESTAdapter(ScheduledExecutorService executor, Runnable shutdownHandler) {
+    public RESTAdapter(ScheduledExecutorService executor, Runnable shutdownHandler, ServiceListener serviceListener) {
         this.executor = executor;
+        this.serviceListener = serviceListener;
         shutdownTask = new Runnable() {
             @Override
             public void run() {
@@ -223,6 +225,7 @@ public final class RESTAdapter implements AutoCloseable {
             .withLocking()
             .build()
             .addComponent(executor)
+            .addComponent(serviceListener)
             .addComponent(HttpClientFactoryImpl.class);
     }
 

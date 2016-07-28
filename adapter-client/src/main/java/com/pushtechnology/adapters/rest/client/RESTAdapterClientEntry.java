@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.concurrent.ScheduledExecutorService;
 
+import com.pushtechnology.adapters.rest.adapter.ServiceListener;
 import com.pushtechnology.adapters.rest.model.store.PollingPersistedModelStore;
 import com.pushtechnology.adapters.rest.persistence.FileSystemPersistence;
 import com.pushtechnology.adapters.rest.persistence.Persistence;
@@ -57,10 +58,14 @@ public final class RESTAdapterClientEntry {
 
         modelStore.start();
 
-        final RESTAdapterClient adapterClient = RESTAdapterClient.create(modelStore, executor, () -> {
-            modelStore.stop();
-            executor.shutdown();
-        });
+        final RESTAdapterClient adapterClient = RESTAdapterClient.create(
+            modelStore,
+            executor,
+            () -> {
+                modelStore.stop();
+                executor.shutdown();
+            },
+            ServiceListener.NULL_LISTENER);
 
         adapterClient.start();
     }

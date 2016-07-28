@@ -23,6 +23,7 @@ import static java.util.Arrays.asList;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.isA;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -57,6 +58,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.verification.VerificationWithTimeout;
 
+import com.pushtechnology.adapters.rest.adapter.ServiceListener;
 import com.pushtechnology.adapters.rest.client.RESTAdapterClient;
 import com.pushtechnology.adapters.rest.model.latest.BasicAuthenticationConfig;
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
@@ -162,6 +164,8 @@ public final class BasicIT {
     @Mock
     private Session.Listener listener;
     @Mock
+    private ServiceListener serviceListener;
+    @Mock
     private Topics.ValueStream<JSON> stream;
     @Mock
     private Topics.CompletionCallback callback;
@@ -248,12 +252,16 @@ public final class BasicIT {
 
     @After
     public void postConditions() {
-        verifyNoMoreInteractions(listener, callback);
+        verifyNoMoreInteractions(listener, callback, serviceListener);
     }
 
     @Test
     public void testInitialisation() throws IOException {
         final RESTAdapterClient client = startClient();
+
+        verify(serviceListener, timed()).onActive(SECURE_SERVICE);
+        verify(serviceListener, timed()).onActive(INSECURE_SERVICE);
+
         final Session session = startSession();
 
         final Topics topics = session.feature(Topics.class);
@@ -274,12 +282,19 @@ public final class BasicIT {
 
         stopSession(session);
         client.close();
+
+        verify(serviceListener, timed()).onRemove(SECURE_SERVICE);
+        verify(serviceListener, timed()).onRemove(INSECURE_SERVICE);
     }
 
     @Test
     public void testReconfigurationFromInactiveToActive() throws IOException {
         modelStore.setModel(EMPTY_MODEL);
         final RESTAdapterClient client = startClient();
+
+        verify(serviceListener, never()).onActive(SECURE_SERVICE);
+        verify(serviceListener, never()).onActive(INSECURE_SERVICE);
+
         final Session session = startSession();
 
         final Topics topics = session.feature(Topics.class);
@@ -291,6 +306,9 @@ public final class BasicIT {
 
         modelStore.setModel(FULL_MODEL);
 
+        verify(serviceListener, timed()).onActive(SECURE_SERVICE);
+        verify(serviceListener, timed()).onActive(INSECURE_SERVICE);
+
         verify(stream, timed()).onSubscription(eq("rest/timestamp"), isA(TopicSpecification.class));
         verify(stream, timed()).onSubscription(eq("rest/increment"), isA(TopicSpecification.class));
         verify(stream, timed()).onSubscription(eq("restTLS/timestamp"), isA(TopicSpecification.class));
@@ -303,12 +321,18 @@ public final class BasicIT {
 
         stopSession(session);
         client.close();
+
+        verify(serviceListener, timed()).onRemove(SECURE_SERVICE);
+        verify(serviceListener, timed()).onRemove(INSECURE_SERVICE);
     }
 
     @Test
     public void testReconfigurationFromDiffusionOnlyToInsecure() throws IOException {
         modelStore.setModel(DIFFUSION_ONLY);
         final RESTAdapterClient client = startClient();
+
+        verify(serviceListener, never()).onActive(INSECURE_SERVICE);
+
         final Session session = startSession();
 
         final Topics topics = session.feature(Topics.class);
@@ -319,6 +343,7 @@ public final class BasicIT {
         verify(callback, timed().times(2)).onComplete();
 
         modelStore.setModel(INSECURE);
+        verify(serviceListener, timed()).onActive(INSECURE_SERVICE);
 
         verify(stream, timed()).onSubscription(eq("rest/timestamp"), isA(TopicSpecification.class));
         verify(stream, timed()).onSubscription(eq("rest/increment"), isA(TopicSpecification.class));
@@ -328,12 +353,15 @@ public final class BasicIT {
 
         stopSession(session);
         client.close();
+
+        verify(serviceListener, timed()).onRemove(INSECURE_SERVICE);
     }
 
     @Test
     public void testReconfigurationFromInsecureToDiffusionOnly() throws IOException {
         modelStore.setModel(INSECURE);
         final RESTAdapterClient client = startClient();
+        verify(serviceListener, timed()).onActive(INSECURE_SERVICE);
         final Session session = startSession();
 
         final Topics topics = session.feature(Topics.class);
@@ -350,6 +378,8 @@ public final class BasicIT {
         verify(stream, timed()).onValue(eq("rest/increment"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
 
         modelStore.setModel(DIFFUSION_ONLY);
+
+        verify(serviceListener, timed()).onRemove(INSECURE_SERVICE);
 
         verify(stream, timed()).onUnsubscription(eq("rest/timestamp"), isA(TopicSpecification.class), eq(REMOVAL));
         verify(stream, timed()).onUnsubscription(eq("rest/increment"), isA(TopicSpecification.class), eq(REMOVAL));
@@ -367,7 +397,8 @@ public final class BasicIT {
         final RESTAdapterClient client = RESTAdapterClient.create(
             modelStore,
             executor,
-            executor::shutdown);
+            executor::shutdown,
+            serviceListener);
         client.start();
         return client;
     }

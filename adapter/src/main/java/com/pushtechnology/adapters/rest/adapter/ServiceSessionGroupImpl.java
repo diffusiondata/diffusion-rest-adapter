@@ -43,6 +43,7 @@ public final class ServiceSessionGroupImpl implements ServiceSessionGroup {
     private final PublishingClient publishingClient;
     private final List<ServiceSession> serviceSessions;
     private final ServiceSessionFactory serviceSessionFactory;
+    private final ServiceListener serviceListener;
 
     /**
      * Constructor.
@@ -51,11 +52,13 @@ public final class ServiceSessionGroupImpl implements ServiceSessionGroup {
             Model model,
             TopicManagementClient topicManagementClient,
             PublishingClient publishingClient,
-            ServiceSessionFactory serviceSessionFactory) {
+            ServiceSessionFactory serviceSessionFactory,
+            ServiceListener serviceListener) {
         this.model = model;
         this.topicManagementClient = topicManagementClient;
         this.publishingClient = publishingClient;
         this.serviceSessionFactory = serviceSessionFactory;
+        this.serviceListener = serviceListener;
         this.serviceSessions = new ArrayList<>();
     }
 
@@ -68,7 +71,10 @@ public final class ServiceSessionGroupImpl implements ServiceSessionGroup {
             topicManagementClient.addService(service);
             publishingClient
                 .addService(service)
-                .onActive(new ServiceReadyForPublishing(topicManagementClient, serviceSession, service));
+                .onStandby(() -> serviceListener.onStandby(service))
+                .onActive(new ServiceReadyForPublishing(topicManagementClient, serviceSession, service)
+                    .andThen((updater) -> serviceListener.onActive(service)))
+                .onClose(() -> serviceListener.onRemove(service));
             serviceSessions.add(serviceSession);
         }
         LOG.info("Opened service session group");

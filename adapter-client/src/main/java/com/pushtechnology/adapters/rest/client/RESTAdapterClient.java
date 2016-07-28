@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.adapters.rest.adapter.RESTAdapter;
+import com.pushtechnology.adapters.rest.adapter.ServiceListener;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.store.ModelStore;
 
@@ -42,13 +43,20 @@ public final class RESTAdapterClient {
     private final ModelStore modelStore;
     private final Runnable shutdownHandler;
 
-    private RESTAdapterClient(ModelStore modelStore, ScheduledExecutorService executor, Runnable shutdownHandler) {
+    private RESTAdapterClient(
+            ModelStore modelStore,
+            ScheduledExecutorService executor,
+            Runnable shutdownHandler,
+            ServiceListener serviceListener) {
         this.modelStore = modelStore;
         this.shutdownHandler = shutdownHandler;
-        restAdapter = new RESTAdapter(executor, () -> {
-            isRunning.set(false);
-            shutdownHandler.run();
-        });
+        restAdapter = new RESTAdapter(
+            executor,
+            () -> {
+                isRunning.set(false);
+                shutdownHandler.run();
+            },
+            serviceListener);
     }
 
     /**
@@ -105,8 +113,9 @@ public final class RESTAdapterClient {
     public static RESTAdapterClient create(
             ModelStore modelStore,
             ScheduledExecutorService executor,
-            Runnable shutdownHandler) {
+            Runnable shutdownHandler,
+            ServiceListener serviceListener) {
         LOG.debug("Creating REST adapter client with model store: {}", modelStore);
-        return new RESTAdapterClient(modelStore, executor, shutdownHandler);
+        return new RESTAdapterClient(modelStore, executor, shutdownHandler, serviceListener);
     }
 }

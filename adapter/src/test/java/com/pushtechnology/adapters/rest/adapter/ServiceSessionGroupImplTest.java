@@ -57,21 +57,27 @@ public final class ServiceSessionGroupImplTest {
     private ServiceSessionFactory serviceSessionFactory;
 
     @Mock
-    private EventedUpdateSource future;
+    private EventedUpdateSource source;
+
+    @Mock
+    private ServiceListener serviceListener;
 
     private ServiceConfig serviceConfig = ServiceConfig.builder().build();
 
+    @SuppressWarnings("unchecked")
     @Before
     public void setUp() {
         initMocks(this);
 
-        when(publishingClient.addService(serviceConfig)).thenReturn(future);
+        when(publishingClient.addService(serviceConfig)).thenReturn(source);
         when(serviceSessionFactory.create(serviceConfig)).thenReturn(serviceSession);
+        when(source.onStandby(isA(Runnable.class))).thenReturn(source);
+        when(source.onActive(isA(Consumer.class))).thenReturn(source);
     }
 
     @After
     public void postConditions() {
-        verifyNoMoreInteractions(topicManagementClient, publishingClient, future, serviceSessionFactory, serviceSession);
+        verifyNoMoreInteractions(topicManagementClient, publishingClient, source, serviceSessionFactory, serviceSession);
     }
 
     @SuppressWarnings("unchecked")
@@ -81,14 +87,17 @@ public final class ServiceSessionGroupImplTest {
             Model.builder().services(singletonList(serviceConfig)).build(),
             topicManagementClient,
             publishingClient,
-            serviceSessionFactory);
+            serviceSessionFactory,
+            serviceListener);
 
         serviceSessionGroup.start();
 
         verify(serviceSessionFactory).create(serviceConfig);
         verify(topicManagementClient).addService(serviceConfig);
         verify(publishingClient).addService(serviceConfig);
-        verify(future).onActive(isA(Consumer.class));
+        verify(source).onStandby(isA(Runnable.class));
+        verify(source).onActive(isA(Consumer.class));
+        verify(source).onClose(isA(Runnable.class));
     }
 
     @Test
@@ -97,7 +106,8 @@ public final class ServiceSessionGroupImplTest {
             Model.builder().services(singletonList(serviceConfig)).build(),
             topicManagementClient,
             publishingClient,
-            serviceSessionFactory);
+            serviceSessionFactory,
+            serviceListener);
 
         serviceSessionGroup.close();
 
