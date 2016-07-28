@@ -22,7 +22,6 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 import org.junit.After;
@@ -34,6 +33,7 @@ import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.polling.ServiceSession;
 import com.pushtechnology.adapters.rest.polling.ServiceSessionFactory;
+import com.pushtechnology.adapters.rest.publication.EventedUpdateSource;
 import com.pushtechnology.adapters.rest.publication.PublishingClient;
 import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
 
@@ -57,7 +57,7 @@ public final class ServiceSessionGroupImplTest {
     private ServiceSessionFactory serviceSessionFactory;
 
     @Mock
-    private CompletableFuture<ServiceConfig> future;
+    private EventedUpdateSource future;
 
     private ServiceConfig serviceConfig = ServiceConfig.builder().build();
 
@@ -88,7 +88,7 @@ public final class ServiceSessionGroupImplTest {
         verify(serviceSessionFactory).create(serviceConfig);
         verify(topicManagementClient).addService(serviceConfig);
         verify(publishingClient).addService(serviceConfig);
-        verify(future).thenAccept(isA(Consumer.class));
+        verify(future).onActive(isA(Consumer.class));
     }
 
     @Test

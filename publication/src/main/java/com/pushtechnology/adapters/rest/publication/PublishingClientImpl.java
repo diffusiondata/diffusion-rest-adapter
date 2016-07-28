@@ -17,16 +17,13 @@ package com.pushtechnology.adapters.rest.publication;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.diffusion.client.callbacks.Registration;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.UpdateSource;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.ValueUpdater;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.datatype.json.JSON;
@@ -46,7 +43,7 @@ public final class PublishingClientImpl implements PublishingClient {
     private static final Logger LOG = LoggerFactory.getLogger(PublishingClientImpl.class);
     private final Session session;
     @GuardedBy("this")
-    private Map<ServiceConfig, Registration> updaterSources = new HashMap<>();
+    private Map<ServiceConfig, EventedUpdateSource> updaterSources = new HashMap<>();
     @GuardedBy("this")
     private Map<ServiceConfig, ValueUpdater<JSON>> updaters = new HashMap<>();
 
@@ -58,51 +55,42 @@ public final class PublishingClientImpl implements PublishingClient {
     }
 
     @Override
-    public synchronized CompletableFuture<ServiceConfig> addService(ServiceConfig serviceConfig) {
-        final CompletableFuture<ServiceConfig> promise = new CompletableFuture<>();
+    public synchronized EventedUpdateSource addService(ServiceConfig serviceConfig) {
 
-        session
-            .feature(TopicUpdateControl.class)
-            .registerUpdateSource(
-                serviceConfig.getTopicRoot(),
-                new UpdateSource.Default() {
-                    @Override
-                    public void onRegistered(String topicPath, Registration registration) {
-                        synchronized (PublishingClientImpl.this) {
-                            updaterSources.put(serviceConfig, registration);
-                        }
-                    }
+        final EventedUpdateSource source = new EventedUpdateSourceImpl(serviceConfig.getTopicRoot())
+            .onActive(updater -> {
+                synchronized (PublishingClientImpl.this) {
+                    LOG.warn("Active for service: {}", serviceConfig);
+                    updaters.put(serviceConfig, updater.valueUpdater(JSON.class));
+                }
+            })
+            .onStandby(() -> {
+                LOG.warn("On standby for service: {}", serviceConfig);
+            })
+            .onClose(() -> {
+                synchronized (PublishingClientImpl.this) {
+                    LOG.warn("Closed for for service: {}", serviceConfig);
+                    updaterSources.remove(serviceConfig);
+                    updaters.remove(serviceConfig);
+                }
+            })
+            .onError(errorReason -> {
+                synchronized (PublishingClientImpl.this) {
+                    LOG.warn("Closed for for service: {} because {}", serviceConfig, errorReason);
+                    updaterSources.remove(serviceConfig);
+                    updaters.remove(serviceConfig);
+                }
+            });
 
-                    @Override
-                    public void onActive(String topicPath, TopicUpdateControl.Updater updater) {
-                        synchronized (PublishingClientImpl.this) {
-                            LOG.warn("Active for service: {}", serviceConfig);
-                            updaters.put(serviceConfig, updater.valueUpdater(JSON.class));
-                            promise.complete(serviceConfig);
-                        }
-                    }
+        updaterSources.put(serviceConfig, source);
+        source.register(session.feature(TopicUpdateControl.class));
 
-                    @Override
-                    public void onStandby(String topicPath) {
-                        LOG.warn("On standby for service: {}", serviceConfig);
-                    }
-
-                    @Override
-                    public void onClose(String topicPath) {
-                        synchronized (PublishingClientImpl.this) {
-                            LOG.warn("Closed for for service: {}", serviceConfig);
-                            updaterSources.remove(serviceConfig);
-                            updaters.remove(serviceConfig);
-                        }
-                    }
-                });
-
-        return promise;
+        return source;
     }
 
     @Override
     public synchronized void removeService(ServiceConfig serviceConfig) {
-        final Registration registration = updaterSources.get(serviceConfig);
+        final EventedUpdateSource registration = updaterSources.get(serviceConfig);
 
         if (registration != null) {
             registration.close();

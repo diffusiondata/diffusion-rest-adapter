@@ -20,6 +20,7 @@ import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.polling.ServiceSession;
 import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
+import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
 
 /**
  * Unit tests for {@link ServiceReadyForPublishing}.
@@ -31,6 +32,8 @@ public final class ServiceReadyForPublishingTest {
     private TopicManagementClient managementClient;
     @Mock
     private ServiceSession serviceSession;
+    @Mock
+    private TopicUpdateControl.Updater updater;
     @Captor
     private ArgumentCaptor<TopicControl.AddCallback> callbackCaptor;
 
@@ -56,17 +59,17 @@ public final class ServiceReadyForPublishingTest {
     public void setUp() {
         initMocks(this);
 
-        serviceReadyHandler = new ServiceReadyForPublishing(managementClient, serviceSession);
+        serviceReadyHandler = new ServiceReadyForPublishing(managementClient, serviceSession, serviceConfig);
     }
 
     @After
     public void postConditions() {
-        verifyNoMoreInteractions(managementClient, serviceSession);
+        verifyNoMoreInteractions(managementClient, serviceSession, updater);
     }
 
     @Test
     public void acceptSuccess() {
-        serviceReadyHandler.accept(serviceConfig);
+        serviceReadyHandler.accept(updater);
         verify(managementClient)
             .addEndpoint(eq(serviceConfig), eq(endpointConfig), callbackCaptor.capture());
         verify(serviceSession).start();
@@ -78,7 +81,7 @@ public final class ServiceReadyForPublishingTest {
 
     @Test
     public void acceptNothingToDo() {
-        serviceReadyHandler.accept(serviceConfig);
+        serviceReadyHandler.accept(updater);
         verify(managementClient)
             .addEndpoint(eq(serviceConfig), eq(endpointConfig), callbackCaptor.capture());
         verify(serviceSession).start();
@@ -90,7 +93,7 @@ public final class ServiceReadyForPublishingTest {
 
     @Test
     public void acceptFailure() {
-        serviceReadyHandler.accept(serviceConfig);
+        serviceReadyHandler.accept(updater);
         verify(managementClient)
             .addEndpoint(eq(serviceConfig), eq(endpointConfig), callbackCaptor.capture());
         verify(serviceSession).start();
@@ -100,7 +103,7 @@ public final class ServiceReadyForPublishingTest {
 
     @Test
     public void acceptDiscard() {
-        serviceReadyHandler.accept(serviceConfig);
+        serviceReadyHandler.accept(updater);
         verify(managementClient)
             .addEndpoint(eq(serviceConfig), eq(endpointConfig), callbackCaptor.capture());
         verify(serviceSession).start();

@@ -24,23 +24,29 @@ import com.pushtechnology.adapters.rest.polling.ServiceSession;
 import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicAddFailReason;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.AddCallback;
+import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
 
 /**
  * Handler for a service that is now ready for publishing to.
  *
  * @author Push Technology Limited
  */
-/*package*/ final class ServiceReadyForPublishing implements Consumer<ServiceConfig> {
+/*package*/ final class ServiceReadyForPublishing implements Consumer<TopicUpdateControl.Updater> {
     private final TopicManagementClient topicManagementClient;
     private final ServiceSession serviceSession;
+    private final ServiceConfig serviceConfig;
 
-    /*package*/ ServiceReadyForPublishing(TopicManagementClient topicManagementClient, ServiceSession serviceSession) {
+    /*package*/ ServiceReadyForPublishing(
+            TopicManagementClient topicManagementClient,
+            ServiceSession serviceSession,
+            ServiceConfig serviceConfig) {
         this.topicManagementClient = topicManagementClient;
         this.serviceSession = serviceSession;
+        this.serviceConfig = serviceConfig;
     }
 
     @Override
-    public void accept(ServiceConfig serviceConfig) {
+    public void accept(TopicUpdateControl.Updater updater) {
         serviceConfig
             .getEndpoints()
             .forEach(endpoint -> topicManagementClient.addEndpoint(serviceConfig, endpoint, new AddCallback() {

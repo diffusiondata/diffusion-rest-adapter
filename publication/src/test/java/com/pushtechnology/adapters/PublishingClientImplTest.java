@@ -12,8 +12,6 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-import java.util.concurrent.CompletableFuture;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,6 +21,7 @@ import org.mockito.Mock;
 
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
+import com.pushtechnology.adapters.rest.publication.EventedUpdateSource;
 import com.pushtechnology.adapters.rest.publication.PublishingClient;
 import com.pushtechnology.adapters.rest.publication.PublishingClientImpl;
 import com.pushtechnology.adapters.rest.publication.UpdateTopicCallback;
@@ -110,23 +109,24 @@ public final class PublishingClientImplTest {
         verify(session).feature(TopicUpdateControl.class);
         verify(updateControl).registerUpdateSource(eq("a"), updateSourceCaptor.capture());
 
-        final UpdateSource value = updateSourceCaptor.getValue();
+        final UpdateSource updateSource = updateSourceCaptor.getValue();
+        updateSource.onRegistered("a", registration);
 
-        value.onStandby("a");
+        updateSource.onStandby("a");
     }
 
     @Test
     public void publishSuccess() {
         final PublishingClient client = new PublishingClientImpl(session);
 
-        final CompletableFuture<ServiceConfig> promise = client.addService(serviceConfig);
+        final EventedUpdateSource source = client.addService(serviceConfig);
 
         verify(session).feature(TopicUpdateControl.class);
         verify(updateControl).registerUpdateSource(eq("a"), updateSourceCaptor.capture());
 
         updateSourceCaptor.getValue().onActive("a/topic", rawUpdater);
 
-        assertTrue(promise.isDone());
+        assertTrue(source.isActive());
 
         client.publish(serviceConfig, endpointConfig, json);
 
@@ -141,14 +141,14 @@ public final class PublishingClientImplTest {
     public void publishFailure() {
         final PublishingClient client = new PublishingClientImpl(session);
 
-        final CompletableFuture<ServiceConfig> promise = client.addService(serviceConfig);
+        final EventedUpdateSource source = client.addService(serviceConfig);
 
         verify(session).feature(TopicUpdateControl.class);
         verify(updateControl).registerUpdateSource(eq("a"), updateSourceCaptor.capture());
 
         updateSourceCaptor.getValue().onActive("a/topic", rawUpdater);
 
-        assertTrue(promise.isDone());
+        assertTrue(source.isActive());
 
         client.publish(serviceConfig, endpointConfig, json);
 
@@ -205,10 +205,26 @@ public final class PublishingClientImplTest {
         final UpdateSource updateSource = updateSourceCaptor.getValue();
 
         updateSource.onRegistered("a", registration);
+        updateSource.onStandby("a");
 
         client.removeService(serviceConfig);
 
         verify(registration).close();
+        updateSource.onClose("a");
+    }
+
+    @Test
+    public void failToRegister() {
+        final PublishingClient client = new PublishingClientImpl(session);
+
+        client.addService(serviceConfig);
+
+        verify(session).feature(TopicUpdateControl.class);
+        verify(updateControl).registerUpdateSource(eq("a"), updateSourceCaptor.capture());
+
+        final UpdateSource updateSource = updateSourceCaptor.getValue();
+
+        updateSource.onError("a", ErrorReason.COMMUNICATION_FAILURE);
     }
 
     @Test

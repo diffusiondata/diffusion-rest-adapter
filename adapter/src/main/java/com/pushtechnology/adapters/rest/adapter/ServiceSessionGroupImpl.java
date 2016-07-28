@@ -68,7 +68,7 @@ public final class ServiceSessionGroupImpl implements ServiceSessionGroup {
             topicManagementClient.addService(service);
             publishingClient
                 .addService(service)
-                .thenAccept(new ServiceReadyForPublishing(topicManagementClient, serviceSession));
+                .onActive(new ServiceReadyForPublishing(topicManagementClient, serviceSession, service));
             serviceSessions.add(serviceSession);
         }
         LOG.info("Opened service session group");

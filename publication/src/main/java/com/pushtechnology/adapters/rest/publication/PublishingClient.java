@@ -15,8 +15,6 @@
 
 package com.pushtechnology.adapters.rest.publication;
 
-import java.util.concurrent.CompletableFuture;
-
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.diffusion.datatype.json.JSON;
@@ -30,7 +28,7 @@ public interface PublishingClient {
     /**
      * Add a service to publish to.
      */
-    CompletableFuture<ServiceConfig> addService(ServiceConfig serviceConfig);
+    EventedUpdateSource addService(ServiceConfig serviceConfig);
 
     /**
      * Remove a service.
