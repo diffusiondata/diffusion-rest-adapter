@@ -31,6 +31,7 @@ import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.concurrent.FutureCallback;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
@@ -86,6 +87,12 @@ public final class EndpointClientImpl implements EndpointClient {
                 @Override
                 public void completed(HttpResponse httpResponse) {
                     try {
+                        final StatusLine statusLine = httpResponse.getStatusLine();
+                        if (statusLine.getStatusCode() >= 400) {
+                            callback.failed(new Exception("Received response " + statusLine));
+                            return;
+                        }
+
                         final HttpEntity entity = httpResponse.getEntity();
 
                         final InputStream content = entity.getContent();

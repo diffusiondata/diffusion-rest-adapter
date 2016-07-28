@@ -17,6 +17,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
 import org.apache.http.concurrent.FutureCallback;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.junit.After;
@@ -50,6 +51,8 @@ public final class EndpointClientImplTest {
     private HttpResponse response;
     @Mock
     private HttpEntity entity;
+    @Mock
+    private StatusLine statusLine;
     @Captor
     private ArgumentCaptor<FutureCallback<HttpResponse>> callbackCaptor;
 
@@ -67,9 +70,11 @@ public final class EndpointClientImplTest {
         when(clientFactory.create(model, null)).thenReturn(httpClient);
         when(httpClient.execute(isA(HttpHost.class), isA(HttpRequest.class), isA(FutureCallback.class)))
             .thenReturn(future);
+        when(response.getStatusLine()).thenReturn(statusLine);
         when(response.getEntity()).thenReturn(entity);
         when(entity.getContent()).thenReturn(new ByteArrayInputStream("{}".getBytes()));
         when(response.getHeaders("content-type")).thenReturn(new Header[0]);
+        when(statusLine.getStatusCode()).thenReturn(200);
 
         endpointClient = new EndpointClientImpl(model, null, clientFactory);
     }
