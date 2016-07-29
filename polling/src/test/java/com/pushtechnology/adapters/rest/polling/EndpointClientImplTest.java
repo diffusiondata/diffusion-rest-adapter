@@ -30,8 +30,6 @@ import org.mockito.Mock;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.diffusion.client.Diffusion;
-import com.pushtechnology.diffusion.datatype.json.JSON;
 
 /**
  * Unit tests for {@link EndpointClientImpl}.
@@ -44,7 +42,7 @@ public final class EndpointClientImplTest {
     @Mock
     private CloseableHttpAsyncClient httpClient;
     @Mock
-    private FutureCallback<JSON> callback;
+    private FutureCallback<String> callback;
     @Mock
     private Future<HttpResponse> future;
     @Mock
@@ -121,10 +119,7 @@ public final class EndpointClientImplTest {
         final FutureCallback<HttpResponse> responseCallback = callbackCaptor.getValue();
 
         responseCallback.completed(response);
-        verify(callback).completed(Diffusion
-            .dataTypes()
-            .json()
-            .fromJsonString("{}"));
+        verify(callback).completed("{}");
     }
 
     @Test

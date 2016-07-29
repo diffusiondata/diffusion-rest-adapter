@@ -25,7 +25,6 @@ import org.apache.http.concurrent.FutureCallback;
 
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.diffusion.datatype.json.JSON;
 
 /**
  * Client for requesting for endpoints.
@@ -41,7 +40,7 @@ public interface EndpointClient extends AutoCloseable {
      * @return handle to asynchronous poll
      * @throws IllegalStateException if the client is not running
      */
-    Future<?> request(ServiceConfig serviceConfig, EndpointConfig endpointConfig, FutureCallback<JSON> callback);
+    Future<?> request(ServiceConfig serviceConfig, EndpointConfig endpointConfig, FutureCallback<String> callback);
 
     /**
      * Start component.

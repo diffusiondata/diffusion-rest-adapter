@@ -41,8 +41,6 @@ import org.slf4j.LoggerFactory;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.diffusion.client.Diffusion;
-import com.pushtechnology.diffusion.datatype.json.JSON;
 
 import net.jcip.annotations.ThreadSafe;
 
@@ -73,7 +71,7 @@ public final class EndpointClientImpl implements EndpointClient {
     public Future<?> request(
             ServiceConfig serviceConfig,
             EndpointConfig endpointConfig,
-            final FutureCallback<JSON> callback) {
+            final FutureCallback<String> callback) {
 
 
         if (client == null) {
@@ -104,10 +102,7 @@ public final class EndpointClientImpl implements EndpointClient {
                             next = content.read();
                         }
 
-                        callback.completed(Diffusion
-                            .dataTypes()
-                            .json()
-                            .fromJsonString(new String(baos.toByteArray(), getResponseCharset(httpResponse))));
+                        callback.completed(new String(baos.toByteArray(), getResponseCharset(httpResponse)));
                     }
                     catch (IOException e) {
                         failed(e);

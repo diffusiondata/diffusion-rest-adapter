@@ -26,6 +26,7 @@ import org.mockito.Mock;
 
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
+import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
 /**
@@ -41,8 +42,6 @@ public final class ServiceSessionTest {
     @Mock
     private PollHandlerFactory handlerFactory;
     @Mock
-    private JSON json;
-    @Mock
     private ScheduledFuture taskFuture;
     @Mock
     private Future pollFuture0;
@@ -53,7 +52,7 @@ public final class ServiceSessionTest {
     @Captor
     private ArgumentCaptor<Runnable> runnableCaptor;
     @Captor
-    private ArgumentCaptor<FutureCallback<JSON>> callbackCaptor;
+    private ArgumentCaptor<FutureCallback<String>> callbackCaptor;
 
     private final EndpointConfig endpointConfig = EndpointConfig
         .builder()
@@ -66,6 +65,7 @@ public final class ServiceSessionTest {
         .pollPeriod(5000L)
         .endpoints(singletonList(endpointConfig))
         .build();
+    private final JSON json = Diffusion.dataTypes().json().fromJsonString("{\"foo\":\"bar\"}");
 
     private ServiceSession serviceSession;
 
@@ -103,9 +103,9 @@ public final class ServiceSessionTest {
 
         verify(endpointClient).request(eq(serviceConfig), eq(endpointConfig), callbackCaptor.capture());
 
-        final FutureCallback<JSON> callback = callbackCaptor.getValue();
+        final FutureCallback<String> callback = callbackCaptor.getValue();
 
-        callback.completed(json);
+        callback.completed("{\"foo\":\"bar\"}");
 
         verify(handler).completed(json);
     }
@@ -124,7 +124,7 @@ public final class ServiceSessionTest {
 
         verify(endpointClient).request(eq(serviceConfig), eq(endpointConfig), callbackCaptor.capture());
 
-        final FutureCallback<JSON> callback = callbackCaptor.getValue();
+        final FutureCallback<String> callback = callbackCaptor.getValue();
 
         final Exception ex = new Exception("Intentional exception");
         callback.failed(ex);
@@ -203,12 +203,12 @@ public final class ServiceSessionTest {
 
         verify(endpointClient).request(eq(serviceConfig), eq(endpointConfig), callbackCaptor.capture());
 
-        final FutureCallback<JSON> callback = callbackCaptor.getValue();
+        final FutureCallback<String> callback = callbackCaptor.getValue();
 
         serviceSession.stop();
         verify(taskFuture).cancel(false);
 
-        callback.completed(json);
+        callback.completed("{\"foo\":\"bar\"}");
 
         verify(handler, never()).completed(json);
     }

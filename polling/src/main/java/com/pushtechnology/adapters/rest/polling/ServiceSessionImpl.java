@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
+import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
 import net.jcip.annotations.GuardedBy;
@@ -143,7 +144,7 @@ public final class ServiceSessionImpl implements ServiceSession {
     /**
      * The handler for the polling result. Notifies the publishing client of the new data.
      */
-    private final class PollResultHandler implements FutureCallback<JSON> {
+    private final class PollResultHandler implements FutureCallback<String> {
         private final FutureCallback<JSON> delegate;
 
         private PollResultHandler(FutureCallback<JSON> delegate) {
@@ -151,12 +152,15 @@ public final class ServiceSessionImpl implements ServiceSession {
         }
 
         @Override
-        public void completed(JSON json) {
-            LOG.trace("Polled value {}", json.toJsonString());
+        public void completed(String body) {
+            LOG.trace("Polled value {}", body);
 
             synchronized (ServiceSessionImpl.this) {
                 if (isRunning) {
-                    delegate.completed(json);
+                    delegate.completed(Diffusion
+                        .dataTypes()
+                        .json()
+                        .fromJsonString(body));
                 }
             }
         }
