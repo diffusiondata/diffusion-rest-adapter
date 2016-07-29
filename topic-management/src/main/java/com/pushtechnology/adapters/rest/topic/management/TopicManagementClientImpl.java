@@ -49,11 +49,34 @@ public final class TopicManagementClientImpl implements TopicManagementClient {
             ServiceConfig serviceConfig,
             EndpointConfig endpointConfig,
             TopicControl.AddCallback callback) {
-        session
-            .feature(TopicControl.class)
-            .addTopic(
-                serviceConfig.getTopicRoot() + "/" + endpointConfig.getTopic(),
-                TopicType.JSON,
-                callback);
+
+        final String produces = endpointConfig.getProduces();
+        final String topicPath = serviceConfig.getTopicRoot() + "/" + endpointConfig.getTopic();
+
+        switch (produces) {
+            case "json" :
+            case "application/json" :
+                session
+                    .feature(TopicControl.class)
+                    .addTopic(
+                        topicPath,
+                        TopicType.JSON,
+                        callback);
+                break;
+
+            case "binary" :
+            case "string" :
+            case "text/plain" :
+                session
+                    .feature(TopicControl.class)
+                    .addTopic(
+                        topicPath,
+                        TopicType.BINARY,
+                        callback);
+                break;
+
+            default:
+                throw new IllegalArgumentException("Unsupported produces value \"" + produces + "\"");
+        }
     }
 }

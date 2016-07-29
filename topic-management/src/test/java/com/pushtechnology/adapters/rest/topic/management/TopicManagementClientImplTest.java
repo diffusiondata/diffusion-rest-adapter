@@ -15,8 +15,9 @@
 
 package com.pushtechnology.adapters.rest.topic.management;
 
+import static com.pushtechnology.diffusion.client.topics.details.TopicType.BINARY;
 import static com.pushtechnology.diffusion.client.topics.details.TopicType.JSON;
-import static java.util.Collections.singletonList;
+import static java.util.Arrays.asList;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.isA;
 import static org.mockito.Mockito.verify;
@@ -46,11 +47,26 @@ public final class TopicManagementClientImplTest {
     @Mock
     private TopicControl.AddCallback addCallback;
 
-    private final EndpointConfig endpointConfig = EndpointConfig
+    private final EndpointConfig jsonEndpointConfig = EndpointConfig
         .builder()
-        .name("endpoint")
+        .name("jsonEndpoint")
         .url("endpoint")
-        .topic("endpoint")
+        .topic("jsonEndpoint")
+        .produces("json")
+        .build();
+    private final EndpointConfig binaryEndpointConfig = EndpointConfig
+        .builder()
+        .name("binaryEndpoint")
+        .url("endpoint")
+        .topic("binaryEndpoint")
+        .produces("binary")
+        .build();
+    private final EndpointConfig stringEndpointConfig = EndpointConfig
+        .builder()
+        .name("stringEndpoint")
+        .url("endpoint")
+        .topic("stringEndpoint")
+        .produces("string")
         .build();
     private final ServiceConfig serviceConfig = ServiceConfig
         .builder()
@@ -58,7 +74,7 @@ public final class TopicManagementClientImplTest {
         .port(80)
         .pollPeriod(5000)
         .topicRoot("service")
-        .endpoints(singletonList(endpointConfig))
+        .endpoints(asList(jsonEndpointConfig, binaryEndpointConfig, stringEndpointConfig))
         .build();
 
     private TopicManagementClient topicManagementClient;
@@ -81,9 +97,23 @@ public final class TopicManagementClientImplTest {
     }
 
     @Test
-    public void addEndpoint() {
-        topicManagementClient.addEndpoint(serviceConfig, endpointConfig, addCallback);
+    public void addJSONEndpoint() {
+        topicManagementClient.addEndpoint(serviceConfig, jsonEndpointConfig, addCallback);
 
-        verify(topicControl).addTopic("service/endpoint", JSON, addCallback);
+        verify(topicControl).addTopic("service/jsonEndpoint", JSON, addCallback);
+    }
+
+    @Test
+    public void addBinaryEndpoint() {
+        topicManagementClient.addEndpoint(serviceConfig, binaryEndpointConfig, addCallback);
+
+        verify(topicControl).addTopic("service/binaryEndpoint", BINARY, addCallback);
+    }
+
+    @Test
+    public void addStringEndpoint() {
+        topicManagementClient.addEndpoint(serviceConfig, stringEndpointConfig, addCallback);
+
+        verify(topicControl).addTopic("service/stringEndpoint", BINARY, addCallback);
     }
 }
