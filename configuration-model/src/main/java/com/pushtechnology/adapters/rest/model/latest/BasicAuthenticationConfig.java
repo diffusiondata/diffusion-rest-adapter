@@ -17,6 +17,7 @@ package com.pushtechnology.adapters.rest.model.latest;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.ToString;
 import lombok.Value;
 
 /**
@@ -29,6 +30,7 @@ import lombok.Value;
 @Value
 @Builder
 @AllArgsConstructor
+@ToString(of = {})
 public class BasicAuthenticationConfig {
     String principal;
     String credential;

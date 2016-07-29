@@ -19,6 +19,7 @@ import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.ToString;
 import lombok.Value;
 
 /**
@@ -31,6 +32,7 @@ import lombok.Value;
 @Value
 @Builder
 @AllArgsConstructor
+@ToString(of = {"host", "port", "secure"})
 public class ServiceConfig {
     /**
      * The host of the service.
