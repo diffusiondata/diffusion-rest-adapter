@@ -15,6 +15,7 @@
 
 package com.pushtechnology.adapters.rest.publication;
 
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,9 +24,11 @@ import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
+import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.ValueUpdater;
 import com.pushtechnology.diffusion.client.session.Session;
+import com.pushtechnology.diffusion.datatype.binary.Binary;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
 import net.jcip.annotations.GuardedBy;
@@ -45,7 +48,7 @@ public final class PublishingClientImpl implements PublishingClient {
     @GuardedBy("this")
     private Map<ServiceConfig, EventedUpdateSource> updaterSources = new HashMap<>();
     @GuardedBy("this")
-    private Map<ServiceConfig, ValueUpdater<JSON>> updaters = new HashMap<>();
+    private Map<ServiceConfig, UpdaterSet> updaters = new HashMap<>();
 
     /**
      * Constructor.
@@ -61,7 +64,9 @@ public final class PublishingClientImpl implements PublishingClient {
             .onActive(updater -> {
                 synchronized (PublishingClientImpl.this) {
                     LOG.warn("Active for service: {}", serviceConfig);
-                    updaters.put(serviceConfig, updater.valueUpdater(JSON.class));
+                    updaters.put(
+                        serviceConfig,
+                        new UpdaterSet(updater.valueUpdater(JSON.class), updater.valueUpdater(Binary.class)));
                 }
             })
             .onStandby(() -> {
@@ -99,27 +104,82 @@ public final class PublishingClientImpl implements PublishingClient {
 
     @Override
     public synchronized void publish(ServiceConfig serviceConfig, EndpointConfig endpointConfig, JSON json) {
+        final UpdaterSet updaterSet = validatePublish(serviceConfig);
+        if (updaterSet == null) {
+            return;
+        }
+
+        final String topicName = serviceConfig.getTopicRoot() + "/" + endpointConfig.getTopic();
+        updaterSet
+            .jsonUpdater
+            .update(
+                topicName,
+                json,
+                topicName,
+                UpdateTopicCallback.INSTANCE);
+    }
+
+    @Override
+    public void publish(ServiceConfig serviceConfig, EndpointConfig endpointConfig, Binary binary) {
+        final UpdaterSet updaterSet = validatePublish(serviceConfig);
+        if (updaterSet == null) {
+            return;
+        }
+
+        final String topicName = serviceConfig.getTopicRoot() + "/" + endpointConfig.getTopic();
+        updaterSet
+            .binaryUpdater
+            .update(
+                topicName,
+                binary,
+                topicName,
+                UpdateTopicCallback.INSTANCE);
+    }
+
+    @Override
+    public void publish(ServiceConfig serviceConfig, EndpointConfig endpointConfig, String value) {
+        final UpdaterSet updaterSet = validatePublish(serviceConfig);
+        if (updaterSet == null) {
+            return;
+        }
+
+        final String topicName = serviceConfig.getTopicRoot() + "/" + endpointConfig.getTopic();
+        updaterSet
+            .binaryUpdater
+            .update(
+                topicName,
+                Diffusion.dataTypes().binary().readValue(value.getBytes(Charset.forName("UTF-8"))),
+                topicName,
+                UpdateTopicCallback.INSTANCE);
+    }
+
+    private UpdaterSet validatePublish(ServiceConfig serviceConfig) {
         final Session.State state = session.getState();
         if (state.isClosed()) {
             throw new IllegalStateException("Session closed");
         }
         else if (state.isRecovering()) {
             LOG.debug("Dropped an update while session is recovering");
-            return;
+            return null;
         }
 
-        final ValueUpdater<JSON> updater = updaters.get(serviceConfig);
+        final UpdaterSet updaterSet = updaters.get(serviceConfig);
 
-        if (updater == null) {
+        if (updaterSet == null) {
             LOG.debug("The service has not been added or is not active, no updater found");
-            return;
+            return null;
         }
 
-        updater
-            .update(
-                serviceConfig.getTopicRoot() + "/" + endpointConfig.getTopic(),
-                json,
-                serviceConfig.getTopicRoot() + "/" + endpointConfig.getTopic(),
-                UpdateTopicCallback.INSTANCE);
+        return updaterSet;
+    }
+
+    private static final class UpdaterSet {
+        private final ValueUpdater<JSON> jsonUpdater;
+        private final ValueUpdater<Binary> binaryUpdater;
+
+        private UpdaterSet(ValueUpdater<JSON> jsonUpdater, ValueUpdater<Binary> binaryUpdater) {
+            this.jsonUpdater = jsonUpdater;
+            this.binaryUpdater = binaryUpdater;
+        }
     }
 }

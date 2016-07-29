@@ -25,6 +25,7 @@ import com.pushtechnology.adapters.rest.publication.EventedUpdateSource;
 import com.pushtechnology.adapters.rest.publication.PublishingClient;
 import com.pushtechnology.adapters.rest.publication.PublishingClientImpl;
 import com.pushtechnology.adapters.rest.publication.UpdateTopicCallback;
+import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.callbacks.ErrorReason;
 import com.pushtechnology.diffusion.client.callbacks.Registration;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
@@ -32,6 +33,7 @@ import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateCo
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.ValueUpdater;
 import com.pushtechnology.diffusion.client.session.Session;
+import com.pushtechnology.diffusion.datatype.binary.Binary;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
 /**
@@ -51,9 +53,13 @@ public final class PublishingClientImplTest {
     @Mock
     private Updater rawUpdater;
     @Mock
-    private ValueUpdater<JSON> updater;
+    private ValueUpdater<JSON> jsonUpdater;
+    @Mock
+    private ValueUpdater<Binary> binaryUpdater;
     @Mock
     private JSON json;
+    @Mock
+    private Binary binary;
     @Captor
     private ArgumentCaptor<UpdateSource> updateSourceCaptor;
 
@@ -66,7 +72,8 @@ public final class PublishingClientImplTest {
 
         when(session.feature(TopicUpdateControl.class)).thenReturn(updateControl);
         when(session.getState()).thenReturn(CONNECTED_ACTIVE);
-        when(rawUpdater.valueUpdater(JSON.class)).thenReturn(updater);
+        when(rawUpdater.valueUpdater(JSON.class)).thenReturn(jsonUpdater);
+        when(rawUpdater.valueUpdater(Binary.class)).thenReturn(binaryUpdater);
 
         endpointConfig = EndpointConfig
             .builder()
@@ -87,7 +94,7 @@ public final class PublishingClientImplTest {
 
     @After
     public void postConditions() {
-        verifyNoMoreInteractions(session, updateControl, rawUpdater, updater, registration);
+        verifyNoMoreInteractions(session, updateControl, rawUpdater, binaryUpdater, registration);
     }
 
     @Test
@@ -116,7 +123,7 @@ public final class PublishingClientImplTest {
     }
 
     @Test
-    public void publishSuccess() {
+    public void publishJSONSuccess() {
         final PublishingClient client = new PublishingClientImpl(session);
 
         final EventedUpdateSource source = client.addService(serviceConfig);
@@ -125,14 +132,65 @@ public final class PublishingClientImplTest {
         verify(updateControl).registerUpdateSource(eq("a"), updateSourceCaptor.capture());
 
         updateSourceCaptor.getValue().onActive("a/topic", rawUpdater);
+        verify(rawUpdater).valueUpdater(JSON.class);
+        verify(rawUpdater).valueUpdater(Binary.class);
 
         assertTrue(source.isActive());
 
         client.publish(serviceConfig, endpointConfig, json);
 
         verify(session).getState();
+        verify(jsonUpdater).update("a/topic", json, "a/topic", UpdateTopicCallback.INSTANCE);
+
+        UpdateTopicCallback.INSTANCE.onSuccess("a/topic");
+    }
+
+    @Test
+    public void publishBinarySuccess() {
+        final PublishingClient client = new PublishingClientImpl(session);
+
+        final EventedUpdateSource source = client.addService(serviceConfig);
+
+        verify(session).feature(TopicUpdateControl.class);
+        verify(updateControl).registerUpdateSource(eq("a"), updateSourceCaptor.capture());
+
+        updateSourceCaptor.getValue().onActive("a/topic", rawUpdater);
         verify(rawUpdater).valueUpdater(JSON.class);
-        verify(updater).update("a/topic", json, "a/topic", UpdateTopicCallback.INSTANCE);
+        verify(rawUpdater).valueUpdater(Binary.class);
+
+        assertTrue(source.isActive());
+
+        client.publish(serviceConfig, endpointConfig, binary);
+
+        verify(session).getState();
+        verify(binaryUpdater).update("a/topic", binary, "a/topic", UpdateTopicCallback.INSTANCE);
+
+        UpdateTopicCallback.INSTANCE.onSuccess("a/topic");
+    }
+
+    @Test
+    public void publishStringSuccess() {
+        final PublishingClient client = new PublishingClientImpl(session);
+
+        final EventedUpdateSource source = client.addService(serviceConfig);
+
+        verify(session).feature(TopicUpdateControl.class);
+        verify(updateControl).registerUpdateSource(eq("a"), updateSourceCaptor.capture());
+
+        updateSourceCaptor.getValue().onActive("a/topic", rawUpdater);
+        verify(rawUpdater).valueUpdater(JSON.class);
+        verify(rawUpdater).valueUpdater(Binary.class);
+
+        assertTrue(source.isActive());
+
+        client.publish(serviceConfig, endpointConfig, "");
+
+        verify(session).getState();
+        verify(binaryUpdater).update(
+            "a/topic",
+            Diffusion.dataTypes().binary().readValue(new byte[0]),
+            "a/topic",
+            UpdateTopicCallback.INSTANCE);
 
         UpdateTopicCallback.INSTANCE.onSuccess("a/topic");
     }
@@ -147,14 +205,15 @@ public final class PublishingClientImplTest {
         verify(updateControl).registerUpdateSource(eq("a"), updateSourceCaptor.capture());
 
         updateSourceCaptor.getValue().onActive("a/topic", rawUpdater);
+        verify(rawUpdater).valueUpdater(JSON.class);
+        verify(rawUpdater).valueUpdater(Binary.class);
 
         assertTrue(source.isActive());
 
         client.publish(serviceConfig, endpointConfig, json);
 
         verify(session).getState();
-        verify(rawUpdater).valueUpdater(JSON.class);
-        verify(updater).update("a/topic", json, "a/topic", UpdateTopicCallback.INSTANCE);
+        verify(jsonUpdater).update("a/topic", json, "a/topic", UpdateTopicCallback.INSTANCE);
 
         UpdateTopicCallback.INSTANCE.onError("a/topic", ErrorReason.COMMUNICATION_FAILURE);
     }
