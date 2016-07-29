@@ -19,16 +19,16 @@ import org.apache.http.concurrent.FutureCallback;
 
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.diffusion.datatype.json.JSON;
 
 /**
  * Factory for handlers of a poll result.
  *
+ * @param <T> The type of response from the poll request
  * @author Push Technology Limited
  */
-public interface PollHandlerFactory {
+public interface PollHandlerFactory<T> {
     /**
      * @return a handler for the result of polling an endpoint
      */
-    FutureCallback<JSON> create(ServiceConfig serviceConfig, EndpointConfig endpointConfig);
+    FutureCallback<T> create(ServiceConfig serviceConfig, EndpointConfig endpointConfig);
 }

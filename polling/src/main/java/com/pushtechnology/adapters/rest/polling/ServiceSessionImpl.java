@@ -47,7 +47,7 @@ public final class ServiceSessionImpl implements ServiceSession {
     private final ScheduledExecutorService executor;
     private final EndpointClient endpointClient;
     private final ServiceConfig serviceConfig;
-    private final PollHandlerFactory handlerFactory;
+    private final PollHandlerFactory<JSON> handlerFactory;
     @GuardedBy("this")
     private boolean isRunning;
 
@@ -58,7 +58,7 @@ public final class ServiceSessionImpl implements ServiceSession {
             ScheduledExecutorService executor,
             EndpointClient endpointClient,
             ServiceConfig serviceConfig,
-            PollHandlerFactory handlerFactory) {
+            PollHandlerFactory<JSON> handlerFactory) {
 
         this.executor = executor;
         this.endpointClient = endpointClient;

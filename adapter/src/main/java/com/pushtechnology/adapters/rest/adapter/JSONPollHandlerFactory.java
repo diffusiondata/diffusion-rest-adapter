@@ -24,17 +24,17 @@ import com.pushtechnology.adapters.rest.publication.PublishingClient;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
 /**
- * Implementation of {@link PollHandlerFactory}.
+ * Implementation of {@link PollHandlerFactory} for {@link JSON}.
  *
  * @author Push Technology Limited
  */
-public final class PollHandlerFactoryImpl implements PollHandlerFactory {
+public final class JSONPollHandlerFactory implements PollHandlerFactory<JSON> {
     private final PublishingClient publishingClient;
 
     /**
      * Constructor.
      */
-    public PollHandlerFactoryImpl(PublishingClient publishingClient) {
+    public JSONPollHandlerFactory(PublishingClient publishingClient) {
         this.publishingClient = publishingClient;
     }
 

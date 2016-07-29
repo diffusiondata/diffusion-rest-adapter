@@ -265,7 +265,7 @@ public final class RESTAdapter implements AutoCloseable {
             .addAdapter(DiffusionSessionFactory.create())
             .addComponent(PublishingClientImpl.class)
             .addComponent(TopicManagementClientImpl.class)
-            .addComponent(PollHandlerFactoryImpl.class)
+            .addComponent(JSONPollHandlerFactory.class)
             .addComponent(model)
             .addComponent(shutdownTask)
             .addComponent(SessionLostListener.class)
