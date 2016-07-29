@@ -1,4 +1,4 @@
-package com.pushtechnology.adapters;
+package com.pushtechnology.adapters.rest.publication;
 
 import static com.pushtechnology.diffusion.client.session.Session.State.CLOSED_FAILED;
 import static com.pushtechnology.diffusion.client.session.Session.State.CONNECTED_ACTIVE;
