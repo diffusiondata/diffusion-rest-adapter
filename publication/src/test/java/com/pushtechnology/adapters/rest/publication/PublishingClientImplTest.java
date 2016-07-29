@@ -66,6 +66,8 @@ public final class PublishingClientImplTest {
     private EndpointConfig endpointConfig;
     private ServiceConfig serviceConfig;
 
+    private PublishingClient client;
+
     @Before
     public void setUp() {
         initMocks(this);
@@ -90,6 +92,8 @@ public final class PublishingClientImplTest {
             .endpoints(singletonList(endpointConfig))
             .topicRoot("a")
             .build();
+
+        client = new PublishingClientImpl(session);
     }
 
     @After
@@ -99,8 +103,6 @@ public final class PublishingClientImplTest {
 
     @Test
     public void addService() {
-        final PublishingClient client = new PublishingClientImpl(session);
-
         client.addService(serviceConfig);
 
         verify(session).feature(TopicUpdateControl.class);
@@ -109,8 +111,6 @@ public final class PublishingClientImplTest {
 
     @Test
     public void addServiceStandby() {
-        final PublishingClient client = new PublishingClientImpl(session);
-
         client.addService(serviceConfig);
 
         verify(session).feature(TopicUpdateControl.class);
@@ -124,8 +124,6 @@ public final class PublishingClientImplTest {
 
     @Test
     public void publishJSONSuccess() {
-        final PublishingClient client = new PublishingClientImpl(session);
-
         final EventedUpdateSource source = client.addService(serviceConfig);
 
         verify(session).feature(TopicUpdateControl.class);
@@ -147,8 +145,6 @@ public final class PublishingClientImplTest {
 
     @Test
     public void publishBinarySuccess() {
-        final PublishingClient client = new PublishingClientImpl(session);
-
         final EventedUpdateSource source = client.addService(serviceConfig);
 
         verify(session).feature(TopicUpdateControl.class);
@@ -170,8 +166,6 @@ public final class PublishingClientImplTest {
 
     @Test
     public void publishStringSuccess() {
-        final PublishingClient client = new PublishingClientImpl(session);
-
         final EventedUpdateSource source = client.addService(serviceConfig);
 
         verify(session).feature(TopicUpdateControl.class);
@@ -197,8 +191,6 @@ public final class PublishingClientImplTest {
 
     @Test
     public void publishFailure() {
-        final PublishingClient client = new PublishingClientImpl(session);
-
         final EventedUpdateSource source = client.addService(serviceConfig);
 
         verify(session).feature(TopicUpdateControl.class);
@@ -220,8 +212,6 @@ public final class PublishingClientImplTest {
 
     @Test
     public void publishWhenServiceNotAdded() {
-        final PublishingClient client = new PublishingClientImpl(session);
-
         client.publish(serviceConfig, endpointConfig, json);
 
         verify(session).getState();
@@ -231,8 +221,6 @@ public final class PublishingClientImplTest {
     public void publishWhenRecovering() {
         when(session.getState()).thenReturn(RECOVERING_RECONNECT);
 
-        final PublishingClient client = new PublishingClientImpl(session);
-
         client.publish(serviceConfig, endpointConfig, json);
 
         verify(session).getState();
@@ -241,8 +229,6 @@ public final class PublishingClientImplTest {
     @Test(expected = IllegalStateException.class)
     public void publishWhenClosed() {
         when(session.getState()).thenReturn(CLOSED_FAILED);
-
-        final PublishingClient client = new PublishingClientImpl(session);
 
         try {
             client.publish(serviceConfig, endpointConfig, json);
@@ -254,8 +240,6 @@ public final class PublishingClientImplTest {
 
     @Test
     public void removeService() {
-        final PublishingClient client = new PublishingClientImpl(session);
-
         client.addService(serviceConfig);
 
         verify(session).feature(TopicUpdateControl.class);
@@ -274,8 +258,6 @@ public final class PublishingClientImplTest {
 
     @Test
     public void failToRegister() {
-        final PublishingClient client = new PublishingClientImpl(session);
-
         client.addService(serviceConfig);
 
         verify(session).feature(TopicUpdateControl.class);
@@ -288,8 +270,6 @@ public final class PublishingClientImplTest {
 
     @Test
     public void removeUnknownService() {
-        final PublishingClient client = new PublishingClientImpl(session);
-
         client.removeService(serviceConfig);
     }
 }
