@@ -20,7 +20,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-import org.apache.http.concurrent.FutureCallback;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,18 +27,15 @@ import org.mockito.Mock;
 
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.adapters.rest.polling.PollHandlerFactory;
 import com.pushtechnology.adapters.rest.publication.PublishingClient;
-import com.pushtechnology.diffusion.datatype.json.JSON;
 
 /**
- * Unit tests for {@link JSONPollHandlerFactory}.
+ * Unit tests for {@link StringPublishingHandler}.
  *
  * @author Push Technology Limited
  */
-public final class JSONPollHandlerFactoryTest {
-    @Mock
-    private JSON json;
+public final class StringPublishingHandlerTest {
+
     @Mock
     private PublishingClient publishingClient;
 
@@ -59,25 +55,34 @@ public final class JSONPollHandlerFactoryTest {
         .topicRoot("a")
         .build();
 
-    private PollHandlerFactory<JSON> pollHandlerFactory;
+    private StringPublishingHandler pollHandler;
 
     @Before
     public void setUp() {
         initMocks(this);
 
-        pollHandlerFactory = new JSONPollHandlerFactory(publishingClient);
+        pollHandler = new StringPublishingHandler(publishingClient, serviceConfig, endpointConfig);
     }
 
     @After
     public void postConditions() {
-        verifyNoMoreInteractions(publishingClient, json);
+        verifyNoMoreInteractions(publishingClient);
     }
 
     @Test
-    public void create() {
-        final FutureCallback<JSON> callback = pollHandlerFactory.create(serviceConfig, endpointConfig);
+    public void completed() {
+        pollHandler.completed("");
 
-        callback.completed(json);
-        verify(publishingClient).publish(serviceConfig, endpointConfig, json);
+        verify(publishingClient).publish(serviceConfig, endpointConfig, "");
+    }
+
+    @Test
+    public void failed() {
+        pollHandler.failed(new Exception("Intentional for test"));
+    }
+
+    @Test
+    public void cancelled() {
+        pollHandler.cancelled();
     }
 }

@@ -40,7 +40,6 @@ public final class JSONPollHandlerFactory implements PollHandlerFactory<JSON> {
 
     @Override
     public FutureCallback<JSON> create(ServiceConfig serviceConfig, EndpointConfig endpointConfig) {
-        return new JSONPublishingHandler(
-            publishingClient, serviceConfig, endpointConfig);
+        return new JSONPublishingHandler(publishingClient, serviceConfig, endpointConfig);
     }
 }

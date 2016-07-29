@@ -30,16 +30,16 @@ import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.polling.PollHandlerFactory;
 import com.pushtechnology.adapters.rest.publication.PublishingClient;
-import com.pushtechnology.diffusion.datatype.json.JSON;
+import com.pushtechnology.diffusion.datatype.binary.Binary;
 
 /**
- * Unit tests for {@link JSONPollHandlerFactory}.
+ * Unit tests for {@link BinaryPollHandlerFactory}.
  *
  * @author Push Technology Limited
  */
-public final class JSONPollHandlerFactoryTest {
+public final class BinaryPollHandlerFactoryTest {
     @Mock
-    private JSON json;
+    private Binary binary;
     @Mock
     private PublishingClient publishingClient;
 
@@ -59,25 +59,25 @@ public final class JSONPollHandlerFactoryTest {
         .topicRoot("a")
         .build();
 
-    private PollHandlerFactory<JSON> pollHandlerFactory;
+    private PollHandlerFactory<Binary> pollHandlerFactory;
 
     @Before
     public void setUp() {
         initMocks(this);
 
-        pollHandlerFactory = new JSONPollHandlerFactory(publishingClient);
+        pollHandlerFactory = new BinaryPollHandlerFactory(publishingClient);
     }
 
     @After
     public void postConditions() {
-        verifyNoMoreInteractions(publishingClient, json);
+        verifyNoMoreInteractions(publishingClient, binary);
     }
 
     @Test
     public void create() {
-        final FutureCallback<JSON> callback = pollHandlerFactory.create(serviceConfig, endpointConfig);
+        final FutureCallback<Binary> callback = pollHandlerFactory.create(serviceConfig, endpointConfig);
 
-        callback.completed(json);
-        verify(publishingClient).publish(serviceConfig, endpointConfig, json);
+        callback.completed(binary);
+        verify(publishingClient).publish(serviceConfig, endpointConfig, binary);
     }
 }

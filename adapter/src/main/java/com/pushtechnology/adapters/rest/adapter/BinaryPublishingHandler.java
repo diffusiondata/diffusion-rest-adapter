@@ -22,20 +22,20 @@ import org.slf4j.LoggerFactory;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.publication.PublishingClient;
-import com.pushtechnology.diffusion.datatype.json.JSON;
+import com.pushtechnology.diffusion.datatype.binary.Binary;
 
 /**
- * Handler for a poll request that publishes the {@link JSON} response.
+ * Handler for a poll request that publishes the {@link Binary} response.
  *
  * @author Push Technology Limited
  */
-/*package*/ final class JSONPublishingHandler implements FutureCallback<JSON> {
-    private static final Logger LOG = LoggerFactory.getLogger(JSONPublishingHandler.class);
+/*package*/ final class BinaryPublishingHandler implements FutureCallback<Binary> {
+    private static final Logger LOG = LoggerFactory.getLogger(BinaryPublishingHandler.class);
     private final PublishingClient publishingClient;
     private final ServiceConfig serviceConfig;
     private final EndpointConfig endpointConfig;
 
-    /*package*/ JSONPublishingHandler(
+    /*package*/ BinaryPublishingHandler(
             PublishingClient publishingClient,
             ServiceConfig serviceConfig,
             EndpointConfig endpointConfig) {
@@ -46,7 +46,7 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
     }
 
     @Override
-    public void completed(JSON result) {
+    public void completed(Binary result) {
         publishingClient.publish(serviceConfig, endpointConfig, result);
     }
 
