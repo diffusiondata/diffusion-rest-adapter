@@ -49,11 +49,16 @@ public final class EndpointPollHandlerFactoryImpl implements EndpointPollHandler
         final String produces = endpointConfig.getProduces();
         switch (produces) {
             case "json" :
-                return new XParsingHandler(jsonHandlerFactory.create(serviceConfig, endpointConfig));
+            case "application/json" :
+                return new JSONParsingHandler(jsonHandlerFactory.create(serviceConfig, endpointConfig));
+
             case "binary" :
                 return new BinaryParsingHandler(binaryHandlerFactory.create(serviceConfig, endpointConfig));
+
+            case "string" :
             case "text/plain" :
                 return stringHandlerFactory.create(serviceConfig, endpointConfig);
+
             default:
                 throw new IllegalArgumentException("Unsupported produces value \"" + produces + "\"");
         }
