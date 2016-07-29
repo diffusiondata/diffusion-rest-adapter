@@ -69,6 +69,7 @@ public final class ServiceSessionImpl implements ServiceSession {
     public synchronized void start() {
         isRunning = true;
 
+        LOG.debug("Starting service session {}", serviceConfig);
         endpointPollers.replaceAll((endpoint, currentHandle) -> startEndpoint(endpoint));
     }
 
@@ -105,7 +106,6 @@ public final class ServiceSessionImpl implements ServiceSession {
 
     @Override
     public synchronized void stop() {
-        LOG.debug("Closing session service {}", this);
         isRunning = false;
 
         endpointPollers.replaceAll((endpointConfig, pollHandle) -> {
@@ -113,7 +113,7 @@ public final class ServiceSessionImpl implements ServiceSession {
             return null;
         });
 
-        LOG.debug("Closed session service {}", this);
+        LOG.debug("Stopping service session {}", serviceConfig);
     }
 
     /**

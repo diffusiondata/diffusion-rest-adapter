@@ -119,7 +119,7 @@ public final class RESTAdapter implements AutoCloseable {
             reconfigurePollingAndPublishing(model);
         }
         else if (haveServicesChanged(model)) {
-            reconfigurePolling(model);
+            reconfigureServices(model);
         }
 
         currentModel = model;
@@ -127,7 +127,7 @@ public final class RESTAdapter implements AutoCloseable {
 
     @GuardedBy("this")
     private void initialConfiguration(Model model) throws IOException {
-        LOG.info("Setting up components for the first time");
+        LOG.info("Setting up components");
 
         if (!isModelInactive(model)) {
             topLevelContainer = newTopLevelContainer();
@@ -135,14 +135,13 @@ public final class RESTAdapter implements AutoCloseable {
             diffusionContainer = newDiffusionContainer(model);
             pollContainer = newPollContainer(model);
 
-            LOG.info("Opening components");
             topLevelContainer.start();
         }
     }
 
     @GuardedBy("this")
     private void switchToInactiveComponents() throws IOException {
-        LOG.info("Replacing with inactive components");
+        LOG.info("Putting adapter to sleep");
 
         if (topLevelContainer != null) {
             topLevelContainer.dispose();
@@ -173,7 +172,7 @@ public final class RESTAdapter implements AutoCloseable {
 
     @GuardedBy("this")
     private void reconfigureSecurity(Model model) throws IOException {
-        LOG.info("Updating security, replacing the polling and publishing components");
+        LOG.info("Updating security, REST and Diffusion sessions");
 
         final MutablePicoContainer oldHttpContainer = httpContainer;
 
@@ -191,7 +190,7 @@ public final class RESTAdapter implements AutoCloseable {
 
     @GuardedBy("this")
     private void reconfigurePollingAndPublishing(Model model) throws IOException {
-        LOG.info("Replacing the polling and publishing components");
+        LOG.debug("Replacing REST and Diffusion sessions");
 
         final MutablePicoContainer oldDiffusionContainer = diffusionContainer;
 
@@ -207,17 +206,15 @@ public final class RESTAdapter implements AutoCloseable {
     }
 
     @GuardedBy("this")
-    private void reconfigurePolling(Model model) {
-        LOG.info("Replacing the polling component");
+    private void reconfigureServices(Model model) {
+        LOG.info("Replacing REST sessions");
 
         final MutablePicoContainer oldPollContainer = pollContainer;
 
-        LOG.info("Starting new polling component");
         pollContainer = newPollContainer(model);
         pollContainer.start();
 
         if (oldPollContainer != null) {
-            LOG.info("Stopping old polling component");
             oldPollContainer.dispose();
             diffusionContainer.removeChildContainer(oldPollContainer);
         }
