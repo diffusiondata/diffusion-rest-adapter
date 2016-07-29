@@ -29,13 +29,13 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
  *
  * @author Push Technology Limited
  */
-/*package*/ final class PollPublishingHandler implements FutureCallback<JSON> {
-    private static final Logger LOG = LoggerFactory.getLogger(PollPublishingHandler.class);
+/*package*/ final class JSONPublishingHandler implements FutureCallback<JSON> {
+    private static final Logger LOG = LoggerFactory.getLogger(JSONPublishingHandler.class);
     private final PublishingClient publishingClient;
     private final ServiceConfig serviceConfig;
     private final EndpointConfig endpointConfig;
 
-    /*package*/ PollPublishingHandler(
+    /*package*/ JSONPublishingHandler(
             PublishingClient publishingClient,
             ServiceConfig serviceConfig,
             EndpointConfig endpointConfig) {

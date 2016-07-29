@@ -16,11 +16,11 @@ import com.pushtechnology.adapters.rest.publication.PublishingClient;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
 /**
- * Unit tests for {@link PollPublishingHandler}.
+ * Unit tests for {@link JSONPublishingHandler}.
  *
  * @author Push Technology Limited
  */
-public final class PollPublishingHandlerTest {
+public final class JSONPublishingHandlerTest {
     @Mock
     private PublishingClient publishingClient;
     @Mock
@@ -42,13 +42,13 @@ public final class PollPublishingHandlerTest {
         .topicRoot("a")
         .build();
 
-    private PollPublishingHandler pollHandler;
+    private JSONPublishingHandler pollHandler;
 
     @Before
     public void setUp() {
         initMocks(this);
 
-        pollHandler = new PollPublishingHandler(publishingClient, serviceConfig, endpointConfig);
+        pollHandler = new JSONPublishingHandler(publishingClient, serviceConfig, endpointConfig);
     }
 
     @After
