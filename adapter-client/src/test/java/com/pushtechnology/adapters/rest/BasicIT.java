@@ -74,6 +74,7 @@ import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.features.Topics;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
+import com.pushtechnology.diffusion.datatype.binary.Binary;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
 /**
@@ -103,6 +104,20 @@ public final class BasicIT {
         .url("/rest/timestamp")
         .produces("json")
         .build();
+    private static final EndpointConfig INCREMENT_BINARY_ENDPOINT = EndpointConfig
+        .builder()
+        .name("increment")
+        .topic("binary/increment")
+        .url("/rest/increment")
+        .produces("binary")
+        .build();
+    private static final EndpointConfig TIMESTAMP_BINARY_ENDPOINT = EndpointConfig
+        .builder()
+        .name("timestamp")
+        .topic("binary/timestamp")
+        .url("/rest/timestamp")
+        .produces("binary")
+        .build();
     private static final EndpointConfig AUTHENTICATED_INCREMENT_ENDPOINT = EndpointConfig
         .builder()
         .name("increment")
@@ -129,6 +144,14 @@ public final class BasicIT {
         .pollPeriod(500)
         .topicRoot("rest")
         .endpoints(asList(INCREMENT_ENDPOINT, TIMESTAMP_ENDPOINT))
+        .build();
+    private static final ServiceConfig INSECURE_BINARY_SERVICE = ServiceConfig
+        .builder()
+        .host("localhost")
+        .port(8081)
+        .pollPeriod(500)
+        .topicRoot("rest")
+        .endpoints(asList(INCREMENT_BINARY_ENDPOINT, TIMESTAMP_BINARY_ENDPOINT))
         .build();
     private static final ServiceConfig SECURE_SERVICE = ServiceConfig
         .builder()
@@ -160,6 +183,13 @@ public final class BasicIT {
         .services(singletonList(INSECURE_SERVICE))
         .truststore("testKeystore.jks")
         .build();
+    private static final Model INSECURE_BINARY = Model
+        .builder()
+        .active(true)
+        .diffusion(DIFFUSION_CONFIG)
+        .services(singletonList(INSECURE_BINARY_SERVICE))
+        .truststore("testKeystore.jks")
+        .build();
     private static final Model FULL_MODEL = Model
         .builder()
         .active(true)
@@ -176,6 +206,8 @@ public final class BasicIT {
     private ServiceListener serviceListener;
     @Mock
     private Topics.ValueStream<JSON> stream;
+    @Mock
+    private Topics.ValueStream<Binary> binaryStream;
     @Mock
     private Topics.CompletionCallback callback;
 
@@ -294,6 +326,40 @@ public final class BasicIT {
 
         verify(serviceListener, timed()).onRemove(SECURE_SERVICE);
         verify(serviceListener, timed()).onRemove(INSECURE_SERVICE);
+    }
+
+    @Test
+    public void testBinary() throws IOException {
+        modelStore.setModel(INSECURE_BINARY);
+        final RESTAdapterClient client = startClient();
+
+        verify(serviceListener, timed()).onActive(INSECURE_BINARY_SERVICE);
+
+        final Session session = startSession();
+
+        final Topics topics = session.feature(Topics.class);
+        topics.addFallbackStream(Binary.class, binaryStream);
+        topics.subscribe("?rest/", callback);
+
+        verify(callback, timed()).onComplete();
+        verify(binaryStream, timed()).onSubscription(eq("rest/binary/timestamp"), isA(TopicSpecification.class));
+        verify(binaryStream, timed()).onSubscription(eq("rest/binary/increment"), isA(TopicSpecification.class));
+
+        verify(binaryStream, timed()).onValue(
+            eq("rest/binary/timestamp"),
+            isA(TopicSpecification.class),
+            isNull(Binary.class),
+            isA(Binary.class));
+        verify(binaryStream, timed()).onValue(
+            eq("rest/binary/increment"),
+            isA(TopicSpecification.class),
+            isNull(Binary.class),
+            isA(Binary.class));
+
+        stopSession(session);
+        client.close();
+
+        verify(serviceListener, timed()).onRemove(INSECURE_BINARY_SERVICE);
     }
 
     @Test
