@@ -118,6 +118,20 @@ public final class BasicIT {
         .url("/rest/timestamp")
         .produces("binary")
         .build();
+    private static final EndpointConfig INCREMENT_STRING_ENDPOINT = EndpointConfig
+        .builder()
+        .name("increment")
+        .topic("string/increment")
+        .url("/rest/increment")
+        .produces("string")
+        .build();
+    private static final EndpointConfig TIMESTAMP_STRING_ENDPOINT = EndpointConfig
+        .builder()
+        .name("timestamp")
+        .topic("string/timestamp")
+        .url("/rest/timestamp")
+        .produces("string")
+        .build();
     private static final EndpointConfig AUTHENTICATED_INCREMENT_ENDPOINT = EndpointConfig
         .builder()
         .name("increment")
@@ -152,6 +166,14 @@ public final class BasicIT {
         .pollPeriod(500)
         .topicRoot("rest")
         .endpoints(asList(INCREMENT_BINARY_ENDPOINT, TIMESTAMP_BINARY_ENDPOINT))
+        .build();
+    private static final ServiceConfig INSECURE_STRING_SERVICE = ServiceConfig
+        .builder()
+        .host("localhost")
+        .port(8081)
+        .pollPeriod(500)
+        .topicRoot("rest")
+        .endpoints(asList(INCREMENT_STRING_ENDPOINT, TIMESTAMP_STRING_ENDPOINT))
         .build();
     private static final ServiceConfig SECURE_SERVICE = ServiceConfig
         .builder()
@@ -188,6 +210,13 @@ public final class BasicIT {
         .active(true)
         .diffusion(DIFFUSION_CONFIG)
         .services(singletonList(INSECURE_BINARY_SERVICE))
+        .truststore("testKeystore.jks")
+        .build();
+    private static final Model INSECURE_STRING = Model
+        .builder()
+        .active(true)
+        .diffusion(DIFFUSION_CONFIG)
+        .services(singletonList(INSECURE_STRING_SERVICE))
         .truststore("testKeystore.jks")
         .build();
     private static final Model FULL_MODEL = Model
@@ -360,6 +389,40 @@ public final class BasicIT {
         client.close();
 
         verify(serviceListener, timed()).onRemove(INSECURE_BINARY_SERVICE);
+    }
+
+    @Test
+    public void testString() throws IOException {
+        modelStore.setModel(INSECURE_STRING);
+        final RESTAdapterClient client = startClient();
+
+        verify(serviceListener, timed()).onActive(INSECURE_STRING_SERVICE);
+
+        final Session session = startSession();
+
+        final Topics topics = session.feature(Topics.class);
+        topics.addFallbackStream(Binary.class, binaryStream);
+        topics.subscribe("?rest/", callback);
+
+        verify(callback, timed()).onComplete();
+        verify(binaryStream, timed()).onSubscription(eq("rest/string/timestamp"), isA(TopicSpecification.class));
+        verify(binaryStream, timed()).onSubscription(eq("rest/string/increment"), isA(TopicSpecification.class));
+
+        verify(binaryStream, timed()).onValue(
+            eq("rest/string/timestamp"),
+            isA(TopicSpecification.class),
+            isNull(Binary.class),
+            isA(Binary.class));
+        verify(binaryStream, timed()).onValue(
+            eq("rest/string/increment"),
+            isA(TopicSpecification.class),
+            isNull(Binary.class),
+            isA(Binary.class));
+
+        stopSession(session);
+        client.close();
+
+        verify(serviceListener, timed()).onRemove(INSECURE_STRING_SERVICE);
     }
 
     @Test
