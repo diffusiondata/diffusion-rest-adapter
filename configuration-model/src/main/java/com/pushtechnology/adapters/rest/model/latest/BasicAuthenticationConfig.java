@@ -20,7 +20,7 @@ import lombok.Builder;
 import lombok.Value;
 
 /**
- * Basic authentication configuration. Version 9.
+ * Basic authentication configuration. Version 10.
  * <p>
  * Description of the basic authentication parameters.
  *

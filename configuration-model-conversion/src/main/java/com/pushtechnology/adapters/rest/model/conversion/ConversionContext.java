@@ -72,6 +72,10 @@ public final class ConversionContext implements ModelConverter {
             com.pushtechnology.adapters.rest.model.v8.Model.class,
             V8Converter.INSTANCE)
         .register(
+            com.pushtechnology.adapters.rest.model.v9.Model.VERSION,
+            com.pushtechnology.adapters.rest.model.v9.Model.class,
+            V9Converter.INSTANCE)
+        .register(
             Model.VERSION,
             Model.class,
             LatestConverter.INSTANCE)

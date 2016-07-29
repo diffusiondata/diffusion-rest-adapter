@@ -17,34 +17,36 @@ package com.pushtechnology.adapters.rest.model.conversion;
 
 import static java.util.stream.Collectors.toList;
 
-import com.pushtechnology.adapters.rest.model.v9.DiffusionConfig;
-import com.pushtechnology.adapters.rest.model.v9.EndpointConfig;
-import com.pushtechnology.adapters.rest.model.v9.Model;
-import com.pushtechnology.adapters.rest.model.v9.SecurityConfig;
-import com.pushtechnology.adapters.rest.model.v9.ServiceConfig;
+import com.pushtechnology.adapters.rest.model.latest.BasicAuthenticationConfig;
+import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
+import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
+import com.pushtechnology.adapters.rest.model.latest.Model;
+import com.pushtechnology.adapters.rest.model.latest.SecurityConfig;
+import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 
 import net.jcip.annotations.Immutable;
 
 /**
- * Converter between different version 8 of the model and version 9.
+ * Converter between different version 9 of the model and version 10.
  *
  * @author Push Technology Limited
  */
 @Immutable
-public final class V8Converter extends AbstractModelConverter<com.pushtechnology.adapters.rest.model.v8.Model, Model> {
+public final class V9Converter extends AbstractModelConverter<com.pushtechnology.adapters.rest.model.v9.Model, Model> {
     /**
      * The converter.
      */
-    public static final V8Converter INSTANCE = new V8Converter();
+    public static final V9Converter INSTANCE = new V9Converter();
 
-    private V8Converter() {
-        super(V9Converter.INSTANCE, com.pushtechnology.adapters.rest.model.v8.Model.class);
+    private V9Converter() {
+        super(LatestConverter.INSTANCE, com.pushtechnology.adapters.rest.model.v9.Model.class);
     }
 
     @Override
-    protected Model convertFrom(com.pushtechnology.adapters.rest.model.v8.Model model) {
+    protected Model convertFrom(com.pushtechnology.adapters.rest.model.v9.Model model) {
         return Model
             .builder()
+            .active(true)
             .services(model
                 .getServices()
                 .stream()
@@ -61,11 +63,21 @@ public final class V8Converter extends AbstractModelConverter<com.pushtechnology
                             .name(oldEndpoint.getName())
                             .url(oldEndpoint.getUrl())
                             .topic(oldEndpoint.getTopic())
+                            .produces("json")
                             .build())
                         .collect(toList()))
                     .pollPeriod(oldService.getPollPeriod())
                     .topicRoot(oldService.getTopicRoot())
-                    .security(SecurityConfig.builder().build())
+                    .security(SecurityConfig
+                        .builder()
+                        .basic(oldService.getSecurity().getBasic() == null ?
+                            null :
+                            BasicAuthenticationConfig
+                                .builder()
+                                .principal(oldService.getSecurity().getBasic().getPrincipal())
+                                .credential(oldService.getSecurity().getBasic().getCredential())
+                                .build())
+                        .build())
                     .build())
                 .collect(toList()))
             .diffusion(DiffusionConfig

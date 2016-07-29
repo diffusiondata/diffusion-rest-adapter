@@ -20,7 +20,7 @@ import lombok.Builder;
 import lombok.Value;
 
 /**
- * Endpoint configuration. Version 9.
+ * Endpoint configuration. Version 10.
  * <p>
  * Description of a REST endpoint to poll.
  *
@@ -42,4 +42,8 @@ public class EndpointConfig {
      * The topic to map the endpoint to.
      */
     String topic;
+    /**
+     * The type of content produced by the endpoint.
+     */
+    String produces;
 }
