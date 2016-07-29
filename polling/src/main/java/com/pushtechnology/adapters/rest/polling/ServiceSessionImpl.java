@@ -105,7 +105,7 @@ public final class ServiceSessionImpl implements ServiceSession {
 
     @Override
     public synchronized void stop() {
-        LOG.info("Closing session service {}", this);
+        LOG.debug("Closing session service {}", this);
         isRunning = false;
 
         endpointPollers.replaceAll((endpointConfig, pollHandle) -> {
@@ -113,7 +113,7 @@ public final class ServiceSessionImpl implements ServiceSession {
             return null;
         });
 
-        LOG.info("Closed session service {}", this);
+        LOG.debug("Closed session service {}", this);
     }
 
     /**

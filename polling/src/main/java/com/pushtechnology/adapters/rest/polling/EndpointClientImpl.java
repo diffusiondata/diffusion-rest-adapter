@@ -124,19 +124,19 @@ public final class EndpointClientImpl implements EndpointClient {
     @PostConstruct
     @Override
     public void start() {
-        LOG.info("Opening endpoint client");
+        LOG.debug("Opening endpoint client");
         final CloseableHttpAsyncClient newClient = clientFactory.create(model, sslContext);
         newClient.start();
         client = newClient;
-        LOG.info("Opened endpoint client");
+        LOG.debug("Opened endpoint client");
     }
 
     @PreDestroy
     @Override
     public void close() throws IOException {
-        LOG.info("Closing endpoint client");
+        LOG.debug("Closing endpoint client");
         client.close();
-        LOG.info("Closed endpoint client");
+        LOG.debug("Closed endpoint client");
     }
 
     private Charset getResponseCharset(HttpResponse response) {

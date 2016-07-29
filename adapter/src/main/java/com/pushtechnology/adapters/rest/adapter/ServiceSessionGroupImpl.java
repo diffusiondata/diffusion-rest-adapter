@@ -65,27 +65,34 @@ public final class ServiceSessionGroupImpl implements ServiceSessionGroup {
     @PostConstruct
     @Override
     public synchronized void start() {
-        LOG.info("Opening service session group");
+        LOG.debug("Opening service session group");
         for (final ServiceConfig service : model.getServices()) {
             final ServiceSession serviceSession = serviceSessionFactory.create(service);
             topicManagementClient.addService(service);
             publishingClient
                 .addService(service)
-                .onStandby(() -> serviceListener.onStandby(service))
-                .onActive(new ServiceReadyForPublishing(topicManagementClient, serviceSession, service)
-                    .andThen((updater) -> serviceListener.onActive(service)))
+                .onStandby(() -> {
+                    LOG.info("Service {} on standby", service);
+                    serviceListener.onStandby(service);
+                })
+                .onActive(
+                    new ServiceReadyForPublishing(topicManagementClient, serviceSession, service)
+                    .andThen((updater) -> {
+                        LOG.info("Service {} active", service);
+                        serviceListener.onActive(service);
+                    }))
                 .onClose(() -> serviceListener.onRemove(service));
             serviceSessions.add(serviceSession);
         }
-        LOG.info("Opened service session group");
+        LOG.debug("Opened service session group");
     }
 
     @PreDestroy
     @Override
     public synchronized void close() {
-        LOG.info("Closing service session group");
+        LOG.debug("Closing service session group");
         serviceSessions.forEach(ServiceSession::stop);
         model.getServices().forEach(publishingClient::removeService);
-        LOG.info("Closed service session group");
+        LOG.debug("Closed service session group");
     }
 }

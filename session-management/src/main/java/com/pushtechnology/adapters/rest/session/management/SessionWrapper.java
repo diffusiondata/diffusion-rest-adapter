@@ -41,8 +41,8 @@ public final class SessionWrapper implements AutoCloseable {
     @PreDestroy
     @Override
     public void close() {
-        LOG.info("Closing session wrapper");
+        LOG.debug("Closing session wrapper");
         session.close();
-        LOG.info("Closed session wrapper");
+        LOG.debug("Closed session wrapper");
     }
 }

@@ -63,25 +63,19 @@ public final class PublishingClientImpl implements PublishingClient {
         final EventedUpdateSource source = new EventedUpdateSourceImpl(serviceConfig.getTopicRoot())
             .onActive(updater -> {
                 synchronized (PublishingClientImpl.this) {
-                    LOG.warn("Active for service: {}", serviceConfig);
                     updaters.put(
                         serviceConfig,
                         new UpdaterSet(updater.valueUpdater(JSON.class), updater.valueUpdater(Binary.class)));
                 }
             })
-            .onStandby(() -> {
-                LOG.warn("On standby for service: {}", serviceConfig);
-            })
             .onClose(() -> {
                 synchronized (PublishingClientImpl.this) {
-                    LOG.warn("Closed for for service: {}", serviceConfig);
                     updaterSources.remove(serviceConfig);
                     updaters.remove(serviceConfig);
                 }
             })
             .onError(errorReason -> {
                 synchronized (PublishingClientImpl.this) {
-                    LOG.warn("Closed for for service: {} because {}", serviceConfig, errorReason);
                     updaterSources.remove(serviceConfig);
                     updaters.remove(serviceConfig);
                 }

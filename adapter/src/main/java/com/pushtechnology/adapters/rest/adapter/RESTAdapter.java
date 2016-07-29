@@ -357,7 +357,7 @@ public final class RESTAdapter implements AutoCloseable {
     @Override
     @GuardedBy("this")
     public synchronized void close() throws IOException {
-        LOG.info("Closing adapter");
+        LOG.debug("Closing adapter");
         if (!wasInactive()) {
             topLevelContainer.dispose();
         }
