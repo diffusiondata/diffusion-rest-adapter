@@ -29,7 +29,6 @@ import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
 import net.jcip.annotations.GuardedBy;
@@ -86,7 +85,9 @@ public final class ServiceSessionImpl implements ServiceSession {
     private PollHandle startEndpoint(EndpointConfig endpointConfig) {
         assert endpointPollers.get(endpointConfig) == null : "The endpoint has already been started";
 
-        final PollResultHandler handler = new PollResultHandler(handlerFactory.create(serviceConfig, endpointConfig));
+        final PollResultHandler handler = new PollResultHandler(
+            new JSONParsingHandler(
+                handlerFactory.create(serviceConfig, endpointConfig)));
         final ScheduledFuture<?> future = executor.scheduleWithFixedDelay(
             new PollingTask(endpointConfig, handler),
             0L,
@@ -145,9 +146,9 @@ public final class ServiceSessionImpl implements ServiceSession {
      * The handler for the polling result. Notifies the publishing client of the new data.
      */
     private final class PollResultHandler implements FutureCallback<String> {
-        private final FutureCallback<JSON> delegate;
+        private final FutureCallback<String> delegate;
 
-        private PollResultHandler(FutureCallback<JSON> delegate) {
+        private PollResultHandler(FutureCallback<String> delegate) {
             this.delegate = delegate;
         }
 
@@ -157,10 +158,7 @@ public final class ServiceSessionImpl implements ServiceSession {
 
             synchronized (ServiceSessionImpl.this) {
                 if (isRunning) {
-                    delegate.completed(Diffusion
-                        .dataTypes()
-                        .json()
-                        .fromJsonString(body));
+                    delegate.completed(body);
                 }
             }
         }
