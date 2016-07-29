@@ -86,6 +86,7 @@ public final class RESTAdapter implements AutoCloseable {
                 }
                 shutdownHandler.run();
             }
+
         };
     }
 
@@ -94,6 +95,12 @@ public final class RESTAdapter implements AutoCloseable {
      */
     @GuardedBy("this")
     public synchronized void reconfigure(Model model) throws IOException {
+
+        if (!model.isActive()) {
+            LOG.warn("The model has been marked as inactive, shutting down");
+            shutdownTask.run();
+            return;
+        }
 
         if (isFirstConfiguration()) {
             initialConfiguration(model);

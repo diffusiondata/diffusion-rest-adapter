@@ -20,6 +20,7 @@ import static com.pushtechnology.diffusion.client.session.Session.State.CLOSED_B
 import static com.pushtechnology.diffusion.client.session.Session.State.CONNECTED_ACTIVE;
 import static com.pushtechnology.diffusion.client.session.Session.State.CONNECTING;
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.isA;
@@ -135,25 +136,29 @@ public final class BasicIT {
         .security(SecurityConfig.builder().basic(BASIC_AUTHENTICATION_CONFIG).build())
         .endpoints(asList(AUTHENTICATED_INCREMENT_ENDPOINT, AUTHENTICATED_TIMESTAMP_ENDPOINT))
         .build();
-    private static final Model EMPTY_MODEL = Model.builder().build();
+    private static final Model EMPTY_MODEL = Model.builder().active(true).build();
     private static final Model DIFFUSION_ONLY = Model
         .builder()
+        .active(true)
         .diffusion(DIFFUSION_CONFIG)
         .truststore("testKeystore.jks")
         .build();
     private static final Model SERVICES_ONLY = Model
         .builder()
+        .active(true)
         .services(asList(INSECURE_SERVICE, SECURE_SERVICE))
         .truststore("testKeystore.jks")
         .build();
     private static final Model INSECURE = Model
         .builder()
+        .active(true)
         .diffusion(DIFFUSION_CONFIG)
-        .services(asList(INSECURE_SERVICE))
+        .services(singletonList(INSECURE_SERVICE))
         .truststore("testKeystore.jks")
         .build();
     private static final Model FULL_MODEL = Model
         .builder()
+        .active(true)
         .diffusion(DIFFUSION_CONFIG)
         .services(asList(INSECURE_SERVICE, SECURE_SERVICE))
         .truststore("testKeystore.jks")
