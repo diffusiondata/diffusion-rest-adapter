@@ -26,8 +26,6 @@ import org.mockito.Mock;
 
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.diffusion.client.Diffusion;
-import com.pushtechnology.diffusion.datatype.json.JSON;
 
 /**
  * Unit tests for {@link ServiceSessionImpl}.
@@ -40,7 +38,7 @@ public final class ServiceSessionTest {
     @Mock
     private EndpointClient endpointClient;
     @Mock
-    private PollHandlerFactory handlerFactory;
+    private EndpointPollHandlerFactory handlerFactory;
     @Mock
     private ScheduledFuture taskFuture;
     @Mock
@@ -48,7 +46,7 @@ public final class ServiceSessionTest {
     @Mock
     private Future pollFuture1;
     @Mock
-    private FutureCallback<JSON> handler;
+    private FutureCallback<String> handler;
     @Captor
     private ArgumentCaptor<Runnable> runnableCaptor;
     @Captor
@@ -65,7 +63,6 @@ public final class ServiceSessionTest {
         .pollPeriod(5000L)
         .endpoints(singletonList(endpointConfig))
         .build();
-    private final JSON json = Diffusion.dataTypes().json().fromJsonString("{\"foo\":\"bar\"}");
 
     private ServiceSession serviceSession;
 
@@ -107,7 +104,7 @@ public final class ServiceSessionTest {
 
         callback.completed("{\"foo\":\"bar\"}");
 
-        verify(handler).completed(json);
+        verify(handler).completed("{\"foo\":\"bar\"}");
     }
 
     @Test
@@ -210,6 +207,6 @@ public final class ServiceSessionTest {
 
         callback.completed("{\"foo\":\"bar\"}");
 
-        verify(handler, never()).completed(json);
+        verify(handler, never()).completed("{\"foo\":\"bar\"}");
     }
 }

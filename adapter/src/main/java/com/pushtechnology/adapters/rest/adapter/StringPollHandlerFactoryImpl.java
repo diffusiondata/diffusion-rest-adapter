@@ -19,27 +19,26 @@ import org.apache.http.concurrent.FutureCallback;
 
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.adapters.rest.polling.PollHandlerFactory;
+import com.pushtechnology.adapters.rest.polling.StringPollHandlerFactory;
 import com.pushtechnology.adapters.rest.publication.PublishingClient;
-import com.pushtechnology.diffusion.datatype.binary.Binary;
 
 /**
- * Implementation of {@link PollHandlerFactory} for {@link Binary}.
+ * Implementation of {@link StringPollHandlerFactory}.
  *
  * @author Push Technology Limited
  */
-public final class BinaryPollHandlerFactory implements PollHandlerFactory<Binary> {
+public final class StringPollHandlerFactoryImpl implements StringPollHandlerFactory {
     private final PublishingClient publishingClient;
 
     /**
      * Constructor.
      */
-    public BinaryPollHandlerFactory(PublishingClient publishingClient) {
+    public StringPollHandlerFactoryImpl(PublishingClient publishingClient) {
         this.publishingClient = publishingClient;
     }
 
     @Override
-    public FutureCallback<Binary> create(ServiceConfig serviceConfig, EndpointConfig endpointConfig) {
-        return new BinaryPublishingHandler(publishingClient, serviceConfig, endpointConfig);
+    public FutureCallback<String> create(ServiceConfig serviceConfig, EndpointConfig endpointConfig) {
+        return new StringPublishingHandler(publishingClient, serviceConfig, endpointConfig);
     }
 }

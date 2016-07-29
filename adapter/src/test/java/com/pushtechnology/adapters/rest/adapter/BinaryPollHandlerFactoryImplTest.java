@@ -33,11 +33,11 @@ import com.pushtechnology.adapters.rest.publication.PublishingClient;
 import com.pushtechnology.diffusion.datatype.binary.Binary;
 
 /**
- * Unit tests for {@link BinaryPollHandlerFactory}.
+ * Unit tests for {@link BinaryPollHandlerFactoryImpl}.
  *
  * @author Push Technology Limited
  */
-public final class BinaryPollHandlerFactoryTest {
+public final class BinaryPollHandlerFactoryImplTest {
     @Mock
     private Binary binary;
     @Mock
@@ -65,7 +65,7 @@ public final class BinaryPollHandlerFactoryTest {
     public void setUp() {
         initMocks(this);
 
-        pollHandlerFactory = new BinaryPollHandlerFactory(publishingClient);
+        pollHandlerFactory = new BinaryPollHandlerFactoryImpl(publishingClient);
     }
 
     @After

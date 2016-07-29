@@ -27,21 +27,19 @@ import org.mockito.Mock;
 
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.diffusion.datatype.binary.Binary;
-import com.pushtechnology.diffusion.datatype.json.JSON;
 
 /**
- * Unit tests for {@link EndpointPollHandlerFactory}.
+ * Unit tests for {@link EndpointPollHandlerFactoryImpl}.
  *
  * @author Push Technology Limited
  */
 public final class EndpointPollHandlerFactoryTest {
     @Mock
-    private PollHandlerFactory<JSON> jsonPollHandlerFactory;
+    private JSONPollHandlerFactory jsonPollHandlerFactory;
     @Mock
-    private PollHandlerFactory<Binary> binaryPollHandlerFactory;
+    private BinaryPollHandlerFactory binaryPollHandlerFactory;
     @Mock
-    private PollHandlerFactory<String> stringPollHandlerFactory;
+    private StringPollHandlerFactory stringPollHandlerFactory;
 
     private final EndpointConfig jsonEndpoint = EndpointConfig
         .builder()
@@ -77,7 +75,7 @@ public final class EndpointPollHandlerFactoryTest {
     public void setUp() {
         initMocks(this);
 
-        pollHandlerFactory = new EndpointPollHandlerFactory(
+        pollHandlerFactory = new EndpointPollHandlerFactoryImpl(
             jsonPollHandlerFactory,
             binaryPollHandlerFactory,
             stringPollHandlerFactory);

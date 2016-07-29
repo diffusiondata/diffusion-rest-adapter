@@ -29,7 +29,6 @@ import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.diffusion.datatype.json.JSON;
 
 import net.jcip.annotations.GuardedBy;
 import net.jcip.annotations.ThreadSafe;
@@ -47,7 +46,7 @@ public final class ServiceSessionImpl implements ServiceSession {
     private final ScheduledExecutorService executor;
     private final EndpointClient endpointClient;
     private final ServiceConfig serviceConfig;
-    private final PollHandlerFactory<JSON> handlerFactory;
+    private final EndpointPollHandlerFactory handlerFactory;
     @GuardedBy("this")
     private boolean isRunning;
 
@@ -58,7 +57,7 @@ public final class ServiceSessionImpl implements ServiceSession {
             ScheduledExecutorService executor,
             EndpointClient endpointClient,
             ServiceConfig serviceConfig,
-            PollHandlerFactory<JSON> handlerFactory) {
+            EndpointPollHandlerFactory handlerFactory) {
 
         this.executor = executor;
         this.endpointClient = endpointClient;
@@ -85,9 +84,7 @@ public final class ServiceSessionImpl implements ServiceSession {
     private PollHandle startEndpoint(EndpointConfig endpointConfig) {
         assert endpointPollers.get(endpointConfig) == null : "The endpoint has already been started";
 
-        final PollResultHandler handler = new PollResultHandler(
-            new JSONParsingHandler(
-                handlerFactory.create(serviceConfig, endpointConfig)));
+        final PollResultHandler handler = new PollResultHandler(handlerFactory.create(serviceConfig, endpointConfig));
         final ScheduledFuture<?> future = executor.scheduleWithFixedDelay(
             new PollingTask(endpointConfig, handler),
             0L,

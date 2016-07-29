@@ -15,16 +15,12 @@
 
 package com.pushtechnology.adapters.rest.polling;
 
-import org.apache.http.concurrent.FutureCallback;
-
-import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
-import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
+import com.pushtechnology.diffusion.datatype.binary.Binary;
 
 /**
- * Factory for poll handlers of the type returned by the endpoint.
+ * Factory for handlers of a {@link Binary} poll result.
+ *
  * @author Push Technology Limited
  */
-public interface EndpointPollHandlerFactory extends PollHandlerFactory<String> {
-    @Override
-    FutureCallback<String> create(ServiceConfig serviceConfig, EndpointConfig endpointConfig);
+public interface BinaryPollHandlerFactory extends PollHandlerFactory<Binary> {
 }

@@ -32,11 +32,11 @@ import com.pushtechnology.adapters.rest.polling.PollHandlerFactory;
 import com.pushtechnology.adapters.rest.publication.PublishingClient;
 
 /**
- * Unit tests for {@link StringPollHandlerFactory}.
+ * Unit tests for {@link StringPollHandlerFactoryImpl}.
  *
  * @author Push Technology Limited
  */
-public final class StringPollHandlerFactoryTest {
+public final class StringPollHandlerFactoryImplTest {
     @Mock
     private PublishingClient publishingClient;
 
@@ -62,7 +62,7 @@ public final class StringPollHandlerFactoryTest {
     public void setUp() {
         initMocks(this);
 
-        pollHandlerFactory = new StringPollHandlerFactory(publishingClient);
+        pollHandlerFactory = new StringPollHandlerFactoryImpl(publishingClient);
     }
 
     @After

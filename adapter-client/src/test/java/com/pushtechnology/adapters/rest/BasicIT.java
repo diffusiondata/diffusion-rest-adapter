@@ -94,24 +94,28 @@ public final class BasicIT {
         .name("increment")
         .topic("increment")
         .url("/rest/increment")
+        .produces("json")
         .build();
     private static final EndpointConfig TIMESTAMP_ENDPOINT = EndpointConfig
         .builder()
         .name("timestamp")
         .topic("timestamp")
         .url("/rest/timestamp")
+        .produces("json")
         .build();
     private static final EndpointConfig AUTHENTICATED_INCREMENT_ENDPOINT = EndpointConfig
         .builder()
         .name("increment")
         .topic("increment")
         .url("/auth/rest/increment")
+        .produces("json")
         .build();
     private static final EndpointConfig AUTHENTICATED_TIMESTAMP_ENDPOINT = EndpointConfig
         .builder()
         .name("timestamp")
         .topic("timestamp")
         .url("/auth/rest/timestamp")
+        .produces("json")
         .build();
     private static final BasicAuthenticationConfig BASIC_AUTHENTICATION_CONFIG = BasicAuthenticationConfig
         .builder()

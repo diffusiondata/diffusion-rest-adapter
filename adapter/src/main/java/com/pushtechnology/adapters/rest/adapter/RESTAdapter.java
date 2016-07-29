@@ -32,6 +32,7 @@ import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.polling.EndpointClientImpl;
+import com.pushtechnology.adapters.rest.polling.EndpointPollHandlerFactoryImpl;
 import com.pushtechnology.adapters.rest.polling.HttpClientFactoryImpl;
 import com.pushtechnology.adapters.rest.polling.ServiceSessionFactoryImpl;
 import com.pushtechnology.adapters.rest.publication.PublishingClientImpl;
@@ -265,11 +266,14 @@ public final class RESTAdapter implements AutoCloseable {
             .addAdapter(DiffusionSessionFactory.create())
             .addComponent(PublishingClientImpl.class)
             .addComponent(TopicManagementClientImpl.class)
-            .addComponent(JSONPollHandlerFactory.class)
             .addComponent(model)
             .addComponent(shutdownTask)
             .addComponent(SessionLostListener.class)
-            .addComponent(SessionWrapper.class);
+            .addComponent(SessionWrapper.class)
+            .addComponent(JSONPollHandlerFactoryImpl.class)
+            .addComponent(BinaryPollHandlerFactoryImpl.class)
+            .addComponent(StringPollHandlerFactoryImpl.class)
+            .addComponent(EndpointPollHandlerFactoryImpl.class);
         httpContainer.addChildContainer(newContainer);
 
         return newContainer;

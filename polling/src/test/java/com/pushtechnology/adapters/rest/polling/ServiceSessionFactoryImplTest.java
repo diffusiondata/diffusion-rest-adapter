@@ -37,7 +37,6 @@ import org.mockito.Mock;
 
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.diffusion.datatype.json.JSON;
 
 /**
  * Unit tests for {@link ServiceSessionFactoryImpl}.
@@ -50,11 +49,11 @@ public final class ServiceSessionFactoryImplTest {
     @Mock
     private EndpointClient endpointClient;
     @Mock
-    private PollHandlerFactory handlerFactory;
+    private EndpointPollHandlerFactory handlerFactory;
     @Mock
     private ScheduledFuture taskFuture;
     @Mock
-    private FutureCallback<JSON> handler;
+    private FutureCallback<String> handler;
 
     private final EndpointConfig endpointConfig = EndpointConfig
         .builder()

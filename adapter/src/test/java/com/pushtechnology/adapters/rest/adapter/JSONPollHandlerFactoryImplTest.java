@@ -33,11 +33,11 @@ import com.pushtechnology.adapters.rest.publication.PublishingClient;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
 /**
- * Unit tests for {@link JSONPollHandlerFactory}.
+ * Unit tests for {@link JSONPollHandlerFactoryImpl}.
  *
  * @author Push Technology Limited
  */
-public final class JSONPollHandlerFactoryTest {
+public final class JSONPollHandlerFactoryImplTest {
     @Mock
     private JSON json;
     @Mock
@@ -65,7 +65,7 @@ public final class JSONPollHandlerFactoryTest {
     public void setUp() {
         initMocks(this);
 
-        pollHandlerFactory = new JSONPollHandlerFactory(publishingClient);
+        pollHandlerFactory = new JSONPollHandlerFactoryImpl(publishingClient);
     }
 
     @After

@@ -18,7 +18,6 @@ package com.pushtechnology.adapters.rest.polling;
 import java.util.concurrent.ScheduledExecutorService;
 
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.diffusion.datatype.json.JSON;
 
 /**
  * Implementation of {@link ServiceSessionFactory}.
@@ -28,7 +27,7 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
 public final class ServiceSessionFactoryImpl implements ServiceSessionFactory {
     private final ScheduledExecutorService executor;
     private final EndpointClient endpointClient;
-    private final PollHandlerFactory<JSON> handlerFactory;
+    private final EndpointPollHandlerFactory handlerFactory;
 
     /**
      * Constructor.
@@ -36,7 +35,7 @@ public final class ServiceSessionFactoryImpl implements ServiceSessionFactory {
     public ServiceSessionFactoryImpl(
             ScheduledExecutorService executor,
             EndpointClient endpointClient,
-            PollHandlerFactory<JSON> handlerFactory) {
+            EndpointPollHandlerFactory handlerFactory) {
         this.executor = executor;
         this.endpointClient = endpointClient;
         this.handlerFactory = handlerFactory;

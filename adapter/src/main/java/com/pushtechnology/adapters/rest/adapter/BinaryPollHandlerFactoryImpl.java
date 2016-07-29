@@ -19,27 +19,27 @@ import org.apache.http.concurrent.FutureCallback;
 
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.adapters.rest.polling.PollHandlerFactory;
+import com.pushtechnology.adapters.rest.polling.BinaryPollHandlerFactory;
 import com.pushtechnology.adapters.rest.publication.PublishingClient;
-import com.pushtechnology.diffusion.datatype.json.JSON;
+import com.pushtechnology.diffusion.datatype.binary.Binary;
 
 /**
- * Implementation of {@link PollHandlerFactory} for {@link JSON}.
+ * Implementation of {@link BinaryPollHandlerFactory}.
  *
  * @author Push Technology Limited
  */
-public final class JSONPollHandlerFactory implements PollHandlerFactory<JSON> {
+public final class BinaryPollHandlerFactoryImpl implements BinaryPollHandlerFactory {
     private final PublishingClient publishingClient;
 
     /**
      * Constructor.
      */
-    public JSONPollHandlerFactory(PublishingClient publishingClient) {
+    public BinaryPollHandlerFactoryImpl(PublishingClient publishingClient) {
         this.publishingClient = publishingClient;
     }
 
     @Override
-    public FutureCallback<JSON> create(ServiceConfig serviceConfig, EndpointConfig endpointConfig) {
-        return new JSONPublishingHandler(publishingClient, serviceConfig, endpointConfig);
+    public FutureCallback<Binary> create(ServiceConfig serviceConfig, EndpointConfig endpointConfig) {
+        return new BinaryPublishingHandler(publishingClient, serviceConfig, endpointConfig);
     }
 }
