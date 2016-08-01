@@ -55,8 +55,8 @@ public final class FileSystemPersistence implements Persistence {
      */
     public FileSystemPersistence(Path directoryPath, ConversionContext conversionContext) {
         this.conversionContext = conversionContext;
-        configFilePath = directoryPath.resolve("service.json");
-        versionFilePath = directoryPath.resolve("service.version.json");
+        configFilePath = directoryPath.resolve("rest.json");
+        versionFilePath = directoryPath.resolve("rest.version.json");
     }
 
     @Override
