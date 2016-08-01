@@ -21,11 +21,14 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import org.apache.http.concurrent.FutureCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
+import com.pushtechnology.adapters.rest.polling.EndpointClient;
+import com.pushtechnology.adapters.rest.polling.EndpointResponse;
 import com.pushtechnology.adapters.rest.polling.ServiceSession;
 import com.pushtechnology.adapters.rest.polling.ServiceSessionFactory;
 import com.pushtechnology.adapters.rest.publication.PublishingClient;
@@ -42,6 +45,7 @@ public final class ServiceSessionGroupImpl implements ServiceSessionGroup {
     private static final Logger LOG = LoggerFactory.getLogger(ServiceSessionGroupImpl.class);
     private final Model model;
     private final TopicManagementClient topicManagementClient;
+    private final EndpointClient endpointClient;
     private final PublishingClient publishingClient;
     private final List<ServiceSession> serviceSessions;
     private final ServiceSessionFactory serviceSessionFactory;
@@ -53,11 +57,13 @@ public final class ServiceSessionGroupImpl implements ServiceSessionGroup {
     public ServiceSessionGroupImpl(
             Model model,
             TopicManagementClient topicManagementClient,
+            EndpointClient endpointClient,
             PublishingClient publishingClient,
             ServiceSessionFactory serviceSessionFactory,
             ServiceListener serviceListener) {
         this.model = model;
         this.topicManagementClient = topicManagementClient;
+        this.endpointClient = endpointClient;
         this.publishingClient = publishingClient;
         this.serviceSessionFactory = serviceSessionFactory;
         this.serviceListener = serviceListener;
@@ -81,19 +87,36 @@ public final class ServiceSessionGroupImpl implements ServiceSessionGroup {
                     LOG.info("Service {} active", service);
                     serviceListener.onActive(service);
                     service.getEndpoints().forEach(endpoint -> {
-                        topicManagementClient.addEndpoint(service, endpoint, new TopicControl.AddCallback() {
+                        endpointClient.request(service, endpoint, new FutureCallback<EndpointResponse>() {
                             @Override
-                            public void onTopicAdded(String topicPath) {
-                                serviceSession.addEndpoint(endpoint);
+                            public void completed(EndpointResponse result) {
+                                topicManagementClient.addEndpoint(service, endpoint, new TopicControl.AddCallback() {
+                                    @Override
+                                    public void onTopicAdded(String topicPath) {
+                                        LOG.info("Endpoint {} exists, adding endpoint to service session", endpoint);
+                                        serviceSession.addEndpoint(endpoint);
+                                    }
+
+                                    @Override
+                                    public void onTopicAddFailed(String topicPath, TopicAddFailReason reason) {
+                                        LOG.warn("Topic creation failed for {} because {}", endpoint, reason);
+                                    }
+
+                                    @Override
+                                    public void onDiscard() {
+                                        LOG.warn("Topic creation for {} might not have succeeded", endpoint);
+                                    }
+                                });
                             }
 
                             @Override
-                            public void onTopicAddFailed(String topicPath, TopicAddFailReason reason) {
-                                onTopicAdded(topicPath);
+                            public void failed(Exception ex) {
+                                LOG.warn("Initial request to {} failed", endpoint, ex);
                             }
 
                             @Override
-                            public void onDiscard() {
+                            public void cancelled() {
+                                LOG.warn("Initial request to {} cancelled", endpoint);
                             }
                         });
                     });

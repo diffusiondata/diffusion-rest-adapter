@@ -31,6 +31,7 @@ import org.mockito.Mock;
 
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
+import com.pushtechnology.adapters.rest.polling.EndpointClient;
 import com.pushtechnology.adapters.rest.polling.ServiceSession;
 import com.pushtechnology.adapters.rest.polling.ServiceSessionFactory;
 import com.pushtechnology.adapters.rest.publication.EventedUpdateSource;
@@ -49,6 +50,9 @@ public final class ServiceSessionGroupImplTest {
 
     @Mock
     private PublishingClient publishingClient;
+
+    @Mock
+    private EndpointClient endpointClient;
 
     @Mock
     private ServiceSession serviceSession;
@@ -77,7 +81,13 @@ public final class ServiceSessionGroupImplTest {
 
     @After
     public void postConditions() {
-        verifyNoMoreInteractions(topicManagementClient, publishingClient, source, serviceSessionFactory, serviceSession);
+        verifyNoMoreInteractions(
+            topicManagementClient,
+            endpointClient,
+            publishingClient,
+            source,
+            serviceSessionFactory,
+            serviceSession);
     }
 
     @SuppressWarnings("unchecked")
@@ -86,6 +96,7 @@ public final class ServiceSessionGroupImplTest {
         final ServiceSessionGroup serviceSessionGroup = new ServiceSessionGroupImpl(
             Model.builder().services(singletonList(serviceConfig)).build(),
             topicManagementClient,
+            endpointClient,
             publishingClient,
             serviceSessionFactory,
             serviceListener);
@@ -105,6 +116,7 @@ public final class ServiceSessionGroupImplTest {
         final ServiceSessionGroup serviceSessionGroup = new ServiceSessionGroupImpl(
             Model.builder().services(singletonList(serviceConfig)).build(),
             topicManagementClient,
+            endpointClient,
             publishingClient,
             serviceSessionFactory,
             serviceListener);
