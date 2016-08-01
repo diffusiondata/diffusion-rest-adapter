@@ -20,7 +20,6 @@ import static com.pushtechnology.diffusion.client.session.Session.State.CLOSED_B
 import static com.pushtechnology.diffusion.client.session.Session.State.CONNECTED_ACTIVE;
 import static com.pushtechnology.diffusion.client.session.Session.State.CONNECTING;
 import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.isA;
@@ -55,6 +54,7 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.verification.VerificationWithTimeout;
@@ -107,28 +107,28 @@ public final class BasicIT {
     private static final EndpointConfig INCREMENT_BINARY_ENDPOINT = EndpointConfig
         .builder()
         .name("increment")
-        .topic("binary/increment")
+        .topic("increment")
         .url("/rest/increment")
         .produces("binary")
         .build();
     private static final EndpointConfig TIMESTAMP_BINARY_ENDPOINT = EndpointConfig
         .builder()
         .name("timestamp")
-        .topic("binary/timestamp")
+        .topic("timestamp")
         .url("/rest/timestamp")
         .produces("binary")
         .build();
     private static final EndpointConfig INCREMENT_STRING_ENDPOINT = EndpointConfig
         .builder()
         .name("increment")
-        .topic("string/increment")
+        .topic("increment")
         .url("/rest/increment")
         .produces("string")
         .build();
     private static final EndpointConfig TIMESTAMP_STRING_ENDPOINT = EndpointConfig
         .builder()
         .name("timestamp")
-        .topic("string/timestamp")
+        .topic("timestamp")
         .url("/rest/timestamp")
         .produces("string")
         .build();
@@ -156,7 +156,7 @@ public final class BasicIT {
         .host("localhost")
         .port(8081)
         .pollPeriod(500)
-        .topicRoot("rest")
+        .topicRoot("rest/json")
         .endpoints(asList(INCREMENT_ENDPOINT, TIMESTAMP_ENDPOINT))
         .build();
     private static final ServiceConfig INSECURE_BINARY_SERVICE = ServiceConfig
@@ -164,7 +164,7 @@ public final class BasicIT {
         .host("localhost")
         .port(8081)
         .pollPeriod(500)
-        .topicRoot("rest")
+        .topicRoot("rest/binary")
         .endpoints(asList(INCREMENT_BINARY_ENDPOINT, TIMESTAMP_BINARY_ENDPOINT))
         .build();
     private static final ServiceConfig INSECURE_STRING_SERVICE = ServiceConfig
@@ -172,7 +172,7 @@ public final class BasicIT {
         .host("localhost")
         .port(8081)
         .pollPeriod(500)
-        .topicRoot("rest")
+        .topicRoot("rest/string")
         .endpoints(asList(INCREMENT_STRING_ENDPOINT, TIMESTAMP_STRING_ENDPOINT))
         .build();
     private static final ServiceConfig SECURE_SERVICE = ServiceConfig
@@ -181,50 +181,9 @@ public final class BasicIT {
         .port(8444)
         .secure(true)
         .pollPeriod(500)
-        .topicRoot("restTLS")
+        .topicRoot("rest/tls")
         .security(SecurityConfig.builder().basic(BASIC_AUTHENTICATION_CONFIG).build())
         .endpoints(asList(AUTHENTICATED_INCREMENT_ENDPOINT, AUTHENTICATED_TIMESTAMP_ENDPOINT))
-        .build();
-    private static final Model EMPTY_MODEL = Model.builder().active(true).build();
-    private static final Model DIFFUSION_ONLY = Model
-        .builder()
-        .active(true)
-        .diffusion(DIFFUSION_CONFIG)
-        .truststore("testKeystore.jks")
-        .build();
-    private static final Model SERVICES_ONLY = Model
-        .builder()
-        .active(true)
-        .services(asList(INSECURE_SERVICE, SECURE_SERVICE))
-        .truststore("testKeystore.jks")
-        .build();
-    private static final Model INSECURE = Model
-        .builder()
-        .active(true)
-        .diffusion(DIFFUSION_CONFIG)
-        .services(singletonList(INSECURE_SERVICE))
-        .truststore("testKeystore.jks")
-        .build();
-    private static final Model INSECURE_BINARY = Model
-        .builder()
-        .active(true)
-        .diffusion(DIFFUSION_CONFIG)
-        .services(singletonList(INSECURE_BINARY_SERVICE))
-        .truststore("testKeystore.jks")
-        .build();
-    private static final Model INSECURE_STRING = Model
-        .builder()
-        .active(true)
-        .diffusion(DIFFUSION_CONFIG)
-        .services(singletonList(INSECURE_STRING_SERVICE))
-        .truststore("testKeystore.jks")
-        .build();
-    private static final Model FULL_MODEL = Model
-        .builder()
-        .active(true)
-        .diffusion(DIFFUSION_CONFIG)
-        .services(asList(INSECURE_SERVICE, SECURE_SERVICE))
-        .truststore("testKeystore.jks")
         .build();
 
     private static Server jettyServer;
@@ -317,7 +276,6 @@ public final class BasicIT {
         initMocks(this);
 
         modelStore = new MutableModelStore();
-        modelStore.setModel(FULL_MODEL);
     }
 
     @After
@@ -327,6 +285,7 @@ public final class BasicIT {
 
     @Test
     public void testInitialisation() throws IOException {
+        modelStore.setModel(modelWith(INSECURE_SERVICE, SECURE_SERVICE));
         final RESTAdapterClient client = startClient();
 
         verify(serviceListener, timed()).onActive(SECURE_SERVICE);
@@ -337,18 +296,17 @@ public final class BasicIT {
         final Topics topics = session.feature(Topics.class);
         topics.addFallbackStream(JSON.class, stream);
         topics.subscribe("?rest/", callback);
-        topics.subscribe("?restTLS/", callback);
 
-        verify(callback, timed().times(2)).onComplete();
-        verify(stream, timed()).onSubscription(eq("rest/timestamp"), isA(TopicSpecification.class));
-        verify(stream, timed()).onSubscription(eq("rest/increment"), isA(TopicSpecification.class));
-        verify(stream, timed()).onSubscription(eq("restTLS/timestamp"), isA(TopicSpecification.class));
-        verify(stream, timed()).onSubscription(eq("restTLS/increment"), isA(TopicSpecification.class));
+        verify(callback, timed()).onComplete();
+        verify(stream, timed()).onSubscription(eq("rest/json/timestamp"), isA(TopicSpecification.class));
+        verify(stream, timed()).onSubscription(eq("rest/json/increment"), isA(TopicSpecification.class));
+        verify(stream, timed()).onSubscription(eq("rest/tls/timestamp"), isA(TopicSpecification.class));
+        verify(stream, timed()).onSubscription(eq("rest/tls/increment"), isA(TopicSpecification.class));
 
-        verify(stream, timed()).onValue(eq("rest/timestamp"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
-        verify(stream, timed()).onValue(eq("rest/increment"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
-        verify(stream, timed()).onValue(eq("restTLS/timestamp"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
-        verify(stream, timed()).onValue(eq("restTLS/increment"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
+        verify(stream, timed()).onValue(eq("rest/json/timestamp"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
+        verify(stream, timed()).onValue(eq("rest/json/increment"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
+        verify(stream, timed()).onValue(eq("rest/tls/timestamp"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
+        verify(stream, timed()).onValue(eq("rest/tls/increment"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
 
         stopSession(session);
         client.close();
@@ -359,7 +317,7 @@ public final class BasicIT {
 
     @Test
     public void testBinary() throws IOException {
-        modelStore.setModel(INSECURE_BINARY);
+        modelStore.setModel(modelWith(INSECURE_BINARY_SERVICE));
         final RESTAdapterClient client = startClient();
 
         verify(serviceListener, timed()).onActive(INSECURE_BINARY_SERVICE);
@@ -393,7 +351,7 @@ public final class BasicIT {
 
     @Test
     public void testString() throws IOException {
-        modelStore.setModel(INSECURE_STRING);
+        modelStore.setModel(modelWith(INSECURE_STRING_SERVICE));
         final RESTAdapterClient client = startClient();
 
         verify(serviceListener, timed()).onActive(INSECURE_STRING_SERVICE);
@@ -427,7 +385,7 @@ public final class BasicIT {
 
     @Test
     public void testReconfigurationFromInactiveToActive() throws IOException {
-        modelStore.setModel(EMPTY_MODEL);
+        modelStore.setModel(modelWith());
         final RESTAdapterClient client = startClient();
 
         verify(serviceListener, never()).onActive(SECURE_SERVICE);
@@ -438,24 +396,23 @@ public final class BasicIT {
         final Topics topics = session.feature(Topics.class);
         topics.addFallbackStream(JSON.class, stream);
         topics.subscribe("?rest/", callback);
-        topics.subscribe("?restTLS/", callback);
 
-        verify(callback, timed().times(2)).onComplete();
+        verify(callback, timed()).onComplete();
 
-        modelStore.setModel(FULL_MODEL);
+        modelStore.setModel(modelWith(INSECURE_SERVICE, SECURE_SERVICE));
 
         verify(serviceListener, timed()).onActive(SECURE_SERVICE);
         verify(serviceListener, timed()).onActive(INSECURE_SERVICE);
 
-        verify(stream, timed()).onSubscription(eq("rest/timestamp"), isA(TopicSpecification.class));
-        verify(stream, timed()).onSubscription(eq("rest/increment"), isA(TopicSpecification.class));
-        verify(stream, timed()).onSubscription(eq("restTLS/timestamp"), isA(TopicSpecification.class));
-        verify(stream, timed()).onSubscription(eq("restTLS/increment"), isA(TopicSpecification.class));
+        verify(stream, timed()).onSubscription(eq("rest/json/timestamp"), isA(TopicSpecification.class));
+        verify(stream, timed()).onSubscription(eq("rest/json/increment"), isA(TopicSpecification.class));
+        verify(stream, timed()).onSubscription(eq("rest/tls/timestamp"), isA(TopicSpecification.class));
+        verify(stream, timed()).onSubscription(eq("rest/tls/increment"), isA(TopicSpecification.class));
 
-        verify(stream, timed()).onValue(eq("rest/timestamp"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
-        verify(stream, timed()).onValue(eq("rest/increment"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
-        verify(stream, timed()).onValue(eq("restTLS/timestamp"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
-        verify(stream, timed()).onValue(eq("restTLS/increment"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
+        verify(stream, timed()).onValue(eq("rest/json/timestamp"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
+        verify(stream, timed()).onValue(eq("rest/json/increment"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
+        verify(stream, timed()).onValue(eq("rest/tls/timestamp"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
+        verify(stream, timed()).onValue(eq("rest/tls/increment"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
 
         stopSession(session);
         client.close();
@@ -466,7 +423,7 @@ public final class BasicIT {
 
     @Test
     public void testReconfigurationFromDiffusionOnlyToInsecure() throws IOException {
-        modelStore.setModel(DIFFUSION_ONLY);
+        modelStore.setModel(modelWith());
         final RESTAdapterClient client = startClient();
 
         verify(serviceListener, never()).onActive(INSECURE_SERVICE);
@@ -476,18 +433,17 @@ public final class BasicIT {
         final Topics topics = session.feature(Topics.class);
         topics.addFallbackStream(JSON.class, stream);
         topics.subscribe("?rest/", callback);
-        topics.subscribe("?restTLS/", callback);
 
-        verify(callback, timed().times(2)).onComplete();
+        verify(callback, timed()).onComplete();
 
-        modelStore.setModel(INSECURE);
+        modelStore.setModel(modelWith(INSECURE_SERVICE));
         verify(serviceListener, timed()).onActive(INSECURE_SERVICE);
 
-        verify(stream, timed()).onSubscription(eq("rest/timestamp"), isA(TopicSpecification.class));
-        verify(stream, timed()).onSubscription(eq("rest/increment"), isA(TopicSpecification.class));
+        verify(stream, timed()).onSubscription(eq("rest/json/timestamp"), isA(TopicSpecification.class));
+        verify(stream, timed()).onSubscription(eq("rest/json/increment"), isA(TopicSpecification.class));
 
-        verify(stream, timed()).onValue(eq("rest/timestamp"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
-        verify(stream, timed()).onValue(eq("rest/increment"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
+        verify(stream, timed()).onValue(eq("rest/json/timestamp"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
+        verify(stream, timed()).onValue(eq("rest/json/increment"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
 
         stopSession(session);
         client.close();
@@ -497,7 +453,7 @@ public final class BasicIT {
 
     @Test
     public void testReconfigurationFromInsecureToDiffusionOnly() throws IOException {
-        modelStore.setModel(INSECURE);
+        modelStore.setModel(modelWith(INSECURE_SERVICE));
         final RESTAdapterClient client = startClient();
         verify(serviceListener, timed()).onActive(INSECURE_SERVICE);
         final Session session = startSession();
@@ -505,25 +461,64 @@ public final class BasicIT {
         final Topics topics = session.feature(Topics.class);
         topics.addFallbackStream(JSON.class, stream);
         topics.subscribe("?rest/", callback);
-        topics.subscribe("?restTLS/", callback);
 
-        verify(callback, timed().times(2)).onComplete();
+        verify(callback, timed()).onComplete();
 
-        verify(stream, timed()).onSubscription(eq("rest/timestamp"), isA(TopicSpecification.class));
-        verify(stream, timed()).onSubscription(eq("rest/increment"), isA(TopicSpecification.class));
+        verify(stream, timed()).onSubscription(eq("rest/json/timestamp"), isA(TopicSpecification.class));
+        verify(stream, timed()).onSubscription(eq("rest/json/increment"), isA(TopicSpecification.class));
 
-        verify(stream, timed()).onValue(eq("rest/timestamp"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
-        verify(stream, timed()).onValue(eq("rest/increment"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
+        verify(stream, timed()).onValue(eq("rest/json/timestamp"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
+        verify(stream, timed()).onValue(eq("rest/json/increment"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
 
-        modelStore.setModel(DIFFUSION_ONLY);
+        modelStore.setModel(modelWith());
 
         verify(serviceListener, timed()).onRemove(INSECURE_SERVICE);
 
-        verify(stream, timed()).onUnsubscription(eq("rest/timestamp"), isA(TopicSpecification.class), eq(REMOVAL));
-        verify(stream, timed()).onUnsubscription(eq("rest/increment"), isA(TopicSpecification.class), eq(REMOVAL));
+        verify(stream, timed()).onUnsubscription(eq("rest/json/timestamp"), isA(TopicSpecification.class), eq(REMOVAL));
+        verify(stream, timed()).onUnsubscription(eq("rest/json/increment"), isA(TopicSpecification.class), eq(REMOVAL));
 
         stopSession(session);
         client.close();
+    }
+
+    @Ignore("Existing service is closed and not reopened")
+    @Test
+    public void testReconfigurationAddingAServiceToExisting() throws IOException {
+        modelStore.setModel(modelWith(INSECURE_SERVICE));
+        final RESTAdapterClient client = startClient();
+        verify(serviceListener, timed()).onActive(INSECURE_SERVICE);
+        final Session session = startSession();
+
+        final Topics topics = session.feature(Topics.class);
+        topics.addFallbackStream(JSON.class, stream);
+        topics.subscribe("?rest/", callback);
+
+        verify(callback, timed()).onComplete();
+
+        verify(stream, timed()).onSubscription(eq("rest/json/timestamp"), isA(TopicSpecification.class));
+        verify(stream, timed()).onSubscription(eq("rest/json/increment"), isA(TopicSpecification.class));
+
+        verify(stream, timed()).onValue(eq("rest/json/timestamp"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
+        verify(stream, timed()).onValue(eq("rest/json/increment"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
+
+        modelStore.setModel(modelWith(INSECURE_SERVICE, INSECURE_BINARY_SERVICE));
+
+        verify(serviceListener, timed()).onActive(INSECURE_BINARY_SERVICE);
+        verify(serviceListener, timed()).onRemove(INSECURE_SERVICE);
+        verify(serviceListener, timed()).onStandby(INSECURE_SERVICE);
+        verify(serviceListener, timed().times(2)).onActive(INSECURE_SERVICE);
+
+        verify(binaryStream, timed()).onSubscription(eq("rest/binary/timestamp"), isA(TopicSpecification.class));
+        verify(binaryStream, timed()).onSubscription(eq("rest/binary/increment"), isA(TopicSpecification.class));
+
+        verify(binaryStream, timed()).onValue(eq("rest/binary/timestamp"), isA(TopicSpecification.class), isNull(Binary.class), isA(Binary.class));
+        verify(binaryStream, timed()).onValue(eq("rest/binary/increment"), isA(TopicSpecification.class), isNull(Binary.class), isA(Binary.class));
+
+        stopSession(session);
+        client.close();
+
+        verify(serviceListener, timed().times(2)).onRemove(INSECURE_SERVICE);
+        verify(serviceListener, timed()).onRemove(INSECURE_BINARY_SERVICE);
     }
 
     private static VerificationWithTimeout timed() {
@@ -555,5 +550,15 @@ public final class BasicIT {
     private void stopSession(Session session) {
         session.close();
         verify(listener, timed()).onSessionStateChanged(session, CONNECTED_ACTIVE, CLOSED_BY_CLIENT);
+    }
+
+    private static Model modelWith(ServiceConfig... services) {
+        return Model
+            .builder()
+            .active(true)
+            .diffusion(DIFFUSION_CONFIG)
+            .services(asList(services))
+            .truststore("testKeystore.jks")
+            .build();
     }
 }
