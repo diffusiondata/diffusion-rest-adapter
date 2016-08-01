@@ -261,16 +261,11 @@ public final class RESTAdapter implements AutoCloseable {
             .withLocking()
             .build()
             .addAdapter(DiffusionSessionFactory.create())
-            .addComponent(PublishingClientImpl.class)
             .addComponent(TopicManagementClientImpl.class)
             .addComponent(model)
             .addComponent(shutdownTask)
             .addComponent(SessionLostListener.class)
-            .addComponent(SessionWrapper.class)
-            .addComponent(JSONPollHandlerFactoryImpl.class)
-            .addComponent(BinaryPollHandlerFactoryImpl.class)
-            .addComponent(StringPollHandlerFactoryImpl.class)
-            .addComponent(EndpointPollHandlerFactoryImpl.class);
+            .addComponent(SessionWrapper.class);
         httpContainer.addChildContainer(newContainer);
 
         return newContainer;
@@ -286,8 +281,13 @@ public final class RESTAdapter implements AutoCloseable {
             .withLocking()
             .build()
             .addComponent(model)
+            .addComponent(PublishingClientImpl.class)
             .addComponent(ServiceSessionFactoryImpl.class)
-            .addComponent(ServiceSessionGroupImpl.class);
+            .addComponent(ServiceSessionGroupImpl.class)
+            .addComponent(JSONPollHandlerFactoryImpl.class)
+            .addComponent(BinaryPollHandlerFactoryImpl.class)
+            .addComponent(StringPollHandlerFactoryImpl.class)
+            .addComponent(EndpointPollHandlerFactoryImpl.class);
         diffusionContainer.addChildContainer(newContainer);
 
         newContainer.getComponent(ServiceSessionGroup.class);

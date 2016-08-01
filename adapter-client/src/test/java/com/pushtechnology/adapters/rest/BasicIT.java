@@ -54,7 +54,6 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.verification.VerificationWithTimeout;
@@ -481,7 +480,6 @@ public final class BasicIT {
         client.close();
     }
 
-    @Ignore("Existing service is closed and not reopened")
     @Test
     public void testReconfigurationAddingAServiceToExisting() throws IOException {
         modelStore.setModel(modelWith(INSECURE_SERVICE));
@@ -490,7 +488,8 @@ public final class BasicIT {
         final Session session = startSession();
 
         final Topics topics = session.feature(Topics.class);
-        topics.addFallbackStream(JSON.class, stream);
+        topics.addStream("?rest/json/", JSON.class, stream);
+        topics.addStream("?rest/binary/", Binary.class, binaryStream);
         topics.subscribe("?rest/", callback);
 
         verify(callback, timed()).onComplete();
