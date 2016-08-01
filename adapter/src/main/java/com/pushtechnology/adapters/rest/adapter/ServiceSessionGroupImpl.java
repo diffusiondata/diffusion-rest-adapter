@@ -30,6 +30,8 @@ import com.pushtechnology.adapters.rest.polling.ServiceSession;
 import com.pushtechnology.adapters.rest.polling.ServiceSessionFactory;
 import com.pushtechnology.adapters.rest.publication.PublishingClient;
 import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
+import com.pushtechnology.diffusion.client.features.control.topics.TopicAddFailReason;
+import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 
 /**
  * Implementation for {@link ServiceSessionGroup}.
@@ -75,12 +77,30 @@ public final class ServiceSessionGroupImpl implements ServiceSessionGroup {
                     LOG.info("Service {} on standby", service);
                     serviceListener.onStandby(service);
                 })
-                .onActive(
-                    new ServiceReadyForPublishing(topicManagementClient, serviceSession, service)
-                    .andThen((updater) -> {
-                        LOG.info("Service {} active", service);
-                        serviceListener.onActive(service);
-                    }))
+                .onActive((updater) -> {
+                    LOG.info("Service {} active", service);
+                    serviceListener.onActive(service);
+                    service.getEndpoints().forEach(endpoint -> {
+                        topicManagementClient.addEndpoint(service, endpoint, new TopicControl.AddCallback() {
+                            @Override
+                            public void onTopicAdded(String topicPath) {
+                                serviceSession.addEndpoint(endpoint);
+                            }
+
+                            @Override
+                            public void onTopicAddFailed(String topicPath, TopicAddFailReason reason) {
+                                if (TopicAddFailReason.EXISTS.equals(reason)) {
+                                    onTopicAdded(topicPath);
+                                }
+                            }
+
+                            @Override
+                            public void onDiscard() {
+                            }
+                        });
+                    });
+                    serviceSession.start();
+                })
                 .onClose(() -> {
                     LOG.info("Service {} closed", service);
                     serviceListener.onRemove(service);
