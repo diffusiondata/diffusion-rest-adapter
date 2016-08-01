@@ -65,7 +65,7 @@ public final class RESTAdapter implements AutoCloseable {
     @GuardedBy("this")
     private MutablePicoContainer diffusionContainer;
     @GuardedBy("this")
-    private MutablePicoContainer pollContainer;
+    private MutablePicoContainer servicesContainer;
     @GuardedBy("this")
     private Model currentModel;
 
@@ -133,7 +133,7 @@ public final class RESTAdapter implements AutoCloseable {
             topLevelContainer = newTopLevelContainer();
             httpContainer = newHttpContainer(model);
             diffusionContainer = newDiffusionContainer(model);
-            pollContainer = newPollContainer(model);
+            servicesContainer = newServicesContainer(model);
 
             topLevelContainer.start();
         }
@@ -148,7 +148,7 @@ public final class RESTAdapter implements AutoCloseable {
             topLevelContainer = null;
             httpContainer = null;
             diffusionContainer = null;
-            pollContainer = null;
+            servicesContainer = null;
         }
     }
 
@@ -161,7 +161,7 @@ public final class RESTAdapter implements AutoCloseable {
         topLevelContainer = newTopLevelContainer();
         httpContainer = newHttpContainer(model);
         diffusionContainer = newDiffusionContainer(model);
-        pollContainer = newPollContainer(model);
+        servicesContainer = newServicesContainer(model);
 
         topLevelContainer.start();
 
@@ -178,7 +178,7 @@ public final class RESTAdapter implements AutoCloseable {
 
         httpContainer = newHttpContainer(model);
         diffusionContainer = newDiffusionContainer(model);
-        pollContainer = newPollContainer(model);
+        servicesContainer = newServicesContainer(model);
 
         httpContainer.start();
 
@@ -195,7 +195,7 @@ public final class RESTAdapter implements AutoCloseable {
         final MutablePicoContainer oldDiffusionContainer = diffusionContainer;
 
         diffusionContainer = newDiffusionContainer(model);
-        pollContainer = newPollContainer(model);
+        servicesContainer = newServicesContainer(model);
 
         diffusionContainer.start();
 
@@ -209,10 +209,10 @@ public final class RESTAdapter implements AutoCloseable {
     private void reconfigureServices(Model model) {
         LOG.info("Replacing REST sessions");
 
-        final MutablePicoContainer oldPollContainer = pollContainer;
+        final MutablePicoContainer oldPollContainer = servicesContainer;
 
-        pollContainer = newPollContainer(model);
-        pollContainer.start();
+        servicesContainer = newServicesContainer(model);
+        servicesContainer.start();
 
         if (oldPollContainer != null) {
             oldPollContainer.dispose();
@@ -272,7 +272,7 @@ public final class RESTAdapter implements AutoCloseable {
     }
 
     @GuardedBy("this")
-    private MutablePicoContainer newPollContainer(Model model) {
+    private MutablePicoContainer newServicesContainer(Model model) {
         final MutablePicoContainer newContainer = new PicoBuilder(diffusionContainer)
             .withCaching()
             .withConstructorInjection()
@@ -315,7 +315,7 @@ public final class RESTAdapter implements AutoCloseable {
     private boolean wasInactive() {
         return httpContainer == null ||
             diffusionContainer == null ||
-            pollContainer == null;
+            servicesContainer == null;
     }
 
     @GuardedBy("this")
