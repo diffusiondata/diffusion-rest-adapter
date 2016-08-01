@@ -81,7 +81,10 @@ public final class ServiceSessionGroupImpl implements ServiceSessionGroup {
                         LOG.info("Service {} active", service);
                         serviceListener.onActive(service);
                     }))
-                .onClose(() -> serviceListener.onRemove(service));
+                .onClose(() -> {
+                    LOG.info("Service {} closed", service);
+                    serviceListener.onRemove(service);
+                });
             serviceSessions.add(serviceSession);
         }
         LOG.debug("Opened service session group");
