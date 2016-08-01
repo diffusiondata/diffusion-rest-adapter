@@ -15,6 +15,8 @@
 
 package com.pushtechnology.adapters.rest.publication;
 
+import java.util.concurrent.CompletableFuture;
+
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.diffusion.datatype.binary.Binary;
@@ -34,7 +36,7 @@ public interface PublishingClient {
     /**
      * Remove a service.
      */
-    void removeService(ServiceConfig serviceConfig);
+    CompletableFuture<ServiceConfig> removeService(ServiceConfig serviceConfig);
 
     /**
      * Update the topic associated with an endpoint.

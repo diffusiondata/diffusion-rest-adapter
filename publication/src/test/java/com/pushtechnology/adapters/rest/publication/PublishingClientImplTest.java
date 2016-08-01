@@ -4,6 +4,7 @@ import static com.pushtechnology.diffusion.client.session.Session.State.CLOSED_F
 import static com.pushtechnology.diffusion.client.session.Session.State.CONNECTED_ACTIVE;
 import static com.pushtechnology.diffusion.client.session.Session.State.RECOVERING_RECONNECT;
 import static java.util.Collections.singletonList;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.isA;
@@ -11,6 +12,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
+
+import java.util.concurrent.CompletableFuture;
 
 import org.junit.After;
 import org.junit.Before;
@@ -21,10 +24,6 @@ import org.mockito.Mock;
 
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.adapters.rest.publication.EventedUpdateSource;
-import com.pushtechnology.adapters.rest.publication.PublishingClient;
-import com.pushtechnology.adapters.rest.publication.PublishingClientImpl;
-import com.pushtechnology.adapters.rest.publication.UpdateTopicCallback;
 import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.callbacks.ErrorReason;
 import com.pushtechnology.diffusion.client.callbacks.Registration;
@@ -250,10 +249,12 @@ public final class PublishingClientImplTest {
         updateSource.onRegistered("a", registration);
         updateSource.onStandby("a");
 
-        client.removeService(serviceConfig);
+        final CompletableFuture<?> future = client.removeService(serviceConfig);
+        assertFalse(future.isDone());
 
         verify(registration).close();
         updateSource.onClose("a");
+        assertTrue(future.isDone());
     }
 
     @Test
@@ -270,6 +271,8 @@ public final class PublishingClientImplTest {
 
     @Test
     public void removeUnknownService() {
-        client.removeService(serviceConfig);
+        final CompletableFuture<?> future = client.removeService(serviceConfig);
+
+        assertTrue(future.isDone());
     }
 }

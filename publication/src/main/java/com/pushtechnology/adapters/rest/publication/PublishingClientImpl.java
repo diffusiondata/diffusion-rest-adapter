@@ -18,6 +18,7 @@ package com.pushtechnology.adapters.rest.publication;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,12 +89,18 @@ public final class PublishingClientImpl implements PublishingClient {
     }
 
     @Override
-    public synchronized void removeService(ServiceConfig serviceConfig) {
+    public synchronized CompletableFuture<ServiceConfig> removeService(ServiceConfig serviceConfig) {
         final EventedUpdateSource registration = updaterSources.get(serviceConfig);
 
         if (registration != null) {
-            registration.close();
+            final CompletableFuture<ServiceConfig> future = new CompletableFuture<>();
+            registration
+                .onClose(() -> future.complete(serviceConfig))
+                .close();
+            return future;
         }
+
+        return CompletableFuture.completedFuture(serviceConfig);
     }
 
     @Override
