@@ -69,7 +69,7 @@ public final class EndpointPollHandlerFactoryTest {
         .endpoints(asList(jsonEndpoint, binaryEndpoint, plainTextEndpoint, xmlEndpoint))
         .build();
 
-    private PollHandlerFactory<String> pollHandlerFactory;
+    private PollHandlerFactory<EndpointResponse> pollHandlerFactory;
 
     @Before
     public void setUp() {

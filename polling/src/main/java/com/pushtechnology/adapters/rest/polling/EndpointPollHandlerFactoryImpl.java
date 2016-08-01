@@ -45,19 +45,20 @@ public final class EndpointPollHandlerFactoryImpl implements EndpointPollHandler
     }
 
     @Override
-    public FutureCallback<String> create(ServiceConfig serviceConfig, EndpointConfig endpointConfig) {
+    public FutureCallback<EndpointResponse> create(ServiceConfig serviceConfig, EndpointConfig endpointConfig) {
         final String produces = endpointConfig.getProduces();
         switch (produces) {
             case "json" :
             case "application/json" :
-                return new JSONParsingHandler(jsonHandlerFactory.create(serviceConfig, endpointConfig));
+                return new StringParsingHandler(
+                    new JSONParsingHandler(jsonHandlerFactory.create(serviceConfig, endpointConfig)));
 
             case "binary" :
                 return new BinaryParsingHandler(binaryHandlerFactory.create(serviceConfig, endpointConfig));
 
             case "string" :
             case "text/plain" :
-                return stringHandlerFactory.create(serviceConfig, endpointConfig);
+                return new StringParsingHandler(stringHandlerFactory.create(serviceConfig, endpointConfig));
 
             default:
                 throw new IllegalArgumentException("Unsupported produces value \"" + produces + "\"");

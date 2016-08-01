@@ -15,14 +15,13 @@
 
 package com.pushtechnology.adapters.rest.polling;
 
-import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 
 import org.apache.http.concurrent.FutureCallback;
 import org.junit.After;
@@ -32,29 +31,26 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 
-import com.pushtechnology.diffusion.datatype.binary.Binary;
-
 /**
- * Unit tests for {@link BinaryParsingHandler}.
+ * Unit tests for {@link StringParsingHandler}.
  *
  * @author Push Technology Limited
  */
-public final class BinaryParsingHandlerTest {
-    @Mock
-    private FutureCallback<Binary> delegate;
+public final class StringParsingHandlerTest {
     @Mock
     private EndpointResponse endpointResponse;
+    @Mock
+    private FutureCallback<String> delegate;
     @Captor
-    private ArgumentCaptor<Binary> binaryCaptor;
+    private ArgumentCaptor<String> stringCaptor;
 
     private FutureCallback<EndpointResponse> handler;
 
     @Before
-    public void setUp() throws IOException {
+    public void setUp() {
         initMocks(this);
 
-        handler = new BinaryParsingHandler(delegate);
-        when(endpointResponse.getResponse()).thenReturn("foobar".getBytes("UTF-8"));
+        handler = new StringParsingHandler(delegate);
     }
 
     @After
@@ -63,13 +59,29 @@ public final class BinaryParsingHandlerTest {
     }
 
     @Test
-    public void completed() throws UnsupportedEncodingException {
+    public void completed() throws IOException {
+        when(endpointResponse.getHeader("content-type")).thenReturn("text/plain; charset=UTF-8");
+        when(endpointResponse.getResponse()).thenReturn("{\"foo\":\"bar\"}".getBytes("UTF-8"));
+
         handler.completed(endpointResponse);
-        verify(delegate).completed(binaryCaptor.capture());
+        verify(delegate).completed(stringCaptor.capture());
 
-        final Binary binary = binaryCaptor.getValue();
+        final String json = stringCaptor.getValue();
 
-        assertArrayEquals("foobar".getBytes("UTF-8"), binary.toByteArray());
+        assertEquals("{\"foo\":\"bar\"}", json);
+    }
+
+    @Test
+    public void completedCharsetMissing() throws IOException {
+        when(endpointResponse.getHeader("content-type")).thenReturn("text/plain");
+        when(endpointResponse.getResponse()).thenReturn("{\"foo\":\"bar\"}".getBytes("ISO-8859-1"));
+
+        handler.completed(endpointResponse);
+        verify(delegate).completed(stringCaptor.capture());
+
+        final String json = stringCaptor.getValue();
+
+        assertEquals("{\"foo\":\"bar\"}", json);
     }
 
     @Test

@@ -15,45 +15,46 @@
 
 package com.pushtechnology.adapters.rest.polling;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
-import org.apache.http.concurrent.FutureCallback;
-
-import com.pushtechnology.diffusion.client.Diffusion;
-import com.pushtechnology.diffusion.datatype.binary.Binary;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
 
 /**
- * Handler that parses a response body as {@link Binary}.
+ * Implementation of {@link EndpointResponse} for {@link HttpResponse}.
  *
  * @author Push Technology Limited
  */
-public final class BinaryParsingHandler implements FutureCallback<EndpointResponse> {
-    private final FutureCallback<Binary> delegate;
+public final class EndpointResponseImpl implements EndpointResponse {
+    private final HttpResponse httpResponse;
 
     /**
      * Constructor.
      */
-    public BinaryParsingHandler(FutureCallback<Binary> delegate) {
-        this.delegate = delegate;
+    public EndpointResponseImpl(HttpResponse httpResponse) {
+        this.httpResponse = httpResponse;
     }
 
     @Override
-    public void completed(EndpointResponse result) {
-        try {
-            delegate.completed(Diffusion.dataTypes().binary().readValue(result.getResponse()));
+    public String getHeader(String headerName) {
+        return httpResponse.getFirstHeader(headerName).getValue();
+    }
+
+    @Override
+    public byte[] getResponse() throws IOException {
+        final HttpEntity entity = httpResponse.getEntity();
+
+        final InputStream content = entity.getContent();
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+        int next = content.read();
+        while (next != -1) {
+            baos.write(next);
+            next = content.read();
         }
-        catch (IOException e) {
-            delegate.failed(e);
-        }
-    }
 
-    @Override
-    public void failed(Exception ex) {
-        delegate.failed(ex);
-    }
-
-    @Override
-    public void cancelled() {
-        delegate.cancelled();
+        return baos.toByteArray();
     }
 }

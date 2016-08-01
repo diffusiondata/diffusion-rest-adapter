@@ -15,20 +15,13 @@
 
 package com.pushtechnology.adapters.rest.polling;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.Charset;
 import java.util.concurrent.Future;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.net.ssl.SSLContext;
 
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
@@ -52,7 +45,6 @@ import net.jcip.annotations.ThreadSafe;
 @ThreadSafe
 public final class EndpointClientImpl implements EndpointClient {
     private static final Logger LOG = LoggerFactory.getLogger(EndpointClientImpl.class);
-    private static final Pattern CHARSET_PATTERN = Pattern.compile(".+; charset=(\\S+)");
     private final Model model;
     private final SSLContext sslContext;
     private final HttpClientFactory clientFactory;
@@ -71,7 +63,7 @@ public final class EndpointClientImpl implements EndpointClient {
     public Future<?> request(
             ServiceConfig serviceConfig,
             EndpointConfig endpointConfig,
-            final FutureCallback<String> callback) {
+            final FutureCallback<EndpointResponse> callback) {
 
 
         if (client == null) {
@@ -84,29 +76,13 @@ public final class EndpointClientImpl implements EndpointClient {
             new FutureCallback<HttpResponse>() {
                 @Override
                 public void completed(HttpResponse httpResponse) {
-                    try {
-                        final StatusLine statusLine = httpResponse.getStatusLine();
-                        if (statusLine.getStatusCode() >= 400) {
-                            callback.failed(new Exception("Received response " + statusLine));
-                            return;
-                        }
-
-                        final HttpEntity entity = httpResponse.getEntity();
-
-                        final InputStream content = entity.getContent();
-                        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-                        int next = content.read();
-                        while (next != -1) {
-                            baos.write(next);
-                            next = content.read();
-                        }
-
-                        callback.completed(new String(baos.toByteArray(), getResponseCharset(httpResponse)));
+                    final StatusLine statusLine = httpResponse.getStatusLine();
+                    if (statusLine.getStatusCode() >= 400) {
+                        callback.failed(new Exception("Received response " + statusLine));
+                        return;
                     }
-                    catch (IOException e) {
-                        failed(e);
-                    }
+
+                    callback.completed(new EndpointResponseImpl(httpResponse));
                 }
 
                 @Override
@@ -137,20 +113,5 @@ public final class EndpointClientImpl implements EndpointClient {
         LOG.debug("Closing endpoint client");
         client.close();
         LOG.debug("Closed endpoint client");
-    }
-
-    private Charset getResponseCharset(HttpResponse response) {
-        final Header[] headers = response.getHeaders("content-type");
-        if (headers.length > 0) {
-            final String contentType = headers[0].getValue();
-            final Matcher matcher = CHARSET_PATTERN.matcher(contentType);
-
-            if (matcher.matches()) {
-                final String charset = matcher.group(1);
-                return Charset.forName(charset);
-            }
-        }
-
-        return Charset.forName("ISO-8859-1");
     }
 }

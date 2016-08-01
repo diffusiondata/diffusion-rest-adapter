@@ -1,6 +1,7 @@
 package com.pushtechnology.adapters.rest.polling;
 
 import static java.util.Collections.singletonList;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.isA;
 import static org.mockito.Mockito.verify;
@@ -42,7 +43,7 @@ public final class EndpointClientImplTest {
     @Mock
     private CloseableHttpAsyncClient httpClient;
     @Mock
-    private FutureCallback<String> callback;
+    private FutureCallback<EndpointResponse> callback;
     @Mock
     private Future<HttpResponse> future;
     @Mock
@@ -53,6 +54,8 @@ public final class EndpointClientImplTest {
     private StatusLine statusLine;
     @Captor
     private ArgumentCaptor<FutureCallback<HttpResponse>> callbackCaptor;
+    @Captor
+    private ArgumentCaptor<EndpointResponse> responseCaptor;
 
     private final EndpointConfig endpointConfig = EndpointConfig.builder().url("/a/url.json").build();
     private final ServiceConfig serviceConfig = ServiceConfig.builder().host("localhost").port(8080).build();
@@ -70,7 +73,7 @@ public final class EndpointClientImplTest {
             .thenReturn(future);
         when(response.getStatusLine()).thenReturn(statusLine);
         when(response.getEntity()).thenReturn(entity);
-        when(entity.getContent()).thenReturn(new ByteArrayInputStream("{}".getBytes()));
+        when(entity.getContent()).thenReturn(new ByteArrayInputStream("{}".getBytes("UTF-8")));
         when(response.getHeaders("content-type")).thenReturn(new Header[0]);
         when(statusLine.getStatusCode()).thenReturn(200);
 
@@ -105,7 +108,7 @@ public final class EndpointClientImplTest {
     }
 
     @Test
-    public void requestResponse() {
+    public void requestResponse() throws IOException {
         endpointClient.start();
 
         verify(clientFactory).create(model, null);
@@ -119,7 +122,10 @@ public final class EndpointClientImplTest {
         final FutureCallback<HttpResponse> responseCallback = callbackCaptor.getValue();
 
         responseCallback.completed(response);
-        verify(callback).completed("{}");
+        verify(callback).completed(responseCaptor.capture());
+        final EndpointResponse endpointResponse = responseCaptor.getValue();
+        final byte[] response = endpointResponse.getResponse();
+        assertArrayEquals("{}".getBytes("UTF-8"), response);
     }
 
     @Test

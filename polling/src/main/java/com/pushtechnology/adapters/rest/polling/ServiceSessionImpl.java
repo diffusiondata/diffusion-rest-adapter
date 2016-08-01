@@ -142,20 +142,18 @@ public final class ServiceSessionImpl implements ServiceSession {
     /**
      * The handler for the polling result. Notifies the publishing client of the new data.
      */
-    private final class PollResultHandler implements FutureCallback<String> {
-        private final FutureCallback<String> delegate;
+    private final class PollResultHandler implements FutureCallback<EndpointResponse> {
+        private final FutureCallback<EndpointResponse> delegate;
 
-        private PollResultHandler(FutureCallback<String> delegate) {
+        private PollResultHandler(FutureCallback<EndpointResponse> delegate) {
             this.delegate = delegate;
         }
 
         @Override
-        public void completed(String body) {
-            LOG.trace("Polled value {}", body);
-
+        public void completed(EndpointResponse response) {
             synchronized (ServiceSessionImpl.this) {
                 if (isRunning) {
-                    delegate.completed(body);
+                    delegate.completed(response);
                 }
             }
         }

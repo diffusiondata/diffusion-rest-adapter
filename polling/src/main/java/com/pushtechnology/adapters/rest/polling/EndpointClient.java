@@ -37,10 +37,13 @@ public interface EndpointClient extends AutoCloseable {
      * @param serviceConfig the service
      * @param endpointConfig the endpoint
      * @param callback handler for the response
-     * @return handle to asynchronous poll
+     * @return handle to asynchronous request
      * @throws IllegalStateException if the client is not running
      */
-    Future<?> request(ServiceConfig serviceConfig, EndpointConfig endpointConfig, FutureCallback<String> callback);
+    Future<?> request(
+        ServiceConfig serviceConfig,
+        EndpointConfig endpointConfig,
+        FutureCallback<EndpointResponse> callback);
 
     /**
      * Start component.

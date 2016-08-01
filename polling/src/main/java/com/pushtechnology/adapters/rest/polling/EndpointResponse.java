@@ -15,16 +15,20 @@
 
 package com.pushtechnology.adapters.rest.polling;
 
-import org.apache.http.concurrent.FutureCallback;
-
-import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
-import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
+import java.io.IOException;
 
 /**
- * Factory for poll handlers of the type returned by the endpoint.
+ * Response to a request to an endpoint.
  * @author Push Technology Limited
  */
-public interface EndpointPollHandlerFactory extends PollHandlerFactory<EndpointResponse> {
-    @Override
-    FutureCallback<EndpointResponse> create(ServiceConfig serviceConfig, EndpointConfig endpointConfig);
+public interface EndpointResponse {
+    /**
+     * @return an HTTP response header value
+     */
+    String getHeader(String headerName);
+
+    /**
+     * @return the response body
+     */
+    byte[] getResponse() throws IOException;
 }

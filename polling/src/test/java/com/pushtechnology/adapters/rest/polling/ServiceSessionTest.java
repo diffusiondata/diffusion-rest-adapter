@@ -38,6 +38,8 @@ public final class ServiceSessionTest {
     @Mock
     private EndpointClient endpointClient;
     @Mock
+    private EndpointResponse endpointResponse;
+    @Mock
     private EndpointPollHandlerFactory handlerFactory;
     @Mock
     private ScheduledFuture taskFuture;
@@ -46,11 +48,11 @@ public final class ServiceSessionTest {
     @Mock
     private Future pollFuture1;
     @Mock
-    private FutureCallback<String> handler;
+    private FutureCallback<EndpointResponse> handler;
     @Captor
     private ArgumentCaptor<Runnable> runnableCaptor;
     @Captor
-    private ArgumentCaptor<FutureCallback<String>> callbackCaptor;
+    private ArgumentCaptor<FutureCallback<EndpointResponse>> callbackCaptor;
 
     private final EndpointConfig endpointConfig = EndpointConfig
         .builder()
@@ -100,11 +102,11 @@ public final class ServiceSessionTest {
 
         verify(endpointClient).request(eq(serviceConfig), eq(endpointConfig), callbackCaptor.capture());
 
-        final FutureCallback<String> callback = callbackCaptor.getValue();
+        final FutureCallback<EndpointResponse> callback = callbackCaptor.getValue();
 
-        callback.completed("{\"foo\":\"bar\"}");
+        callback.completed(endpointResponse);
 
-        verify(handler).completed("{\"foo\":\"bar\"}");
+        verify(handler).completed(endpointResponse);
     }
 
     @Test
@@ -121,7 +123,7 @@ public final class ServiceSessionTest {
 
         verify(endpointClient).request(eq(serviceConfig), eq(endpointConfig), callbackCaptor.capture());
 
-        final FutureCallback<String> callback = callbackCaptor.getValue();
+        final FutureCallback<EndpointResponse> callback = callbackCaptor.getValue();
 
         final Exception ex = new Exception("Intentional exception");
         callback.failed(ex);
@@ -200,13 +202,13 @@ public final class ServiceSessionTest {
 
         verify(endpointClient).request(eq(serviceConfig), eq(endpointConfig), callbackCaptor.capture());
 
-        final FutureCallback<String> callback = callbackCaptor.getValue();
+        final FutureCallback<EndpointResponse> callback = callbackCaptor.getValue();
 
         serviceSession.stop();
         verify(taskFuture).cancel(false);
 
-        callback.completed("{\"foo\":\"bar\"}");
+        callback.completed(endpointResponse);
 
-        verify(handler, never()).completed("{\"foo\":\"bar\"}");
+        verify(handler, never()).completed(endpointResponse);
     }
 }

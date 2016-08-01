@@ -53,7 +53,7 @@ public final class ServiceSessionFactoryImplTest {
     @Mock
     private ScheduledFuture taskFuture;
     @Mock
-    private FutureCallback<String> handler;
+    private FutureCallback<EndpointResponse> handler;
 
     private final EndpointConfig endpointConfig = EndpointConfig
         .builder()
