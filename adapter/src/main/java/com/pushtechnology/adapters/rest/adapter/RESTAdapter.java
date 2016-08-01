@@ -329,11 +329,15 @@ public final class RESTAdapter implements AutoCloseable {
             .getServices()
             .stream()
             .map(ServiceConfig::getSecurity)
+            .filter(securityConfig -> securityConfig != null)
+            .filter(securityConfig -> securityConfig.getBasic() != null)
             .collect(toList())
             .equals(newModel
                 .getServices()
                 .stream()
                 .map(ServiceConfig::getSecurity)
+                .filter(securityConfig -> securityConfig != null)
+                .filter(securityConfig -> securityConfig.getBasic() != null)
                 .collect(toList()));
     }
 
