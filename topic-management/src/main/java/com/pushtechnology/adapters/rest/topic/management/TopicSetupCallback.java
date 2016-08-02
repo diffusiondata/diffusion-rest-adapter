@@ -15,26 +15,41 @@
 
 package com.pushtechnology.adapters.rest.topic.management;
 
-import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
-import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
+import com.pushtechnology.diffusion.client.features.control.topics.TopicAddFailReason;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 
 /**
- * Topic management client for Diffusion server.
+ * Callback handles mapping of {@link TopicAddFailReason#EXISTS} to success.
  *
  * @author Push Technology Limited
  */
-public interface TopicManagementClient {
-    /**
-     * Start managing the topics for a REST service.
-     */
-    void addService(ServiceConfig serviceConfig);
+public final class TopicSetupCallback implements TopicControl.AddCallback {
+    private final TopicControl.AddCallback delegate;
 
     /**
-     * Start managing the topics for a REST endpoint.
-     * @param serviceConfig the service of the endpoint
-     * @param endpointConfig the endpoint
-     * @param callback callback for completion. The onTopicAddFailed with the reason EXISTS.
+     * Constructor.
      */
-    void addEndpoint(ServiceConfig serviceConfig, EndpointConfig endpointConfig, TopicControl.AddCallback callback);
+    public TopicSetupCallback(TopicControl.AddCallback delegate) {
+        this.delegate = delegate;
+    }
+
+    @Override
+    public void onTopicAdded(String topicPath) {
+        delegate.onTopicAdded(topicPath);
+    }
+
+    @Override
+    public void onTopicAddFailed(String topicPath, TopicAddFailReason reason) {
+        if (TopicAddFailReason.EXISTS.equals(reason)) {
+            delegate.onTopicAdded(topicPath);
+        }
+        else {
+            delegate.onTopicAddFailed(topicPath, reason);
+        }
+    }
+
+    @Override
+    public void onDiscard() {
+        delegate.onDiscard();
+    }
 }

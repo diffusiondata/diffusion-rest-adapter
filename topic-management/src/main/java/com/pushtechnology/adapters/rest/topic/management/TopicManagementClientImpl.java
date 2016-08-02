@@ -61,7 +61,7 @@ public final class TopicManagementClientImpl implements TopicManagementClient {
                     .addTopic(
                         topicPath,
                         TopicType.JSON,
-                        callback);
+                        new TopicSetupCallback(callback));
                 break;
 
             case "binary" :
@@ -72,7 +72,7 @@ public final class TopicManagementClientImpl implements TopicManagementClient {
                     .addTopic(
                         topicPath,
                         TopicType.BINARY,
-                        callback);
+                        new TopicSetupCallback(callback));
                 break;
 
             default:

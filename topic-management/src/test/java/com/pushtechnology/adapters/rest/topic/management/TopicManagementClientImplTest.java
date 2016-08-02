@@ -21,11 +21,15 @@ import static java.util.Arrays.asList;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.isA;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
@@ -46,6 +50,8 @@ public final class TopicManagementClientImplTest {
     private TopicControl topicControl;
     @Mock
     private TopicControl.AddCallback addCallback;
+    @Captor
+    private ArgumentCaptor<TopicControl.AddCallback> callbackCaptor;
 
     private final EndpointConfig jsonEndpointConfig = EndpointConfig
         .builder()
@@ -88,6 +94,10 @@ public final class TopicManagementClientImplTest {
         when(session.feature(TopicControl.class)).thenReturn(topicControl);
     }
 
+    @After
+    public void postConditions() {
+        verifyNoMoreInteractions(topicControl, addCallback);
+    }
 
     @Test
     public void addService() {
@@ -100,20 +110,32 @@ public final class TopicManagementClientImplTest {
     public void addJSONEndpoint() {
         topicManagementClient.addEndpoint(serviceConfig, jsonEndpointConfig, addCallback);
 
-        verify(topicControl).addTopic("service/jsonEndpoint", JSON, addCallback);
+        verify(topicControl).addTopic(eq("service/jsonEndpoint"), eq(JSON), callbackCaptor.capture());
+
+        callbackCaptor.getValue().onDiscard();
+
+        verify(addCallback).onDiscard();
     }
 
     @Test
     public void addBinaryEndpoint() {
         topicManagementClient.addEndpoint(serviceConfig, binaryEndpointConfig, addCallback);
 
-        verify(topicControl).addTopic("service/binaryEndpoint", BINARY, addCallback);
+        verify(topicControl).addTopic(eq("service/binaryEndpoint"), eq(BINARY), callbackCaptor.capture());
+
+        callbackCaptor.getValue().onDiscard();
+
+        verify(addCallback).onDiscard();
     }
 
     @Test
     public void addStringEndpoint() {
         topicManagementClient.addEndpoint(serviceConfig, stringEndpointConfig, addCallback);
 
-        verify(topicControl).addTopic("service/stringEndpoint", BINARY, addCallback);
+        verify(topicControl).addTopic(eq("service/stringEndpoint"), eq(BINARY), callbackCaptor.capture());
+
+        callbackCaptor.getValue().onDiscard();
+
+        verify(addCallback).onDiscard();
     }
 }
