@@ -103,6 +103,29 @@ shutdown the the Diffusion server. The `diffusion-maven-plugin` requires a syste
 for this dependency is relative to the `DIFFUSION_HOME` environmental variable. Any REST service is started embedded
 within the JVM process.
 
+### Build artifact overview
+
+#### adapter-client
+
+The `adapter-client` module creates an executable JAR with all dependencies shaded in.
+It loads the configuration model from the filesystem in the current working directory.
+If the client is closed the JVM process will be terminated.
+
+### adapter
+
+The `adapter` module is more suitable for embedding the adapter in other applications.
+It expects to be notified of changes to the model.
+
 ## Connecting to Diffusion
 
 The session will require the `register_handler`, `modify_topic` and `update_topic` permissions to function correctly.
+If the session fails to connect to Diffusion the client is closed.
+
+### Connection loss
+
+If the connection is lost the session will attempt to recover.
+If recovery fails the client is closed.
+
+## Polling REST services
+
+If the initial poll of a REST endpoint fails no topic will be created for it.
