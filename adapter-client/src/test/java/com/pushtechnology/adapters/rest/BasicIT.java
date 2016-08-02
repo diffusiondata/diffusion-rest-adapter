@@ -192,6 +192,8 @@ public final class BasicIT {
     @Mock
     private ServiceListener serviceListener;
     @Mock
+    private ServiceListener backupServiceListener;
+    @Mock
     private Topics.ValueStream<JSON> stream;
     @Mock
     private Topics.ValueStream<Binary> binaryStream;
@@ -279,7 +281,7 @@ public final class BasicIT {
 
     @After
     public void postConditions() {
-        verifyNoMoreInteractions(listener, callback, serviceListener);
+        verifyNoMoreInteractions(listener, callback, serviceListener, backupServiceListener);
     }
 
     @Test
@@ -520,17 +522,61 @@ public final class BasicIT {
         verify(serviceListener, timed()).onRemove(INSECURE_BINARY_SERVICE);
     }
 
+    @Test
+    public void testStandByAndSwitchOver() throws IOException {
+        modelStore.setModel(modelWith(INSECURE_SERVICE));
+        final RESTAdapterClient client0 = startClient();
+
+        verify(serviceListener, timed()).onActive(INSECURE_SERVICE);
+
+        final RESTAdapterClient client1 = startClient(backupServiceListener);
+
+        verify(backupServiceListener, timed()).onStandby(INSECURE_SERVICE);
+
+        final Session session = startSession();
+
+        final Topics topics = session.feature(Topics.class);
+        topics.addFallbackStream(JSON.class, stream);
+        topics.subscribe("?rest/", callback);
+
+        verify(callback, timed()).onComplete();
+        verify(stream, timed()).onSubscription(eq("rest/json/timestamp"), isA(TopicSpecification.class));
+        verify(stream, timed()).onSubscription(eq("rest/json/increment"), isA(TopicSpecification.class));
+
+        verify(stream, timed()).onValue(eq("rest/json/timestamp"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
+        verify(stream, timed()).onValue(eq("rest/json/increment"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
+
+        client0.close();
+        verify(serviceListener, timed()).onRemove(INSECURE_SERVICE);
+        verify(backupServiceListener, timed()).onActive(INSECURE_SERVICE);
+
+        verify(stream, never()).onUnsubscription(eq("rest/json/timestamp"), isA(TopicSpecification.class), eq(REMOVAL));
+        verify(stream, never()).onUnsubscription(eq("rest/json/increment"), isA(TopicSpecification.class), eq(REMOVAL));
+
+        client1.close();
+        verify(backupServiceListener, timed()).onRemove(INSECURE_SERVICE);
+
+        verify(stream, timed()).onUnsubscription(eq("rest/json/timestamp"), isA(TopicSpecification.class), eq(REMOVAL));
+        verify(stream, timed()).onUnsubscription(eq("rest/json/increment"), isA(TopicSpecification.class), eq(REMOVAL));
+
+        stopSession(session);
+    }
+
     private static VerificationWithTimeout timed() {
         return timeout(5000);
     }
 
     private RESTAdapterClient startClient() {
+        return startClient(serviceListener);
+    }
+
+    private RESTAdapterClient startClient(ServiceListener listener) {
         ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
         final RESTAdapterClient client = RESTAdapterClient.create(
             modelStore,
             executor,
             executor::shutdown,
-            serviceListener);
+            listener);
         client.start();
         return client;
     }
