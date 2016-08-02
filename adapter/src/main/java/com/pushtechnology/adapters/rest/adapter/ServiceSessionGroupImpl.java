@@ -25,7 +25,6 @@ import org.apache.http.concurrent.FutureCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.polling.EndpointClient;
@@ -35,7 +34,7 @@ import com.pushtechnology.adapters.rest.polling.ServiceSessionFactory;
 import com.pushtechnology.adapters.rest.publication.PublishingClient;
 import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicAddFailReason;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
+import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.AddCallback;
 
 /**
  * Implementation for {@link ServiceSessionGroup}.
@@ -88,42 +87,43 @@ public final class ServiceSessionGroupImpl implements ServiceSessionGroup {
                     LOG.info("Service {} active", service);
                     serviceListener.onActive(service);
                     service.getEndpoints().forEach(endpoint -> {
-                        endpointClient.request(service, endpoint, new FutureCallback<EndpointResponse>() {
-                            @Override
-                            public void completed(EndpointResponse result) {
-                                if (!validateContentType(result, endpoint)) {
-                                    return;
+                        endpointClient.request(
+                            service,
+                            endpoint,
+                            new ValidateContentType(endpoint, new FutureCallback<EndpointResponse>() {
+                                @Override
+                                public void completed(EndpointResponse result) {
+                                    topicManagementClient.addEndpoint(service, endpoint, new AddCallback() {
+                                        @Override
+                                        public void onTopicAdded(String topicPath) {
+                                            LOG.info(
+                                                "Endpoint {} exists, adding endpoint to service session",
+                                                endpoint);
+                                            serviceSession.addEndpoint(endpoint);
+                                        }
+
+                                        @Override
+                                        public void onTopicAddFailed(String topicPath, TopicAddFailReason reason) {
+                                            LOG.warn("Topic creation failed for {} because {}", endpoint, reason);
+                                        }
+
+                                        @Override
+                                        public void onDiscard() {
+                                            LOG.warn("Topic creation for {} might not have succeeded", endpoint);
+                                        }
+                                    });
                                 }
 
-                                topicManagementClient.addEndpoint(service, endpoint, new TopicControl.AddCallback() {
-                                    @Override
-                                    public void onTopicAdded(String topicPath) {
-                                        LOG.info("Endpoint {} exists, adding endpoint to service session", endpoint);
-                                        serviceSession.addEndpoint(endpoint);
-                                    }
+                                @Override
+                                public void failed(Exception ex) {
+                                    LOG.warn("Initial request to {} failed", endpoint, ex);
+                                }
 
-                                    @Override
-                                    public void onTopicAddFailed(String topicPath, TopicAddFailReason reason) {
-                                        LOG.warn("Topic creation failed for {} because {}", endpoint, reason);
-                                    }
-
-                                    @Override
-                                    public void onDiscard() {
-                                        LOG.warn("Topic creation for {} might not have succeeded", endpoint);
-                                    }
-                                });
-                            }
-
-                            @Override
-                            public void failed(Exception ex) {
-                                LOG.warn("Initial request to {} failed", endpoint, ex);
-                            }
-
-                            @Override
-                            public void cancelled() {
-                                LOG.warn("Initial request to {} cancelled", endpoint);
-                            }
-                        });
+                                @Override
+                                public void cancelled() {
+                                    LOG.warn("Initial request to {} cancelled", endpoint);
+                                }
+                            }));
                     });
                     serviceSession.start();
                 })
@@ -134,32 +134,6 @@ public final class ServiceSessionGroupImpl implements ServiceSessionGroup {
             serviceSessions.add(serviceSession);
         }
         LOG.debug("Opened service session group");
-    }
-
-    private boolean validateContentType(EndpointResponse result, EndpointConfig endpoint) {
-        final String contentType = result.getHeader("content-type");
-        if (contentType == null) {
-            // Assume correct when no content type provided
-            return true;
-        }
-
-        if ("binary".equals(endpoint.getProduces())) {
-            // Everything is binary
-            return true;
-        }
-
-        if (contentType.startsWith(endpoint.getProduces())) {
-            // Content type looks about right
-            return true;
-        }
-
-        if (contentType.startsWith("application/json") || contentType.startsWith("text/json")) {
-            // JSON content can be treated as binary, string, or JSON
-            return true;
-        }
-
-        LOG.warn("The content type of the response {} is not suitable for the endpoint {}", contentType, endpoint);
-        return false;
     }
 
     @PreDestroy
