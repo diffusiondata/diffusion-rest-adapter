@@ -53,30 +53,33 @@ public final class TopicManagementClientImpl implements TopicManagementClient {
         final String produces = endpointConfig.getProduces();
         final String topicPath = serviceConfig.getTopicRoot() + "/" + endpointConfig.getTopic();
 
-        switch (produces) {
-            case "json" :
-            case "application/json" :
-                session
-                    .feature(TopicControl.class)
-                    .addTopic(
-                        topicPath,
-                        TopicType.JSON,
-                        new TopicSetupCallback(callback));
-                break;
+        // Addition synchronisation to partially work around FB: 14967
+        synchronized (this) {
+            switch (produces) {
+                case "json":
+                case "application/json":
+                    session
+                        .feature(TopicControl.class)
+                        .addTopic(
+                            topicPath,
+                            TopicType.JSON,
+                            new TopicSetupCallback(callback));
+                    break;
 
-            case "binary" :
-            case "string" :
-            case "text/plain" :
-                session
-                    .feature(TopicControl.class)
-                    .addTopic(
-                        topicPath,
-                        TopicType.BINARY,
-                        new TopicSetupCallback(callback));
-                break;
+                case "binary":
+                case "string":
+                case "text/plain":
+                    session
+                        .feature(TopicControl.class)
+                        .addTopic(
+                            topicPath,
+                            TopicType.BINARY,
+                            new TopicSetupCallback(callback));
+                    break;
 
-            default:
-                throw new IllegalArgumentException("Unsupported produces value \"" + produces + "\"");
+                default:
+                    throw new IllegalArgumentException("Unsupported produces value \"" + produces + "\"");
+            }
         }
     }
 }
