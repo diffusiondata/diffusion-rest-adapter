@@ -89,9 +89,7 @@ public final class ServiceSessionGroupImpl implements ServiceSessionGroup {
 
                             @Override
                             public void onTopicAddFailed(String topicPath, TopicAddFailReason reason) {
-                                if (TopicAddFailReason.EXISTS.equals(reason)) {
-                                    onTopicAdded(topicPath);
-                                }
+                                onTopicAdded(topicPath);
                             }
 
                             @Override
