@@ -129,3 +129,18 @@ If recovery fails the client is closed.
 ## Polling REST services
 
 If the initial poll of a REST endpoint fails no topic will be created for it.
+
+## Backup adapter clients
+
+Multiple instances of the adapter client can be run, but only one client will poll a given REST service and update
+Diffusion with the result.
+
+Each service will either be in a `standby` or `active` state.
+This state is co-ordinated with other adapter clients and control sessions using update sources on the root topic for
+the service.
+This state can be observed through a `ServiceListener`.
+Only when the service is `active` will the client poll it and update Diffusion.
+A client can have both active and standby services.
+
+When a client with `active` services closes one client with the service in `standby` will switch to `active` and take
+over. If there is no other client configured with the service the topics associated with the service will be removed.
