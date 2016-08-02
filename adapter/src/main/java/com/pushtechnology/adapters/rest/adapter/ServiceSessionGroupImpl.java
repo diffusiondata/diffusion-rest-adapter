@@ -25,6 +25,7 @@ import org.apache.http.concurrent.FutureCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.polling.EndpointClient;
@@ -90,6 +91,10 @@ public final class ServiceSessionGroupImpl implements ServiceSessionGroup {
                         endpointClient.request(service, endpoint, new FutureCallback<EndpointResponse>() {
                             @Override
                             public void completed(EndpointResponse result) {
+                                if (!validateContentType(result, endpoint)) {
+                                    return;
+                                }
+
                                 topicManagementClient.addEndpoint(service, endpoint, new TopicControl.AddCallback() {
                                     @Override
                                     public void onTopicAdded(String topicPath) {
@@ -129,6 +134,32 @@ public final class ServiceSessionGroupImpl implements ServiceSessionGroup {
             serviceSessions.add(serviceSession);
         }
         LOG.debug("Opened service session group");
+    }
+
+    private boolean validateContentType(EndpointResponse result, EndpointConfig endpoint) {
+        final String contentType = result.getHeader("content-type");
+        if (contentType == null) {
+            // Assume correct when no content type provided
+            return true;
+        }
+
+        if ("binary".equals(endpoint.getProduces())) {
+            // Everything is binary
+            return true;
+        }
+
+        if (contentType.startsWith(endpoint.getProduces())) {
+            // Content type looks about right
+            return true;
+        }
+
+        if (contentType.startsWith("application/json") || contentType.startsWith("text/json")) {
+            // JSON content can be treated as binary, string, or JSON
+            return true;
+        }
+
+        LOG.warn("The content type of the response {} is not suitable for the endpoint {}", contentType, endpoint);
+        return false;
     }
 
     @PreDestroy
