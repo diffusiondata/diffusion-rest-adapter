@@ -15,8 +15,6 @@
 
 package com.pushtechnology.adapters.rest.adapter;
 
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.isA;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -29,8 +27,8 @@ import org.mockito.Mock;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.polling.EndpointResponse;
-import com.pushtechnology.adapters.rest.polling.ServiceSession;
 import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
+import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 
 /**
  * Unit tests for {@link InitialEndpointResponseHandler}.
@@ -42,9 +40,9 @@ public final class InitialEndpointResponseHandlerTest {
     @Mock
     private TopicManagementClient topicManagementClient;
     @Mock
-    private ServiceSession serviceSession;
-    @Mock
     private EndpointResponse response;
+    @Mock
+    private TopicControl.AddCallback callback;
 
     private ServiceConfig serviceConfig = ServiceConfig.builder().build();
     private final EndpointConfig endpointConfig = EndpointConfig.builder().build();
@@ -59,22 +57,19 @@ public final class InitialEndpointResponseHandlerTest {
             topicManagementClient,
             serviceConfig,
             endpointConfig,
-            serviceSession);
+            callback);
     }
 
     @After
     public void postConditions() {
-        verifyNoMoreInteractions(serviceSession, topicManagementClient, response);
+        verifyNoMoreInteractions(topicManagementClient, response, callback);
     }
 
     @Test
     public void completed() {
         handler.completed(response);
 
-        verify(topicManagementClient).addEndpoint(
-            eq(serviceConfig),
-            eq(endpointConfig),
-            isA(AddEndpointToServiceSession.class));
+        verify(topicManagementClient).addEndpoint(serviceConfig, endpointConfig, callback);
     }
 
     @Test

@@ -22,8 +22,8 @@ import org.slf4j.LoggerFactory;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.polling.EndpointResponse;
-import com.pushtechnology.adapters.rest.polling.ServiceSession;
 import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
+import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 
 /**
  * Handle the initial response for an endpoint.
@@ -35,7 +35,7 @@ import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
     private final TopicManagementClient topicManagementClient;
     private final ServiceConfig service;
     private final EndpointConfig endpoint;
-    private final ServiceSession serviceSession;
+    private final TopicControl.AddCallback callback;
 
     /**
      * Constructor.
@@ -44,16 +44,17 @@ import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
             TopicManagementClient topicManagementClient,
             ServiceConfig service,
             EndpointConfig endpoint,
-            ServiceSession serviceSession) {
+            TopicControl.AddCallback callback) {
+
         this.topicManagementClient = topicManagementClient;
         this.service = service;
         this.endpoint = endpoint;
-        this.serviceSession = serviceSession;
+        this.callback = callback;
     }
 
     @Override
     public void completed(EndpointResponse result) {
-        topicManagementClient.addEndpoint(service, endpoint, new AddEndpointToServiceSession(endpoint, serviceSession));
+        topicManagementClient.addEndpoint(service, endpoint, callback);
     }
 
     @Override

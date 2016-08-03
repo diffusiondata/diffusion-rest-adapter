@@ -60,6 +60,6 @@ import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
                     topicManagementClient,
                     service,
                     endpointConfig,
-                    serviceSession)));
+                    new AddEndpointToServiceSession(endpointConfig, serviceSession))));
     }
 }
