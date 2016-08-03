@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="warn">
+    <Properties>
+        <Property name="pattern">%date{yyyy-MM-dd HH:mm:ss.SSS}|%level|%thread|%marker|%replace{%msg}{\|}{}|%logger%n%xEx</Property>
+    </Properties>
+
+    <Appenders>
+        <Console name="console">
+            <PatternLayout pattern="${pattern}" />
+        </Console>
+    </Appenders>
+
+    <Loggers>
+        <Root level="info" includeLocation="false">
+            <AppenderRef ref="console" />
+        </Root>
+    </Loggers>
+</Configuration>
