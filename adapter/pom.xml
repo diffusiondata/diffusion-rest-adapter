@@ -14,11 +14,6 @@
     <dependencies>
         <dependency>
             <groupId>com.pushtechnology.adapters.rest</groupId>
-            <artifactId>configuration-persistence</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.pushtechnology.adapters.rest</groupId>
             <artifactId>polling</artifactId>
         </dependency>
 
@@ -40,11 +35,6 @@
         <dependency>
             <groupId>com.pushtechnology.adapters.rest</groupId>
             <artifactId>configuration-store</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.picocontainer</groupId>
-            <artifactId>picocontainer</artifactId>
         </dependency>
 
         <dependency>
