@@ -13,14 +13,18 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.polling;
+package com.pushtechnology.adapters.rest.adapter;
 
 import org.apache.http.concurrent.FutureCallback;
 
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.diffusion.datatype.binary.Binary;
-import com.pushtechnology.diffusion.datatype.json.JSON;
+import com.pushtechnology.adapters.rest.polling.BinaryParsingHandler;
+import com.pushtechnology.adapters.rest.polling.EndpointPollHandlerFactory;
+import com.pushtechnology.adapters.rest.polling.EndpointResponse;
+import com.pushtechnology.adapters.rest.polling.JSONParsingHandler;
+import com.pushtechnology.adapters.rest.polling.StringParsingHandler;
+import com.pushtechnology.adapters.rest.publication.PublishingClient;
 
 /**
  * Implementation of {@link EndpointPollHandlerFactory}.
@@ -28,20 +32,13 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
  * @author Push Technology Limited
  */
 public final class EndpointPollHandlerFactoryImpl implements EndpointPollHandlerFactory {
-    private final PollHandlerFactory<JSON> jsonHandlerFactory;
-    private final PollHandlerFactory<Binary> binaryHandlerFactory;
-    private final PollHandlerFactory<String> stringHandlerFactory;
+    private final PublishingClient publishingClient;
 
     /**
      * Constructor.
      */
-    public EndpointPollHandlerFactoryImpl(
-            JSONPollHandlerFactory jsonHandlerFactory,
-            BinaryPollHandlerFactory binaryHandlerFactory,
-            StringPollHandlerFactory stringHandlerFactory) {
-        this.jsonHandlerFactory = jsonHandlerFactory;
-        this.binaryHandlerFactory = binaryHandlerFactory;
-        this.stringHandlerFactory = stringHandlerFactory;
+    public EndpointPollHandlerFactoryImpl(PublishingClient publishingClient) {
+        this.publishingClient = publishingClient;
     }
 
     @Override
@@ -51,14 +48,17 @@ public final class EndpointPollHandlerFactoryImpl implements EndpointPollHandler
             case "json" :
             case "application/json" :
                 return new StringParsingHandler(
-                    new JSONParsingHandler(jsonHandlerFactory.create(serviceConfig, endpointConfig)));
+                    new JSONParsingHandler(
+                        new JSONPublishingHandler(publishingClient, serviceConfig, endpointConfig)));
 
             case "binary" :
-                return new BinaryParsingHandler(binaryHandlerFactory.create(serviceConfig, endpointConfig));
+                return new BinaryParsingHandler(
+                    new BinaryPublishingHandler(publishingClient, serviceConfig, endpointConfig));
 
             case "string" :
             case "text/plain" :
-                return new StringParsingHandler(stringHandlerFactory.create(serviceConfig, endpointConfig));
+                return new StringParsingHandler(
+                    new StringPublishingHandler(publishingClient, serviceConfig, endpointConfig));
 
             default:
                 throw new IllegalArgumentException("Unsupported produces value \"" + produces + "\"");

@@ -13,13 +13,14 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.polling;
+package com.pushtechnology.adapters.rest.adapter;
 
 import static java.util.Arrays.asList;
-import static org.mockito.Mockito.verify;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.MockitoAnnotations.initMocks;
 
+import org.apache.http.concurrent.FutureCallback;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,6 +28,11 @@ import org.mockito.Mock;
 
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
+import com.pushtechnology.adapters.rest.polling.BinaryParsingHandler;
+import com.pushtechnology.adapters.rest.polling.EndpointResponse;
+import com.pushtechnology.adapters.rest.polling.PollHandlerFactory;
+import com.pushtechnology.adapters.rest.polling.StringParsingHandler;
+import com.pushtechnology.adapters.rest.publication.PublishingClient;
 
 /**
  * Unit tests for {@link EndpointPollHandlerFactoryImpl}.
@@ -35,11 +41,7 @@ import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
  */
 public final class EndpointPollHandlerFactoryTest {
     @Mock
-    private JSONPollHandlerFactory jsonPollHandlerFactory;
-    @Mock
-    private BinaryPollHandlerFactory binaryPollHandlerFactory;
-    @Mock
-    private StringPollHandlerFactory stringPollHandlerFactory;
+    private PublishingClient publishingClient;
 
     private final EndpointConfig jsonEndpoint = EndpointConfig
         .builder()
@@ -75,36 +77,33 @@ public final class EndpointPollHandlerFactoryTest {
     public void setUp() {
         initMocks(this);
 
-        pollHandlerFactory = new EndpointPollHandlerFactoryImpl(
-            jsonPollHandlerFactory,
-            binaryPollHandlerFactory,
-            stringPollHandlerFactory);
+        pollHandlerFactory = new EndpointPollHandlerFactoryImpl(publishingClient);
     }
 
     @After
     public void postConditions() {
-        verifyNoMoreInteractions(jsonPollHandlerFactory, binaryPollHandlerFactory, stringPollHandlerFactory);
+        verifyNoMoreInteractions(publishingClient);
     }
 
     @Test
     public void createJson() {
-        pollHandlerFactory.create(serviceConfig, jsonEndpoint);
+        final FutureCallback<EndpointResponse> callback = pollHandlerFactory.create(serviceConfig, jsonEndpoint);
 
-        verify(jsonPollHandlerFactory).create(serviceConfig, jsonEndpoint);
+        assertTrue(callback instanceof StringParsingHandler);
     }
 
     @Test
     public void createBinary() {
-        pollHandlerFactory.create(serviceConfig, binaryEndpoint);
+        final FutureCallback<EndpointResponse> callback = pollHandlerFactory.create(serviceConfig, binaryEndpoint);
 
-        verify(binaryPollHandlerFactory).create(serviceConfig, binaryEndpoint);
+        assertTrue(callback instanceof BinaryParsingHandler);
     }
 
     @Test
     public void createPlainText() {
-        pollHandlerFactory.create(serviceConfig, plainTextEndpoint);
+        final FutureCallback<EndpointResponse> callback = pollHandlerFactory.create(serviceConfig, plainTextEndpoint);
 
-        verify(stringPollHandlerFactory).create(serviceConfig, plainTextEndpoint);
+        assertTrue(callback instanceof StringParsingHandler);
     }
 
     @Test(expected = IllegalArgumentException.class)
