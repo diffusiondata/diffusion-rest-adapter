@@ -13,22 +13,25 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.model.latest;
+package com.pushtechnology.adapters.rest.model.v10;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.ToString;
 import lombok.Value;
 
 /**
- * Security configuration. Version 11.
+ * Basic authentication configuration. Version 10.
  * <p>
- * Description of the security used by a REST service.
+ * Description of the basic authentication parameters.
  *
  * @author Push Technology Limited
  */
 @Value
 @Builder
 @AllArgsConstructor
-public class SecurityConfig {
-    BasicAuthenticationConfig basic;
+@ToString(of = {})
+public class BasicAuthenticationConfig {
+    String principal;
+    String credential;
 }

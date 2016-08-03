@@ -36,6 +36,12 @@ public final class DiffusionSessionFactoryTest {
             .builder()
             .host("localhost")
             .port(8080)
+            .connectionTimeout(10000)
+            .reconnectionTimeout(10000)
+            .maximumMessageSize(32000)
+            .inputBufferSize(32000)
+            .outputBufferSize(32000)
+            .recoveryBufferSize(256)
             .build())
         .build();
 
@@ -47,6 +53,12 @@ public final class DiffusionSessionFactoryTest {
             .port(8080)
             .principal("control")
             .password("password")
+            .connectionTimeout(10000)
+            .reconnectionTimeout(10000)
+            .maximumMessageSize(32000)
+            .inputBufferSize(32000)
+            .outputBufferSize(32000)
+            .recoveryBufferSize(256)
             .build())
         .build();
 
@@ -55,13 +67,18 @@ public final class DiffusionSessionFactoryTest {
         initMocks(this);
 
         when(sessionFactory.transports(WEBSOCKET)).thenReturn(sessionFactory);
-        when(sessionFactory.reconnectionTimeout(10000)).thenReturn(sessionFactory);
         when(sessionFactory.listener(listener)).thenReturn(sessionFactory);
         when(sessionFactory.serverHost("localhost")).thenReturn(sessionFactory);
         when(sessionFactory.serverPort(8080)).thenReturn(sessionFactory);
         when(sessionFactory.secureTransport(false)).thenReturn(sessionFactory);
         when(sessionFactory.principal("control")).thenReturn(sessionFactory);
         when(sessionFactory.password("password")).thenReturn(sessionFactory);
+        when(sessionFactory.connectionTimeout(10000)).thenReturn(sessionFactory);
+        when(sessionFactory.reconnectionTimeout(10000)).thenReturn(sessionFactory);
+        when(sessionFactory.maximumMessageSize(32000)).thenReturn(sessionFactory);
+        when(sessionFactory.inputBufferSize(32000)).thenReturn(sessionFactory);
+        when(sessionFactory.outputBufferSize(32000)).thenReturn(sessionFactory);
+        when(sessionFactory.recoveryBufferSize(256)).thenReturn(sessionFactory);
         when(sessionFactory.open()).thenReturn(session);
     }
 
@@ -75,7 +92,6 @@ public final class DiffusionSessionFactoryTest {
         final DiffusionSessionFactory diffusionSessionFactory = new DiffusionSessionFactory(sessionFactory);
 
         verify(sessionFactory).transports(WEBSOCKET);
-        verify(sessionFactory).reconnectionTimeout(10000);
 
         assertEquals(session, diffusionSessionFactory.provide(noAuthModel, listener, null));
 
@@ -83,6 +99,12 @@ public final class DiffusionSessionFactoryTest {
         verify(sessionFactory).serverHost("localhost");
         verify(sessionFactory).serverPort(8080);
         verify(sessionFactory).secureTransport(false);
+        verify(sessionFactory).connectionTimeout(10000);
+        verify(sessionFactory).reconnectionTimeout(10000);
+        verify(sessionFactory).maximumMessageSize(32000);
+        verify(sessionFactory).inputBufferSize(32000);
+        verify(sessionFactory).outputBufferSize(32000);
+        verify(sessionFactory).recoveryBufferSize(256);
         verify(sessionFactory).open();
     }
 
@@ -91,7 +113,6 @@ public final class DiffusionSessionFactoryTest {
         final DiffusionSessionFactory diffusionSessionFactory = new DiffusionSessionFactory(sessionFactory);
 
         verify(sessionFactory).transports(WEBSOCKET);
-        verify(sessionFactory).reconnectionTimeout(10000);
 
         assertEquals(session, diffusionSessionFactory.provide(authModel, listener, null));
 
@@ -101,6 +122,12 @@ public final class DiffusionSessionFactoryTest {
         verify(sessionFactory).secureTransport(false);
         verify(sessionFactory).principal("control");
         verify(sessionFactory).password("password");
+        verify(sessionFactory).connectionTimeout(10000);
+        verify(sessionFactory).reconnectionTimeout(10000);
+        verify(sessionFactory).maximumMessageSize(32000);
+        verify(sessionFactory).inputBufferSize(32000);
+        verify(sessionFactory).outputBufferSize(32000);
+        verify(sessionFactory).recoveryBufferSize(256);
         verify(sessionFactory).open();
     }
 }

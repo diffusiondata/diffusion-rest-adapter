@@ -13,22 +13,41 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.model.latest;
+package com.pushtechnology.adapters.rest.model.v10;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Value;
 
 /**
- * Security configuration. Version 11.
+ * Diffusion configuration. Version 10.
  * <p>
- * Description of the security used by a REST service.
+ * Description of a Diffusion server to publish to.
  *
  * @author Push Technology Limited
  */
 @Value
 @Builder
 @AllArgsConstructor
-public class SecurityConfig {
-    BasicAuthenticationConfig basic;
+public class DiffusionConfig {
+    /**
+     * The host of the Diffusion server.
+     */
+    String host;
+    /**
+     * The port the Diffusion server listens on.
+     */
+    int port;
+    /**
+     * If a secure connection should be used.
+     */
+    boolean secure;
+    /**
+     * The principal. Can be {@code null}.
+     */
+    String principal;
+    /**
+     * The password. Can be {@code null}.
+     */
+    String password;
 }

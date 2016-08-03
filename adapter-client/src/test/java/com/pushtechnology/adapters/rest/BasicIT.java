@@ -90,6 +90,12 @@ public final class BasicIT {
         .port(8080)
         .principal("control")
         .password("password")
+        .connectionTimeout(10000)
+        .reconnectionTimeout(10000)
+        .maximumMessageSize(32000)
+        .inputBufferSize(32000)
+        .outputBufferSize(32000)
+        .recoveryBufferSize(256)
         .build();
     private static final EndpointConfig INCREMENT_ENDPOINT = EndpointConfig
         .builder()

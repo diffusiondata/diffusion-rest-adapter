@@ -24,7 +24,7 @@ import lombok.Builder;
 import lombok.Value;
 
 /**
- * Configuration model. Version 10.
+ * Configuration model. Version 11.
  *
  * @author Push Technology Limited
  */
@@ -35,7 +35,7 @@ public class Model implements AnyModel {
     /**
      * The version of the model.
      */
-    public static final int VERSION = 10;
+    public static final int VERSION = 11;
 
     /**
      * If the client should run.

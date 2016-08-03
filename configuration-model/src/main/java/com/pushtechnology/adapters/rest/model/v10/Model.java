@@ -13,22 +13,47 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.model.latest;
+package com.pushtechnology.adapters.rest.model.v10;
+
+import java.util.List;
+
+import com.pushtechnology.adapters.rest.model.AnyModel;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Value;
 
 /**
- * Security configuration. Version 11.
- * <p>
- * Description of the security used by a REST service.
+ * Configuration model. Version 10.
  *
  * @author Push Technology Limited
  */
 @Value
 @Builder
 @AllArgsConstructor
-public class SecurityConfig {
-    BasicAuthenticationConfig basic;
+public class Model implements AnyModel {
+    /**
+     * The version of the model.
+     */
+    public static final int VERSION = 10;
+
+    /**
+     * If the client should run.
+     */
+    private boolean active;
+
+    /**
+     * The Diffusion server.
+     */
+    private DiffusionConfig diffusion;
+
+    /**
+     * The REST services to poll.
+     */
+    List<ServiceConfig> services;
+
+    /**
+     * The location of the trust store.
+     */
+    String truststore;
 }

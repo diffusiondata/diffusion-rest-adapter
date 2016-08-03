@@ -16,9 +16,12 @@ It is intended to trigger an orderly shutdown of the client.
 ### Diffusion
 
 The Diffusion section describes the server to connect the client to.
-It contains the `host`, `port`, `secure`, `principal` and `password`.
+It contains the `host`, `port`, `secure`, `principal`, `password`, `connectionTimeout`, `reconnectionTimeout`,
+`maximumMessageSize`, `inputBufferSize`, `outputBufferSize` and `recoveryBufferSize`.
 The `host`, `port` and `secure` may not be null, they identify the server to connect to.
 The `principal` and `password` can be null, they identify the client to the server.
+The `connectionTimeout`, `reconnectionTimeout`, `maximumMessageSize`, `inputBufferSize`, `outputBufferSize` and
+`recoveryBufferSize` allow the Diffusion session to be tuned.
 
 ### Services
 

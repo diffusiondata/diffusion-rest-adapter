@@ -13,22 +13,39 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.model.latest;
+package com.pushtechnology.adapters.rest.model.v10;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.ToString;
 import lombok.Value;
 
 /**
- * Security configuration. Version 11.
+ * Endpoint configuration. Version 10.
  * <p>
- * Description of the security used by a REST service.
+ * Description of a REST endpoint to poll.
  *
  * @author Push Technology Limited
  */
 @Value
 @Builder
 @AllArgsConstructor
-public class SecurityConfig {
-    BasicAuthenticationConfig basic;
+@ToString(of = "name")
+public class EndpointConfig {
+    /**
+     * The name of the endpoint.
+     */
+    String name;
+    /**
+     * The URL of the endpoint.
+     */
+    String url;
+    /**
+     * The topic to map the endpoint to.
+     */
+    String topic;
+    /**
+     * The type of content produced by the endpoint.
+     */
+    String produces;
 }

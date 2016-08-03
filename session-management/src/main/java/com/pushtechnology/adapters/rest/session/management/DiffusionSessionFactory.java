@@ -40,9 +40,7 @@ public final class DiffusionSessionFactory extends ProviderAdapter {
      * Constructor.
      */
     /*package*/ DiffusionSessionFactory(SessionFactory baseSessionFactory) {
-        this.baseSessionFactory = baseSessionFactory
-            .transports(WEBSOCKET)
-            .reconnectionTimeout(10000);
+        this.baseSessionFactory = baseSessionFactory.transports(WEBSOCKET);
     }
 
     /**
@@ -55,6 +53,12 @@ public final class DiffusionSessionFactory extends ProviderAdapter {
             .serverHost(diffusionConfig.getHost())
             .serverPort(diffusionConfig.getPort())
             .secureTransport(diffusionConfig.isSecure())
+            .connectionTimeout(diffusionConfig.getConnectionTimeout())
+            .reconnectionTimeout(diffusionConfig.getReconnectionTimeout())
+            .maximumMessageSize(diffusionConfig.getMaximumMessageSize())
+            .inputBufferSize(diffusionConfig.getInputBufferSize())
+            .outputBufferSize(diffusionConfig.getInputBufferSize())
+            .recoveryBufferSize(diffusionConfig.getRecoveryBufferSize())
             .listener(listener);
 
         if (sslContext != null) {

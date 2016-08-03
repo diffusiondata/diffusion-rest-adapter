@@ -20,7 +20,7 @@ import lombok.Builder;
 import lombok.Value;
 
 /**
- * Diffusion configuration. Version 10.
+ * Diffusion configuration. Version 11.
  * <p>
  * Description of a Diffusion server to publish to.
  *
@@ -50,4 +50,28 @@ public class DiffusionConfig {
      * The password. Can be {@code null}.
      */
     String password;
+    /**
+     * The Diffusion session connection timeout.
+     */
+    int connectionTimeout;
+    /**
+     * The Diffusion session reconnection timeout.
+     */
+    int reconnectionTimeout;
+    /**
+     * The Diffusion session maximum message size.
+     */
+    int maximumMessageSize;
+    /**
+     * The Diffusion session input buffer size.
+     */
+    int inputBufferSize;
+    /**
+     * The Diffusion session output buffer size.
+     */
+    int outputBufferSize;
+    /**
+     * The Diffusion session recovery buffer size.
+     */
+    int recoveryBufferSize;
 }

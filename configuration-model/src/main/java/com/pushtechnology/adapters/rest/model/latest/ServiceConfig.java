@@ -23,7 +23,7 @@ import lombok.ToString;
 import lombok.Value;
 
 /**
- * Service configuration. Version 10.
+ * Service configuration. Version 11.
  * <p>
  * Description of a REST service to poll.
  *

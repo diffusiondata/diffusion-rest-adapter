@@ -13,14 +13,14 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.model.latest;
+package com.pushtechnology.adapters.rest.model.v10;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Value;
 
 /**
- * Security configuration. Version 11.
+ * Security configuration. Version 10.
  * <p>
  * Description of the security used by a REST service.
  *
