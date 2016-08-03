@@ -21,7 +21,6 @@ import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.adapters.rest.polling.EndpointResponse;
 import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 
@@ -30,7 +29,7 @@ import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
  *
  * @author Push Technology Limited
  */
-/*package*/ final class AddTopicForEndpoint implements FutureCallback<EndpointResponse> {
+/*package*/ final class AddTopicForEndpoint implements FutureCallback<Object> {
     private static final Logger LOG = LoggerFactory.getLogger(AddTopicForEndpoint.class);
     private final TopicManagementClient topicManagementClient;
     private final ServiceConfig service;
@@ -53,7 +52,7 @@ import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
     }
 
     @Override
-    public void completed(EndpointResponse result) {
+    public void completed(Object result) {
         topicManagementClient.addEndpoint(service, endpoint, callback);
     }
 

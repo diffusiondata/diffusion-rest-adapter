@@ -27,12 +27,12 @@ import com.pushtechnology.adapters.rest.polling.EndpointResponse;
  */
 public final class ValidateContentType implements FutureCallback<EndpointResponse> {
     private final EndpointConfig endpointConfig;
-    private final FutureCallback<EndpointResponse> delegate;
+    private final FutureCallback<? super EndpointResponse> delegate;
 
     /**
      * Constructor.
      */
-    public ValidateContentType(EndpointConfig endpointConfig, FutureCallback<EndpointResponse> delegate) {
+    public ValidateContentType(EndpointConfig endpointConfig, FutureCallback<? super EndpointResponse> delegate) {
         this.endpointConfig = endpointConfig;
         this.delegate = delegate;
     }
