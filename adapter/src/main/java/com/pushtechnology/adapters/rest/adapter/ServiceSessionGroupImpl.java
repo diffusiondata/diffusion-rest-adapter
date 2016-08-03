@@ -33,8 +33,6 @@ import com.pushtechnology.adapters.rest.polling.ServiceSession;
 import com.pushtechnology.adapters.rest.polling.ServiceSessionFactory;
 import com.pushtechnology.adapters.rest.publication.PublishingClient;
 import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicAddFailReason;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.AddCallback;
 
 /**
  * Implementation for {@link ServiceSessionGroup}.
@@ -93,25 +91,10 @@ public final class ServiceSessionGroupImpl implements ServiceSessionGroup {
                             new ValidateContentType(endpoint, new FutureCallback<EndpointResponse>() {
                                 @Override
                                 public void completed(EndpointResponse result) {
-                                    topicManagementClient.addEndpoint(service, endpoint, new AddCallback() {
-                                        @Override
-                                        public void onTopicAdded(String topicPath) {
-                                            LOG.info(
-                                                "Endpoint {} exists, adding endpoint to service session",
-                                                endpoint);
-                                            serviceSession.addEndpoint(endpoint);
-                                        }
-
-                                        @Override
-                                        public void onTopicAddFailed(String topicPath, TopicAddFailReason reason) {
-                                            LOG.warn("Topic creation failed for {} because {}", endpoint, reason);
-                                        }
-
-                                        @Override
-                                        public void onDiscard() {
-                                            LOG.warn("Topic creation for {} might not have succeeded", endpoint);
-                                        }
-                                    });
+                                    topicManagementClient.addEndpoint(
+                                        service,
+                                        endpoint,
+                                        new AddEndpointToServiceSession(endpoint, serviceSession));
                                 }
 
                                 @Override
@@ -144,4 +127,5 @@ public final class ServiceSessionGroupImpl implements ServiceSessionGroup {
         model.getServices().forEach(publishingClient::removeService);
         LOG.debug("Closed service session group");
     }
+
 }
