@@ -55,6 +55,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.mockito.Mock;
 import org.mockito.verification.VerificationWithTimeout;
 
@@ -77,10 +78,11 @@ import com.pushtechnology.diffusion.datatype.binary.Binary;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
 /**
- * Basic integration test for adapting resources.
+ * Basic integration test for adapting resources against embedded services.
  *
  * @author Push Technology Limited
  */
+@Category(EmbeddedServices.class)
 public final class BasicIT {
     private static final DiffusionConfig DIFFUSION_CONFIG = DiffusionConfig
         .builder()
