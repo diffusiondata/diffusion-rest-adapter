@@ -99,6 +99,7 @@
 
     <profiles>
         <!-- Enable integration tests only when the DIFFUSION_HOME environmental variable is set -->
+        <!-- Only runs the embedded services test category by default -->
         <profile>
             <id>integration-test</id>
             <activation>
@@ -176,6 +177,7 @@
             </build>
         </profile>
 
+        <!-- Run only the live services test when requested -->
         <profile>
             <id>live-services-test</id>
             <activation>
@@ -186,24 +188,27 @@
                 <plugins>
                     <plugin>
                         <artifactId>maven-failsafe-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>test</id>
-                                <phase>integration-test</phase>
-                                <goals>
-                                    <goal>integration-test</goal>
-                                </goals>
-                            </execution>
-                            <execution>
-                                <id>verify</id>
-                                <phase>post-integration-test</phase>
-                                <goals>
-                                    <goal>verify</goal>
-                                </goals>
-                            </execution>
-                        </executions>
                         <configuration>
                             <groups>com.pushtechnology.adapters.rest.LiveServices</groups>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- Run both the embedded and live services tests when requested -->
+        <profile>
+            <id>all-tests</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <configuration>
+                            <groups>com.pushtechnology.adapters.rest.EmbeddedServices,com.pushtechnology.adapters.rest.LiveServices</groups>
                         </configuration>
                     </plugin>
                 </plugins>

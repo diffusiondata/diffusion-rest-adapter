@@ -107,7 +107,13 @@ They are run by the profile, `integration-test`, enabled when the environmental 
 They use the `diffusion-maven-plugin` to start up and shutdown the the Diffusion server.
 The `diffusion-maven-plugin` requires a system dependency to run, these `systemPath` for this dependency is relative to
 the `DIFFUSION_HOME` environmental variable.
-Any REST service is started embedded within the JVM process.
+
+There are two categories for the integration tests, Embedded service tests and live service tests.
+The embedded service tests host their own REST services embedded within the JVM process.
+The live service tests use REST services generally available on the internet.
+The only the embedded service tests are run by default.
+To run only the live service tests enable the profile `live-services-test`.
+To run both the embedded services tests and the live service tests enable the profile `all-tests`.
 
 ### Build artifact overview
 
