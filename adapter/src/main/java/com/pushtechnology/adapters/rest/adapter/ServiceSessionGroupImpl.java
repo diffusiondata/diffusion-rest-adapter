@@ -21,14 +21,12 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
-import org.apache.http.concurrent.FutureCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.polling.EndpointClient;
-import com.pushtechnology.adapters.rest.polling.EndpointResponse;
 import com.pushtechnology.adapters.rest.polling.ServiceSession;
 import com.pushtechnology.adapters.rest.polling.ServiceSessionFactory;
 import com.pushtechnology.adapters.rest.publication.PublishingClient;
@@ -88,25 +86,13 @@ public final class ServiceSessionGroupImpl implements ServiceSessionGroup {
                         endpointClient.request(
                             service,
                             endpoint,
-                            new ValidateContentType(endpoint, new FutureCallback<EndpointResponse>() {
-                                @Override
-                                public void completed(EndpointResponse result) {
-                                    topicManagementClient.addEndpoint(
-                                        service,
-                                        endpoint,
-                                        new AddEndpointToServiceSession(endpoint, serviceSession));
-                                }
-
-                                @Override
-                                public void failed(Exception ex) {
-                                    LOG.warn("Initial request to {} failed", endpoint, ex);
-                                }
-
-                                @Override
-                                public void cancelled() {
-                                    LOG.warn("Initial request to {} cancelled", endpoint);
-                                }
-                            }));
+                            new ValidateContentType(
+                                endpoint,
+                                new InitialEndpointResponseHandler(
+                                    topicManagementClient,
+                                    service,
+                                    endpoint,
+                                    serviceSession)));
                     });
                     serviceSession.start();
                 })
