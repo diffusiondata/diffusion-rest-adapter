@@ -82,18 +82,13 @@ public final class ServiceSessionGroupImpl implements ServiceSessionGroup {
                 .onActive((updater) -> {
                     LOG.info("Service {} active", service);
                     serviceListener.onActive(service);
-                    service.getEndpoints().forEach(endpoint -> {
-                        endpointClient.request(
+                    service
+                        .getEndpoints()
+                        .forEach(new InitialiseEndpoint(
+                            endpointClient,
+                            topicManagementClient,
                             service,
-                            endpoint,
-                            new ValidateContentType(
-                                endpoint,
-                                new InitialEndpointResponseHandler(
-                                    topicManagementClient,
-                                    service,
-                                    endpoint,
-                                    serviceSession)));
-                    });
+                            serviceSession));
                     serviceSession.start();
                 })
                 .onClose(() -> {
