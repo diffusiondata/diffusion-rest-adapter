@@ -23,11 +23,6 @@
         </dependency>
 
         <dependency>
-            <groupId>com.pushtechnology.diffusion</groupId>
-            <artifactId>diffusion-client</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>org.glassfish.jersey.containers</groupId>
             <artifactId>jersey-container-servlet-core</artifactId>
         </dependency>

@@ -24,7 +24,7 @@
 
         <dependency>
             <groupId>com.pushtechnology.diffusion</groupId>
-            <artifactId>diffusion-api</artifactId>
+            <artifactId>diffusion-client</artifactId>
         </dependency>
 
         <dependency>
@@ -45,12 +45,6 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.pushtechnology.diffusion</groupId>
-            <artifactId>diffusion-client</artifactId>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 

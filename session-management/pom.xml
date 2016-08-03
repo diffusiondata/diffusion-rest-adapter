@@ -19,7 +19,7 @@
 
         <dependency>
             <groupId>com.pushtechnology.diffusion</groupId>
-            <artifactId>diffusion-api</artifactId>
+            <artifactId>diffusion-client</artifactId>
         </dependency>
 
         <dependency>
