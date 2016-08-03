@@ -26,12 +26,12 @@ import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 
 /**
- * Handle the initial response for an endpoint.
+ * Add topic for an endpoint when a response is successfully received.
  *
  * @author Push Technology Limited
  */
-/*package*/ final class InitialEndpointResponseHandler implements FutureCallback<EndpointResponse> {
-    private static final Logger LOG = LoggerFactory.getLogger(InitialEndpointResponseHandler.class);
+/*package*/ final class AddTopicForEndpoint implements FutureCallback<EndpointResponse> {
+    private static final Logger LOG = LoggerFactory.getLogger(AddTopicForEndpoint.class);
     private final TopicManagementClient topicManagementClient;
     private final ServiceConfig service;
     private final EndpointConfig endpoint;
@@ -40,7 +40,7 @@ import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
     /**
      * Constructor.
      */
-    /*package*/ InitialEndpointResponseHandler(
+    /*package*/ AddTopicForEndpoint(
             TopicManagementClient topicManagementClient,
             ServiceConfig service,
             EndpointConfig endpoint,

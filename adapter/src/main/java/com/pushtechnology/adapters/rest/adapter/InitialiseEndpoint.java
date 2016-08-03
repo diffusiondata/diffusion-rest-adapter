@@ -56,7 +56,7 @@ import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
             endpointConfig,
             new ValidateContentType(
                 endpointConfig,
-                new InitialEndpointResponseHandler(
+                new AddTopicForEndpoint(
                     topicManagementClient,
                     service,
                     endpointConfig,

@@ -31,11 +31,11 @@ import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 
 /**
- * Unit tests for {@link InitialEndpointResponseHandler}.
+ * Unit tests for {@link AddTopicForEndpoint}.
  *
  * @author Push Technology Limited
  */
-public final class InitialEndpointResponseHandlerTest {
+public final class AddTopicForEndpointTest {
 
     @Mock
     private TopicManagementClient topicManagementClient;
@@ -47,13 +47,13 @@ public final class InitialEndpointResponseHandlerTest {
     private ServiceConfig serviceConfig = ServiceConfig.builder().build();
     private final EndpointConfig endpointConfig = EndpointConfig.builder().build();
 
-    private InitialEndpointResponseHandler handler;
+    private AddTopicForEndpoint handler;
 
     @Before
     public void setUp() {
         initMocks(this);
 
-        handler = new InitialEndpointResponseHandler(
+        handler = new AddTopicForEndpoint(
             topicManagementClient,
             serviceConfig,
             endpointConfig,
