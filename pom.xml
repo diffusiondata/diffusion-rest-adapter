@@ -259,34 +259,30 @@
                     </execution>
                 </executions>
             </plugin>
-        </plugins>
 
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <artifactId>maven-pmd-plugin</artifactId>
-                    <executions>
-                        <execution>
-                            <goals>
-                                <goal>check</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                    <configuration>
-                        <rulesets>
-                            <ruleset>/pmd/adapter-ruleset.xml</ruleset>
-                        </rulesets>
-                    </configuration>
-                    <dependencies>
-                        <dependency>
-                            <groupId>com.pushtechnology.adapters.rest</groupId>
-                            <artifactId>build-rules</artifactId>
-                            <version>${project.version}</version>
-                        </dependency>
-                    </dependencies>
-                </plugin>
-            </plugins>
-        </pluginManagement>
+            <plugin>
+                <artifactId>maven-pmd-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <rulesets>
+                        <ruleset>/pmd/adapter-ruleset.xml</ruleset>
+                    </rulesets>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.pushtechnology.adapters.rest</groupId>
+                        <artifactId>build-rules</artifactId>
+                        <version>${project.version}</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+        </plugins>
     </build>
 
     <reporting>
