@@ -108,7 +108,7 @@ public final class LiveIT {
             .host("api.bitcoinaverage.com")
             .port(443)
             .secure(true)
-            .pollPeriod(10000)
+            .pollPeriod(20000)
             .endpoints(singletonList(EndpointConfig
                 .builder()
                 .name("GBP")
@@ -199,15 +199,5 @@ public final class LiveIT {
     private void stopSession(Session session) {
         session.close();
         verify(listener, timed()).onSessionStateChanged(session, CONNECTED_ACTIVE, CLOSED_BY_CLIENT);
-    }
-
-    private static Model modelWith(ServiceConfig... services) {
-        return Model
-            .builder()
-            .active(true)
-            .diffusion(DIFFUSION_CONFIG)
-            .services(asList(services))
-            .truststore("testKeystore.jks")
-            .build();
     }
 }
