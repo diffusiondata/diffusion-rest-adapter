@@ -102,8 +102,8 @@ public final class LiveIT {
     }
 
     @Test
-    public void testInitialisation() throws IOException {
-        final ServiceConfig serviceConfig = ServiceConfig
+    public void testInitialValuesAreRecievedForEndpoints() throws IOException {
+        final ServiceConfig bitcoinaverage = ServiceConfig
             .builder()
             .host("api.bitcoinaverage.com")
             .port(443)
@@ -117,31 +117,53 @@ public final class LiveIT {
                 .url("/ticker/global/GBP").build()))
             .topicRoot("bitcoin")
             .build();
+
+        final ServiceConfig icndb = ServiceConfig
+            .builder()
+            .host("api.icndb.com")
+            .port(80)
+            .secure(false)
+            .pollPeriod(10000)
+            .endpoints(singletonList(EndpointConfig
+                .builder()
+                .name("Random Chuck Norris jokes")
+                .produces("application/json")
+                .topic("random")
+                .url("/jokes/random")
+                .build()))
+            .topicRoot("icndb")
+            .build();
+
         modelStore.setModel(Model
             .builder()
             .active(true)
             .diffusion(DIFFUSION_CONFIG)
-            .services(singletonList(serviceConfig))
+            .services(asList(bitcoinaverage, icndb))
             .build());
         final RESTAdapterClient client = startClient();
 
-        verify(serviceListener, timed()).onActive(serviceConfig);
+        verify(serviceListener, timed()).onActive(bitcoinaverage);
+        verify(serviceListener, timed()).onActive(icndb);
 
         final Session session = startSession();
 
         final Topics topics = session.feature(Topics.class);
         topics.addFallbackStream(JSON.class, stream);
         topics.subscribe("?bitcoin/", callback);
+        topics.subscribe("?icndb/", callback);
 
-        verify(callback, timed()).onComplete();
+        verify(callback, timed().times(2)).onComplete();
         verify(stream, timed()).onSubscription(eq("bitcoin/GBP"), isA(TopicSpecification.class));
+        verify(stream, timed()).onSubscription(eq("icndb/random"), isA(TopicSpecification.class));
 
         verify(stream, timed()).onValue(eq("bitcoin/GBP"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
+        verify(stream, timed()).onValue(eq("icndb/random"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
 
         stopSession(session);
         client.close();
 
-        verify(serviceListener, timed()).onRemove(serviceConfig);
+        verify(serviceListener, timed()).onRemove(bitcoinaverage);
+        verify(serviceListener, timed()).onRemove(icndb);
     }
 
     private static VerificationWithTimeout timed() {
