@@ -17,6 +17,7 @@ package com.pushtechnology.adapters.rest.adapter;
 
 import org.apache.http.concurrent.FutureCallback;
 
+import com.pushtechnology.adapters.rest.model.EndpointType;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.polling.EndpointResponse;
 
@@ -46,20 +47,9 @@ public final class ValidateContentType implements FutureCallback<EndpointRespons
             return;
         }
 
-        if ("binary".equals(endpointConfig.getProduces())) {
-            // Everything is binary
-            delegate.completed(result);
-            return;
-        }
+        final EndpointType type = EndpointType.from(endpointConfig.getProduces());
 
-        if (contentType.startsWith(endpointConfig.getProduces())) {
-            // Content type looks about right
-            delegate.completed(result);
-            return;
-        }
-
-        if (contentType.startsWith("application/json") || contentType.startsWith("text/json")) {
-            // JSON content can be treated as binary, string, or JSON
+        if (type.canHandle(contentType)) {
             delegate.completed(result);
             return;
         }

@@ -15,12 +15,12 @@
 
 package com.pushtechnology.adapters.rest.topic.management;
 
+import com.pushtechnology.adapters.rest.model.EndpointType;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.diffusion.client.callbacks.TopicTreeHandler;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 import com.pushtechnology.diffusion.client.session.Session;
-import com.pushtechnology.diffusion.client.topics.details.TopicType;
 
 /**
  * Topic management client to control Diffusion topic tree.
@@ -55,31 +55,9 @@ public final class TopicManagementClientImpl implements TopicManagementClient {
 
         // Addition synchronisation to partially work around FB: 14967
         synchronized (this) {
-            switch (produces) {
-                case "json":
-                case "application/json":
-                    session
-                        .feature(TopicControl.class)
-                        .addTopic(
-                            topicPath,
-                            TopicType.JSON,
-                            new TopicSetupCallback(callback));
-                    break;
-
-                case "binary":
-                case "string":
-                case "text/plain":
-                    session
-                        .feature(TopicControl.class)
-                        .addTopic(
-                            topicPath,
-                            TopicType.BINARY,
-                            new TopicSetupCallback(callback));
-                    break;
-
-                default:
-                    throw new IllegalArgumentException("Unsupported produces value \"" + produces + "\"");
-            }
+            session
+                .feature(TopicControl.class)
+                .addTopic(topicPath, EndpointType.from(produces).getTopicType(), new TopicSetupCallback(callback));
         }
     }
 }

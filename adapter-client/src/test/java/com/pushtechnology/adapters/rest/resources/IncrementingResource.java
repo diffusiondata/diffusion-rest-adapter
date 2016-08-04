@@ -31,7 +31,7 @@ public class IncrementingResource {
     private static final AtomicInteger count = new AtomicInteger(0);
 
     @GET
-    @Produces("text/json")
+    @Produces("application/json")
     public String getHello() {
         return "{\"current\" : " + count.getAndIncrement() + ", \"next\" : " + count.get() + "}";
     }

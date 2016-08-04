@@ -27,7 +27,7 @@ import javax.ws.rs.Produces;
 @Path("/timestamp")
 public class TimestampResource {
     @GET
-    @Produces("text/json")
+    @Produces("application/json")
     public String getHello() {
         return "{\"timestamp\" : " + System.currentTimeMillis() + "}";
     }

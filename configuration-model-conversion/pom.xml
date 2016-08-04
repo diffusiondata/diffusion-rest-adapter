@@ -18,11 +18,6 @@
         </dependency>
 
         <dependency>
-            <groupId>com.pushtechnology.diffusion</groupId>
-            <artifactId>diffusion-client</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>net.jcip</groupId>
             <artifactId>jcip-annotations</artifactId>
         </dependency>

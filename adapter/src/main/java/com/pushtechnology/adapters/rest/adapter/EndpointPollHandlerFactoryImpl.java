@@ -17,6 +17,7 @@ package com.pushtechnology.adapters.rest.adapter;
 
 import org.apache.http.concurrent.FutureCallback;
 
+import com.pushtechnology.adapters.rest.model.EndpointType;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.polling.BinaryParsingHandler;
@@ -43,25 +44,24 @@ public final class EndpointPollHandlerFactoryImpl implements EndpointPollHandler
 
     @Override
     public FutureCallback<EndpointResponse> create(ServiceConfig serviceConfig, EndpointConfig endpointConfig) {
-        final String produces = endpointConfig.getProduces();
-        switch (produces) {
-            case "json" :
-            case "application/json" :
+        final EndpointType endpointType = EndpointType.from(endpointConfig.getProduces());
+
+        switch (endpointType) {
+            case JSON:
                 return new StringParsingHandler(
                     new JSONParsingHandler(
                         new JSONPublishingHandler(publishingClient, serviceConfig, endpointConfig)));
 
-            case "binary" :
+            case BINARY:
                 return new BinaryParsingHandler(
                     new BinaryPublishingHandler(publishingClient, serviceConfig, endpointConfig));
 
-            case "string" :
-            case "text/plain" :
+            case PLAIN_TEXT:
                 return new StringParsingHandler(
                     new StringPublishingHandler(publishingClient, serviceConfig, endpointConfig));
 
             default:
-                throw new IllegalArgumentException("Unsupported produces value \"" + produces + "\"");
+                throw new IllegalArgumentException("Unsupported endpoint type \"" + endpointType + "\"");
         }
     }
 }
