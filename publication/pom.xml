@@ -13,8 +13,8 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.pushtechnology.diffusion</groupId>
-            <artifactId>diffusion-client</artifactId>
+            <groupId>com.pushtechnology.adapters.rest</groupId>
+            <artifactId>session-management</artifactId>
         </dependency>
 
         <dependency>

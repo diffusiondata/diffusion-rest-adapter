@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
+import com.pushtechnology.adapters.rest.session.management.EventedSessionListener;
 import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.ValueUpdater;
@@ -46,6 +47,7 @@ import net.jcip.annotations.ThreadSafe;
 public final class PublishingClientImpl implements PublishingClient {
     private static final Logger LOG = LoggerFactory.getLogger(PublishingClientImpl.class);
     private final Session session;
+    private final EventedSessionListener sessionListener;
     @GuardedBy("this")
     private Map<ServiceConfig, EventedUpdateSource> updaterSources = new HashMap<>();
     @GuardedBy("this")
@@ -54,8 +56,9 @@ public final class PublishingClientImpl implements PublishingClient {
     /**
      * Constructor.
      */
-    public PublishingClientImpl(Session session) {
+    public PublishingClientImpl(Session session, EventedSessionListener sessionListener) {
         this.session = session;
+        this.sessionListener = sessionListener;
     }
 
     @Override
@@ -101,6 +104,42 @@ public final class PublishingClientImpl implements PublishingClient {
         }
 
         return CompletableFuture.completedFuture(serviceConfig);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> UpdateContext<T> createUpdateContext(
+            ServiceConfig serviceConfig,
+            EndpointConfig endpointConfig,
+            Class<T> type) {
+
+        final UpdaterSet updaterSet = updaters.get(serviceConfig);
+        if (updaterSet == null) {
+            throw new IllegalStateException("The service has not been added or is not active, no updater found");
+        }
+
+        final String topicPath = serviceConfig.getTopicRoot() + "/" + endpointConfig.getTopic();
+        if (JSON.class.isAssignableFrom(type)) {
+            final JSONUpdateContext jsonUpdateContext =
+                new JSONUpdateContext(session, updaterSet.jsonUpdater, topicPath);
+            sessionListener.onSessionStateChange(jsonUpdateContext);
+            return (UpdateContext<T>) jsonUpdateContext;
+        }
+        else if (String.class.isAssignableFrom(type)) {
+            final StringUpdateContext stringUpdateContext =
+                new StringUpdateContext(session, updaterSet.binaryUpdater, topicPath);
+            sessionListener.onSessionStateChange(stringUpdateContext);
+            return (UpdateContext<T>) stringUpdateContext;
+        }
+        else if (Binary.class.isAssignableFrom(type)) {
+            final BinaryUpdateContext binaryUpdateContext =
+                new BinaryUpdateContext(session, updaterSet.binaryUpdater, topicPath);
+            sessionListener.onSessionStateChange(binaryUpdateContext);
+            return (UpdateContext<T>) binaryUpdateContext;
+        }
+        else {
+            throw new IllegalArgumentException("Unsupported type");
+        }
     }
 
     @Override

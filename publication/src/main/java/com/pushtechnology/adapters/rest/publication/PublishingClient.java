@@ -52,4 +52,12 @@ public interface PublishingClient {
      * Update the topic associated with an endpoint.
      */
     void publish(ServiceConfig serviceConfig, EndpointConfig endpointConfig, String value);
+
+    /**
+     * Create an update context.
+     */
+    <T> UpdateContext<T> createUpdateContext(
+        ServiceConfig serviceConfig,
+        EndpointConfig endpointConfig,
+        Class<T> type);
 }
