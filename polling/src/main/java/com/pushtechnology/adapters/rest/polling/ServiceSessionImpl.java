@@ -86,11 +86,18 @@ public final class ServiceSessionImpl implements ServiceSession {
         assert endpointPollers.get(endpointConfig) == null : "The endpoint has already been started";
 
         final PollResultHandler handler = new PollResultHandler(handlerFactory.create(serviceConfig, endpointConfig));
-        final ScheduledFuture<?> future = executor.scheduleWithFixedDelay(
-            new PollingTask(endpointConfig, handler),
-            0L,
-            serviceConfig.getPollPeriod(),
-            MILLISECONDS);
+
+        final ScheduledFuture<?> future;
+        if (serviceConfig.getPollPeriod() <= 0) {
+            future = executor.schedule(new PollingTask(endpointConfig, handler), 0L, MILLISECONDS);
+        }
+        else {
+            future = executor.scheduleWithFixedDelay(
+                new PollingTask(endpointConfig, handler),
+                0L,
+                serviceConfig.getPollPeriod(),
+                MILLISECONDS);
+        }
 
         return new PollHandle(future);
     }
