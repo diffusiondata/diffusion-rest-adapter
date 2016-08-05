@@ -17,6 +17,7 @@ package com.pushtechnology.adapters.rest.adapter;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.MockitoAnnotations.initMocks;
 
@@ -33,6 +34,8 @@ import com.pushtechnology.adapters.rest.polling.EndpointResponse;
 import com.pushtechnology.adapters.rest.polling.PollHandlerFactory;
 import com.pushtechnology.adapters.rest.polling.StringParsingHandler;
 import com.pushtechnology.adapters.rest.publication.PublishingClient;
+import com.pushtechnology.diffusion.datatype.binary.Binary;
+import com.pushtechnology.diffusion.datatype.json.JSON;
 
 /**
  * Unit tests for {@link EndpointPollHandlerFactoryImpl}.
@@ -90,6 +93,7 @@ public final class EndpointPollHandlerFactoryTest {
         final FutureCallback<EndpointResponse> callback = pollHandlerFactory.create(serviceConfig, jsonEndpoint);
 
         assertTrue(callback instanceof StringParsingHandler);
+        verify(publishingClient).createUpdateContext(serviceConfig, jsonEndpoint, JSON.class);
     }
 
     @Test
@@ -97,6 +101,7 @@ public final class EndpointPollHandlerFactoryTest {
         final FutureCallback<EndpointResponse> callback = pollHandlerFactory.create(serviceConfig, binaryEndpoint);
 
         assertTrue(callback instanceof BinaryParsingHandler);
+        verify(publishingClient).createUpdateContext(serviceConfig, binaryEndpoint, Binary.class);
     }
 
     @Test
@@ -104,6 +109,7 @@ public final class EndpointPollHandlerFactoryTest {
         final FutureCallback<EndpointResponse> callback = pollHandlerFactory.create(serviceConfig, plainTextEndpoint);
 
         assertTrue(callback instanceof StringParsingHandler);
+        verify(publishingClient).createUpdateContext(serviceConfig, plainTextEndpoint, String.class);
     }
 
     @Test(expected = IllegalArgumentException.class)

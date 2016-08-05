@@ -20,34 +20,30 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
-import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.adapters.rest.publication.PublishingClient;
-import com.pushtechnology.diffusion.datatype.binary.Binary;
+import com.pushtechnology.adapters.rest.publication.UpdateContext;
 
 /**
- * Handler for a poll request that publishes the {@link Binary} response.
+ * Handler for a poll request that publishes the response using a {@link UpdateContext}.
  *
+ * @param <T> the type of values it publishes
  * @author Push Technology Limited
  */
-/*package*/ final class BinaryPublishingHandler implements FutureCallback<Binary> {
-    private static final Logger LOG = LoggerFactory.getLogger(BinaryPublishingHandler.class);
-    private final PublishingClient publishingClient;
-    private final ServiceConfig serviceConfig;
+/*package*/ final class PublicationHandler<T> implements FutureCallback<T> {
+    private static final Logger LOG = LoggerFactory.getLogger(PublicationHandler.class);
     private final EndpointConfig endpointConfig;
+    private final UpdateContext<T> updateContext;
 
-    /*package*/ BinaryPublishingHandler(
-            PublishingClient publishingClient,
-            ServiceConfig serviceConfig,
-            EndpointConfig endpointConfig) {
+    /*package*/ PublicationHandler(
+            EndpointConfig endpointConfig,
+            UpdateContext<T> updateContext) {
 
-        this.publishingClient = publishingClient;
-        this.serviceConfig = serviceConfig;
         this.endpointConfig = endpointConfig;
+        this.updateContext = updateContext;
     }
 
     @Override
-    public void completed(Binary result) {
-        publishingClient.publish(serviceConfig, endpointConfig, result);
+    public void completed(T result) {
+        updateContext.publish(result);
     }
 
     @Override

@@ -26,6 +26,8 @@ import com.pushtechnology.adapters.rest.polling.EndpointResponse;
 import com.pushtechnology.adapters.rest.polling.JSONParsingHandler;
 import com.pushtechnology.adapters.rest.polling.StringParsingHandler;
 import com.pushtechnology.adapters.rest.publication.PublishingClient;
+import com.pushtechnology.diffusion.datatype.binary.Binary;
+import com.pushtechnology.diffusion.datatype.json.JSON;
 
 /**
  * Implementation of {@link EndpointPollHandlerFactory}.
@@ -50,15 +52,21 @@ public final class EndpointPollHandlerFactoryImpl implements EndpointPollHandler
             case JSON:
                 return new StringParsingHandler(
                     new JSONParsingHandler(
-                        new JSONPublishingHandler(publishingClient, serviceConfig, endpointConfig)));
+                        new PublicationHandler<>(
+                            endpointConfig,
+                            publishingClient.createUpdateContext(serviceConfig, endpointConfig, JSON.class))));
 
             case BINARY:
                 return new BinaryParsingHandler(
-                    new BinaryPublishingHandler(publishingClient, serviceConfig, endpointConfig));
+                    new PublicationHandler<>(
+                        endpointConfig,
+                        publishingClient.createUpdateContext(serviceConfig, endpointConfig, Binary.class)));
 
             case PLAIN_TEXT:
                 return new StringParsingHandler(
-                    new StringPublishingHandler(publishingClient, serviceConfig, endpointConfig));
+                    new PublicationHandler<>(
+                        endpointConfig,
+                        publishingClient.createUpdateContext(serviceConfig, endpointConfig, String.class)));
 
             default:
                 throw new IllegalArgumentException("Unsupported endpoint type \"" + endpointType + "\"");

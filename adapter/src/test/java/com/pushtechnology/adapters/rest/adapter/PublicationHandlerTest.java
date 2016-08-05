@@ -12,19 +12,19 @@ import org.mockito.Mock;
 
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.adapters.rest.publication.PublishingClient;
+import com.pushtechnology.adapters.rest.publication.UpdateContext;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
 /**
- * Unit tests for {@link JSONPublishingHandler}.
+ * Unit tests for {@link PublicationHandler}.
  *
  * @author Push Technology Limited
  */
-public final class JSONPublishingHandlerTest {
-    @Mock
-    private PublishingClient publishingClient;
+public final class PublicationHandlerTest {
     @Mock
     private JSON json;
+    @Mock
+    private UpdateContext<JSON> updateContext;
 
     private final EndpointConfig endpointConfig = EndpointConfig
         .builder()
@@ -42,25 +42,25 @@ public final class JSONPublishingHandlerTest {
         .topicRoot("a")
         .build();
 
-    private JSONPublishingHandler pollHandler;
+    private PublicationHandler<JSON> pollHandler;
 
     @Before
     public void setUp() {
         initMocks(this);
 
-        pollHandler = new JSONPublishingHandler(publishingClient, serviceConfig, endpointConfig);
+        pollHandler = new PublicationHandler<>(endpointConfig, updateContext);
     }
 
     @After
     public void postConditions() {
-        verifyNoMoreInteractions(publishingClient, json);
+        verifyNoMoreInteractions(updateContext, json);
     }
 
     @Test
     public void completed() {
         pollHandler.completed(json);
 
-        verify(publishingClient).publish(serviceConfig, endpointConfig, json);
+        verify(updateContext).publish(json);
     }
 
     @Test
