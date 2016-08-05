@@ -2,6 +2,7 @@ package com.pushtechnology.adapters.rest.session.management;
 
 import static com.pushtechnology.diffusion.client.session.SessionAttributes.Transport.WEBSOCKET;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.isA;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -29,7 +30,8 @@ public final class DiffusionSessionFactoryTest {
     @Mock
     private Session session;
 
-    private final SessionLostListener listener = new SessionLostListener(null);
+    private final SessionLostListener lostListener = new SessionLostListener(null);
+    private final EventedSessionListener listener = new EventedSessionListener();
     private final Model noAuthModel = Model
         .builder()
         .diffusion(DiffusionConfig
@@ -67,7 +69,7 @@ public final class DiffusionSessionFactoryTest {
         initMocks(this);
 
         when(sessionFactory.transports(WEBSOCKET)).thenReturn(sessionFactory);
-        when(sessionFactory.listener(listener)).thenReturn(sessionFactory);
+        when(sessionFactory.listener(isA(Session.Listener.class))).thenReturn(sessionFactory);
         when(sessionFactory.serverHost("localhost")).thenReturn(sessionFactory);
         when(sessionFactory.serverPort(8080)).thenReturn(sessionFactory);
         when(sessionFactory.secureTransport(false)).thenReturn(sessionFactory);
@@ -93,9 +95,9 @@ public final class DiffusionSessionFactoryTest {
 
         verify(sessionFactory).transports(WEBSOCKET);
 
-        assertEquals(session, diffusionSessionFactory.provide(noAuthModel, listener, null));
+        assertEquals(session, diffusionSessionFactory.provide(noAuthModel, lostListener, listener, null));
 
-        verify(sessionFactory).listener(listener);
+        verify(sessionFactory).listener(isA(Session.Listener.class));
         verify(sessionFactory).serverHost("localhost");
         verify(sessionFactory).serverPort(8080);
         verify(sessionFactory).secureTransport(false);
@@ -114,9 +116,9 @@ public final class DiffusionSessionFactoryTest {
 
         verify(sessionFactory).transports(WEBSOCKET);
 
-        assertEquals(session, diffusionSessionFactory.provide(authModel, listener, null));
+        assertEquals(session, diffusionSessionFactory.provide(authModel, lostListener, listener, null));
 
-        verify(sessionFactory).listener(listener);
+        verify(sessionFactory).listener(isA(Session.Listener.class));
         verify(sessionFactory).serverHost("localhost");
         verify(sessionFactory).serverPort(8080);
         verify(sessionFactory).secureTransport(false);

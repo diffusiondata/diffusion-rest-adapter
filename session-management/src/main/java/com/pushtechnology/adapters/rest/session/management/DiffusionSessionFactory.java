@@ -46,7 +46,11 @@ public final class DiffusionSessionFactory extends ProviderAdapter {
     /**
      * @return an open session
      */
-    public Session provide(Model model, SessionLostListener listener, @Nullable SSLContext sslContext) {
+    public Session provide(
+            Model model,
+            SessionLostListener sessionLostListener,
+            EventedSessionListener listener,
+            @Nullable SSLContext sslContext) {
         final DiffusionConfig diffusionConfig = model.getDiffusion();
 
         SessionFactory sessionFactory = baseSessionFactory
@@ -58,8 +62,11 @@ public final class DiffusionSessionFactory extends ProviderAdapter {
             .maximumMessageSize(diffusionConfig.getMaximumMessageSize())
             .inputBufferSize(diffusionConfig.getInputBufferSize())
             .outputBufferSize(diffusionConfig.getInputBufferSize())
-            .recoveryBufferSize(diffusionConfig.getRecoveryBufferSize())
-            .listener(listener);
+            .recoveryBufferSize(diffusionConfig.getRecoveryBufferSize());
+
+        sessionFactory = listener
+            .onSessionStateChange(sessionLostListener)
+            .addTo(sessionFactory);
 
         if (sslContext != null) {
             sessionFactory = sessionFactory.sslContext(sslContext);

@@ -36,6 +36,7 @@ import com.pushtechnology.adapters.rest.polling.HttpClientFactoryImpl;
 import com.pushtechnology.adapters.rest.polling.ServiceSessionFactoryImpl;
 import com.pushtechnology.adapters.rest.publication.PublishingClientImpl;
 import com.pushtechnology.adapters.rest.session.management.DiffusionSessionFactory;
+import com.pushtechnology.adapters.rest.session.management.EventedSessionListener;
 import com.pushtechnology.adapters.rest.session.management.SSLContextFactory;
 import com.pushtechnology.adapters.rest.session.management.SessionLostListener;
 import com.pushtechnology.adapters.rest.session.management.SessionWrapper;
@@ -264,6 +265,7 @@ public final class RESTAdapter implements AutoCloseable {
             .addComponent(model)
             .addComponent(shutdownTask)
             .addComponent(SessionLostListener.class)
+            .addComponent(EventedSessionListener.class)
             .addComponent(SessionWrapper.class);
         httpContainer.addChildContainer(newContainer);
 
