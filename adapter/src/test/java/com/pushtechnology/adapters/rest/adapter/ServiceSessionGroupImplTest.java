@@ -99,7 +99,8 @@ public final class ServiceSessionGroupImplTest {
             endpointClient,
             publishingClient,
             serviceSessionFactory,
-            serviceListener);
+            serviceListener,
+            new ParsingHandlerFactory());
 
         serviceSessionGroup.start();
 
@@ -119,7 +120,8 @@ public final class ServiceSessionGroupImplTest {
             endpointClient,
             publishingClient,
             serviceSessionFactory,
-            serviceListener);
+            serviceListener,
+            new ParsingHandlerFactory());
 
         serviceSessionGroup.close();
 

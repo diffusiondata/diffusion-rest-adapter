@@ -33,7 +33,7 @@ public final class ValidateContentType implements FutureCallback<EndpointRespons
     /**
      * Constructor.
      */
-    public ValidateContentType(EndpointConfig endpointConfig, FutureCallback<? super EndpointResponse> delegate) {
+    public ValidateContentType(EndpointConfig endpointConfig, FutureCallback<EndpointResponse> delegate) {
         this.endpointConfig = endpointConfig;
         this.delegate = delegate;
     }

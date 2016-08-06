@@ -17,6 +17,7 @@ package com.pushtechnology.adapters.rest.adapter;
 
 import java.util.function.Consumer;
 
+import com.pushtechnology.adapters.rest.model.EndpointType;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.polling.EndpointClient;
@@ -33,6 +34,7 @@ import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
     private final TopicManagementClient topicManagementClient;
     private final ServiceConfig service;
     private final ServiceSession serviceSession;
+    private final ParsingHandlerFactory parsingHandlerFactory;
 
     /**
      * Constructor.
@@ -41,25 +43,29 @@ import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
             EndpointClient endpointClient,
             TopicManagementClient topicManagementClient,
             ServiceConfig service,
-            ServiceSession serviceSession) {
+            ServiceSession serviceSession,
+            ParsingHandlerFactory parsingHandlerFactory) {
 
         this.endpointClient = endpointClient;
         this.topicManagementClient = topicManagementClient;
         this.service = service;
         this.serviceSession = serviceSession;
+        this.parsingHandlerFactory = parsingHandlerFactory;
     }
 
     @Override
     public void accept(EndpointConfig endpointConfig) {
+        final Class<?> type = EndpointType.from(endpointConfig.getProduces()).getValueType();
         endpointClient.request(
             service,
             endpointConfig,
             new ValidateContentType(
                 endpointConfig,
-                new AddTopicForEndpoint(
+                parsingHandlerFactory.create(type,
+                new AddTopicForEndpoint<>(
                     topicManagementClient,
                     service,
                     endpointConfig,
-                    new AddEndpointToServiceSession(endpointConfig, serviceSession))));
+                    new AddEndpointToServiceSession(endpointConfig, serviceSession)))));
     }
 }

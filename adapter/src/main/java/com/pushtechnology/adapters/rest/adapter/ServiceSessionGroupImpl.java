@@ -46,6 +46,7 @@ public final class ServiceSessionGroupImpl implements ServiceSessionGroup {
     private final List<ServiceSession> serviceSessions;
     private final ServiceSessionFactory serviceSessionFactory;
     private final ServiceListener serviceListener;
+    private final ParsingHandlerFactory parsingHandlerFactory;
 
     /**
      * Constructor.
@@ -56,13 +57,15 @@ public final class ServiceSessionGroupImpl implements ServiceSessionGroup {
             EndpointClient endpointClient,
             PublishingClient publishingClient,
             ServiceSessionFactory serviceSessionFactory,
-            ServiceListener serviceListener) {
+            ServiceListener serviceListener,
+            ParsingHandlerFactory parsingHandlerFactory) {
         this.model = model;
         this.topicManagementClient = topicManagementClient;
         this.endpointClient = endpointClient;
         this.publishingClient = publishingClient;
         this.serviceSessionFactory = serviceSessionFactory;
         this.serviceListener = serviceListener;
+        this.parsingHandlerFactory = parsingHandlerFactory;
         this.serviceSessions = new ArrayList<>();
     }
 
@@ -88,7 +91,8 @@ public final class ServiceSessionGroupImpl implements ServiceSessionGroup {
                             endpointClient,
                             topicManagementClient,
                             service,
-                            serviceSession));
+                            serviceSession,
+                            parsingHandlerFactory));
                     serviceSession.start();
                 })
                 .onClose(() -> {

@@ -27,9 +27,10 @@ import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 /**
  * Add topic for an endpoint when a response is successfully received.
  *
+ * @param <T> the value type of the topic to add
  * @author Push Technology Limited
  */
-/*package*/ final class AddTopicForEndpoint implements FutureCallback<Object> {
+/*package*/ final class AddTopicForEndpoint<T> implements FutureCallback<T> {
     private static final Logger LOG = LoggerFactory.getLogger(AddTopicForEndpoint.class);
     private final TopicManagementClient topicManagementClient;
     private final ServiceConfig service;
@@ -52,7 +53,7 @@ import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
     }
 
     @Override
-    public void completed(Object result) {
+    public void completed(T result) {
         topicManagementClient.addEndpoint(service, endpoint, callback);
     }
 

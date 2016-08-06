@@ -19,6 +19,7 @@ import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.isA;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import org.junit.After;
@@ -45,7 +46,7 @@ public final class InitialiseEndpointTest {
     @Mock
     private ServiceSession serviceSession;
 
-    private final EndpointConfig endpointConfig = EndpointConfig.builder().build();
+    private final EndpointConfig endpointConfig = EndpointConfig.builder().produces("json").build();
     private final ServiceConfig serviceConfig = ServiceConfig.builder().build();
 
     private InitialiseEndpoint initialiseEndpoint;
@@ -54,7 +55,12 @@ public final class InitialiseEndpointTest {
     public void setUp() {
         initMocks(this);
 
-        initialiseEndpoint = new InitialiseEndpoint(endpointClient, topicManagementClient, serviceConfig, serviceSession);
+        initialiseEndpoint = new InitialiseEndpoint(
+            endpointClient,
+            topicManagementClient,
+            serviceConfig,
+            serviceSession,
+            new ParsingHandlerFactory());
     }
 
     @After
