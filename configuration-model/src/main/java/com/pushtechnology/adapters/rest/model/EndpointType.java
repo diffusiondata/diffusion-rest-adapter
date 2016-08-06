@@ -29,19 +29,19 @@ import com.pushtechnology.diffusion.client.topics.details.TopicType;
  * @author Push Technology Limited
  */
 public enum EndpointType {
-    JSON(asList("json", "application/json", "text/json"), TopicType.JSON) {
+    JSON(asList("json", "application/json", "text/json"), TopicType.JSON, com.pushtechnology.diffusion.datatype.json.JSON.class) {
         @Override
         public boolean canHandle(String contentType) {
             return contentType.startsWith("application/json") || contentType.startsWith("text/json");
         }
     },
-    PLAIN_TEXT(asList("string", "text/plain"), TopicType.BINARY) {
+    PLAIN_TEXT(asList("string", "text/plain"), TopicType.BINARY, String.class) {
         @Override
         public boolean canHandle(String contentType) {
             return contentType.startsWith("text/plain") || JSON.canHandle(contentType);
         }
     },
-    BINARY(asList("binary", "application/octet-stream"), TopicType.BINARY) {
+    BINARY(asList("binary", "application/octet-stream"), TopicType.BINARY, com.pushtechnology.diffusion.datatype.binary.Binary.class) {
         @Override
         public boolean canHandle(String contentType) {
             return true;
@@ -65,10 +65,12 @@ public enum EndpointType {
 
     private final Collection<String> identifiers;
     private final TopicType topicType;
+    private final Class<?> valueType;
 
-    EndpointType(Collection<String> identifiers, TopicType topicType) {
+    EndpointType(Collection<String> identifiers, TopicType topicType, Class<?> valueType) {
         this.identifiers = identifiers;
         this.topicType = topicType;
+        this.valueType = valueType;
     }
 
     /**
@@ -76,6 +78,13 @@ public enum EndpointType {
      */
     public TopicType getTopicType() {
         return topicType;
+    }
+
+    /**
+     * @return the value type of the endpoint type
+     */
+    public Class<?> getValueType() {
+        return valueType;
     }
 
     /**

@@ -20,14 +20,9 @@ import org.apache.http.concurrent.FutureCallback;
 import com.pushtechnology.adapters.rest.model.EndpointType;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.adapters.rest.polling.BinaryParsingHandler;
 import com.pushtechnology.adapters.rest.polling.EndpointPollHandlerFactory;
 import com.pushtechnology.adapters.rest.polling.EndpointResponse;
-import com.pushtechnology.adapters.rest.polling.JSONParsingHandler;
-import com.pushtechnology.adapters.rest.polling.StringParsingHandler;
 import com.pushtechnology.adapters.rest.publication.PublishingClient;
-import com.pushtechnology.diffusion.datatype.binary.Binary;
-import com.pushtechnology.diffusion.datatype.json.JSON;
 
 /**
  * Implementation of {@link EndpointPollHandlerFactory}.
@@ -36,40 +31,27 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
  */
 public final class EndpointPollHandlerFactoryImpl implements EndpointPollHandlerFactory {
     private final PublishingClient publishingClient;
+    private final ParsingHandlerFactory parsingHandlerFactory;
 
     /**
      * Constructor.
      */
-    public EndpointPollHandlerFactoryImpl(PublishingClient publishingClient) {
+    public EndpointPollHandlerFactoryImpl(
+            PublishingClient publishingClient,
+            ParsingHandlerFactory parsingHandlerFactory) {
         this.publishingClient = publishingClient;
+        this.parsingHandlerFactory = parsingHandlerFactory;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public FutureCallback<EndpointResponse> create(ServiceConfig serviceConfig, EndpointConfig endpointConfig) {
         final EndpointType endpointType = EndpointType.from(endpointConfig.getProduces());
-
-        switch (endpointType) {
-            case JSON:
-                return new StringParsingHandler(
-                    new JSONParsingHandler(
-                        new PublicationHandler<>(
-                            endpointConfig,
-                            publishingClient.createUpdateContext(serviceConfig, endpointConfig, JSON.class))));
-
-            case BINARY:
-                return new BinaryParsingHandler(
-                    new PublicationHandler<>(
-                        endpointConfig,
-                        publishingClient.createUpdateContext(serviceConfig, endpointConfig, Binary.class)));
-
-            case PLAIN_TEXT:
-                return new StringParsingHandler(
-                    new PublicationHandler<>(
-                        endpointConfig,
-                        publishingClient.createUpdateContext(serviceConfig, endpointConfig, String.class)));
-
-            default:
-                throw new IllegalArgumentException("Unsupported endpoint type \"" + endpointType + "\"");
-        }
+        final Class valueType = endpointType.getValueType();
+        return parsingHandlerFactory.create(
+            valueType,
+            new PublicationHandler<>(
+                endpointConfig,
+                publishingClient.createUpdateContext(serviceConfig, endpointConfig, valueType)));
     }
 }
