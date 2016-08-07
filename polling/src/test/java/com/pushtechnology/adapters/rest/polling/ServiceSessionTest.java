@@ -94,7 +94,7 @@ public final class ServiceSessionTest {
         serviceSession.addEndpoint(endpointConfig);
         verify(handlerFactory).create(serviceConfig, endpointConfig);
 
-        verify(executor).scheduleWithFixedDelay(runnableCaptor.capture(), eq(0L), eq(5000L), eq(MILLISECONDS));
+        verify(executor).scheduleWithFixedDelay(runnableCaptor.capture(), eq(5000L), eq(5000L), eq(MILLISECONDS));
 
         final Runnable runnable = runnableCaptor.getValue();
 
@@ -115,7 +115,7 @@ public final class ServiceSessionTest {
         serviceSession.addEndpoint(endpointConfig);
         verify(handlerFactory).create(serviceConfig, endpointConfig);
 
-        verify(executor).scheduleWithFixedDelay(runnableCaptor.capture(), eq(0L), eq(5000L), eq(MILLISECONDS));
+        verify(executor).scheduleWithFixedDelay(runnableCaptor.capture(), eq(5000L), eq(5000L), eq(MILLISECONDS));
 
         final Runnable runnable = runnableCaptor.getValue();
 
@@ -137,7 +137,7 @@ public final class ServiceSessionTest {
         serviceSession.addEndpoint(endpointConfig);
         verify(handlerFactory).create(serviceConfig, endpointConfig);
 
-        verify(executor).scheduleWithFixedDelay(runnableCaptor.capture(), eq(0L), eq(5000L), eq(MILLISECONDS));
+        verify(executor).scheduleWithFixedDelay(runnableCaptor.capture(), eq(5000L), eq(5000L), eq(MILLISECONDS));
 
         serviceSession.stop();
 
@@ -150,7 +150,7 @@ public final class ServiceSessionTest {
         serviceSession.addEndpoint(endpointConfig);
         verify(handlerFactory).create(serviceConfig, endpointConfig);
 
-        verify(executor).scheduleWithFixedDelay(runnableCaptor.capture(), eq(0L), eq(5000L), eq(MILLISECONDS));
+        verify(executor).scheduleWithFixedDelay(runnableCaptor.capture(), eq(5000L), eq(5000L), eq(MILLISECONDS));
 
         final Runnable runnable = runnableCaptor.getValue();
 
@@ -170,7 +170,7 @@ public final class ServiceSessionTest {
         serviceSession.addEndpoint(endpointConfig);
         verify(handlerFactory).create(serviceConfig, endpointConfig);
 
-        verify(executor).scheduleWithFixedDelay(runnableCaptor.capture(), eq(0L), eq(5000L), eq(MILLISECONDS));
+        verify(executor).scheduleWithFixedDelay(runnableCaptor.capture(), eq(5000L), eq(5000L), eq(MILLISECONDS));
 
         final Runnable runnable = runnableCaptor.getValue();
 
@@ -194,7 +194,7 @@ public final class ServiceSessionTest {
         serviceSession.addEndpoint(endpointConfig);
         verify(handlerFactory).create(serviceConfig, endpointConfig);
 
-        verify(executor).scheduleWithFixedDelay(runnableCaptor.capture(), eq(0L), eq(5000L), eq(MILLISECONDS));
+        verify(executor).scheduleWithFixedDelay(runnableCaptor.capture(), eq(5000L), eq(5000L), eq(MILLISECONDS));
 
         final Runnable runnable = runnableCaptor.getValue();
 

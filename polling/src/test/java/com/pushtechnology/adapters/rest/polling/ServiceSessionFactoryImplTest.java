@@ -97,6 +97,6 @@ public final class ServiceSessionFactoryImplTest {
         serviceSession.addEndpoint(endpointConfig);
         verify(handlerFactory).create(serviceConfig, endpointConfig);
 
-        verify(executor).scheduleWithFixedDelay(isA(Runnable.class), eq(0L), eq(5000L), eq(MILLISECONDS));
+        verify(executor).scheduleWithFixedDelay(isA(Runnable.class), eq(5000L), eq(5000L), eq(MILLISECONDS));
     }
 }

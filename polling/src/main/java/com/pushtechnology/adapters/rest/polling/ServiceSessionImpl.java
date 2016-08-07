@@ -22,7 +22,6 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 
 import org.apache.http.concurrent.FutureCallback;
 import org.slf4j.Logger;
@@ -88,16 +87,19 @@ public final class ServiceSessionImpl implements ServiceSession {
 
         final PollResultHandler handler = new PollResultHandler(handlerFactory.create(serviceConfig, endpointConfig));
 
-        final ScheduledFuture<?> future;
+        final Future<?> future;
         if (serviceConfig.getPollPeriod() > 0) {
             future = executor.scheduleWithFixedDelay(
                 new PollingTask(endpointConfig, handler),
-                0L,
-                serviceConfig.getPollPeriod(),
-                MILLISECONDS);
+                    serviceConfig.getPollPeriod(),
+                    serviceConfig.getPollPeriod(),
+                    MILLISECONDS);
+        }
+        else {
+            future = CompletableFuture.completedFuture(new Object());
         }
 
-        return new PollHandle(CompletableFuture.completedFuture(null));
+        return new PollHandle(future);
     }
 
     private void stopEndpoint(PollHandle pollHandle) {
