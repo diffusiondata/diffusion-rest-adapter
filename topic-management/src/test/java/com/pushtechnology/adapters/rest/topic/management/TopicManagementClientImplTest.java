@@ -15,8 +15,6 @@
 
 package com.pushtechnology.adapters.rest.topic.management;
 
-import static com.pushtechnology.diffusion.client.topics.details.TopicType.BINARY;
-import static com.pushtechnology.diffusion.client.topics.details.TopicType.JSON;
 import static java.util.Arrays.asList;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.isA;
@@ -37,6 +35,9 @@ import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.diffusion.client.callbacks.TopicTreeHandler;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 import com.pushtechnology.diffusion.client.session.Session;
+import com.pushtechnology.diffusion.client.topics.details.TopicType;
+import com.pushtechnology.diffusion.datatype.binary.Binary;
+import com.pushtechnology.diffusion.datatype.json.JSON;
 
 /**
  * Unit tests for {@link TopicManagementClientImpl}.
@@ -50,6 +51,10 @@ public final class TopicManagementClientImplTest {
     private TopicControl topicControl;
     @Mock
     private TopicControl.AddCallback addCallback;
+    @Mock
+    private JSON json;
+    @Mock
+    private Binary binary;
     @Captor
     private ArgumentCaptor<TopicControl.AddCallback> callbackCaptor;
 
@@ -110,7 +115,7 @@ public final class TopicManagementClientImplTest {
     public void addJSONEndpoint() {
         topicManagementClient.addEndpoint(serviceConfig, jsonEndpointConfig, addCallback);
 
-        verify(topicControl).addTopic(eq("service/jsonEndpoint"), eq(JSON), callbackCaptor.capture());
+        verify(topicControl).addTopic(eq("service/jsonEndpoint"), eq(TopicType.JSON), callbackCaptor.capture());
 
         callbackCaptor.getValue().onDiscard();
 
@@ -121,7 +126,7 @@ public final class TopicManagementClientImplTest {
     public void addBinaryEndpoint() {
         topicManagementClient.addEndpoint(serviceConfig, binaryEndpointConfig, addCallback);
 
-        verify(topicControl).addTopic(eq("service/binaryEndpoint"), eq(BINARY), callbackCaptor.capture());
+        verify(topicControl).addTopic(eq("service/binaryEndpoint"), eq(TopicType.BINARY), callbackCaptor.capture());
 
         callbackCaptor.getValue().onDiscard();
 
@@ -132,7 +137,43 @@ public final class TopicManagementClientImplTest {
     public void addStringEndpoint() {
         topicManagementClient.addEndpoint(serviceConfig, stringEndpointConfig, addCallback);
 
-        verify(topicControl).addTopic(eq("service/stringEndpoint"), eq(BINARY), callbackCaptor.capture());
+        verify(topicControl).addTopic(eq("service/stringEndpoint"), eq(TopicType.BINARY), callbackCaptor.capture());
+
+        callbackCaptor.getValue().onDiscard();
+
+        verify(addCallback).onDiscard();
+    }
+
+    @Test
+    public void addJSONEndpointWithValue() {
+        topicManagementClient.addEndpoint(serviceConfig, jsonEndpointConfig, json, addCallback);
+
+        verify(topicControl)
+            .addTopic(eq("service/jsonEndpoint"), eq(TopicType.JSON), eq(json), callbackCaptor.capture());
+
+        callbackCaptor.getValue().onDiscard();
+
+        verify(addCallback).onDiscard();
+    }
+
+    @Test
+    public void addBinaryEndpointWithValue() {
+        topicManagementClient.addEndpoint(serviceConfig, binaryEndpointConfig, binary, addCallback);
+
+        verify(topicControl)
+            .addTopic(eq("service/binaryEndpoint"), eq(TopicType.BINARY), eq(binary), callbackCaptor.capture());
+
+        callbackCaptor.getValue().onDiscard();
+
+        verify(addCallback).onDiscard();
+    }
+
+    @Test
+    public void addStringEndpointWithValue() {
+        topicManagementClient.addEndpoint(serviceConfig, stringEndpointConfig, "", addCallback);
+
+        verify(topicControl)
+            .addTopic(eq("service/stringEndpoint"), eq(TopicType.BINARY), isA(Binary.class), callbackCaptor.capture());
 
         callbackCaptor.getValue().onDiscard();
 

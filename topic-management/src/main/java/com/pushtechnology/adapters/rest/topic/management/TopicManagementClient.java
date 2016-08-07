@@ -17,7 +17,7 @@ package com.pushtechnology.adapters.rest.topic.management;
 
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
+import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.AddCallback;
 
 /**
  * Topic management client for Diffusion server.
@@ -36,5 +36,18 @@ public interface TopicManagementClient {
      * @param endpointConfig the endpoint
      * @param callback callback for completion. The onTopicAddFailed with the reason EXISTS.
      */
-    void addEndpoint(ServiceConfig serviceConfig, EndpointConfig endpointConfig, TopicControl.AddCallback callback);
+    void addEndpoint(ServiceConfig serviceConfig, EndpointConfig endpointConfig, AddCallback callback);
+
+    /**
+     * Start managing the topics for a REST endpoint.
+     * @param serviceConfig the service of the endpoint
+     * @param endpointConfig the endpoint
+     * @param initialValue the initial value of the topic
+     * @param callback callback for completion. The onTopicAddFailed with the reason EXISTS.
+     */
+    <V> void addEndpoint(
+        ServiceConfig serviceConfig,
+        EndpointConfig endpointConfig,
+        V initialValue,
+        AddCallback callback);
 }
