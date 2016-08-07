@@ -26,9 +26,9 @@ import org.mockito.Mock;
 
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.adapters.rest.polling.EndpointResponse;
 import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
+import com.pushtechnology.diffusion.datatype.json.JSON;
 
 /**
  * Unit tests for {@link AddTopicForEndpoint}.
@@ -40,20 +40,20 @@ public final class AddTopicForEndpointTest {
     @Mock
     private TopicManagementClient topicManagementClient;
     @Mock
-    private EndpointResponse response;
+    private JSON response;
     @Mock
     private TopicControl.AddCallback callback;
 
     private ServiceConfig serviceConfig = ServiceConfig.builder().build();
     private final EndpointConfig endpointConfig = EndpointConfig.builder().build();
 
-    private AddTopicForEndpoint handler;
+    private AddTopicForEndpoint<JSON> handler;
 
     @Before
     public void setUp() {
         initMocks(this);
 
-        handler = new AddTopicForEndpoint(
+        handler = new AddTopicForEndpoint<>(
             topicManagementClient,
             serviceConfig,
             endpointConfig,
@@ -69,7 +69,7 @@ public final class AddTopicForEndpointTest {
     public void completed() {
         handler.completed(response);
 
-        verify(topicManagementClient).addEndpoint(serviceConfig, endpointConfig, callback);
+        verify(topicManagementClient).addEndpoint(serviceConfig, endpointConfig, response, callback);
     }
 
     @Test

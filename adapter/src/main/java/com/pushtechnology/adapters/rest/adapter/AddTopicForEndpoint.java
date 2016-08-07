@@ -53,8 +53,8 @@ import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
     }
 
     @Override
-    public void completed(T result) {
-        topicManagementClient.addEndpoint(service, endpoint, callback);
+    public void completed(T value) {
+        topicManagementClient.addEndpoint(service, endpoint, value, callback);
     }
 
     @Override
