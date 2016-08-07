@@ -19,6 +19,7 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -88,10 +89,7 @@ public final class ServiceSessionImpl implements ServiceSession {
         final PollResultHandler handler = new PollResultHandler(handlerFactory.create(serviceConfig, endpointConfig));
 
         final ScheduledFuture<?> future;
-        if (serviceConfig.getPollPeriod() <= 0) {
-            future = executor.schedule(new PollingTask(endpointConfig, handler), 0L, MILLISECONDS);
-        }
-        else {
+        if (serviceConfig.getPollPeriod() > 0) {
             future = executor.scheduleWithFixedDelay(
                 new PollingTask(endpointConfig, handler),
                 0L,
@@ -99,7 +97,7 @@ public final class ServiceSessionImpl implements ServiceSession {
                 MILLISECONDS);
         }
 
-        return new PollHandle(future);
+        return new PollHandle(CompletableFuture.completedFuture(null));
     }
 
     private void stopEndpoint(PollHandle pollHandle) {
