@@ -36,6 +36,10 @@ The `topicRoot` is the part of the topic tree the service will be mapped to.
 The `security` describes how to the HTTP client will authenticate with the service.
 The `endpoints` are the endpoints to poll.
 
+##### Also see
+
+[Services](documentation/Services.md)
+
 #### Endpoint
 
 The Endpoint describes an endpoint of a REST service to poll.
@@ -43,6 +47,9 @@ It contains the `name`, `url` and `topic`.
 The `url` indicates the URL of the service to poll.
 The `topic` indicates the topic that should be updated with the result of the poll, this topic is relative to the
 `topicRoot` of the service.
+
+[Endpoints](documentation/Endpoints.md)
+
 
 #### Security
 
