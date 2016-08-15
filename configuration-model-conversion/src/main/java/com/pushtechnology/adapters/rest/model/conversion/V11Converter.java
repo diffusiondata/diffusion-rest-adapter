@@ -17,35 +17,35 @@ package com.pushtechnology.adapters.rest.model.conversion;
 
 import static java.util.stream.Collectors.toList;
 
-import com.pushtechnology.adapters.rest.model.v11.BasicAuthenticationConfig;
-import com.pushtechnology.adapters.rest.model.v11.DiffusionConfig;
-import com.pushtechnology.adapters.rest.model.v11.EndpointConfig;
-import com.pushtechnology.adapters.rest.model.v11.Model;
-import com.pushtechnology.adapters.rest.model.v11.SecurityConfig;
-import com.pushtechnology.adapters.rest.model.v11.ServiceConfig;
+import com.pushtechnology.adapters.rest.model.latest.BasicAuthenticationConfig;
+import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
+import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
+import com.pushtechnology.adapters.rest.model.latest.Model;
+import com.pushtechnology.adapters.rest.model.latest.SecurityConfig;
+import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.diffusion.client.session.SessionAttributes;
 
 import net.jcip.annotations.Immutable;
 
 /**
- * Converter between different version 10 of the model and version 11.
+ * Converter between different version 11 of the model and version 12.
  *
  * @author Push Technology Limited
  */
 @Immutable
-public final class V10Converter
-        extends AbstractModelConverter<com.pushtechnology.adapters.rest.model.v10.Model, Model> {
+public final class V11Converter
+        extends AbstractModelConverter<com.pushtechnology.adapters.rest.model.v11.Model, Model> {
     /**
      * The converter.
      */
-    public static final V10Converter INSTANCE = new V10Converter();
+    public static final V11Converter INSTANCE = new V11Converter();
 
-    private V10Converter() {
-        super(V11Converter.INSTANCE, com.pushtechnology.adapters.rest.model.v10.Model.class);
+    private V11Converter() {
+        super(LatestConverter.INSTANCE, com.pushtechnology.adapters.rest.model.v11.Model.class);
     }
 
     @Override
-    protected Model convertFrom(com.pushtechnology.adapters.rest.model.v10.Model model) {
+    protected Model convertFrom(com.pushtechnology.adapters.rest.model.v11.Model model) {
         return Model
             .builder()
             .active(true)
@@ -54,6 +54,7 @@ public final class V10Converter
                 .stream()
                 .map(oldService -> ServiceConfig
                     .builder()
+                    .name(oldService.getHost() + ":" + oldService.getPort() + ":" + oldService.isSecure())
                     .host(oldService.getHost())
                     .port(oldService.getPort())
                     .secure(oldService.isSecure())

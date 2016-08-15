@@ -21,7 +21,7 @@ import lombok.ToString;
 import lombok.Value;
 
 /**
- * Basic authentication configuration. Version 11.
+ * Basic authentication configuration. Version 12.
  * <p>
  * Description of the basic authentication parameters.
  *

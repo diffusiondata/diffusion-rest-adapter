@@ -13,65 +13,59 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.model.latest;
+package com.pushtechnology.adapters.rest.model.v11;
+
+import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.ToString;
 import lombok.Value;
 
 /**
- * Diffusion configuration. Version 12.
+ * Service configuration. Version 11.
  * <p>
- * Description of a Diffusion server to publish to.
+ * Description of a REST service to poll.
  *
  * @author Push Technology Limited
  */
 @Value
 @Builder
 @AllArgsConstructor
-public class DiffusionConfig {
+@ToString(of = {"host", "port", "secure"})
+public class ServiceConfig {
     /**
-     * The host of the Diffusion server.
+     * The host of the service.
      */
     String host;
+
     /**
-     * The port the Diffusion server listens on.
+     * The port to connect to.
      */
     int port;
+
     /**
-     * If a secure connection should be used.
+     * If a secure transport should be used.
      */
     boolean secure;
+
     /**
-     * The principal. Can be {@code null}.
+     * The endpoints the service makes available.
      */
-    String principal;
+    List<EndpointConfig> endpoints;
+
     /**
-     * The password. Can be {@code null}.
+     * The time in milliseconds between polls.
      */
-    String password;
+    long pollPeriod;
+
     /**
-     * The Diffusion session connection timeout.
+     * The topic root.
      */
-    int connectionTimeout;
+    String topicRoot;
+
     /**
-     * The Diffusion session reconnection timeout.
+     * The security configuration for the service.
      */
-    int reconnectionTimeout;
-    /**
-     * The Diffusion session maximum message size.
-     */
-    int maximumMessageSize;
-    /**
-     * The Diffusion session input buffer size.
-     */
-    int inputBufferSize;
-    /**
-     * The Diffusion session output buffer size.
-     */
-    int outputBufferSize;
-    /**
-     * The Diffusion session recovery buffer size.
-     */
-    int recoveryBufferSize;
+    SecurityConfig security;
 }
