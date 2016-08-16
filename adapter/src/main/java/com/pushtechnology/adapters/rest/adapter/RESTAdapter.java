@@ -18,7 +18,6 @@ package com.pushtechnology.adapters.rest.adapter;
 import static java.util.stream.Collectors.counting;
 import static java.util.stream.Collectors.toList;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
@@ -81,13 +80,13 @@ public final class RESTAdapter implements AutoCloseable {
                 try {
                     close();
                 }
-                catch (IOException e) {
-                    // Not expected as no known implementation throws this
+                // CHECKSTYLE.OFF: IllegalCatch // Bulkhead
+                catch (Exception e) {
                     LOG.warn("Exception during shutdown", e);
                 }
+                // CHECKSTYLE.ON: IllegalCatch
                 shutdownHandler.run();
             }
-
         };
     }
 
@@ -95,7 +94,7 @@ public final class RESTAdapter implements AutoCloseable {
      * Reconfigure the component.
      */
     @GuardedBy("this")
-    public synchronized void reconfigure(Model model) throws IOException {
+    public synchronized void reconfigure(Model model) {
 
         if (!model.isActive()) {
             LOG.warn("The model has been marked as inactive, shutting down");
@@ -126,7 +125,7 @@ public final class RESTAdapter implements AutoCloseable {
     }
 
     @GuardedBy("this")
-    private void initialConfiguration(Model model) throws IOException {
+    private void initialConfiguration(Model model) {
         LOG.info("Setting up components");
 
         if (!isModelInactive(model)) {
@@ -140,7 +139,7 @@ public final class RESTAdapter implements AutoCloseable {
     }
 
     @GuardedBy("this")
-    private void switchToInactiveComponents() throws IOException {
+    private void switchToInactiveComponents() {
         LOG.info("Putting adapter to sleep");
 
         if (topLevelContainer != null) {
@@ -153,7 +152,7 @@ public final class RESTAdapter implements AutoCloseable {
     }
 
     @GuardedBy("this")
-    private void reconfigureAll(Model model) throws IOException {
+    private void reconfigureAll(Model model) {
         LOG.info("Replacing all components");
 
         final MutablePicoContainer oldTopLevelContainer = topLevelContainer;
@@ -171,7 +170,7 @@ public final class RESTAdapter implements AutoCloseable {
     }
 
     @GuardedBy("this")
-    private void reconfigureSecurity(Model model) throws IOException {
+    private void reconfigureSecurity(Model model) {
         LOG.info("Updating security, REST and Diffusion sessions");
 
         final MutablePicoContainer oldHttpContainer = httpContainer;
@@ -189,7 +188,7 @@ public final class RESTAdapter implements AutoCloseable {
     }
 
     @GuardedBy("this")
-    private void reconfigurePollingAndPublishing(Model model) throws IOException {
+    private void reconfigurePollingAndPublishing(Model model) {
         LOG.debug("Replacing REST and Diffusion sessions");
 
         final MutablePicoContainer oldDiffusionContainer = diffusionContainer;
@@ -356,7 +355,7 @@ public final class RESTAdapter implements AutoCloseable {
 
     @Override
     @GuardedBy("this")
-    public synchronized void close() throws IOException {
+    public synchronized void close() {
         LOG.debug("Closing adapter");
         if (!wasInactive()) {
             topLevelContainer.dispose();
