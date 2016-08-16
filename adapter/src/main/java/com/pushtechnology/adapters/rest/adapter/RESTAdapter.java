@@ -128,13 +128,14 @@ public final class RESTAdapter implements AutoCloseable {
     private void initialConfiguration(Model model) {
         LOG.info("Setting up components");
 
+        topLevelContainer = newTopLevelContainer();
+
         if (!isModelInactive(model)) {
-            topLevelContainer = newTopLevelContainer();
             httpContainer = newHttpContainer(model);
             diffusionContainer = newDiffusionContainer(model);
             servicesContainer = newServicesContainer(model);
 
-            topLevelContainer.start();
+            httpContainer.start();
         }
     }
 
@@ -142,9 +143,8 @@ public final class RESTAdapter implements AutoCloseable {
     private void switchToInactiveComponents() {
         LOG.info("Putting adapter to sleep");
 
-        if (topLevelContainer != null) {
-            topLevelContainer.dispose();
-            topLevelContainer = null;
+        if (httpContainer != null) {
+            httpContainer.dispose();
             httpContainer = null;
             diffusionContainer = null;
             servicesContainer = null;
@@ -155,17 +155,16 @@ public final class RESTAdapter implements AutoCloseable {
     private void reconfigureAll(Model model) {
         LOG.info("Replacing all components");
 
-        final MutablePicoContainer oldTopLevelContainer = topLevelContainer;
+        final MutablePicoContainer oldHttpContainer = httpContainer;
 
-        topLevelContainer = newTopLevelContainer();
         httpContainer = newHttpContainer(model);
         diffusionContainer = newDiffusionContainer(model);
         servicesContainer = newServicesContainer(model);
 
-        topLevelContainer.start();
+        httpContainer.start();
 
-        if (oldTopLevelContainer != null) {
-            oldTopLevelContainer.dispose();
+        if (oldHttpContainer != null) {
+            oldHttpContainer.dispose();
         }
     }
 
@@ -358,9 +357,10 @@ public final class RESTAdapter implements AutoCloseable {
     public synchronized void close() {
         LOG.debug("Closing adapter");
         if (!wasInactive()) {
-            topLevelContainer.dispose();
+            httpContainer.dispose();
         }
         currentModel = null;
+        topLevelContainer = null;
         LOG.info("Closed adapter");
     }
 }
