@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
+import com.pushtechnology.diffusion.datatype.binary.Binary;
 
 /**
  * The supported endpoint types that can be processed by the adapter.
@@ -42,7 +43,7 @@ public enum EndpointType {
             return contentType != null && (contentType.startsWith("text/plain") || JSON.canHandle(contentType));
         }
     },
-    BINARY(asList("binary", "application/octet-stream"), TopicType.BINARY, com.pushtechnology.diffusion.datatype.binary.Binary.class) {
+    BINARY(asList("binary", "application/octet-stream"), TopicType.BINARY, Binary.class) {
         @Override
         public boolean canHandle(String contentType) {
             return true;
