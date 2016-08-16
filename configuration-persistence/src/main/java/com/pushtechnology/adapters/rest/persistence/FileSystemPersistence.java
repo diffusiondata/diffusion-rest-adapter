@@ -111,4 +111,9 @@ public final class FileSystemPersistence implements Persistence {
             objectMapper.writeValue(versionStream, Model.VERSION);
         }
     }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "(path=" + configFilePath + ")";
+    }
 }

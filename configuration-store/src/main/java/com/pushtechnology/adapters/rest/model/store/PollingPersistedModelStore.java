@@ -89,6 +89,11 @@ public final class PollingPersistedModelStore extends AbstractModelStore {
         return latestModel;
     }
 
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "(persistence=" + persistence + ", period=" + period + ")";
+    }
+
     private final class Poll implements Runnable {
         @Override
         public void run() {

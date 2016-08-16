@@ -49,4 +49,9 @@ public final class MutableModelStore extends AbstractModelStore {
         notifyListeners(newModel);
         return this;
     }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName();
+    }
 }
