@@ -62,12 +62,9 @@ public final class TopicManagementClientImpl implements TopicManagementClient {
         final String topicPath = serviceConfig.getTopicRoot() + "/" + endpointConfig.getTopic();
         final TopicType topicType = EndpointType.from(produces).getTopicType();
 
-        // Addition synchronisation to partially work around FB: 14967
-        synchronized (this) {
-            session
-                .feature(TopicControl.class)
-                .addTopic(topicPath, topicType, new TopicSetupCallback(callback));
-        }
+        session
+            .feature(TopicControl.class)
+            .addTopic(topicPath, topicType, new TopicSetupCallback(callback));
     }
 
     @Override
