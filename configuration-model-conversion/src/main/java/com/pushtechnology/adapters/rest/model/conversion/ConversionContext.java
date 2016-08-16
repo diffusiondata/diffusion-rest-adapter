@@ -85,8 +85,7 @@ public final class ConversionContext implements ModelConverter {
             V11Converter.INSTANCE)
         .register(
             Model.VERSION,
-            Model.class,
-            LatestConverter.INSTANCE)
+            Model.class)
         .build();
 
     private final Map<Integer, Class<? extends AnyModel>> modelVersions = new HashMap<>();
@@ -102,33 +101,30 @@ public final class ConversionContext implements ModelConverter {
 
     @Override
     public Model convert(AnyModel model) {
-        final ModelConverter converter = converters.get(model.getClass());
-        if (converter == null) {
-            throw new IllegalArgumentException("The argument " + model + " cannot be converted");
-        }
-
-        return convertFrom(converter, model);
-    }
-
-    private Model convertFrom(ModelConverter converter, AnyModel model) {
-        ModelConverter currentConverter = converter;
+        ModelConverter currentConverter = converters.get(model.getClass());
         AnyModel currentModel = model;
         while (currentConverter != null) {
+            // Convert the model
             currentModel = currentConverter.convert(currentModel);
-            currentConverter = currentConverter.next();
+
+            // Lookup the next converter to use
+            currentConverter = converters.get(currentModel.getClass());
+        }
+
+        if (!(currentModel instanceof Model)) {
+            throw new IllegalArgumentException(
+                "The model " +
+                model +
+                " cannot be converted. There are no converters that can handle " +
+                currentModel.getClass());
         }
 
         return (Model) currentModel;
     }
 
-    @Override
-    public ModelConverter next() {
-        return null;
-    }
-
     /**
      * @param version the schema version number
-     * @return the model used by the version
+     * @return the model class used by the version
      */
     public Class<? extends AnyModel> modelVersion(int version) {
         return modelVersions.get(version);
@@ -161,8 +157,8 @@ public final class ConversionContext implements ModelConverter {
         /**
          * Register a conversion with the context.
          * @param version the schema version
-         * @param fromClass the model for the version
-         * @param converter the converter to the latest model
+         * @param fromClass the model class for the version
+         * @param converter a converter to another version
          * @return the builder
          */
         public Builder register(int version, Class<? extends AnyModel> fromClass, ModelConverter converter) {
@@ -173,6 +169,19 @@ public final class ConversionContext implements ModelConverter {
             newModelVersions.putAll(modelVersions);
             newModelVersions.put(version, fromClass);
             return new Builder(newModelVersions, newConverters);
+        }
+
+        /**
+         * Register a model version with the context.
+         * @param version the schema version
+         * @param fromClass the model class for the version
+         * @return the builder
+         */
+        public Builder register(int version, Class<? extends AnyModel> fromClass) {
+            final Map<Integer, Class<? extends AnyModel>> newModelVersions = new HashMap<>();
+            newModelVersions.putAll(modelVersions);
+            newModelVersions.put(version, fromClass);
+            return new Builder(newModelVersions, converters);
         }
 
         /**

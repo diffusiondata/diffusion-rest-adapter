@@ -25,14 +25,12 @@ import com.pushtechnology.adapters.rest.model.AnyModel;
  * @author Push Technology Limited
  */
 public abstract class AbstractModelConverter<M extends AnyModel, N extends AnyModel> implements ModelConverter {
-    private final ModelConverter nextConverter;
     private final Class<M> supportedModel;
 
     /**
      * Constructor.
      */
-    protected AbstractModelConverter(ModelConverter nextConverter, Class<M> supportedModel) {
-        this.nextConverter = nextConverter;
+    protected AbstractModelConverter(Class<M> supportedModel) {
         this.supportedModel = supportedModel;
     }
 
@@ -53,9 +51,4 @@ public abstract class AbstractModelConverter<M extends AnyModel, N extends AnyMo
      * @throws IllegalArgumentException if the converter does not know how to convert supplied model
      */
     protected abstract N convertFrom(M model);
-
-    @Override
-    public final ModelConverter next() {
-        return nextConverter;
-    }
 }

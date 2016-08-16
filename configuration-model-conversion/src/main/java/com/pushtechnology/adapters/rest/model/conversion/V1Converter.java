@@ -38,7 +38,7 @@ public final class V1Converter extends AbstractModelConverter<com.pushtechnology
     private static final int DEFAULT_POLL_PERIOD = 60000;
 
     private V1Converter() {
-        super(V2Converter.INSTANCE, com.pushtechnology.adapters.rest.model.v1.Model.class);
+        super(com.pushtechnology.adapters.rest.model.v1.Model.class);
     }
 
     @Override

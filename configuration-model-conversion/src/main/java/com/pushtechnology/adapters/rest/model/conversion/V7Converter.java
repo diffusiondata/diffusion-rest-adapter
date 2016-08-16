@@ -37,7 +37,7 @@ public final class V7Converter extends AbstractModelConverter<com.pushtechnology
     public static final V7Converter INSTANCE = new V7Converter();
 
     private V7Converter() {
-        super(V8Converter.INSTANCE, com.pushtechnology.adapters.rest.model.v7.Model.class);
+        super(com.pushtechnology.adapters.rest.model.v7.Model.class);
     }
 
     @Override

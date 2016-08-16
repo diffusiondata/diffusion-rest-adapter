@@ -41,7 +41,7 @@ public final class V11Converter
     public static final V11Converter INSTANCE = new V11Converter();
 
     private V11Converter() {
-        super(LatestConverter.INSTANCE, com.pushtechnology.adapters.rest.model.v11.Model.class);
+        super(com.pushtechnology.adapters.rest.model.v11.Model.class);
     }
 
     @Override

@@ -40,7 +40,7 @@ public final class V2Converter extends AbstractModelConverter<com.pushtechnology
      * Constructor.
      */
     protected V2Converter() {
-        super(V3Converter.INSTANCE, com.pushtechnology.adapters.rest.model.v2.Model.class);
+        super(com.pushtechnology.adapters.rest.model.v2.Model.class);
     }
 
     @Override

@@ -37,7 +37,7 @@ public final class V5Converter extends AbstractModelConverter<com.pushtechnology
     public static final V5Converter INSTANCE = new V5Converter();
 
     private V5Converter() {
-        super(V6Converter.INSTANCE, com.pushtechnology.adapters.rest.model.v5.Model.class);
+        super(com.pushtechnology.adapters.rest.model.v5.Model.class);
     }
 
     @Override

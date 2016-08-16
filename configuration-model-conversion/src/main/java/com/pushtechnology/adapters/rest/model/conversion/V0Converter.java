@@ -47,9 +47,4 @@ public enum V0Converter implements ModelConverter {
             throw new IllegalArgumentException("The argument " + model + " cannot be converted");
         }
     }
-
-    @Override
-    public ModelConverter next() {
-        return V1Converter.INSTANCE;
-    }
 }

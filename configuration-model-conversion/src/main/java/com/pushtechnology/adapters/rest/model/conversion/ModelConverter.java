@@ -30,9 +30,4 @@ public interface ModelConverter {
      * @throws IllegalArgumentException if the converter does not know how to convert supplied model
      */
     AnyModel convert(AnyModel model);
-
-    /**
-     * @return The next converter that can be applied to the models returned by this converter
-     */
-    ModelConverter next();
 }

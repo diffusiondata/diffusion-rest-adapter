@@ -39,7 +39,7 @@ public final class ConversionContextTest {
 
     @Test
     public void testModelVersion1() {
-        assertEquals(Model.class, FULL_CONTEXT.modelVersion(Model.VERSION));
+        assertEquals(com.pushtechnology.adapters.rest.model.v1.Model.class, FULL_CONTEXT.modelVersion(1));
     }
 
     @Test(expected = IllegalArgumentException.class)
