@@ -15,17 +15,8 @@
 
 package com.pushtechnology.adapters.rest.client;
 
-import static com.pushtechnology.adapters.rest.model.conversion.ConversionContext.FULL_CONTEXT;
-import static java.util.concurrent.Executors.newSingleThreadScheduledExecutor;
-
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.concurrent.ScheduledExecutorService;
-
-import com.pushtechnology.adapters.rest.adapter.ServiceListener;
-import com.pushtechnology.adapters.rest.model.store.PollingPersistedModelStore;
-import com.pushtechnology.adapters.rest.persistence.FileSystemPersistence;
-import com.pushtechnology.adapters.rest.persistence.Persistence;
 
 import net.jcip.annotations.Immutable;
 
@@ -49,24 +40,6 @@ public final class RESTAdapterClientEntry {
     public static void main(String[] args) throws IOException, InterruptedException {
         // CHECKSTYLE.ON: UncommentedMain
 
-        final Persistence fileSystemPersistence = new FileSystemPersistence(Paths.get("."), FULL_CONTEXT);
-        final ScheduledExecutorService executor = newSingleThreadScheduledExecutor();
-        final PollingPersistedModelStore modelStore = new PollingPersistedModelStore(
-            fileSystemPersistence,
-            executor,
-            1000L);
-
-        modelStore.start();
-
-        final RESTAdapterClient adapterClient = RESTAdapterClient.create(
-            modelStore,
-            executor,
-            () -> {
-                modelStore.stop();
-                executor.shutdown();
-            },
-            ServiceListener.NULL_LISTENER);
-
-        adapterClient.start();
+        RESTAdapterClient.create(Paths.get(".")).start();
     }
 }

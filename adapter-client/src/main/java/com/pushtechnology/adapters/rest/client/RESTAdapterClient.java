@@ -15,7 +15,11 @@
 
 package com.pushtechnology.adapters.rest.client;
 
+import static com.pushtechnology.adapters.rest.model.conversion.ConversionContext.FULL_CONTEXT;
+import static java.util.concurrent.Executors.newSingleThreadScheduledExecutor;
+
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -26,6 +30,9 @@ import com.pushtechnology.adapters.rest.adapter.RESTAdapter;
 import com.pushtechnology.adapters.rest.adapter.ServiceListener;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.store.ModelStore;
+import com.pushtechnology.adapters.rest.model.store.PollingPersistedModelStore;
+import com.pushtechnology.adapters.rest.persistence.FileSystemPersistence;
+import com.pushtechnology.adapters.rest.persistence.Persistence;
 
 import net.jcip.annotations.ThreadSafe;
 
@@ -114,5 +121,38 @@ public final class RESTAdapterClient {
             ServiceListener serviceListener) {
         LOG.debug("Creating REST adapter client with model store: {}", modelStore);
         return new RESTAdapterClient(modelStore, executor, shutdownHandler, serviceListener);
+    }
+
+    /**
+     * Factory method for {@link RESTAdapterClient}.
+     * @param pathToConfigDirectory the directory with the configuration
+     * @return a new {@link RESTAdapterClient}
+     * @throws IOException if there is a problem with accessing the model store
+     * @throws IllegalStateException if the configuration is missing
+     */
+    public static RESTAdapterClient create(Path pathToConfigDirectory) throws IOException {
+        final Persistence fileSystemPersistence = new FileSystemPersistence(pathToConfigDirectory, FULL_CONTEXT);
+        final ScheduledExecutorService executor = newSingleThreadScheduledExecutor();
+        final PollingPersistedModelStore modelStore = new PollingPersistedModelStore(
+            fileSystemPersistence,
+            executor,
+            1000L);
+
+        try {
+            modelStore.start();
+        }
+        catch (IllegalStateException | IOException e) {
+            executor.shutdown();
+            throw e;
+        }
+
+        return RESTAdapterClient.create(
+            modelStore,
+            executor,
+            () -> {
+                modelStore.stop();
+                executor.shutdown();
+            },
+            ServiceListener.NULL_LISTENER);
     }
 }
