@@ -34,7 +34,7 @@ import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 
 /**
- * Unit tests for {@link FixedModelStore}.
+ * Unit tests for {@link MutableModelStore}.
  *
  * @author Push Technology Limited
  */
