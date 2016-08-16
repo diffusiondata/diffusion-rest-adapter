@@ -9,7 +9,7 @@ import org.mockito.Mock;
 /**
  * Unit tests for {@link ServiceListener}.
  *
- * @author Matt Champion on 28/07/2016
+ * @author Push Technology Limited
  */
 public final class ServiceListenerTest {
 

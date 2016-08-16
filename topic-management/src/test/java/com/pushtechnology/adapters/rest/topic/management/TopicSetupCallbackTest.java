@@ -15,7 +15,7 @@ import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 /**
  * Unit tests for {@link TopicSetupCallback}.
  *
- * @author Matt Champion on 02/08/2016
+ * @author Push Technology Limited
  */
 public final class TopicSetupCallbackTest {
     @Mock

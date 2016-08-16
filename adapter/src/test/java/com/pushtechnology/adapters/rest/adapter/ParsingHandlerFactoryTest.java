@@ -15,7 +15,7 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
 /**
  * Unit tests for {@link ParsingHandlerFactory}.
  *
- * @author Matt Champion on 06/08/2016
+ * @author Push Technology Limited
  */
 public final class ParsingHandlerFactoryTest {
     @Mock
