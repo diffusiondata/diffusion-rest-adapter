@@ -360,6 +360,7 @@ public final class RESTAdapter implements AutoCloseable {
         if (!wasInactive()) {
             topLevelContainer.dispose();
         }
+        currentModel = null;
         LOG.info("Closed adapter");
     }
 }
