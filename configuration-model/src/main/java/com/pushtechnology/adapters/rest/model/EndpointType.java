@@ -32,13 +32,14 @@ public enum EndpointType {
     JSON(asList("json", "application/json", "text/json"), TopicType.JSON, com.pushtechnology.diffusion.datatype.json.JSON.class) {
         @Override
         public boolean canHandle(String contentType) {
-            return contentType.startsWith("application/json") || contentType.startsWith("text/json");
+            return contentType != null &&
+                (contentType.startsWith("application/json") || contentType.startsWith("text/json"));
         }
     },
     PLAIN_TEXT(asList("string", "text/plain"), TopicType.BINARY, String.class) {
         @Override
         public boolean canHandle(String contentType) {
-            return contentType.startsWith("text/plain") || JSON.canHandle(contentType);
+            return contentType != null && (contentType.startsWith("text/plain") || JSON.canHandle(contentType));
         }
     },
     BINARY(asList("binary", "application/octet-stream"), TopicType.BINARY, com.pushtechnology.diffusion.datatype.binary.Binary.class) {
@@ -88,12 +89,20 @@ public enum EndpointType {
     }
 
     /**
+     * @return an identifier for the endpoint type
+     */
+    public String getIdentifier() {
+        return identifiers.iterator().next();
+    }
+
+    /**
      * @return if the content type if valid for the endpoint type
      */
     public abstract boolean canHandle(String contentType);
 
     /**
      * @return the endpoint type resolved from the name or a supported media type
+     * @throws IllegalArgumentException if the endpoint type is unknown
      */
     public static EndpointType from(String identifier) {
         final EndpointType endpointType = identifierLookup.get(identifier);
@@ -101,5 +110,20 @@ public enum EndpointType {
             throw new IllegalArgumentException("Unknown endpoint type " + identifier);
         }
         return endpointType;
+    }
+
+    /**
+     * @return best guess for the topic type for the provided content type
+     */
+    public static EndpointType inferFromContentType(String contentType) {
+        if (JSON.canHandle(contentType)) {
+            return JSON;
+        }
+        else if (PLAIN_TEXT.canHandle(contentType)) {
+            return PLAIN_TEXT;
+        }
+        else {
+            return BINARY;
+        }
     }
 }

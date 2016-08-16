@@ -20,6 +20,8 @@ import static com.pushtechnology.diffusion.client.session.Session.State.CLOSED_B
 import static com.pushtechnology.diffusion.client.session.Session.State.CONNECTED_ACTIVE;
 import static com.pushtechnology.diffusion.client.session.Session.State.CONNECTING;
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.isA;
@@ -56,6 +58,8 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.verification.VerificationWithTimeout;
 
@@ -74,6 +78,7 @@ import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.features.Topics;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
+import com.pushtechnology.diffusion.client.topics.details.TopicType;
 import com.pushtechnology.diffusion.datatype.binary.Binary;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
@@ -139,6 +144,13 @@ public final class BasicIT {
         .url("/rest/timestamp")
         .produces("string")
         .build();
+    private static final EndpointConfig TIMESTAMP_AUTO_ENDPOINT = EndpointConfig
+        .builder()
+        .name("timestamp")
+        .topic("timestamp")
+        .url("/rest/timestamp")
+        .produces("auto")
+        .build();
     private static final EndpointConfig AUTHENTICATED_INCREMENT_ENDPOINT = EndpointConfig
         .builder()
         .name("increment")
@@ -192,6 +204,14 @@ public final class BasicIT {
         .security(SecurityConfig.builder().basic(BASIC_AUTHENTICATION_CONFIG).build())
         .endpoints(asList(AUTHENTICATED_INCREMENT_ENDPOINT, AUTHENTICATED_TIMESTAMP_ENDPOINT))
         .build();
+    private static final ServiceConfig INFERRED_SERVICE = ServiceConfig
+        .builder()
+        .host("localhost")
+        .port(8081)
+        .pollPeriod(500)
+        .topicRoot("rest/auto")
+        .endpoints(singletonList(TIMESTAMP_AUTO_ENDPOINT))
+        .build();
 
     private static Server jettyServer;
 
@@ -207,6 +227,8 @@ public final class BasicIT {
     private Topics.ValueStream<Binary> binaryStream;
     @Mock
     private Topics.CompletionCallback callback;
+    @Captor
+    private ArgumentCaptor<TopicSpecification> specificationCaptor;
 
     private MutableModelStore modelStore;
 
@@ -568,6 +590,32 @@ public final class BasicIT {
         verify(stream, timed()).onUnsubscription(eq("rest/json/increment"), isA(TopicSpecification.class), eq(REMOVAL));
 
         stopSession(session);
+    }
+
+    @Test
+    public void testInference() throws IOException {
+        modelStore.setModel(modelWith(INFERRED_SERVICE));
+        final RESTAdapterClient client = startClient();
+
+        verify(serviceListener, timed()).onActive(INFERRED_SERVICE);
+
+        final Session session = startSession();
+
+        final Topics topics = session.feature(Topics.class);
+        topics.addFallbackStream(JSON.class, stream);
+        topics.subscribe("?rest/", callback);
+
+        verify(callback, timed()).onComplete();
+        verify(stream, timed()).onSubscription(eq("rest/auto/timestamp"), specificationCaptor.capture());
+
+        assertEquals(TopicType.JSON, specificationCaptor.getValue().getType());
+
+        verify(stream, timed()).onValue(eq("rest/auto/timestamp"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
+
+        stopSession(session);
+        client.close();
+
+        verify(serviceListener, timed()).onRemove(INFERRED_SERVICE);
     }
 
     private static VerificationWithTimeout timed() {

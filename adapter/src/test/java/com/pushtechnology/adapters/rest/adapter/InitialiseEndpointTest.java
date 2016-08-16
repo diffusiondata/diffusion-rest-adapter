@@ -17,19 +17,26 @@ package com.pushtechnology.adapters.rest.adapter;
 
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.isA;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
+import java.io.IOException;
+
+import org.apache.http.concurrent.FutureCallback;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.polling.EndpointClient;
+import com.pushtechnology.adapters.rest.polling.EndpointResponse;
 import com.pushtechnology.adapters.rest.polling.ServiceSession;
 import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
 
@@ -45,15 +52,23 @@ public final class InitialiseEndpointTest {
     private TopicManagementClient topicManagementClient;
     @Mock
     private ServiceSession serviceSession;
+    @Mock
+    private EndpointResponse response;
+    @Captor
+    private ArgumentCaptor<FutureCallback<EndpointResponse>> callbackCaptor;
 
     private final EndpointConfig endpointConfig = EndpointConfig.builder().produces("json").build();
+    private final EndpointConfig inferEndpointConfig = EndpointConfig.builder().produces("auto").build();
     private final ServiceConfig serviceConfig = ServiceConfig.builder().build();
 
     private InitialiseEndpoint initialiseEndpoint;
 
     @Before
-    public void setUp() {
+    public void setUp() throws IOException {
         initMocks(this);
+
+        when(response.getHeader("content-type")).thenReturn("application/json");
+        when(response.getResponse()).thenReturn(new byte[0]);
 
         initialiseEndpoint = new InitialiseEndpoint(
             endpointClient,
@@ -65,7 +80,7 @@ public final class InitialiseEndpointTest {
 
     @After
     public void postConditions() {
-        verifyNoMoreInteractions(endpointClient, topicManagementClient, serviceSession);
+        verifyNoMoreInteractions(endpointClient, topicManagementClient, serviceSession, response);
     }
 
     @Test
@@ -73,5 +88,18 @@ public final class InitialiseEndpointTest {
         initialiseEndpoint.accept(endpointConfig);
 
         verify(endpointClient).request(eq(serviceConfig), eq(endpointConfig), isA(ValidateContentType.class));
+    }
+
+    @Test
+    public void acceptInfer() throws IOException {
+        initialiseEndpoint.accept(inferEndpointConfig);
+
+        verify(endpointClient).request(eq(serviceConfig), eq(inferEndpointConfig), callbackCaptor.capture());
+
+        final FutureCallback<EndpointResponse> callback = callbackCaptor.getValue();
+        callback.completed(response);
+
+        verify(response, times(2)).getHeader("content-type");
+        verify(response).getResponse();
     }
 }

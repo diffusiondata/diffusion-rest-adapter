@@ -55,17 +55,41 @@ import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
 
     @Override
     public void accept(EndpointConfig endpointConfig) {
-        final Class<?> type = EndpointType.from(endpointConfig.getProduces()).getValueType();
-        endpointClient.request(
-            service,
-            endpointConfig,
-            new ValidateContentType(
+        final String produces = endpointConfig.getProduces();
+
+        if ("auto".equals(produces)) {
+            endpointClient.request(
+                service,
                 endpointConfig,
-                parsingHandlerFactory.create(type,
-                new AddTopicForEndpoint<>(
-                    topicManagementClient,
-                    service,
+                new InferTopicType((endpointType) -> {
+                    final EndpointConfig inferredEndpointConfig = EndpointConfig
+                        .builder()
+                        .name(endpointConfig.getName())
+                        .topic(endpointConfig.getTopic())
+                        .url(endpointConfig.getUrl())
+                        .produces(endpointType.getIdentifier())
+                        .build();
+                    return parsingHandlerFactory.create(endpointType.getValueType(),
+                        new AddTopicForEndpoint<>(
+                            topicManagementClient,
+                            service,
+                            inferredEndpointConfig,
+                            new AddEndpointToServiceSession(inferredEndpointConfig, serviceSession)));
+                }));
+        }
+        else {
+            final Class<?> type = EndpointType.from(produces).getValueType();
+            endpointClient.request(
+                service,
+                endpointConfig,
+                new ValidateContentType(
                     endpointConfig,
-                    new AddEndpointToServiceSession(endpointConfig, serviceSession)))));
+                    parsingHandlerFactory.create(type,
+                        new AddTopicForEndpoint<>(
+                            topicManagementClient,
+                            service,
+                            endpointConfig,
+                            new AddEndpointToServiceSession(endpointConfig, serviceSession)))));
+        }
     }
 }

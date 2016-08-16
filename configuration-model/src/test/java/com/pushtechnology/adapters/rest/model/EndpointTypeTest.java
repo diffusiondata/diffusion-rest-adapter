@@ -80,4 +80,13 @@ public final class EndpointTypeTest {
         assertEquals(EndpointType.PLAIN_TEXT, EndpointType.from("text/plain"));
         assertEquals(EndpointType.BINARY, EndpointType.from("application/octet-stream"));
     }
+
+    @Test
+    public void infer() {
+        assertEquals(EndpointType.JSON, EndpointType.inferFromContentType("application/json"));
+        assertEquals(EndpointType.PLAIN_TEXT, EndpointType.inferFromContentType("text/plain"));
+        assertEquals(EndpointType.PLAIN_TEXT, EndpointType.inferFromContentType("text/plain; charset=utf-8"));
+        assertEquals(EndpointType.BINARY, EndpointType.inferFromContentType("application/octet-stream"));
+        assertEquals(EndpointType.BINARY, EndpointType.inferFromContentType("who/knows"));
+    }
 }
