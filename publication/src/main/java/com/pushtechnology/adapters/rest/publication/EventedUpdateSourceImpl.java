@@ -130,13 +130,6 @@ public final class EventedUpdateSourceImpl implements EventedUpdateSource {
         }
     }
 
-    @Override
-    public boolean isActive() {
-        synchronized (mutex) {
-            return state == State.ACTIVE;
-        }
-    }
-
     private final class InvertedUpdateSource implements TopicUpdateControl.UpdateSource {
         @Override
         public void onActive(String topicPath, Updater updater) {

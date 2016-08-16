@@ -59,9 +59,4 @@ public interface EventedUpdateSource extends AutoCloseable {
      */
     @Override
     void close();
-
-    /**
-     * @return if the source is active
-     */
-    boolean isActive();
 }

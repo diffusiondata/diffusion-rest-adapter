@@ -160,8 +160,6 @@ public final class PublishingClientImplTest {
         verify(rawUpdater).valueUpdater(JSON.class);
         verify(rawUpdater).valueUpdater(Binary.class);
 
-        assertTrue(source.isActive());
-
         client.publish(serviceConfig, endpointConfig, json);
 
         verify(session).getState();
@@ -181,8 +179,6 @@ public final class PublishingClientImplTest {
         verify(rawUpdater).valueUpdater(JSON.class);
         verify(rawUpdater).valueUpdater(Binary.class);
 
-        assertTrue(source.isActive());
-
         client.publish(serviceConfig, endpointConfig, binary);
 
         verify(session).getState();
@@ -201,8 +197,6 @@ public final class PublishingClientImplTest {
         updateSourceCaptor.getValue().onActive("a/topic", rawUpdater);
         verify(rawUpdater).valueUpdater(JSON.class);
         verify(rawUpdater).valueUpdater(Binary.class);
-
-        assertTrue(source.isActive());
 
         client.publish(serviceConfig, endpointConfig, "");
 
@@ -226,8 +220,6 @@ public final class PublishingClientImplTest {
         updateSourceCaptor.getValue().onActive("a/topic", rawUpdater);
         verify(rawUpdater).valueUpdater(JSON.class);
         verify(rawUpdater).valueUpdater(Binary.class);
-
-        assertTrue(source.isActive());
 
         client.publish(serviceConfig, endpointConfig, json);
 
@@ -314,8 +306,6 @@ public final class PublishingClientImplTest {
         verify(rawUpdater).valueUpdater(JSON.class);
         verify(rawUpdater).valueUpdater(Binary.class);
 
-        assertTrue(source.isActive());
-
         final UpdateContext<JSON> updateContext = client.createUpdateContext(serviceConfig, endpointConfig, JSON.class);
 
         updateContext.publish(json);
@@ -336,8 +326,6 @@ public final class PublishingClientImplTest {
         verify(rawUpdater).valueUpdater(JSON.class);
         verify(rawUpdater).valueUpdater(Binary.class);
 
-        assertTrue(source.isActive());
-
         final UpdateContext<Binary> updateContext = client.createUpdateContext(serviceConfig, endpointConfig, Binary.class);
 
         updateContext.publish(binary);
@@ -357,8 +345,6 @@ public final class PublishingClientImplTest {
         updateSourceCaptor.getValue().onActive("a/topic", rawUpdater);
         verify(rawUpdater).valueUpdater(JSON.class);
         verify(rawUpdater).valueUpdater(Binary.class);
-
-        assertTrue(source.isActive());
 
         final UpdateContext<String> updateContext = client
             .createUpdateContext(serviceConfig, endpointConfig, String.class);
@@ -385,8 +371,6 @@ public final class PublishingClientImplTest {
         verify(rawUpdater).valueUpdater(JSON.class);
         verify(rawUpdater).valueUpdater(Binary.class);
 
-        assertTrue(source.isActive());
-
         client.createUpdateContext(serviceConfig, endpointConfig, Integer.class);
     }
 
@@ -404,8 +388,6 @@ public final class PublishingClientImplTest {
         updateSourceCaptor.getValue().onActive("a/topic", rawUpdater);
         verify(rawUpdater).valueUpdater(JSON.class);
         verify(rawUpdater).valueUpdater(Binary.class);
-
-        assertTrue(source.isActive());
 
         when(session.getState()).thenReturn(RECOVERING_RECONNECT);
 
