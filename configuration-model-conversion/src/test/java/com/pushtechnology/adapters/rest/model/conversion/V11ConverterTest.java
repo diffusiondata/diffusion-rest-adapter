@@ -38,6 +38,7 @@ public final class V11ConverterTest {
                             .name("endpoint")
                             .topic("topic")
                             .url("/url")
+                            .produces("binary")
                             .build()))
                         .pollPeriod(5000)
                         .topicRoot("a")
@@ -88,7 +89,7 @@ public final class V11ConverterTest {
         assertEquals("endpoint", endpoints.get(0).getName());
         assertEquals("topic", endpoints.get(0).getTopic());
         assertEquals("/url", endpoints.get(0).getUrl());
-        assertEquals("json", endpoints.get(0).getProduces());
+        assertEquals("binary", endpoints.get(0).getProduces());
         assertNotNull(basic);
         assertEquals("control", basic.getPrincipal());
         assertEquals("password", basic.getCredential());

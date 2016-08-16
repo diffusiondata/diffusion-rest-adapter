@@ -66,7 +66,7 @@ public final class V11Converter
                             .name(oldEndpoint.getName())
                             .url(oldEndpoint.getUrl())
                             .topic(oldEndpoint.getTopic())
-                            .produces("json")
+                            .produces(oldEndpoint.getProduces())
                             .build())
                         .collect(toList()))
                     .pollPeriod(oldService.getPollPeriod())
