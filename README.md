@@ -1,7 +1,4 @@
-Diffusion REST Adapter
-# REST to Streaming Adapter
-
-`TODO: Rename the project`
+# Diffusion REST Adapter
 
 ## Configuration Model
 
