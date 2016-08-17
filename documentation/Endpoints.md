@@ -14,6 +14,6 @@ If any stage fails the subsequent stages will not be attempted.
 
 ## Also see
 
-[Services](Services.md)
-[ServiceSessions](ServiceSessions.md)
-[README](../README.md)
+| [Services](Services.md) |
+| [ServiceSessions](ServiceSessions.md) |
+| [README](../README.md) |

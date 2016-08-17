@@ -29,4 +29,4 @@ The new components may be in standby until the old components are stopped.
 
 ## Also see
 
-[README](../README.md)
+| [README](../README.md) |

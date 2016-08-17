@@ -25,7 +25,7 @@ Stopping a `ServiceSession` cancels the tasks used to trigger a poll of all endp
 
 ## Also see
 
-[Services](Services.md)
-[Endpoints](Endpoints.md)
-[ServiceSessions](ServiceSessions.md)
-[README](../README.md)
+| [Services](Services.md) |
+| [Endpoints](Endpoints.md) |
+| [ServiceSessions](ServiceSessions.md) |
+| [README](../README.md) |

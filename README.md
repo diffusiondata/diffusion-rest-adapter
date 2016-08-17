@@ -1,10 +1,10 @@
 # Diffusion REST Adapter
 
-[Overview](documentation/Overview.md)
-[Configuration](documentation/Configuration.md)
-[Services](documentation/Services.md)
-[Endpoints](documentation/Endpoints.md)
-[ServiceSessions](documentation/ServiceSessions.md)
+| [Overview](documentation/Overview.md) |
+| [Configuration](documentation/Configuration.md) |
+| [Services](documentation/Services.md) |
+| [Endpoints](documentation/Endpoints.md) |
+| [ServiceSessions](documentation/ServiceSessions.md) |
 
 ## Building
 

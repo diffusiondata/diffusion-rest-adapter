@@ -26,6 +26,6 @@ When the `EventedUpdateSource` of a service enters stand by it waits to be made 
 
 ## Also see
 
-[Endpoints](Endpoints.md)
-[ServiceSessions](ServiceSessions.md)
-[README](../README.md)
+| [Endpoints](Endpoints.md) |
+| [ServiceSessions](ServiceSessions.md) |
+| [README](../README.md) |
