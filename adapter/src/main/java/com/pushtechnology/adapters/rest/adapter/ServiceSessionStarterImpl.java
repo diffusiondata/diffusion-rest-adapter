@@ -25,11 +25,11 @@ import com.pushtechnology.adapters.rest.publication.PublishingClient;
 import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
 
 /**
- * Implementation for {@link ServiceSessionBinder}.
+ * Implementation for {@link ServiceSessionStarter}.
  * @author Push Technology Limited
  */
-public final class ServiceSessionBinderImpl implements ServiceSessionBinder {
-    private static final Logger LOG = LoggerFactory.getLogger(ServiceSessionBinderImpl.class);
+public final class ServiceSessionStarterImpl implements ServiceSessionStarter {
+    private static final Logger LOG = LoggerFactory.getLogger(ServiceSessionStarterImpl.class);
 
     private final TopicManagementClient topicManagementClient;
     private final EndpointClient endpointClient;
@@ -40,7 +40,7 @@ public final class ServiceSessionBinderImpl implements ServiceSessionBinder {
     /**
      * Constructor.
      */
-    public ServiceSessionBinderImpl(
+    public ServiceSessionStarterImpl(
             TopicManagementClient topicManagementClient,
             EndpointClient endpointClient,
             PublishingClient publishingClient,
@@ -54,7 +54,7 @@ public final class ServiceSessionBinderImpl implements ServiceSessionBinder {
     }
 
     @Override
-    public void bind(ServiceConfig serviceConfig, ServiceSession serviceSession) {
+    public void start(ServiceConfig serviceConfig, ServiceSession serviceSession) {
         topicManagementClient.addService(serviceConfig);
         publishingClient
             .addService(serviceConfig)

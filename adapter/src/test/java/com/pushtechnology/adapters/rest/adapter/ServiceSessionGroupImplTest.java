@@ -49,7 +49,7 @@ public final class ServiceSessionGroupImplTest {
     private ServiceSessionFactory serviceSessionFactory;
 
     @Mock
-    private ServiceSessionBinder binder;
+    private ServiceSessionStarter starter;
 
     private ServiceConfig serviceConfig = ServiceConfig.builder().build();
 
@@ -64,11 +64,10 @@ public final class ServiceSessionGroupImplTest {
     @After
     public void postConditions() {
         verifyNoMoreInteractions(
-            binder,
+            starter,
             publishingClient,
             serviceSessionFactory,
-            serviceSession,
-            binder);
+            serviceSession);
     }
 
     @SuppressWarnings("unchecked")
@@ -78,12 +77,12 @@ public final class ServiceSessionGroupImplTest {
             Model.builder().services(singletonList(serviceConfig)).build(),
             publishingClient,
             serviceSessionFactory,
-            binder);
+            starter);
 
         serviceSessionGroup.start();
 
         verify(serviceSessionFactory).create(serviceConfig);
-        verify(binder).bind(serviceConfig, serviceSession);
+        verify(starter).start(serviceConfig, serviceSession);
     }
 
     @Test
@@ -92,7 +91,7 @@ public final class ServiceSessionGroupImplTest {
             Model.builder().services(singletonList(serviceConfig)).build(),
             publishingClient,
             serviceSessionFactory,
-            binder);
+            starter);
 
         serviceSessionGroup.close();
 

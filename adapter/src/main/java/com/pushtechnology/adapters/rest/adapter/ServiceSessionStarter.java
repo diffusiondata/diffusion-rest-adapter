@@ -19,13 +19,13 @@ import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.polling.ServiceSession;
 
 /**
- * Bind the {@link ServiceSession}. Setup the update sources, topics etc.
+ * Start the {@link ServiceSession}. Setup the update sources, topics etc.
  *
  * @author Push Technology Limited
  */
-public interface ServiceSessionBinder {
+public interface ServiceSessionStarter {
     /**
      * Bind a service session.
      */
-    void bind(ServiceConfig serviceConfig, ServiceSession serviceSession);
+    void start(ServiceConfig serviceConfig, ServiceSession serviceSession);
 }

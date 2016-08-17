@@ -41,7 +41,7 @@ public final class ServiceSessionGroupImpl implements ServiceSessionGroup {
     private final PublishingClient publishingClient;
     private final List<ServiceSession> serviceSessions;
     private final ServiceSessionFactory serviceSessionFactory;
-    private final ServiceSessionBinder serviceSessionBinder;
+    private final ServiceSessionStarter serviceSessionStarter;
 
     /**
      * Constructor.
@@ -50,11 +50,11 @@ public final class ServiceSessionGroupImpl implements ServiceSessionGroup {
             Model model,
             PublishingClient publishingClient,
             ServiceSessionFactory serviceSessionFactory,
-            ServiceSessionBinder serviceSessionBinder) {
+            ServiceSessionStarter serviceSessionStarter) {
         this.model = model;
         this.publishingClient = publishingClient;
         this.serviceSessionFactory = serviceSessionFactory;
-        this.serviceSessionBinder = serviceSessionBinder;
+        this.serviceSessionStarter = serviceSessionStarter;
         this.serviceSessions = new ArrayList<>();
     }
 
@@ -64,7 +64,7 @@ public final class ServiceSessionGroupImpl implements ServiceSessionGroup {
         LOG.debug("Opening service session group");
         for (final ServiceConfig service : model.getServices()) {
             final ServiceSession serviceSession = serviceSessionFactory.create(service);
-            serviceSessionBinder.bind(service, serviceSession);
+            serviceSessionStarter.start(service, serviceSession);
             serviceSessions.add(serviceSession);
         }
         LOG.debug("Opened service session group");

@@ -38,11 +38,11 @@ import com.pushtechnology.adapters.rest.publication.PublishingClient;
 import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
 
 /**
- * Unit tests for {@link ServiceSessionBinderImpl}.
+ * Unit tests for {@link ServiceSessionStarterImpl}.
  *
  * @author Push Technology Limited
  */
-public final class ServiceSessionBinderImplTest {
+public final class ServiceSessionStarterImplTest {
 
     @Mock
     private TopicManagementClient topicManagementClient;
@@ -65,7 +65,7 @@ public final class ServiceSessionBinderImplTest {
     @Captor
     private ArgumentCaptor<Runnable> runnableCaptor;
 
-    private ServiceSessionBinder binder;
+    private ServiceSessionStarter binder;
     private ServiceConfig serviceConfig = ServiceConfig.builder().build();
 
     @SuppressWarnings("unchecked")
@@ -73,7 +73,7 @@ public final class ServiceSessionBinderImplTest {
     public void setUp() {
         initMocks(this);
 
-        binder = new ServiceSessionBinderImpl(
+        binder = new ServiceSessionStarterImpl(
             topicManagementClient,
             endpointClient,
             publishingClient,
@@ -97,8 +97,8 @@ public final class ServiceSessionBinderImplTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void bind() {
-        binder.bind(serviceConfig, serviceSession);
+    public void start() {
+        binder.start(serviceConfig, serviceSession);
 
         verify(topicManagementClient).addService(serviceConfig);
         verify(publishingClient).addService(serviceConfig);
@@ -110,7 +110,7 @@ public final class ServiceSessionBinderImplTest {
     @SuppressWarnings("unchecked")
     @Test
     public void standby() {
-        binder.bind(serviceConfig, serviceSession);
+        binder.start(serviceConfig, serviceSession);
 
         verify(topicManagementClient).addService(serviceConfig);
         verify(publishingClient).addService(serviceConfig);
@@ -126,7 +126,7 @@ public final class ServiceSessionBinderImplTest {
     @SuppressWarnings("unchecked")
     @Test
     public void close() {
-        binder.bind(serviceConfig, serviceSession);
+        binder.start(serviceConfig, serviceSession);
 
         verify(topicManagementClient).addService(serviceConfig);
         verify(publishingClient).addService(serviceConfig);
