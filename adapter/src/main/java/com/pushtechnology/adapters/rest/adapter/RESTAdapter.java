@@ -135,7 +135,11 @@ public final class RESTAdapter implements AutoCloseable {
             diffusionContainer = newDiffusionContainer(model);
             servicesContainer = newServicesContainer(model);
 
+            final ServiceManagerContext managerContext = servicesContainer.getComponent(ServiceManagerContext.class);
+
             httpContainer.start();
+
+            topLevelContainer.getComponent(ServiceManager.class).reconfigure(managerContext, model);
         }
     }
 
@@ -163,7 +167,11 @@ public final class RESTAdapter implements AutoCloseable {
         diffusionContainer = newDiffusionContainer(model);
         servicesContainer = newServicesContainer(model);
 
+        final ServiceManagerContext managerContext = servicesContainer.getComponent(ServiceManagerContext.class);
+
         httpContainer.start();
+
+        topLevelContainer.getComponent(ServiceManager.class).reconfigure(managerContext, model);
     }
 
     @GuardedBy("this")
@@ -179,7 +187,11 @@ public final class RESTAdapter implements AutoCloseable {
         diffusionContainer = newDiffusionContainer(model);
         servicesContainer = newServicesContainer(model);
 
+        final ServiceManagerContext managerContext = servicesContainer.getComponent(ServiceManagerContext.class);
+
         httpContainer.start();
+
+        topLevelContainer.getComponent(ServiceManager.class).reconfigure(managerContext, model);
     }
 
     @GuardedBy("this")
@@ -194,7 +206,11 @@ public final class RESTAdapter implements AutoCloseable {
         diffusionContainer = newDiffusionContainer(model);
         servicesContainer = newServicesContainer(model);
 
+        final ServiceManagerContext managerContext = servicesContainer.getComponent(ServiceManagerContext.class);
+
         diffusionContainer.start();
+
+        topLevelContainer.getComponent(ServiceManager.class).reconfigure(managerContext, model);
     }
 
     @GuardedBy("this")
@@ -207,7 +223,12 @@ public final class RESTAdapter implements AutoCloseable {
         }
 
         servicesContainer = newServicesContainer(model);
+
+        final ServiceManagerContext managerContext = servicesContainer.getComponent(ServiceManagerContext.class);
+
         servicesContainer.start();
+
+        topLevelContainer.getComponent(ServiceManager.class).reconfigure(managerContext, model);
     }
 
     @GuardedBy("this")
@@ -222,7 +243,8 @@ public final class RESTAdapter implements AutoCloseable {
             .addComponent(executor)
             .addComponent(serviceListener)
             .addComponent(HttpClientFactoryImpl.class)
-            .addComponent(ParsingHandlerFactory.class);
+            .addComponent(ParsingHandlerFactory.class)
+            .addComponent(ServiceManager.class);
     }
 
     @GuardedBy("this")
@@ -276,11 +298,9 @@ public final class RESTAdapter implements AutoCloseable {
             .addComponent(PublishingClientImpl.class)
             .addComponent(ServiceSessionStarterImpl.class)
             .addComponent(ServiceSessionFactoryImpl.class)
-            .addComponent(ServiceSessionGroupImpl.class)
+            .addComponent(ServiceManagerContext.class)
             .addComponent(EndpointPollHandlerFactoryImpl.class);
         diffusionContainer.addChildContainer(newContainer);
-
-        newContainer.getComponent(ServiceSessionGroup.class);
 
         return newContainer;
     }
@@ -352,6 +372,9 @@ public final class RESTAdapter implements AutoCloseable {
         if (!wasInactive()) {
             httpContainer.dispose();
         }
+
+        topLevelContainer.getComponent(ServiceManager.class).close();
+
         currentModel = null;
         topLevelContainer = null;
         LOG.info("Closed adapter");
