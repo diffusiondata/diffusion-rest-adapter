@@ -274,6 +274,7 @@ public final class RESTAdapter implements AutoCloseable {
             .build()
             .addComponent(model)
             .addComponent(PublishingClientImpl.class)
+            .addComponent(ServiceSessionBinderImpl.class)
             .addComponent(ServiceSessionFactoryImpl.class)
             .addComponent(ServiceSessionGroupImpl.class)
             .addComponent(EndpointPollHandlerFactoryImpl.class);

@@ -16,13 +16,10 @@
 package com.pushtechnology.adapters.rest.adapter;
 
 import static java.util.Collections.singletonList;
-import static org.mockito.Mockito.isA;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
-
-import java.util.function.Consumer;
 
 import org.junit.After;
 import org.junit.Before;
@@ -31,12 +28,9 @@ import org.mockito.Mock;
 
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.adapters.rest.polling.EndpointClient;
 import com.pushtechnology.adapters.rest.polling.ServiceSession;
 import com.pushtechnology.adapters.rest.polling.ServiceSessionFactory;
-import com.pushtechnology.adapters.rest.publication.EventedUpdateSource;
 import com.pushtechnology.adapters.rest.publication.PublishingClient;
-import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
 
 /**
  * Unit tests for {@link ServiceSessionGroupImpl}.
@@ -46,13 +40,7 @@ import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
 public final class ServiceSessionGroupImplTest {
 
     @Mock
-    private TopicManagementClient topicManagementClient;
-
-    @Mock
     private PublishingClient publishingClient;
-
-    @Mock
-    private EndpointClient endpointClient;
 
     @Mock
     private ServiceSession serviceSession;
@@ -61,10 +49,7 @@ public final class ServiceSessionGroupImplTest {
     private ServiceSessionFactory serviceSessionFactory;
 
     @Mock
-    private EventedUpdateSource source;
-
-    @Mock
-    private ServiceListener serviceListener;
+    private ServiceSessionBinder binder;
 
     private ServiceConfig serviceConfig = ServiceConfig.builder().build();
 
@@ -73,21 +58,17 @@ public final class ServiceSessionGroupImplTest {
     public void setUp() {
         initMocks(this);
 
-        when(publishingClient.addService(serviceConfig)).thenReturn(source);
         when(serviceSessionFactory.create(serviceConfig)).thenReturn(serviceSession);
-        when(source.onStandby(isA(Runnable.class))).thenReturn(source);
-        when(source.onActive(isA(Consumer.class))).thenReturn(source);
     }
 
     @After
     public void postConditions() {
         verifyNoMoreInteractions(
-            topicManagementClient,
-            endpointClient,
+            binder,
             publishingClient,
-            source,
             serviceSessionFactory,
-            serviceSession);
+            serviceSession,
+            binder);
     }
 
     @SuppressWarnings("unchecked")
@@ -95,33 +76,23 @@ public final class ServiceSessionGroupImplTest {
     public void start() {
         final ServiceSessionGroup serviceSessionGroup = new ServiceSessionGroupImpl(
             Model.builder().services(singletonList(serviceConfig)).build(),
-            topicManagementClient,
-            endpointClient,
             publishingClient,
             serviceSessionFactory,
-            serviceListener,
-            new ParsingHandlerFactory());
+            binder);
 
         serviceSessionGroup.start();
 
         verify(serviceSessionFactory).create(serviceConfig);
-        verify(topicManagementClient).addService(serviceConfig);
-        verify(publishingClient).addService(serviceConfig);
-        verify(source).onStandby(isA(Runnable.class));
-        verify(source).onActive(isA(Consumer.class));
-        verify(source).onClose(isA(Runnable.class));
+        verify(binder).bind(serviceConfig, serviceSession);
     }
 
     @Test
     public void close() {
         final ServiceSessionGroup serviceSessionGroup = new ServiceSessionGroupImpl(
             Model.builder().services(singletonList(serviceConfig)).build(),
-            topicManagementClient,
-            endpointClient,
             publishingClient,
             serviceSessionFactory,
-            serviceListener,
-            new ParsingHandlerFactory());
+            binder);
 
         serviceSessionGroup.close();
 

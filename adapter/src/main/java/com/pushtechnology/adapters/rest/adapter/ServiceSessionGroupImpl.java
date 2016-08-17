@@ -26,11 +26,9 @@ import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.adapters.rest.polling.EndpointClient;
 import com.pushtechnology.adapters.rest.polling.ServiceSession;
 import com.pushtechnology.adapters.rest.polling.ServiceSessionFactory;
 import com.pushtechnology.adapters.rest.publication.PublishingClient;
-import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
 
 /**
  * Implementation for {@link ServiceSessionGroup}.
@@ -40,32 +38,23 @@ import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
 public final class ServiceSessionGroupImpl implements ServiceSessionGroup {
     private static final Logger LOG = LoggerFactory.getLogger(ServiceSessionGroupImpl.class);
     private final Model model;
-    private final TopicManagementClient topicManagementClient;
-    private final EndpointClient endpointClient;
     private final PublishingClient publishingClient;
     private final List<ServiceSession> serviceSessions;
     private final ServiceSessionFactory serviceSessionFactory;
-    private final ServiceListener serviceListener;
-    private final ParsingHandlerFactory parsingHandlerFactory;
+    private final ServiceSessionBinder serviceSessionBinder;
 
     /**
      * Constructor.
      */
     public ServiceSessionGroupImpl(
             Model model,
-            TopicManagementClient topicManagementClient,
-            EndpointClient endpointClient,
             PublishingClient publishingClient,
             ServiceSessionFactory serviceSessionFactory,
-            ServiceListener serviceListener,
-            ParsingHandlerFactory parsingHandlerFactory) {
+            ServiceSessionBinder serviceSessionBinder) {
         this.model = model;
-        this.topicManagementClient = topicManagementClient;
-        this.endpointClient = endpointClient;
         this.publishingClient = publishingClient;
         this.serviceSessionFactory = serviceSessionFactory;
-        this.serviceListener = serviceListener;
-        this.parsingHandlerFactory = parsingHandlerFactory;
+        this.serviceSessionBinder = serviceSessionBinder;
         this.serviceSessions = new ArrayList<>();
     }
 
@@ -75,30 +64,7 @@ public final class ServiceSessionGroupImpl implements ServiceSessionGroup {
         LOG.debug("Opening service session group");
         for (final ServiceConfig service : model.getServices()) {
             final ServiceSession serviceSession = serviceSessionFactory.create(service);
-            topicManagementClient.addService(service);
-            publishingClient
-                .addService(service)
-                .onStandby(() -> {
-                    LOG.info("Service {} on standby", service);
-                    serviceListener.onStandby(service);
-                })
-                .onActive((updater) -> {
-                    LOG.info("Service {} active", service);
-                    serviceListener.onActive(service);
-                    service
-                        .getEndpoints()
-                        .forEach(new InitialiseEndpoint(
-                            endpointClient,
-                            topicManagementClient,
-                            service,
-                            serviceSession,
-                            parsingHandlerFactory));
-                    serviceSession.start();
-                })
-                .onClose(() -> {
-                    LOG.info("Service {} closed", service);
-                    serviceListener.onRemove(service);
-                });
+            serviceSessionBinder.bind(service, serviceSession);
             serviceSessions.add(serviceSession);
         }
         LOG.debug("Opened service session group");
