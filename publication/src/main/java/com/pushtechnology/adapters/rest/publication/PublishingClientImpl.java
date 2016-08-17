@@ -67,9 +67,12 @@ public final class PublishingClientImpl implements PublishingClient {
         final EventedUpdateSource source = new EventedUpdateSourceImpl(serviceConfig.getTopicRoot())
             .onActive(updater -> {
                 synchronized (PublishingClientImpl.this) {
-                    updaters.put(
-                        serviceConfig,
-                        new UpdaterSet(updater.valueUpdater(JSON.class), updater.valueUpdater(Binary.class)));
+                    final ValueUpdater<JSON> jsonUpdater = updater.valueUpdater(JSON.class);
+                    final ValueUpdater<Binary> binaryUpdater = updater.valueUpdater(Binary.class);
+                    // Remove cached values to prevent stale values poisoning the delta calculation
+                    // The cache is shared by all updaters
+                    jsonUpdater.removeCachedValues(serviceConfig.getTopicRoot());
+                    updaters.put(serviceConfig, new UpdaterSet(jsonUpdater, binaryUpdater));
                 }
             })
             .onClose(() -> {
