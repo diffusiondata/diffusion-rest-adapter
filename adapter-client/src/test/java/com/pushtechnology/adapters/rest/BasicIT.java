@@ -311,7 +311,7 @@ public final class BasicIT {
 
     @After
     public void postConditions() {
-        verifyNoMoreInteractions(listener, callback, serviceListener, backupServiceListener);
+        verifyNoMoreInteractions(listener, callback, backupServiceListener);
     }
 
     @Test
@@ -534,9 +534,8 @@ public final class BasicIT {
 
         modelStore.setModel(modelWith(INSECURE_SERVICE, INSECURE_BINARY_SERVICE));
 
-        verify(serviceListener, timed()).onActive(INSECURE_BINARY_SERVICE);
         verify(serviceListener, timed()).onRemove(INSECURE_SERVICE);
-        verify(serviceListener, timed()).onStandby(INSECURE_SERVICE);
+        verify(serviceListener, timed()).onActive(INSECURE_BINARY_SERVICE);
         verify(serviceListener, timed().times(2)).onActive(INSECURE_SERVICE);
 
         verify(binaryStream, timed()).onSubscription(eq("rest/binary/timestamp"), isA(TopicSpecification.class));

@@ -155,67 +155,59 @@ public final class RESTAdapter implements AutoCloseable {
     private void reconfigureAll(Model model) {
         LOG.info("Replacing all components");
 
-        final MutablePicoContainer oldHttpContainer = httpContainer;
+        if (httpContainer != null) {
+            httpContainer.dispose();
+        }
 
         httpContainer = newHttpContainer(model);
         diffusionContainer = newDiffusionContainer(model);
         servicesContainer = newServicesContainer(model);
 
         httpContainer.start();
-
-        if (oldHttpContainer != null) {
-            oldHttpContainer.dispose();
-        }
     }
 
     @GuardedBy("this")
     private void reconfigureSecurity(Model model) {
         LOG.info("Updating security, REST and Diffusion sessions");
 
-        final MutablePicoContainer oldHttpContainer = httpContainer;
+        if (httpContainer != null) {
+            httpContainer.dispose();
+            topLevelContainer.removeChildContainer(httpContainer);
+        }
 
         httpContainer = newHttpContainer(model);
         diffusionContainer = newDiffusionContainer(model);
         servicesContainer = newServicesContainer(model);
 
         httpContainer.start();
-
-        if (oldHttpContainer != null) {
-            oldHttpContainer.dispose();
-            topLevelContainer.removeChildContainer(oldHttpContainer);
-        }
     }
 
     @GuardedBy("this")
     private void reconfigurePollingAndPublishing(Model model) {
         LOG.debug("Replacing REST and Diffusion sessions");
 
-        final MutablePicoContainer oldDiffusionContainer = diffusionContainer;
+        if (diffusionContainer != null) {
+            diffusionContainer.dispose();
+            httpContainer.removeChildContainer(diffusionContainer);
+        }
 
         diffusionContainer = newDiffusionContainer(model);
         servicesContainer = newServicesContainer(model);
 
         diffusionContainer.start();
-
-        if (oldDiffusionContainer != null) {
-            oldDiffusionContainer.dispose();
-            httpContainer.removeChildContainer(oldDiffusionContainer);
-        }
     }
 
     @GuardedBy("this")
     private void reconfigureServices(Model model) {
         LOG.info("Replacing REST sessions");
 
-        final MutablePicoContainer oldPollContainer = servicesContainer;
+        if (servicesContainer != null) {
+            servicesContainer.dispose();
+            diffusionContainer.removeChildContainer(servicesContainer);
+        }
 
         servicesContainer = newServicesContainer(model);
         servicesContainer.start();
-
-        if (oldPollContainer != null) {
-            oldPollContainer.dispose();
-            diffusionContainer.removeChildContainer(oldPollContainer);
-        }
     }
 
     @GuardedBy("this")
