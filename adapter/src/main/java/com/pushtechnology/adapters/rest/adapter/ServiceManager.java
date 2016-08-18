@@ -20,8 +20,6 @@ import java.util.List;
 
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.adapters.rest.polling.ServiceSession;
-import com.pushtechnology.adapters.rest.polling.ServiceSessionFactory;
 
 import net.jcip.annotations.ThreadSafe;
 
@@ -32,15 +30,13 @@ import net.jcip.annotations.ThreadSafe;
  */
 @ThreadSafe
 public final class ServiceManager implements AutoCloseable {
-    private Model currentModel;
-    private ServiceManagerContext currentContext;
-    private final List<ServiceSession> serviceSessions;
+    private final List<Service> services;
 
     /**
      * Constructor.
      */
     public ServiceManager() {
-        serviceSessions = new ArrayList<>();
+        services = new ArrayList<>();
     }
 
     /**
@@ -50,27 +46,18 @@ public final class ServiceManager implements AutoCloseable {
         close();
 
         // Apply the new configuration
-        currentModel = model;
-        currentContext = context;
-        final ServiceSessionFactory serviceSessionFactory = currentContext.getServiceSessionFactory();
-        final ServiceSessionStarter serviceSessionStarter = currentContext.getServiceSessionStarter();
+        for (final ServiceConfig serviceConfig : model.getServices()) {
+            final Service service = new Service();
+            service.reconfigure(serviceConfig, context);
 
-        for (final ServiceConfig service : model.getServices()) {
-            final ServiceSession serviceSession = serviceSessionFactory.create(service);
-            serviceSessionStarter.start(service, serviceSession);
-            serviceSessions.add(serviceSession);
+            services.add(service);
         }
     }
 
     @Override
     public synchronized void close() {
-        if (currentModel != null) {
-            // Remove the previous configuration
-            serviceSessions.forEach(ServiceSession::stop);
-            currentModel.getServices().forEach(currentContext.getPublishingClient()::removeService);
-            serviceSessions.clear();
-            currentModel = null;
-            currentContext = null;
-        }
+        // Remove the previous configuration
+        services.forEach(Service::close);
+        services.clear();
     }
 }
