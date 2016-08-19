@@ -28,7 +28,11 @@ import com.pushtechnology.adapters.rest.model.store.ModelStore;
 import com.pushtechnology.adapters.rest.session.management.DiffusionSessionFactory;
 import com.pushtechnology.adapters.rest.session.management.EventedSessionListener;
 import com.pushtechnology.adapters.rest.session.management.SessionLostListener;
+import com.pushtechnology.diffusion.client.content.Content;
+import com.pushtechnology.diffusion.client.features.control.topics.MessagingControl;
 import com.pushtechnology.diffusion.client.session.Session;
+import com.pushtechnology.diffusion.client.session.SessionId;
+import com.pushtechnology.diffusion.client.types.ReceiveContext;
 
 /**
  * A {@link ModelStore} implementation that is controlled by Diffusion messages.
@@ -38,6 +42,7 @@ import com.pushtechnology.diffusion.client.session.Session;
 public final class ClientControlledModelStore extends AbstractModelStore implements ModelStore, AutoCloseable {
     private final DiffusionConfig diffusionConfig;
     private final SSLContext sslContext;
+    private final DiffusionSessionFactory sessionFactory;
     private Session session;
     private Model model;
     private AtomicBoolean isRunning = new AtomicBoolean(false);
@@ -45,9 +50,13 @@ public final class ClientControlledModelStore extends AbstractModelStore impleme
     /**
      * Constructor.
      */
-    /*package*/ ClientControlledModelStore(DiffusionConfig diffusionConfig, SSLContext sslContext) {
+    /*package*/ ClientControlledModelStore(
+            DiffusionConfig diffusionConfig,
+            SSLContext sslContext,
+            DiffusionSessionFactory sessionFactory) {
         this.diffusionConfig = diffusionConfig;
         this.sslContext = sslContext;
+        this.sessionFactory = sessionFactory;
         this.model = Model
             .builder()
             .active(true)
@@ -60,10 +69,6 @@ public final class ClientControlledModelStore extends AbstractModelStore impleme
      * Start the model store.
      */
     public void start() {
-        start(DiffusionSessionFactory.create());
-    }
-
-    /*package*/ synchronized void start(DiffusionSessionFactory sessionFactory) {
         if (!isRunning.compareAndSet(false, true)) {
             throw new IllegalStateException("The " + this + " has already been started");
         }
@@ -71,6 +76,18 @@ public final class ClientControlledModelStore extends AbstractModelStore impleme
         final EventedSessionListener listener = new EventedSessionListener();
         final SessionLostListener sessionLostListener = new SessionLostListener(() -> { });
         session = sessionFactory.openSession(diffusionConfig, sessionLostListener, listener, sslContext);
+
+        session
+            .feature(MessagingControl.class)
+            .addMessageHandler("adapter/rest/model/store", new MessagingControl.MessageHandler.Default() {
+                @Override
+                public void onMessage(
+                    SessionId sessionId,
+                    String path,
+                    Content content,
+                    ReceiveContext receiveContext) {
+                }
+            });
     }
 
     @Override
@@ -90,7 +107,7 @@ public final class ClientControlledModelStore extends AbstractModelStore impleme
     /**
      * @return a new model store
      */
-    public static ModelStore create(DiffusionConfig diffusionConfig, SSLContext sslContext) {
-        return new ClientControlledModelStore(diffusionConfig, sslContext);
+    public static ClientControlledModelStore create(DiffusionConfig diffusionConfig, SSLContext sslContext) {
+        return new ClientControlledModelStore(diffusionConfig, sslContext, DiffusionSessionFactory.create());
     }
 }
