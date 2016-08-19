@@ -287,7 +287,8 @@ public final class BasicIT {
         sslContextFactory.setExcludeProtocols();
         sslContextFactory.setExcludeCipherSuites();
 
-        final ServerConnector httpsConnector = new ServerConnector(jettyServer,
+        final ServerConnector httpsConnector = new ServerConnector(
+            jettyServer,
             new SslConnectionFactory(sslContextFactory, "http/1.1"),
             new HttpConnectionFactory(httpsConfiguration));
         httpsConnector.setPort(8444);

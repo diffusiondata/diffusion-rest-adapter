@@ -23,9 +23,11 @@ The only the embedded service tests are run by default.
 To run only the live service tests enable the profile `live-services-test`.
 To run both the embedded services tests and the live service tests enable the profile `all-tests`.
 
+The integration tests assume that the ports 8080, 8081, 8082, 8443 and 8444 are available to listen on.
+
 ### Build artifact overview
 
-#### adapter-client
+### adapter-client
 
 The `adapter-client` module creates an executable JAR with all dependencies shaded in.
 It loads the configuration model from the filesystem in the current working directory.
@@ -35,6 +37,11 @@ If the client is closed the JVM process will be terminated.
 
 The `adapter` module is more suitable for embedding the adapter in other applications.
 It expects to be notified of changes to the model.
+
+### diffusion-rest-adapter-integrated-server
+
+The `diffusion-rest-adapter-integrated-server` module creates an integrated application server and `adapter-client`.
+It is used to deploy an instance of the Diffusion REST Adapter with a web front end as a CloudFoundry application.
 
 ## Connecting to Diffusion
 
