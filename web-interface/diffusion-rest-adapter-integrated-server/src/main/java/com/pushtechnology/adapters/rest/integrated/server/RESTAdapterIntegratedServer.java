@@ -19,13 +19,14 @@ import static java.util.concurrent.Executors.newSingleThreadScheduledExecutor;
 
 import java.util.concurrent.ScheduledExecutorService;
 
+import javax.naming.NamingException;
+
+import org.eclipse.jetty.plus.jndi.Resource;
 import org.eclipse.jetty.server.Server;
 
 import com.pushtechnology.adapters.rest.adapter.ServiceListener;
 import com.pushtechnology.adapters.rest.client.RESTAdapterClient;
-import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
-import com.pushtechnology.adapters.rest.model.latest.Model;
-import com.pushtechnology.adapters.rest.model.store.MutableModelStore;
+import com.pushtechnology.adapters.rest.model.store.AsyncMutableModelStore;
 
 /**
  * Diffusion REST Adapter Integrated Server.
@@ -47,38 +48,43 @@ public final class RESTAdapterIntegratedServer implements AutoCloseable {
     /**
      * Start the server.
      */
-    public void start() throws Exception {
-        adapterClient.start();
-        jettyServer.start();
+    public void start() {
+        try {
+            jettyServer.start();
+            adapterClient.start();
+        }
+        // CHECKSTYLE.OFF: IllegalCatch // Jetty throws Exceptions
+        catch (Exception e) {
+            // CHECKSTYLE.ON: IllegalCatch
+            throw new IllegalStateException(e);
+        }
     }
 
     @Override
-    public void close() throws Exception {
-        adapterClient.close();
-        jettyServer.stop();
+    public void close() {
+        try {
+            adapterClient.close();
+            jettyServer.stop();
+        }
+        // CHECKSTYLE.OFF: IllegalCatch // Jetty throws Exceptions
+        catch (Exception e) {
+            // CHECKSTYLE.ON: IllegalCatch
+            throw new IllegalStateException(e);
+        }
     }
 
     /**
      * @param port the port for the application server to listen on
      * @return a new {@link RESTAdapterIntegratedServer}
      */
-    public static RESTAdapterIntegratedServer create(int port) {
+    public static RESTAdapterIntegratedServer create(int port) throws NamingException {
         final ScheduledExecutorService executor = newSingleThreadScheduledExecutor();
 
-        final MutableModelStore modelStore = new MutableModelStore();
-        modelStore.setModel(Model
-            .builder()
-            .active(true)
-            .diffusion(DiffusionConfig
-                .builder()
-                .host("localhost")
-                .port(8082)
-                .principal("control")
-                .password("password")
-                .build())
-            .build());
+        final AsyncMutableModelStore modelStore = new AsyncMutableModelStore(executor);
 
         final Server jettyServer = new Server(port);
+        // The constructor appears to bind itself using static methods
+        new Resource(jettyServer, "diffusion/rest/modelstore", modelStore);
 
         final RESTAdapterClient adapterClient = RESTAdapterClient.create(
             modelStore,

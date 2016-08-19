@@ -15,6 +15,8 @@
 
 package com.pushtechnology.adapters.rest.integrated.server;
 
+import javax.naming.NamingException;
+
 /**
  * Entry point for Diffusion REST Adapter Integrated Server.
  *
@@ -27,10 +29,11 @@ public final class RESTAdapterIntegratedServerEntry {
     /**
      * Entry point for adapter client.
      * @param args The command line arguments
-     * @throws Exception if there was a problem starting the integrated server
+     * @throws NamingException if there was a problem starting the integrated server
+     * @throws IllegalStateException if there was a problem starting the integrated server
      */
-    // CHECKSTYLE.OFF: UncommentedMain
-    public static void main(String[] args) throws Exception {
+    // CHECKSTYLE.OFF: UncommentedMain // Entry point for runnable JAR
+    public static void main(String[] args) throws NamingException {
         // CHECKSTYLE.ON: UncommentedMain
 
         RESTAdapterIntegratedServer.create(8080).start();
