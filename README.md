@@ -23,7 +23,7 @@ The only the embedded service tests are run by default.
 To run only the live service tests enable the profile `live-services-test`.
 To run both the embedded services tests and the live service tests enable the profile `all-tests`.
 
-The integration tests assume that the ports 8080, 8081, 8082, 8443 and 8444 are available to listen on.
+The integration tests assume that the ports 8080, 8081, 8443 and 8444 are available to listen on.
 
 ### Build artifact overview
 
