@@ -33,4 +33,81 @@
         </dependency>
     </dependencies>
 
+    <profiles>
+        <!-- Enable integration tests only when the DIFFUSION_HOME environmental variable is set -->
+        <!-- Only runs the embedded services test category by default -->
+        <profile>
+            <id>integration-test</id>
+            <activation>
+                <property>
+                    <name>env.DIFFUSION_HOME</name>
+                </property>
+            </activation>
+
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>diffusion-maven-plugin</artifactId>
+                        <groupId>com.pushtechnology.diffusion.maven.plugin</groupId>
+                        <configuration>
+                            <systemProperties>
+                                <systemProperty>
+                                    <name>diffusion.home</name>
+                                    <value>${env.DIFFUSION_HOME}</value>
+                                </systemProperty>
+                            </systemProperties>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>start-diffusion</id>
+                                <phase>pre-integration-test</phase>
+                                <goals>
+                                    <goal>start</goal>
+                                </goals>
+                                <configuration>
+                                    <serverStartTimeout>10000</serverStartTimeout>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>stop-diffusion</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>stop</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <dependencies>
+                            <dependency>
+                                <groupId>com.pushtechnology.diffusion</groupId>
+                                <artifactId>diffusion</artifactId>
+                                <version>local-installation</version>
+                                <scope>system</scope>
+                                <systemPath>${env.DIFFUSION_HOME}/lib/diffusion.jar</systemPath>
+                            </dependency>
+                        </dependencies>
+                    </plugin>
+
+                    <plugin>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>test</id>
+                                <phase>integration-test</phase>
+                                <goals>
+                                    <goal>integration-test</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>verify</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>verify</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
