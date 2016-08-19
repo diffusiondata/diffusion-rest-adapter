@@ -32,7 +32,7 @@ import net.jcip.annotations.ThreadSafe;
  * @author Push Technology Limited
  */
 @ThreadSafe
-/*package*/ abstract class AbstractModelStore implements ModelStore {
+public abstract class AbstractModelStore implements ModelStore {
     @GuardedBy("this")
     private final Collection<Consumer<Model>> listeners = new ArrayList<>();
 

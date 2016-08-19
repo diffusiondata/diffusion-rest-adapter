@@ -17,6 +17,7 @@
         <module>adapter</module>
         <module>adapter-client</module>
         <module>build-rules</module>
+        <module>client-controlled-model-store</module>
         <module>configuration-model</module>
         <module>configuration-model-conversion</module>
         <module>configuration-persistence</module>
@@ -53,6 +54,11 @@
                 <version>${project.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>com.pushtechnology.adapters.rest</groupId>
+                <artifactId>client-controlled-model-store</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>com.pushtechnology.adapters.rest</groupId>

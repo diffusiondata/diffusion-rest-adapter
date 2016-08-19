@@ -39,7 +39,7 @@ public final class DiffusionSessionFactory extends ProviderAdapter {
     /**
      * Constructor.
      */
-    /*package*/ DiffusionSessionFactory(SessionFactory baseSessionFactory) {
+    public DiffusionSessionFactory(SessionFactory baseSessionFactory) {
         this.baseSessionFactory = baseSessionFactory.transports(WEBSOCKET);
     }
 
@@ -51,7 +51,18 @@ public final class DiffusionSessionFactory extends ProviderAdapter {
             SessionLostListener sessionLostListener,
             EventedSessionListener listener,
             @Nullable SSLContext sslContext) {
-        final DiffusionConfig diffusionConfig = model.getDiffusion();
+
+        return openSession(model.getDiffusion(), sessionLostListener, listener, sslContext);
+    }
+
+    /**
+     * @return an open session
+     */
+    public Session openSession(
+            DiffusionConfig diffusionConfig,
+            SessionLostListener sessionLostListener,
+            EventedSessionListener listener,
+            @Nullable SSLContext sslContext) {
 
         SessionFactory sessionFactory = baseSessionFactory
             .serverHost(diffusionConfig.getHost())
