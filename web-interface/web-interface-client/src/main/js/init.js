@@ -1,12 +1,52 @@
 
 (function() {
+    var diffusion = require('diffusion');
+
+    function start() {
+        console.log('Ready');
+
+        session
+            .stream('?adapter/rest/model/store/')
+            .asType(diffusion.datatypes.json())
+            .on('value', function(path, specification, newValue, oldValue) {
+                console.log(path, newValue);
+            });
+    }
+
+    var started = false;
+    function tryStart() {
+        if (!started && setup && connected) {
+            start();
+
+            started = true;
+        }
+    }
+
+    var connected = false;
+    var session;
+    function connect() {
+        diffusion.connect({
+            host : 'localhost',
+            port : 8080
+        }).then(function (newSession) {
+            connected = true;
+            session = newSession;
+            session.subscribe('?adapter/rest/model/store/');
+
+            tryStart();
+        }, function() {
+            setTimeout(connect, 5000);
+        });
+    }
+
     var setup = false;
     function ready() {
         if (setup) {
             return;
         }
 
-        // TODO: Init
+        tryStart();
+
         setup = true;
     }
 
@@ -21,4 +61,6 @@
         document.attachEvent('onreadystatechange', readyStateChange);
         window.attachEvent('onload', ready);
     }
+
+    connect();
 })();
