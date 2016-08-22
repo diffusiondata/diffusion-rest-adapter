@@ -15,6 +15,8 @@
 
 package com.pushtechnology.adapters.rest.integrated.server;
 
+import java.io.IOException;
+
 import javax.naming.NamingException;
 
 /**
@@ -33,9 +35,9 @@ public final class RESTAdapterIntegratedServerEntry {
      * @throws IllegalStateException if there was a problem starting the integrated server
      */
     // CHECKSTYLE.OFF: UncommentedMain // Entry point for runnable JAR
-    public static void main(String[] args) throws NamingException {
+    public static void main(String[] args) throws NamingException, IOException {
         // CHECKSTYLE.ON: UncommentedMain
 
-        RESTAdapterIntegratedServer.create(8080).start();
+        RESTAdapterIntegratedServer.create(8081).start();
     }
 }
