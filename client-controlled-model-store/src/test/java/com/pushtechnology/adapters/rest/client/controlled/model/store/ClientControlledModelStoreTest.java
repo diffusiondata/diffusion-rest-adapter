@@ -23,6 +23,8 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
+import java.util.concurrent.ScheduledExecutorService;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -51,8 +53,14 @@ public final class ClientControlledModelStoreTest {
     @Mock
     private MessagingControl messagingControl;
 
+    @Mock
+    private ScheduledExecutorService executor;
+
     @Captor
     private ArgumentCaptor<MessagingControl.MessageHandler> messageHandlerCaptor;
+
+    @Captor
+    private ArgumentCaptor<Runnable> runnableCaptor;
 
     private final DiffusionConfig diffusionConfig = DiffusionConfig
         .builder()
@@ -90,15 +98,19 @@ public final class ClientControlledModelStoreTest {
 
     @After
     public void postConditions() {
-        verifyNoMoreInteractions(session, messagingControl);
+        verifyNoMoreInteractions(session, messagingControl, executor);
     }
 
     @Test
     public void startClose() {
         final ClientControlledModelStore modelStore = new ClientControlledModelStore(
+            executor,
             diffusionConfig,
             null,
             new DiffusionSessionFactory(sessionFactory));
+
+        verify(executor).execute(runnableCaptor.capture());
+        runnableCaptor.getValue().run();
 
         modelStore.start();
 

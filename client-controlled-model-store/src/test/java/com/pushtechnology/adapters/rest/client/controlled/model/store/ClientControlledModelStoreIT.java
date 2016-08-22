@@ -15,10 +15,10 @@
 
 package com.pushtechnology.adapters.rest.client.controlled.model.store;
 
-import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static com.pushtechnology.adapters.rest.client.controlled.model.store.ClientControlledModelStore.create;
+import static java.util.concurrent.Executors.newSingleThreadScheduledExecutor;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -49,7 +49,7 @@ public final class ClientControlledModelStoreIT {
 
     @Test
     public void startClose() {
-        final ClientControlledModelStore modelStore = ClientControlledModelStore.create(diffusionConfig, null);
+        final ClientControlledModelStore modelStore = create(newSingleThreadScheduledExecutor(), diffusionConfig, null);
 
         modelStore.start();
 
