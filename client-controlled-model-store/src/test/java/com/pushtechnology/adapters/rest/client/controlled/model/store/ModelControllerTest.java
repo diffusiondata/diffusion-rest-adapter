@@ -22,7 +22,7 @@ import com.pushtechnology.diffusion.client.types.ReceiveContext;
 /**
  * Unit tests for {@link ModelController}.
  *
- * @author Matt Champion on 22/08/2016
+ * @author Push Technology Limited
  */
 public final class ModelControllerTest {
 
@@ -37,6 +37,9 @@ public final class ModelControllerTest {
 
     @Mock
     private ReceiveContext context;
+
+    @Mock
+    private ModelPublisher modelPublisher;
 
     @Captor
     private ArgumentCaptor<Runnable> runnableCaptor;
@@ -57,22 +60,23 @@ public final class ModelControllerTest {
 
     @After
     public void postConditions() {
-        verifyNoMoreInteractions(executor, sessionId, content, context);
+        verifyNoMoreInteractions(executor, sessionId, content, context, modelPublisher);
     }
 
     @Test
     public void wrongPath() {
-        final ModelController controller = new ModelController(modelStore);
+        final ModelController controller = new ModelController(modelStore, modelPublisher);
 
         controller.onMessage(sessionId, ClientControlledModelStore.CONTROL_PATH + "/child", content, context);
     }
 
     @Test
     public void onMessage() {
-        final ModelController controller = new ModelController(modelStore);
+        final ModelController controller = new ModelController(modelStore, modelPublisher);
 
         controller.onMessage(sessionId, ClientControlledModelStore.CONTROL_PATH, content, context);
 
         verify(executor).execute(runnableCaptor.capture());
+        verify(modelPublisher).update();
     }
 }

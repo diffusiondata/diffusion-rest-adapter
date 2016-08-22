@@ -46,14 +46,13 @@ public final class ClientControlledModelStore implements ModelStore, AutoCloseab
     /**
      * Path the model store registers to receive messages on.
      */
-    /*pacakge*/ static final String CONTROL_PATH = "adapter/rest/model/store";
+    /*package*/ static final String CONTROL_PATH = "adapter/rest/model/store";
     // Replace the session when lost
     private final SessionLostListener sessionLostListener;
     private final DiffusionConfig diffusionConfig;
     private final SSLContext sslContext;
     private final DiffusionSessionFactory sessionFactory;
     private final AsyncMutableModelStore delegateModelStore;
-    private final ModelController modelController;
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
     private Session session;
 
@@ -76,7 +75,6 @@ public final class ClientControlledModelStore implements ModelStore, AutoCloseab
             .diffusion(diffusionConfig)
             .services(emptyList())
             .build());
-        modelController = new ModelController(delegateModelStore);
     }
 
     /**
@@ -105,6 +103,12 @@ public final class ClientControlledModelStore implements ModelStore, AutoCloseab
             // Handled by the session lost listener
             return;
         }
+
+        final ModelPublisher modelPublisher = ModelPublisherImpl.create(session);
+
+        modelPublisher.initialise(delegateModelStore.get());
+
+        final ModelController modelController = new ModelController(delegateModelStore, modelPublisher);
 
         session
             .feature(MessagingControl.class)

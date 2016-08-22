@@ -35,12 +35,14 @@ import net.jcip.annotations.ThreadSafe;
 /*package*/ final class ModelController extends MessagingControl.MessageHandler.Default {
     private static final Logger LOG = LoggerFactory.getLogger(ModelController.class);
     private final AsyncMutableModelStore modelStore;
+    private final ModelPublisher modelPublisher;
 
     /**
      * Constructor.
      */
-    /*package*/ ModelController(AsyncMutableModelStore modelStore) {
+    /*package*/ ModelController(AsyncMutableModelStore modelStore, ModelPublisher modelPublisher) {
         this.modelStore = modelStore;
+        this.modelPublisher = modelPublisher;
     }
 
     @Override
@@ -51,5 +53,6 @@ import net.jcip.annotations.ThreadSafe;
         }
 
         modelStore.apply(model -> model);
+        modelPublisher.update();
     }
 }

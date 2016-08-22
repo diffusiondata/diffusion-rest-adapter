@@ -34,7 +34,9 @@ import org.mockito.Mock;
 
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.session.management.DiffusionSessionFactory;
+import com.pushtechnology.diffusion.client.callbacks.TopicTreeHandler;
 import com.pushtechnology.diffusion.client.features.control.topics.MessagingControl;
+import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.session.SessionFactory;
 
@@ -52,6 +54,9 @@ public final class ClientControlledModelStoreTest {
 
     @Mock
     private MessagingControl messagingControl;
+
+    @Mock
+    private TopicControl topicControl;
 
     @Mock
     private ScheduledExecutorService executor;
@@ -94,6 +99,7 @@ public final class ClientControlledModelStoreTest {
         when(sessionFactory.open()).thenReturn(session);
 
         when(session.feature(MessagingControl.class)).thenReturn(messagingControl);
+        when(session.feature(TopicControl.class)).thenReturn(topicControl);
     }
 
     @After
@@ -116,7 +122,9 @@ public final class ClientControlledModelStoreTest {
 
         verify(sessionFactory).open();
         verify(session).feature(MessagingControl.class);
+        verify(session).feature(TopicControl.class);
         verify(messagingControl).addMessageHandler(eq("adapter/rest/model/store"), messageHandlerCaptor.capture());
+        verify(topicControl).removeTopicsWithSession(eq("adapter/rest/model/store"), isA(TopicTreeHandler.class));
 
         modelStore.close();
 
