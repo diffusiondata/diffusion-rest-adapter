@@ -125,6 +125,8 @@
                 <groupId>com.pushtechnology.adapters.rest</groupId>
                 <artifactId>web-interface-client</artifactId>
                 <version>${project.version}</version>
+                <type>zip</type>
+                <classifier>bundle</classifier>
             </dependency>
 
             <dependency>

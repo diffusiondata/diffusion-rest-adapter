@@ -16,7 +16,29 @@
         <dependency>
             <groupId>com.pushtechnology.adapters.rest</groupId>
             <artifactId>web-interface-client</artifactId>
+            <type>zip</type>
+            <classifier>bundle</classifier>
         </dependency>
     </dependencies>
 
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>unpack-js</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>unpack-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <classifier>bundle</classifier>
+                            <outputDirectory>${project.build.directory}/${project.name}-${project.version}/js</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>
