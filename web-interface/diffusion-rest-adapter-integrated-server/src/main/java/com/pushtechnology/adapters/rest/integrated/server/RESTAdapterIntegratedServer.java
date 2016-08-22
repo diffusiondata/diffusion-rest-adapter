@@ -33,7 +33,9 @@ import org.eclipse.jetty.webapp.WebAppContext;
 
 import com.pushtechnology.adapters.rest.adapter.ServiceListener;
 import com.pushtechnology.adapters.rest.client.RESTAdapterClient;
-import com.pushtechnology.adapters.rest.model.store.AsyncMutableModelStore;
+import com.pushtechnology.adapters.rest.client.controlled.model.store.ClientControlledModelStore;
+import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
+import com.pushtechnology.diffusion.client.session.SessionAttributes;
 
 /**
  * Diffusion REST Adapter Integrated Server.
@@ -46,10 +48,15 @@ import com.pushtechnology.adapters.rest.model.store.AsyncMutableModelStore;
 public final class RESTAdapterIntegratedServer implements AutoCloseable {
     private final Server jettyServer;
     private final RESTAdapterClient adapterClient;
+    private final ClientControlledModelStore modelStore;
 
-    private RESTAdapterIntegratedServer(Server jettyServer, RESTAdapterClient adapterClient) {
+    private RESTAdapterIntegratedServer(
+            Server jettyServer,
+            RESTAdapterClient adapterClient,
+            ClientControlledModelStore modelStore) {
         this.jettyServer = jettyServer;
         this.adapterClient = adapterClient;
+        this.modelStore = modelStore;
     }
 
     /**
@@ -57,6 +64,7 @@ public final class RESTAdapterIntegratedServer implements AutoCloseable {
      */
     public void start() {
         try {
+            modelStore.start();
             jettyServer.start();
             adapterClient.start();
         }
@@ -70,6 +78,7 @@ public final class RESTAdapterIntegratedServer implements AutoCloseable {
     @Override
     public void close() {
         try {
+            modelStore.close();
             adapterClient.close();
             jettyServer.stop();
         }
@@ -90,7 +99,22 @@ public final class RESTAdapterIntegratedServer implements AutoCloseable {
 
         final ScheduledExecutorService executor = newSingleThreadScheduledExecutor();
 
-        final AsyncMutableModelStore modelStore = new AsyncMutableModelStore(executor);
+        final DiffusionConfig diffusionConfig = DiffusionConfig
+            .builder()
+            .host("localhost")
+            .port(8080)
+            .secure(false)
+            .principal("control")
+            .password("password")
+            .connectionTimeout(SessionAttributes.DEFAULT_CONNECTION_TIMEOUT)
+            .reconnectionTimeout(SessionAttributes.DEFAULT_RECONNECTION_TIMEOUT)
+            .maximumMessageSize(SessionAttributes.DEFAULT_MAXIMUM_MESSAGE_SIZE)
+            .inputBufferSize(SessionAttributes.DEFAULT_INPUT_BUFFER_SIZE)
+            .outputBufferSize(SessionAttributes.DEFAULT_OUTPUT_BUFFER_SIZE)
+            .recoveryBufferSize(SessionAttributes.DEFAULT_RECOVERY_BUFFER_SIZE)
+            .build();
+        final ClientControlledModelStore modelStore = ClientControlledModelStore
+            .create(executor, diffusionConfig, null);
 
         final Server jettyServer = new Server(port);
         final WebAppContext webapp = new WebAppContext();
@@ -104,7 +128,7 @@ public final class RESTAdapterIntegratedServer implements AutoCloseable {
             executor::shutdown,
             ServiceListener.NULL_LISTENER);
 
-        return new RESTAdapterIntegratedServer(jettyServer, adapterClient);
+        return new RESTAdapterIntegratedServer(jettyServer, adapterClient, modelStore);
     }
 
     private static void extractWarTo(Path warFile) throws IOException {
