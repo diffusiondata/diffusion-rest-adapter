@@ -15,3 +15,5 @@ target
 dependency-reduced-pom.xml
 rest.json
 rest.version.json
+node
+node_modules
