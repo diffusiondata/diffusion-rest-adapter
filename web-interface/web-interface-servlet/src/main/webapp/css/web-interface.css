@@ -1,0 +1,140 @@
+
+/*******************************************************************************
+ * Copyright (C) 2016 Push Technology Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
+
+body{
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: #EEE;
+  font-family: 'Roboto', sans-serif;
+}
+
+h1{
+  font-weight: 300;
+}
+
+.page-header{
+  margin-top: 0;
+  text-align: center;
+}
+
+.page-title{
+  z-index: 3;
+  position: relative;
+  color: #EEEEEE;
+  text-align: left;
+}
+
+.page-title h5{
+  font-family: 'Roboto', sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  margin-top: 0;
+}
+
+#main-header{
+  height: 200px;
+}
+
+#main-header img{
+  z-index: 3;
+  position: relative;
+  height: 50px;
+  margin-top: 10px;
+}
+
+.overlay:before{
+  opacity: 0.85;
+  background-color: #1C1E21;
+  width: 100%;
+  height: 200px;
+  top: 0;
+  left: 0;
+  position: absolute;
+  content: '';
+  z-index: 2;
+}
+
+button {
+  font-weight: 700;
+  font-size: 13px;
+  text-transform: uppercase;
+  color: white;
+  background-color: #CC0066;
+  margin-bottom: 10px;
+  border: 0;
+  outline: none;
+  border-radius: 0;
+}
+
+#nav{
+  width: 450px;
+  margin-left: auto;
+  margin-right: auto;
+  margin: 20px auto 40px auto;
+}
+
+.content {
+  margin: 10px;
+}
+
+.valueGroup {
+    display: inline-block;
+    padding: 3px;
+    margin: 2px;
+    border: 1px solid black;
+    width: 100%;
+}
+
+.smallValueGroup {
+    display: inline-block;
+    padding: 3px;
+    margin: 2px;
+    border: 1px solid black;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.header {
+    font-weight: bold;
+    padding: 3px;
+    margin: 2px;
+    text-align: center;
+}
+
+.value {
+    background-color: #FAFAFA;
+    padding: 3px;
+    margin: 2px;
+}
+
+.raw {
+    background-color: #FAFAFA;
+    padding: 3px;
+    margin: 2px;
+}
+
+.output {
+    border: 1px solid black;
+
+}
+
+table {
+    width: 100%
+}
+
+table.col8 > td {
+    width: 12.25%
+}
