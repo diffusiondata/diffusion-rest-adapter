@@ -90,51 +90,13 @@ button {
   margin: 10px;
 }
 
-.valueGroup {
-    display: inline-block;
-    padding: 3px;
-    margin: 2px;
-    border: 1px solid black;
-    width: 100%;
+.serviceList {
+    background-color: #d3d3d3;
+    width: 10%;
+    min-height: 100px;
 }
 
-.smallValueGroup {
-    display: inline-block;
-    padding: 3px;
-    margin: 2px;
-    border: 1px solid black;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.header {
-    font-weight: bold;
-    padding: 3px;
-    margin: 2px;
-    text-align: center;
-}
-
-.value {
-    background-color: #FAFAFA;
-    padding: 3px;
-    margin: 2px;
-}
-
-.raw {
-    background-color: #FAFAFA;
-    padding: 3px;
-    margin: 2px;
-}
-
-.output {
-    border: 1px solid black;
-
-}
-
-table {
-    width: 100%
-}
-
-table.col8 > td {
-    width: 12.25%
+.serviceDetail {
+    background-color: #d3d3d3;
+    width: 85%;
 }
