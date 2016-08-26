@@ -38,6 +38,14 @@
         </dependency>
     </dependencies>
 
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-pmd-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
     <profiles>
         <!-- Enable integration tests only when the DIFFUSION_HOME environmental variable is set -->
         <!-- Only runs the embedded services test category by default -->
