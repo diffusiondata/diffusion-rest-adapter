@@ -29,6 +29,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import javax.naming.NamingException;
 
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.gzip.GzipHandler;
 import org.eclipse.jetty.webapp.WebAppContext;
 
 import com.pushtechnology.adapters.rest.adapter.ServiceListener;
@@ -120,7 +121,9 @@ public final class RESTAdapterIntegratedServer implements AutoCloseable {
         final WebAppContext webapp = new WebAppContext();
         webapp.setContextPath("/");
         webapp.setWar(tempFile.toAbsolutePath().toString());
-        jettyServer.setHandler(webapp);
+        final GzipHandler gzipHandler = new GzipHandler();
+        gzipHandler.setHandler(webapp);
+        jettyServer.setHandler(gzipHandler);
 
         final RESTAdapterClient adapterClient = RESTAdapterClient.create(
             modelStore,
