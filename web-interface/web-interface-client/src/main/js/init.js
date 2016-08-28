@@ -2,13 +2,14 @@
 (function() {
     var diffusion = require('diffusion');
     var model = require('model');
-    var servicesView = require('services-view');
+    var reflect = require('reflect-metadata');
+    var zone = require('zone.js');
     var view;
 
     function start() {
         console.log('Ready');
 
-        view = servicesView.create(document.getElementById('root'));
+        var main = require('main');
 
         session
             .stream('?adapter/rest/model/store/')

@@ -10,15 +10,27 @@ var gulp = require('gulp'),
     browserify = require('browserify'),
     globby = require('globby'),
     source = require('vinyl-source-stream'),
-    rename = require('gulp-rename');
+    rename = require('gulp-rename'),
+    uglify = require('gulp-uglify'),
+    typings = require('gulp-typings'),
+    buffer = require('vinyl-buffer');
 
-gulp.task('generate-typescript', function() {
-    var tsResult = gulp.src(['src/main/ts/*.ts'])
+gulp.task('install-typings', function(done) {
+    return gulp
+        .src('typings.json')
+        .pipe(gulp.dest('target'))
+        .pipe(typings());
+});
+
+gulp.task('generate-typescript', ['install-typings'], function() {
+    var tsResult = gulp.src(['src/main/ts/**/*.ts', 'target/typings/**/*.d.ts'])
         .pipe(ts({
             target : 'ES5',
             module : 'commonjs',
             moduleResolution : 'node',
-            declaration : true
+            declaration : true,
+            emitDecoratorMetadata: true,
+            experimentalDecorators : true
         }));
 
     // Pipe the generated JavaScript to the build directory
@@ -33,16 +45,20 @@ gulp.task('generate-typescript', function() {
 gulp.task('generate-dist', ['generate-typescript'], function(done) {
     // Package both the source JavaScript and the generated JavaScript using
     // browserify
-    globby(['target/js/*.js', 'src/main/js/*.js']).then(function(entries) {
+    globby(['target/js/**/*.js', 'src/main/js/**/*.js']).then(function(entries) {
         browserify({
             entries: entries,
-            debug: true,
+            debug: false,
             paths: ['target/js']
         })
         .transform('browserify-shim')
         .bundle()
         .pipe(source('index.js'))
         .pipe(rename('client.js'))
+        .pipe(buffer())
+        .pipe(uglify({
+            mangle: false
+        }))
         .pipe(gulp.dest('target/dist/js'))
         .on('end', function() {
             done();
@@ -81,4 +97,4 @@ gulp.task('doc', function() {
         }));
 });
 
-gulp.task('default', ['generate-typescript', 'generate-dist', 'checks']);
+gulp.task('default', ['install-typings', 'generate-typescript', 'generate-dist', 'checks']);
