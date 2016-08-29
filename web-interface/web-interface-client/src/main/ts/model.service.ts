@@ -56,4 +56,9 @@ export class ModelService {
             });
         });
     }
+
+    createService(service: Service): Promise<void> {
+        console.log(service);
+        return Promise.resolve();
+    }
 }
