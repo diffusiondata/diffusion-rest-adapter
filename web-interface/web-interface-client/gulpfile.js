@@ -22,7 +22,7 @@ gulp.task('install-typings', function(done) {
         .pipe(typings());
 });
 
-gulp.task('generate-typescript', ['install-typings'], function() {
+gulp.task('generate-javascript', ['install-typings'], function() {
     var tsResult = gulp.src(['src/main/ts/**/*.ts', 'target/typings/**/*.d.ts'])
         .pipe(ts({
             target : 'ES5',
@@ -42,7 +42,7 @@ gulp.task('generate-typescript', ['install-typings'], function() {
     return tsResult;
 });
 
-gulp.task('generate-dist', ['generate-typescript'], function(done) {
+gulp.task('generate-dist', ['generate-javascript'], function(done) {
     // Package both the source JavaScript and the generated JavaScript using
     // browserify
     globby(['target/js/**/*.js', 'src/main/js/**/*.js']).then(function(entries) {
@@ -97,4 +97,4 @@ gulp.task('doc', function() {
         }));
 });
 
-gulp.task('default', ['install-typings', 'generate-typescript', 'generate-dist', 'checks']);
+gulp.task('default', ['install-typings', 'generate-javascript', 'generate-dist', 'checks']);
