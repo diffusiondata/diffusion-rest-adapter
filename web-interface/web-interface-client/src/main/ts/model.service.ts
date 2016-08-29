@@ -58,7 +58,13 @@ export class ModelService {
     }
 
     createService(service: Service): Promise<void> {
-        console.log(service);
-        return Promise.resolve();
+        return this.init().then(function(session) {
+            return session.messages.send(
+                'adapter/rest/model/store',
+                diffusion.datatypes.json().from({
+                    type: 'create-service',
+                    service: service
+                }));
+        });
     }
 }

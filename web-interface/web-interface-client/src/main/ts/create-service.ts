@@ -7,7 +7,7 @@ import { Service } from './model';
 @Component({
   selector: 'create-service',
   template: `<h3>Create service</h3>
-<form #createServiceForm="ngForm" (ngSubmit)="onCreateService()">
+<form #createServiceForm="ngForm" (ngSubmit)="onCreateService($event)">
     <div class="form-group">
         <label for="name">Name</label>
         <input id="name" required [(ngModel)]="service.name" name="name" #name="ngModel">
@@ -74,8 +74,12 @@ export class CreateServiceComponent {
 
     constructor(private router: Router, private modelService: ModelService) {}
 
-    onCreateService(): boolean {
-        this.modelService.createService(this.service);
-        return false;
+    onCreateService(): void {
+        try {
+            this.modelService.createService(this.service);
+        }
+        catch (e) {
+            console.error(e);
+        }
     }
 }
