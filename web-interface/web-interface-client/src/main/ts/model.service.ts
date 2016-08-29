@@ -1,10 +1,12 @@
 import { Injectable } from '@angular/core';
 import { Model, Service } from './model';
 import * as diffusion from 'diffusion';
+import { RequestContext } from './request-context';
 
 @Injectable()
 export class ModelService {
     private session: any;
+    private context: RequestContext;
     model: Model = {
         services: []
     };
@@ -22,6 +24,7 @@ export class ModelService {
         }).then((session) => {
             console.log('Connected');
             this.session = session;
+            this.context = new RequestContext(session, 'adapter/rest/model/store');
             return Promise.resolve(this.session);
         }, (error) => {
             console.log(error);
@@ -33,7 +36,6 @@ export class ModelService {
         return this.init().then(function(session) {
             // TODO: Get the current model
             return Promise.resolve(model);
-        });
     }
 
     getService(name: string): Promise<Service> {
@@ -46,16 +48,13 @@ export class ModelService {
     }
 
     createService(service: Service): Promise<void> {
-        let model = this.model;
-        return this.init().then(function(session) {
-            // TODO: Handle failure to add service
-            model.services.push(service);
-            return session.messages.send(
-                'adapter/rest/model/store',
-                diffusion.datatypes.json().from({
-                    type: 'create-service',
-                    service: service
-                }));
+        return this.init().then((session) => {
+            return this.context.request({
+                type: 'create-service',
+                service: service
+            }).then(() => {
+                this.model.services.push(JSON.parse(JSON.stringify(service)));
+            });
         });
     }
 }

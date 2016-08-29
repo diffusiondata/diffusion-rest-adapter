@@ -110,9 +110,8 @@ public final class ClientControlledModelStore implements ModelStore, AutoCloseab
 
         final ModelController modelController = new ModelController(delegateModelStore, modelPublisher);
 
-        session
-            .feature(MessagingControl.class)
-            .addMessageHandler(CONTROL_PATH, modelController);
+        final RequestManager requestManager = new RequestManager(session.feature(MessagingControl.class));
+        requestManager.addHandler(CONTROL_PATH, modelController);
     }
 
     @Override

@@ -1,11 +1,30 @@
+/*******************************************************************************
+ * Copyright (C) 2016 Push Technology Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
+
 package com.pushtechnology.adapters.rest.client.controlled.model.store;
 
 import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
+import static org.mockito.Mockito.isA;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.MockitoAnnotations.initMocks;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.junit.After;
@@ -17,12 +36,8 @@ import org.mockito.Mock;
 
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.store.AsyncMutableModelStore;
-import com.pushtechnology.diffusion.client.Diffusion;
-import com.pushtechnology.diffusion.client.content.Content;
 import com.pushtechnology.diffusion.client.session.SessionId;
 import com.pushtechnology.diffusion.client.types.ReceiveContext;
-import com.pushtechnology.diffusion.content.ContentImpl;
-import com.pushtechnology.diffusion.datatype.json.JSON;
 
 /**
  * Unit tests for {@link ModelController}.
@@ -43,12 +58,11 @@ public final class ModelControllerTest {
     @Mock
     private ModelPublisher modelPublisher;
 
+    @Mock
+    private RequestManager.Responder responder;
+
     @Captor
     private ArgumentCaptor<Runnable> runnableCaptor;
-
-    private Content emptyMessage;
-    private Content unknownTypeMessage;
-    private Content createServiceMessage;
 
     private AsyncMutableModelStore modelStore;
 
@@ -62,70 +76,66 @@ public final class ModelControllerTest {
         modelStore.setModel(Model.builder().services(emptyList()).build());
         verify(executor).execute(runnableCaptor.capture());
         runnableCaptor.getValue().run();
-
-        emptyMessage = new ContentImpl(Diffusion
-            .dataTypes()
-            .json()
-            .fromJsonString("{}")
-            .toByteArray());
-        unknownTypeMessage = new ContentImpl(Diffusion
-            .dataTypes()
-            .json()
-            .fromJsonString("{\"type\":\"ha, ha\"}")
-            .toByteArray());
-        createServiceMessage = new ContentImpl(Diffusion
-            .dataTypes()
-            .json()
-            .fromJsonString("{\"type\":\"create-service\",\"service\":{\"name\":\"\",\"host\":\"\",\"port\":80,\"secure\":\"false\",\"pollPeriod\":5000,\"topicRoot\":\"\"}}")
-            .toByteArray());
     }
 
     @After
     public void postConditions() {
-        verifyNoMoreInteractions(executor, sessionId, context, modelPublisher);
+        verifyNoMoreInteractions(executor, sessionId, context, modelPublisher, responder);
     }
 
-    @Test
-    public void wrongPath() {
-        final ModelController controller = new ModelController(modelStore, modelPublisher);
-
-        controller.onMessage(sessionId, ClientControlledModelStore.CONTROL_PATH + "/child", createServiceMessage, context);
-    }
-
+    @SuppressWarnings("unchecked")
     @Test
     public void onEmptyMessage() {
         final ModelController controller = new ModelController(modelStore, modelPublisher);
 
-        controller.onMessage(sessionId, ClientControlledModelStore.CONTROL_PATH, new ContentImpl(new byte[0]), context);
-
-        verify(executor).execute(runnableCaptor.capture());
+        controller.onRequest(emptyMap(), responder);
+        verify(responder).respond(isA(Map.class));
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void onUnknownMessage() {
         final ModelController controller = new ModelController(modelStore, modelPublisher);
 
-        controller.onMessage(sessionId, ClientControlledModelStore.CONTROL_PATH, unknownTypeMessage, context);
+        final Map<String, Object> unknownTypeMessage = new HashMap<>();
+        unknownTypeMessage.put("type", "ha, ha");
 
-        verify(executor).execute(runnableCaptor.capture());
-    }
-
-    @Test
-    public void onEmptyObjectMessage() {
-        final ModelController controller = new ModelController(modelStore, modelPublisher);
-
-        controller.onMessage(sessionId, ClientControlledModelStore.CONTROL_PATH, emptyMessage, context);
-
-        verify(executor).execute(runnableCaptor.capture());
+        controller.onRequest(unknownTypeMessage, responder);
+        verify(responder).respond(isA(Map.class));
     }
 
     @Test
     public void onCreateServiceMessage() {
         final ModelController controller = new ModelController(modelStore, modelPublisher);
 
-        controller.onMessage(sessionId, ClientControlledModelStore.CONTROL_PATH, createServiceMessage, context);
+        final Map<String, Object> message = new HashMap<>();
+        message.put("type", "create-service");
+        final Map<String, Object> service = new HashMap<>();
+        service.put("name", "");
+        service.put("host", "");
+        service.put("port", 80);
+        service.put("secure", false);
+        service.put("pollPeriod", 50000);
+        service.put("topicRoot", "");
+
+        message.put("service", service);
+
+        controller.onRequest(message, responder);
 
         verify(executor, times(2)).execute(runnableCaptor.capture());
         verify(modelPublisher).update();
+        verify(responder).respond(emptyMap());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void onCreateServiceMessageWithoutService() {
+        final ModelController controller = new ModelController(modelStore, modelPublisher);
+
+        final Map<String, Object> message = new HashMap<>();
+        message.put("type", "create-service");
+
+        controller.onRequest(message, responder);
+        verify(responder).respond(isA(Map.class));
     }
 }

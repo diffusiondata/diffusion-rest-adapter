@@ -16,38 +16,30 @@
 package com.pushtechnology.adapters.rest.client.controlled.model.store;
 
 import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toList;
 
-import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.NullNode;
-import com.fasterxml.jackson.dataformat.cbor.CBORFactory;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.model.store.AsyncMutableModelStore;
-import com.pushtechnology.diffusion.client.content.Content;
-import com.pushtechnology.diffusion.client.features.control.topics.MessagingControl;
-import com.pushtechnology.diffusion.client.session.SessionId;
-import com.pushtechnology.diffusion.client.types.ReceiveContext;
 
 import net.jcip.annotations.ThreadSafe;
 
 /**
- * A {@link MessagingControl.MessageHandler} for modifying the model store.
+ * A {@link RequestManager.RequestHandler} for modifying the model store.
  *
  * @author Push Technology Limited
  */
 @ThreadSafe
-/*package*/ final class ModelController extends MessagingControl.MessageHandler.Default {
+/*package*/ final class ModelController implements RequestManager.RequestHandler {
     private static final Logger LOG = LoggerFactory.getLogger(ModelController.class);
-    private final CBORFactory factory = new CBORFactory();
-    private final ObjectMapper mapper = new ObjectMapper(factory);
     private final AsyncMutableModelStore modelStore;
     private final ModelPublisher modelPublisher;
 
@@ -60,51 +52,43 @@ import net.jcip.annotations.ThreadSafe;
     }
 
     @Override
-    public void onMessage(SessionId sessionId, String path, Content content, ReceiveContext receiveContext) {
-        if (!ClientControlledModelStore.CONTROL_PATH.equals(path)) {
-            LOG.error("Received a message on the wrong path");
-            return;
-        }
-
-        final JsonNode jsonNode;
-        try {
-            jsonNode = mapper.readTree(content.toBytes());
-        }
-        catch (IOException e) {
-            LOG.error("Did not receive a valid JSON value: {}", content);
-            return;
-        }
-
-        onJsonMessage(jsonNode);
-    }
-
-    private void onJsonMessage(JsonNode jsonNode) {
-        final JsonNode typeNode = jsonNode.get("type");
-        if (typeNode == NullNode.instance || typeNode == null) {
-            LOG.error("Unknown type. Ignoring message.");
-            return;
-        }
-
-        final String type = typeNode.asText();
+    public void onRequest(Map<String, Object> request, RequestManager.Responder responder) {
+        final Object type = request.get("type");
         if ("create-service".equals(type)) {
-            onCreateService(jsonNode);
+            onCreateService(request, responder);
             return;
         }
 
         LOG.error("Unknown type. Ignoring message.");
+        responder.respond(error("Unknown request type"));
     }
 
-    private void onCreateService(JsonNode jsonNode) {
-        final JsonNode serviceNode = jsonNode.get("service");
+    private static Map<String, Object> error(String message) {
+        final Map<String, Object> response = new HashMap<>();
+        response.put("error", message);
+        return response;
+    }
+
+    @SuppressWarnings("unchecked")
+    private void onCreateService(Map<String, Object> request, RequestManager.Responder responder) {
+        final Object serviceObject = request.get("service");
+
+        if (serviceObject == null || !(serviceObject instanceof Map)) {
+            LOG.error("No or invalid service message component");
+            responder.respond(error("No service provided"));
+            return;
+        }
+
+        final Map<String, Object> service = (Map<String, Object>) serviceObject;
         final ServiceConfig serviceConfig = ServiceConfig
             .builder()
-            .name(serviceNode.get("name").asText())
-            .host(serviceNode.get("host").asText())
-            .port(serviceNode.get("port").asInt())
-            .secure(serviceNode.get("secure").asBoolean())
+            .name((String) service.get("name"))
+            .host((String) service.get("host"))
+            .port((Integer) service.get("port"))
+            .secure((Boolean) service.get("secure"))
             .endpoints(emptyList())
-            .pollPeriod(serviceNode.get("pollPeriod").asInt())
-            .topicRoot(serviceNode.get("topicRoot").asText())
+            .pollPeriod((Integer) service.get("pollPeriod"))
+            .topicRoot((String) service.get("topicRoot"))
             .build();
 
         modelStore.apply(model -> {
@@ -120,5 +104,6 @@ import net.jcip.annotations.ThreadSafe;
                 .build();
         });
         modelPublisher.update();
+        responder.respond(emptyMap());
     }
 }

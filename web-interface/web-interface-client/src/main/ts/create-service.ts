@@ -61,7 +61,7 @@ import { Service } from './model';
 </form>`
 })
 export class CreateServiceComponent {
-    service: Service = {
+    service = {
         name: null,
         host: null,
         port: null,
@@ -75,6 +75,9 @@ export class CreateServiceComponent {
     constructor(private router: Router, private modelService: ModelService) {}
 
     onCreateService(): void {
+        this.service.port = parseInt(this.service.port);
+        this.service.pollPeriod = parseInt(this.service.pollPeriod);
+
         try {
             this.modelService.createService(this.service);
         }
