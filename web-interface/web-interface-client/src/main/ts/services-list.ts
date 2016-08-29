@@ -21,7 +21,9 @@ export class ServicesListComponent implements OnInit {
     showCreateComponent = false;
     selectedService: Service = null;
 
-    constructor(private router: Router, private modelService: ModelService) {}
+    constructor(private router: Router, private modelService: ModelService) {
+        this.model = this.modelService.model;
+    }
 
     onSelect(service: Service): void {
         let link = ['/service', service.name];
@@ -33,11 +35,9 @@ export class ServicesListComponent implements OnInit {
         this.showCreateComponent = true;
     }
 
-    updateMode(): void {
-        this.modelService.getModel().then(model => this.model = model)
-    }
-
     ngOnInit(): void {
-        this.updateMode();
+        this.modelService.getModel().then(model => {}, error => {
+            console.error(error);
+        });
     }
 }
