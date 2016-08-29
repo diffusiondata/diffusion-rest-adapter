@@ -6,10 +6,17 @@ import { ModelService } from './model.service';
 
 @Component({
   selector: 'service-detail',
-  template: `<h3 *ngIf="service">{{service.name}}</h3>`
+  template: `<div *ngIf="service">
+    <h3>{{service.name}}</h3>
+    <div><span>Host</span><span>{{service.host}}</span></div>
+    <div><span>Port</span><span>{{service.port}}</span></div>
+    <div><span>Secure</span><span>{{service.secure}}</span></div>
+    <div><span>Poll period</span><span>{{service.pollPeriod}}</span></div>
+    <div><span>Topic root</span><span>{{service.topicRoot}}</span></div>
+</div>`
 })
 export class ServiceDetailComponent implements OnInit {
-    service: Service;
+    private service: Service;
 
     constructor(private modelService: ModelService, private route: ActivatedRoute) {}
 
