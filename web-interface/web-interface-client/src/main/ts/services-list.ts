@@ -6,13 +6,16 @@ import { ModelService } from './model.service';
 
 @Component({
     selector: 'services-list',
-    template: `<div class="serviceList">
+    template: `<div class="col-md-4">
+    <div class="panel panel-default">
+        <div class="panel-body scroll-panel">
+            <div class="list-group">
+                <a *ngFor="let service of model.services" (click)="onSelect(service)" class="list-group-item"><span class="list-group-item-text">{{service.name}}</span></a>
+                <a routerLink="/createService" class="list-group-item"><span class="list-group-item-text">Create new service</span></a>
+            </div>
+        </div>
     <div>
-        <button *ngFor="let service of model.services" (click)="onSelect(service)">{{service.name}}</button>
-        <button routerLink="/createService">Create new service</button>
-    </div>
-</div><router-outlet></router-outlet>`,
-    providers: [ModelService]
+</div>`
 })
 export class ServicesListComponent implements OnInit {
     model: Model = {

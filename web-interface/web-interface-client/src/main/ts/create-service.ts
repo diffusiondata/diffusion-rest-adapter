@@ -65,7 +65,7 @@ export class CreateServiceComponent {
         name: null,
         host: null,
         port: null,
-        secure: false,
+        secure: null,
         endpoints: [],
         pollPeriod: null,
         topicRoot: null,
@@ -75,8 +75,10 @@ export class CreateServiceComponent {
     constructor(private router: Router, private modelService: ModelService) {}
 
     onCreateService(): void {
+        // Fix types from data entry
         this.service.port = parseInt(this.service.port);
         this.service.pollPeriod = parseInt(this.service.pollPeriod);
+        this.service.secure = this.service.secure === "true";
 
         try {
             this.modelService.createService(this.service);
