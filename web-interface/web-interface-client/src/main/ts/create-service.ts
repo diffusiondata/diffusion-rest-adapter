@@ -7,7 +7,7 @@ import { Service } from './model';
 @Component({
   selector: 'create-service',
   template: `<h3>Create service</h3>
-<form #createServiceForm="ngForm" (ngSubmit)="onCreateService($event)">
+<form *ngIf="active" #createServiceForm="ngForm" (ngSubmit)="onCreateService($event)">
     <div class="form-group">
         <label for="name">Name</label>
         <input id="name" required [(ngModel)]="service.name" name="name" #name="ngModel">
@@ -61,11 +61,12 @@ import { Service } from './model';
 </form>`
 })
 export class CreateServiceComponent {
-    service = {
+    active = true;
+    service: any = {
         name: null,
         host: null,
         port: null,
-        secure: null,
+        secure: false,
         endpoints: [],
         pollPeriod: null,
         topicRoot: null,
@@ -78,13 +79,29 @@ export class CreateServiceComponent {
         // Fix types from data entry
         this.service.port = parseInt(this.service.port);
         this.service.pollPeriod = parseInt(this.service.pollPeriod);
-        this.service.secure = this.service.secure === "true";
+        this.service.secure = this.service.secure === true || this.service.secure === "true";
 
         try {
             this.modelService.createService(this.service);
+            this.reset();
         }
         catch (e) {
             console.error(e);
         }
+    }
+
+    private reset(): void {
+        this.active = false;
+        this.service = {
+            name: null,
+            host: null,
+            port: null,
+            secure: false,
+            endpoints: [],
+            pollPeriod: null,
+            topicRoot: null,
+            security: null
+        };
+        setTimeout(() => this.active = true, 0);
     }
 }
