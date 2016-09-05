@@ -18,7 +18,6 @@
         <module>adapter</module>
         <module>adapter-client</module>
         <module>build-rules</module>
-        <module>client-controlled-model-store</module>
         <module>configuration-model</module>
         <module>configuration-model-conversion</module>
         <module>configuration-persistence</module>

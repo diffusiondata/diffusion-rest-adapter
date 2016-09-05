@@ -12,6 +12,7 @@
     <artifactId>web-interface</artifactId>
     <packaging>pom</packaging>
     <modules>
+        <module>client-controlled-model-store</module>
         <module>diffusion-rest-adapter-integrated-server</module>
         <module>web-interface-servlet</module>
         <module>web-interface-client</module>
