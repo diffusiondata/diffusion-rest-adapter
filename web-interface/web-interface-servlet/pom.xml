@@ -19,6 +19,10 @@
             <type>zip</type>
             <classifier>bundle</classifier>
         </dependency>
+        <dependency>
+            <groupId>org.tuckey</groupId>
+            <artifactId>urlrewritefilter</artifactId>
+        </dependency>
     </dependencies>
 
     <profiles>
