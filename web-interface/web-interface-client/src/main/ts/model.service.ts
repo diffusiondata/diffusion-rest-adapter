@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Model, Service } from './model';
-import * as diffusion from 'diffusion';
+import * as d from './diffusion.d.ts';
 import { RequestContext } from './request-context';
+const diffusion: d.Diffusion = require('diffusion');
 
 @Injectable()
 export class ModelService {
@@ -17,17 +18,20 @@ export class ModelService {
         }
 
         console.log('Initialising');
-        return diffusion.connect({
-            host: 'localhost',
-            port: 8080,
-            secure: false
-        }).then((session) => {
-            console.log('Connected');
-            this.session = session;
-            this.context = new RequestContext(session, 'adapter/rest/model/store');
-            return Promise.resolve(this.session);
-        }, (error) => {
-            console.log(error);
+        return new Promise((resolve, reject) => {
+            diffusion.connect({
+                host: 'localhost',
+                port: 8080,
+                secure: false
+            }).then((session) => {
+                console.log('Connected');
+                this.session = session;
+                this.context = new RequestContext(session, 'adapter/rest/model/store');
+                resolve(this.session);
+            }, (error) => {
+                console.log(error);
+                reject(error);
+            });
         });
     }
 

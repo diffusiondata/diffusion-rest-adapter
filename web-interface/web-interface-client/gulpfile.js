@@ -118,7 +118,7 @@ gulp.task('generate-dist-debug', ['generate-javascript-debug'], function(done) {
 });
 
 gulp.task('checks', function() {
-    return gulp.src('src/main/ts/*.ts')
+    return gulp.src(['src/main/ts/*.ts', '!src/main/ts/*.d.ts'])
         .pipe(tslint({
             configuration : {
                 rules : {
