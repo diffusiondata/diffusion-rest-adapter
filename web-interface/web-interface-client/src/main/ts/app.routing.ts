@@ -1,9 +1,9 @@
 import { ModuleWithProviders }  from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 
-import { CreateServiceComponent } from './create-service';
-import { ServiceDetailComponent } from './service-detail';
-import { UnselectedComponent } from './unselected';
+import { CreateServiceComponent } from './create-service.component';
+import { ServiceDetailComponent } from './service-detail.component';
+import { UnselectedComponent } from './unselected.component';
 
 const appRoutes: Routes = [
     {
