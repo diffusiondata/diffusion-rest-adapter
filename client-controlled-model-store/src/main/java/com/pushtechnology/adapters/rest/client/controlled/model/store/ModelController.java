@@ -59,6 +59,11 @@ import net.jcip.annotations.ThreadSafe;
             return;
         }
 
+        if ("list-services".equals(type)) {
+            responder.respond(modelStore.get().getServices());
+            return;
+        }
+
         LOG.error("Unknown type. Ignoring message.");
         responder.respond(error("Unknown request type"));
     }

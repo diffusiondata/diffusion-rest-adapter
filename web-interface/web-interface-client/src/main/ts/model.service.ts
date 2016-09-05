@@ -36,10 +36,14 @@ export class ModelService {
     }
 
     getModel(): Promise<Model> {
-        let model = this.model;
-        return this.init().then(function(session) {
-            // TODO: Get the current model
-            return Promise.resolve(model);
+        return this.init().then((session) => {
+            return this.context.request({
+                type: 'list-services'
+            }).then((response) => {
+                this.model.services = response
+                return this.model;
+            });
+        });
     }
 
     getService(name: string): Promise<Service> {
