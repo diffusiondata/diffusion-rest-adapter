@@ -47,12 +47,9 @@ export class ModelService {
     }
 
     getService(name: string): Promise<Service> {
-        let model = this.model;
-        return this.init().then(function(session) {
-            return Promise.resolve(model.services.find(function(element) {
-                return element.name === name;
-            }));
-        });
+        return this.init()
+            .then(() => this.getModel())
+            .then((model) => Promise.resolve(model.services.find((element) => element.name === name)));
     }
 
     createService(service: Service): Promise<void> {
