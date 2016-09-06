@@ -36,14 +36,14 @@ export class ModelService {
     }
 
     getModel(): Promise<Model> {
-        return this.init().then((session) => {
-            return this.context.request({
+        return this.init()
+            .then((session) => this.context.request({
                 type: 'list-services'
-            }).then((response) => {
+            }))
+            .then((response) => {
                 this.model.services = response
                 return this.model;
             });
-        });
     }
 
     getService(name: string): Promise<Service> {
@@ -53,13 +53,13 @@ export class ModelService {
     }
 
     createService(service: Service): Promise<void> {
-        return this.init().then((session) => {
-            return this.context.request({
+        return this.init()
+            .then((session) => this.context.request({
                 type: 'create-service',
                 service: service
-            }).then(() => {
+            }))
+            .then(() => {
                 this.model.services.push(JSON.parse(JSON.stringify(service)));
             });
-        });
     }
 }
