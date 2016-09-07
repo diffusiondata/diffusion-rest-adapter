@@ -104,11 +104,7 @@ public final class ClientControlledModelStore implements ModelStore, AutoCloseab
             return;
         }
 
-        final ModelPublisher modelPublisher = ModelPublisherImpl.create(session);
-
-        modelPublisher.initialise(delegateModelStore.get());
-
-        final ModelController modelController = new ModelController(delegateModelStore, modelPublisher);
+        final ModelController modelController = new ModelController(delegateModelStore);
 
         final RequestManager requestManager = new RequestManager(session.feature(MessagingControl.class));
         requestManager.addHandler(CONTROL_PATH, modelController);

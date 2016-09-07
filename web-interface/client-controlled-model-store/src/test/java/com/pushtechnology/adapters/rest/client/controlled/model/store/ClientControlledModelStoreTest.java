@@ -122,9 +122,7 @@ public final class ClientControlledModelStoreTest {
 
         verify(sessionFactory).open();
         verify(session).feature(MessagingControl.class);
-        verify(session).feature(TopicControl.class);
         verify(messagingControl).addMessageHandler(eq("adapter/rest/model/store"), messageHandlerCaptor.capture());
-        verify(topicControl).removeTopicsWithSession(eq("adapter/rest/model/store"), isA(TopicTreeHandler.class));
 
         modelStore.close();
 

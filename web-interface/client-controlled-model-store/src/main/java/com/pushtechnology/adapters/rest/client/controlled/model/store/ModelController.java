@@ -41,14 +41,12 @@ import net.jcip.annotations.ThreadSafe;
 /*package*/ final class ModelController implements RequestManager.RequestHandler {
     private static final Logger LOG = LoggerFactory.getLogger(ModelController.class);
     private final AsyncMutableModelStore modelStore;
-    private final ModelPublisher modelPublisher;
 
     /**
      * Constructor.
      */
-    /*package*/ ModelController(AsyncMutableModelStore modelStore, ModelPublisher modelPublisher) {
+    /*package*/ ModelController(AsyncMutableModelStore modelStore) {
         this.modelStore = modelStore;
-        this.modelPublisher = modelPublisher;
     }
 
     @Override
@@ -108,7 +106,6 @@ import net.jcip.annotations.ThreadSafe;
                 .truststore(model.getTruststore())
                 .build();
         });
-        modelPublisher.update();
         responder.respond(emptyMap());
     }
 }

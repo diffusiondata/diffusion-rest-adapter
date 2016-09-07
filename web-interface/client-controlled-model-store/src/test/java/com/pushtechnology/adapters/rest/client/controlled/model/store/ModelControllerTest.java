@@ -56,9 +56,6 @@ public final class ModelControllerTest {
     private ReceiveContext context;
 
     @Mock
-    private ModelPublisher modelPublisher;
-
-    @Mock
     private RequestManager.Responder responder;
 
     @Captor
@@ -80,13 +77,13 @@ public final class ModelControllerTest {
 
     @After
     public void postConditions() {
-        verifyNoMoreInteractions(executor, sessionId, context, modelPublisher, responder);
+        verifyNoMoreInteractions(executor, sessionId, context, responder);
     }
 
     @SuppressWarnings("unchecked")
     @Test
     public void onEmptyMessage() {
-        final ModelController controller = new ModelController(modelStore, modelPublisher);
+        final ModelController controller = new ModelController(modelStore);
 
         controller.onRequest(emptyMap(), responder);
         verify(responder).respond(isA(Map.class));
@@ -95,7 +92,7 @@ public final class ModelControllerTest {
     @SuppressWarnings("unchecked")
     @Test
     public void onUnknownMessage() {
-        final ModelController controller = new ModelController(modelStore, modelPublisher);
+        final ModelController controller = new ModelController(modelStore);
 
         final Map<String, Object> unknownTypeMessage = new HashMap<>();
         unknownTypeMessage.put("type", "ha, ha");
@@ -106,7 +103,7 @@ public final class ModelControllerTest {
 
     @Test
     public void onCreateServiceMessage() {
-        final ModelController controller = new ModelController(modelStore, modelPublisher);
+        final ModelController controller = new ModelController(modelStore);
 
         final Map<String, Object> message = new HashMap<>();
         message.put("type", "create-service");
@@ -123,14 +120,13 @@ public final class ModelControllerTest {
         controller.onRequest(message, responder);
 
         verify(executor, times(2)).execute(runnableCaptor.capture());
-        verify(modelPublisher).update();
         verify(responder).respond(emptyMap());
     }
 
     @SuppressWarnings("unchecked")
     @Test
     public void onCreateServiceMessageWithoutService() {
-        final ModelController controller = new ModelController(modelStore, modelPublisher);
+        final ModelController controller = new ModelController(modelStore);
 
         final Map<String, Object> message = new HashMap<>();
         message.put("type", "create-service");
