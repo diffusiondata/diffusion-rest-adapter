@@ -28,6 +28,9 @@ import { ModelService } from './model.service';
         <label for="topicRoot" class="col-sm-2 control-label">Topic root</label>
         <p id="topicRoot" class="form-control-static">{{service.topicRoot}}</p>
     </div>
+    <div class="form-group">
+        <endpoints-list></endpoints-list>
+    </div>
 </form>`
 })
 export class ServiceDetailComponent implements OnInit {
