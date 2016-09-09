@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Params } from '@angular/router';
+import { ActivatedRoute, Params, Router } from '@angular/router';
 
 import { Service } from './model';
 import { ModelService } from './model.service';
@@ -28,6 +28,9 @@ import { ModelService } from './model.service';
         <label for="topicRoot" class="col-sm-2 control-label">Topic root</label>
         <p id="topicRoot" class="form-control-static">{{service.topicRoot}}</p>
     </div>
+    <div>
+        <button class="btn btn-default" (click)="onRemove()">Remove service</button>
+    </div>
     <div class="form-group">
         <endpoints-list></endpoints-list>
     </div>
@@ -36,12 +39,17 @@ import { ModelService } from './model.service';
 export class ServiceDetailComponent implements OnInit {
     private service: Service;
 
-    constructor(private modelService: ModelService, private route: ActivatedRoute) {}
+    constructor(private router: Router, private modelService: ModelService, private route: ActivatedRoute) {}
 
     ngOnInit(): void {
         this.route.params.forEach((params: Params) => {
             let name: string = params['name'];
             this.modelService.getService(name).then(service => this.service = service);
         });
+    }
+
+    onRemove() {
+        this.modelService.deleteService(this.service.name);
+        this.router.navigate(['/']);
     }
 }

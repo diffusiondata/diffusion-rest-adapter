@@ -1,6 +1,7 @@
 import { Component, Input } from '@angular/core';
 
-import { Endpoint } from './model';
+import { ModelService } from './model.service';
+import { Service, Endpoint } from './model';
 
 @Component({
     selector: 'endpoint-detail',
@@ -21,11 +22,19 @@ import { Endpoint } from './model';
         <label for="produces" class="col-sm-2 control-label">Produces</label>
         <p id="produces" class="form-control-static">{{endpoint.produces}}</p>
     </div>
+    <div>
+        <button class="btn btn-default" (click)="onRemove()">Remove endpoint</button>
+    </div>
 </div>`
 })
 export class EndpointDetailComponent {
+    @Input() service: Service;
     @Input() endpoint: Endpoint;
 
-    constructor() {
+    constructor(private modelService: ModelService) {
+    }
+
+    onRemove() {
+        this.modelService.deleteEndpoint(this.service.name, this.endpoint.name);
     }
 }

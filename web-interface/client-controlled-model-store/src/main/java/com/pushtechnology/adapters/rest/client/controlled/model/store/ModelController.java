@@ -26,6 +26,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.model.store.AsyncMutableModelStore;
@@ -52,18 +53,203 @@ import net.jcip.annotations.ThreadSafe;
     @Override
     public void onRequest(Map<String, Object> request, RequestManager.Responder responder) {
         final Object type = request.get("type");
-        if ("create-service".equals(type)) {
-            onCreateService(request, responder);
-            return;
-        }
 
         if ("list-services".equals(type)) {
             responder.respond(modelStore.get().getServices());
             return;
         }
 
-        LOG.error("Unknown type. Ignoring message.");
+        if ("create-service".equals(type)) {
+            onCreateService(request, responder);
+            return;
+        }
+
+        if ("create-endpoint".equals(type)) {
+            onCreateEndpoint(request, responder);
+            return;
+        }
+
+        if ("delete-service".equals(type)) {
+            onDeleteService(request, responder);
+            return;
+        }
+
+        if ("delete-endpoint".equals(type)) {
+            onDeleteEndpoint(request, responder);
+            return;
+        }
+
+        LOG.error("Unknown type {}. Ignoring message.", type);
         responder.respond(error("Unknown request type"));
+    }
+
+    private void onDeleteEndpoint(Map<String, Object> request, RequestManager.Responder responder) {
+        final Object serviceObject = request.get("serviceName");
+        if (serviceObject == null || !(serviceObject instanceof String)) {
+            LOG.error("No or invalid service name message component");
+            responder.error("No service name provided");
+            return;
+        }
+
+        final Object endpointObject = request.get("endpointName");
+        if (endpointObject == null || !(endpointObject instanceof String)) {
+            LOG.error("No or invalid endpoint name message component");
+            responder.error("No endpoint name provided");
+            return;
+        }
+
+        modelStore.apply(model -> {
+            final List<ServiceConfig> serviceConfigs = model
+                .getServices()
+                .stream()
+                .map(serviceConfig -> {
+                    if (serviceConfig.getName().equals(serviceObject)) {
+                        final List<EndpointConfig> endpointConfigs = serviceConfig
+                            .getEndpoints()
+                            .stream()
+                            .filter(endpointConfig -> !endpointConfig.getName().equals(endpointObject))
+                            .collect(toList());
+
+                        if (!endpointConfigs.equals(serviceConfig.getEndpoints())) {
+                            LOG.info("Removing endpoint {} from {}", endpointObject, serviceObject);
+                        }
+
+                        return ServiceConfig
+                            .builder()
+                            .name(serviceConfig.getName())
+                            .host(serviceConfig.getHost())
+                            .port(serviceConfig.getPort())
+                            .secure(serviceConfig.isSecure())
+                            .endpoints(endpointConfigs)
+                            .topicRoot(serviceConfig.getTopicRoot())
+                            .pollPeriod(serviceConfig.getPollPeriod())
+                            .security(serviceConfig.getSecurity())
+                            .build();
+                    }
+                    else {
+                        return serviceConfig;
+                    }
+                })
+                .collect(toList());
+
+            if (serviceConfigs.equals(model.getServices())) {
+                LOG.info("Failed to find endpoint {} on {}", endpointObject, serviceObject);
+            }
+
+            return Model
+                .builder()
+                .active(true)
+                .diffusion(model.getDiffusion())
+                .services(serviceConfigs)
+                .truststore(model.getTruststore())
+                .build();
+        });
+        responder.respond(emptyMap());
+    }
+
+    private void onDeleteService(Map<String, Object> request, RequestManager.Responder responder) {
+        final Object serviceObject = request.get("serviceName");
+        if (serviceObject == null || !(serviceObject instanceof String)) {
+            LOG.error("No or invalid service name message component");
+            responder.error("No service name provided");
+            return;
+        }
+
+        modelStore.apply(model -> {
+            final List<ServiceConfig> serviceConfigs = model
+                .getServices()
+                .stream()
+                .filter(serviceConfig -> !serviceConfig.getName().equals(serviceObject))
+                .collect(toList());
+
+            if (serviceConfigs.equals(model.getServices())) {
+                LOG.info("Failed to find service {}", serviceObject);
+            }
+            else {
+                LOG.info("Removing service {}", serviceObject);
+            }
+
+            return Model
+                .builder()
+                .active(true)
+                .diffusion(model.getDiffusion())
+                .services(serviceConfigs)
+                .truststore(model.getTruststore())
+                .build();
+        });
+        responder.respond(emptyMap());
+    }
+
+    @SuppressWarnings("unchecked")
+    private void onCreateEndpoint(Map<String, Object> request, RequestManager.Responder responder) {
+        final Object serviceObject = request.get("serviceName");
+        if (serviceObject == null || !(serviceObject instanceof String)) {
+            LOG.error("No or invalid service name message component");
+            responder.error("No service name provided");
+            return;
+        }
+
+        final Object endpointObject = request.get("endpoint");
+        if (endpointObject == null || !(endpointObject instanceof Map)) {
+            LOG.error("No or invalid endpoint message component");
+            responder.error("No endpoint provided");
+            return;
+        }
+
+        final Map<String, Object> endpoint = (Map<String, Object>) endpointObject;
+        final EndpointConfig endpointConfig = EndpointConfig
+            .builder()
+            .name((String) endpoint.get("name"))
+            .topic((String) endpoint.get("topic"))
+            .url((String) endpoint.get("url"))
+            .produces((String) endpoint.get("produces"))
+            .build();
+
+        modelStore.apply(model -> {
+            final List<ServiceConfig> serviceConfigs = model
+                .getServices()
+                .stream()
+                .map(serviceConfig -> {
+                    if (serviceConfig.getName().equals(serviceObject)) {
+                        final List<EndpointConfig> endpointConfigs = serviceConfig
+                            .getEndpoints()
+                            .stream()
+                            .collect(toList());
+                        endpointConfigs.add(endpointConfig);
+
+                        LOG.info("Adding {} to {}", endpointConfig, serviceObject);
+
+                        return ServiceConfig
+                            .builder()
+                            .name(serviceConfig.getName())
+                            .host(serviceConfig.getHost())
+                            .port(serviceConfig.getPort())
+                            .secure(serviceConfig.isSecure())
+                            .endpoints(endpointConfigs)
+                            .topicRoot(serviceConfig.getTopicRoot())
+                            .pollPeriod(serviceConfig.getPollPeriod())
+                            .security(serviceConfig.getSecurity())
+                            .build();
+                    }
+                    else {
+                        return serviceConfig;
+                    }
+                })
+                .collect(toList());
+
+            if (serviceConfigs.equals(model.getServices())) {
+                LOG.info("Failed to find service {}", serviceObject);
+            }
+
+            return Model
+                .builder()
+                .active(true)
+                .diffusion(model.getDiffusion())
+                .services(serviceConfigs)
+                .truststore(model.getTruststore())
+                .build();
+        });
+        responder.respond(emptyMap());
     }
 
     private static Map<String, Object> error(String message) {
@@ -97,6 +283,8 @@ import net.jcip.annotations.ThreadSafe;
         modelStore.apply(model -> {
             final List<ServiceConfig> serviceConfigs = model.getServices().stream().collect(toList());
             serviceConfigs.add(serviceConfig);
+
+            LOG.info("Adding {}", serviceConfig);
 
             return Model
                 .builder()
