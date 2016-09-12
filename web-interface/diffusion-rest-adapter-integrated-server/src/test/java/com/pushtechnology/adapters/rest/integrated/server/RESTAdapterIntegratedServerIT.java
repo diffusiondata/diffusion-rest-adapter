@@ -34,6 +34,8 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.verification.VerificationWithTimeout;
 
+import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
+
 /**
  * Unit tests for {@link RESTAdapterIntegratedServer}.
  *
@@ -63,7 +65,14 @@ public final class RESTAdapterIntegratedServerIT {
 
     @Test
     public void startClose() throws Exception {
-        final RESTAdapterIntegratedServer restAdapterIntegratedServer = RESTAdapterIntegratedServer.create(8081);
+        final RESTAdapterIntegratedServer restAdapterIntegratedServer = RESTAdapterIntegratedServer.create(
+            8081,
+            DiffusionConfig.builder()
+                .host("localhost")
+                .port(8080)
+                .secure(false)
+                .principal("control")
+                .password("password"));
 
         restAdapterIntegratedServer.start();
 

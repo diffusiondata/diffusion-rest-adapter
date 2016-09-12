@@ -36,6 +36,7 @@ import com.pushtechnology.adapters.rest.adapter.ServiceListener;
 import com.pushtechnology.adapters.rest.client.RESTAdapterClient;
 import com.pushtechnology.adapters.rest.client.controlled.model.store.ClientControlledModelStore;
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
+import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig.DiffusionConfigBuilder;
 import com.pushtechnology.diffusion.client.session.SessionAttributes;
 
 /**
@@ -94,19 +95,16 @@ public final class RESTAdapterIntegratedServer implements AutoCloseable {
      * @param port the port for the application server to listen on
      * @return a new {@link RESTAdapterIntegratedServer}
      */
-    public static RESTAdapterIntegratedServer create(int port) throws NamingException, IOException {
+    public static RESTAdapterIntegratedServer create(
+            int port,
+            DiffusionConfigBuilder baseConfig) throws NamingException, IOException {
+
         final Path tempFile = Files.createTempFile("web-interface-servlet", ".war");
         extractWarTo(tempFile);
 
         final ScheduledExecutorService executor = newSingleThreadScheduledExecutor();
 
-        final DiffusionConfig diffusionConfig = DiffusionConfig
-            .builder()
-            .host("localhost")
-            .port(8080)
-            .secure(false)
-            .principal("control")
-            .password("password")
+        final DiffusionConfig diffusionConfig = baseConfig
             .connectionTimeout(SessionAttributes.DEFAULT_CONNECTION_TIMEOUT)
             .reconnectionTimeout(SessionAttributes.DEFAULT_RECONNECTION_TIMEOUT)
             .maximumMessageSize(SessionAttributes.DEFAULT_MAXIMUM_MESSAGE_SIZE)
@@ -120,6 +118,9 @@ public final class RESTAdapterIntegratedServer implements AutoCloseable {
         final Server jettyServer = new Server(port);
         final WebAppContext webapp = new WebAppContext();
         webapp.setContextPath("/");
+        webapp.setInitParameter("host", diffusionConfig.getHost());
+        webapp.setInitParameter("port", "" + diffusionConfig.getPort());
+        webapp.setInitParameter("secure", "" + diffusionConfig.isSecure());
         webapp.setWar(tempFile.toAbsolutePath().toString());
         final GzipHandler gzipHandler = new GzipHandler();
         gzipHandler.setHandler(webapp);

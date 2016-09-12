@@ -5,10 +5,20 @@
         <servlet-class>org.eclipse.jetty.servlet.DefaultServlet</servlet-class>
     </servlet>
 
+    <servlet>
+        <servlet-name>ConfigServlet</servlet-name>
+        <servlet-class>com.pushtechnology.adapters.rest.servlet.ConfigServlet</servlet-class>
+    </servlet>
+
     <filter>
         <filter-name>rewrite</filter-name>
         <filter-class>org.tuckey.web.filters.urlrewrite.UrlRewriteFilter</filter-class>
     </filter>
+
+    <servlet-mapping>
+        <servlet-name>ConfigServlet</servlet-name>
+        <url-pattern>/js/config.js</url-pattern>
+    </servlet-mapping>
 
     <servlet-mapping>
         <servlet-name>DefaultServlet</servlet-name>

@@ -19,9 +19,15 @@
             <type>zip</type>
             <classifier>bundle</classifier>
         </dependency>
+
         <dependency>
             <groupId>org.tuckey</groupId>
             <artifactId>urlrewritefilter</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
         </dependency>
     </dependencies>
 
@@ -54,6 +60,7 @@
                 </plugins>
             </build>
         </profile>
+
         <profile>
             <id>debug</id>
             <activation>

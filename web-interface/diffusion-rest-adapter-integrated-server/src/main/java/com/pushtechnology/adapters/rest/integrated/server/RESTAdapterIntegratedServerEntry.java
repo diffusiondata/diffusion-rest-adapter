@@ -19,6 +19,8 @@ import java.io.IOException;
 
 import javax.naming.NamingException;
 
+import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
+
 /**
  * Entry point for Diffusion REST Adapter Integrated Server.
  *
@@ -38,6 +40,15 @@ public final class RESTAdapterIntegratedServerEntry {
     public static void main(String[] args) throws NamingException, IOException {
         // CHECKSTYLE.ON: UncommentedMain
 
-        RESTAdapterIntegratedServer.create(8081).start();
+        RESTAdapterIntegratedServer
+            .create(
+                8081,
+                DiffusionConfig.builder()
+                    .host("localhost")
+                    .port(8080)
+                    .secure(false)
+                    .principal("control")
+                    .password("password"))
+            .start();
     }
 }

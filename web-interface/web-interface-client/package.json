@@ -2,7 +2,8 @@
   "name": "web-interface-client",
   "version": "0.0.1",
   "browserify-shim": {
-    "diffusion": "global:diffusion"
+    "diffusion": "global:diffusion",
+    "diffusionConfig": "global:diffusionConfig"
   },
   "dependencies": {
     "@angular/common": "2.0.0-rc.5",

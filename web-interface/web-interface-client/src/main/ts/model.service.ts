@@ -3,6 +3,7 @@ import { Model, Service, Endpoint } from './model';
 import * as d from './diffusion.d.ts';
 import { RequestContext } from './request-context';
 const diffusion: d.Diffusion = require('diffusion');
+const diffusionConfig: d.Options = require('diffusionConfig');
 
 @Injectable()
 export class ModelService {
@@ -15,11 +16,7 @@ export class ModelService {
     private init(): Promise<any> {
         if (!this.session) {
             this.session = new Promise((resolve, reject) => {
-                diffusion.connect({
-                    host: 'localhost',
-                    port: 8080,
-                    secure: false
-                }).then((session) => {
+                diffusion.connect(diffusionConfig).then((session) => {
                     console.log('Connected');
                     this.context = new RequestContext(session, 'adapter/rest/model/store');
                     resolve(session);
