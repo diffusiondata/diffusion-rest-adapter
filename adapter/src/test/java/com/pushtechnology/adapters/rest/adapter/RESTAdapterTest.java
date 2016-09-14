@@ -15,10 +15,13 @@
 
 package com.pushtechnology.adapters.rest.adapter;
 
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.MockitoAnnotations.initMocks;
 
+import java.util.Collections;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.junit.After;
@@ -27,6 +30,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 
 import com.pushtechnology.adapters.rest.model.latest.Model;
+import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 
 /**
  * Unit tests for {@link RESTAdapter}.
@@ -79,6 +83,29 @@ public final class RESTAdapterTest {
         adapter.close();
 
         adapter.reconfigure(Model.builder().active(true).build());
+
+        adapter.close();
+    }
+
+    @Test
+    public void startAddInactiveServiceStop() {
+        final RESTAdapter adapter = new RESTAdapter(executor, shutdownHandler, listener);
+
+        adapter.reconfigure(Model.builder().active(true).build());
+
+        adapter.reconfigure(Model
+            .builder()
+            .active(true)
+            .services(singletonList(ServiceConfig
+                .builder()
+                .name("service-0")
+                .host("localhost")
+                .secure(false)
+                .endpoints(emptyList())
+                .topicRoot("root")
+                .pollPeriod(5000)
+                .build()))
+            .build());
 
         adapter.close();
     }
