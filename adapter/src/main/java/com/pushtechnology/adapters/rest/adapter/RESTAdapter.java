@@ -331,7 +331,7 @@ public final class RESTAdapter implements AutoCloseable {
     @GuardedBy("this")
     private boolean hasTruststoreChanged(Model newModel) {
         return currentModel.getTruststore() == null && newModel.getTruststore() != null ||
-            !currentModel.getTruststore().equals(newModel.getTruststore());
+            currentModel.getTruststore() != null && !currentModel.getTruststore().equals(newModel.getTruststore());
     }
 
     private boolean hasSecurityChanged(Model newModel) {
