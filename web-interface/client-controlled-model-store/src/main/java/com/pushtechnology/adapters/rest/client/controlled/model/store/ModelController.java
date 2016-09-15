@@ -205,51 +205,17 @@ import net.jcip.annotations.ThreadSafe;
             .produces((String) endpoint.get("produces"))
             .build();
 
-        modelStore.apply(model -> {
-            final List<ServiceConfig> serviceConfigs = model
-                .getServices()
-                .stream()
-                .map(serviceConfig -> {
-                    if (serviceConfig.getName().equals(serviceObject)) {
-                        final List<EndpointConfig> endpointConfigs = serviceConfig
-                            .getEndpoints()
-                            .stream()
-                            .collect(toList());
-                        endpointConfigs.add(endpointConfig);
+        switch (modelStore.createEndpoint((String) serviceObject, endpointConfig)) {
+            case SUCCESS:
+                responder.respond(emptyMap());
+                return;
+            case PARENT_MISSING:
+                responder.error("service missing");
+                return;
+            default:
+                responder.error("endpoint name conflict");
+        }
 
-                        LOG.info("Adding {} to {}", endpointConfig, serviceObject);
-
-                        return ServiceConfig
-                            .builder()
-                            .name(serviceConfig.getName())
-                            .host(serviceConfig.getHost())
-                            .port(serviceConfig.getPort())
-                            .secure(serviceConfig.isSecure())
-                            .endpoints(endpointConfigs)
-                            .topicRoot(serviceConfig.getTopicRoot())
-                            .pollPeriod(serviceConfig.getPollPeriod())
-                            .security(serviceConfig.getSecurity())
-                            .build();
-                    }
-                    else {
-                        return serviceConfig;
-                    }
-                })
-                .collect(toList());
-
-            if (serviceConfigs.equals(model.getServices())) {
-                LOG.info("Failed to find service {}", serviceObject);
-            }
-
-            return Model
-                .builder()
-                .active(true)
-                .diffusion(model.getDiffusion())
-                .services(serviceConfigs)
-                .truststore(model.getTruststore())
-                .build();
-        });
-        responder.respond(emptyMap());
     }
 
     private static Map<String, Object> error(String message) {
@@ -280,20 +246,12 @@ import net.jcip.annotations.ThreadSafe;
             .topicRoot((String) service.get("topicRoot"))
             .build();
 
-        modelStore.apply(model -> {
-            final List<ServiceConfig> serviceConfigs = model.getServices().stream().collect(toList());
-            serviceConfigs.add(serviceConfig);
-
-            LOG.info("Adding {}", serviceConfig);
-
-            return Model
-                .builder()
-                .active(true)
-                .diffusion(model.getDiffusion())
-                .services(serviceConfigs)
-                .truststore(model.getTruststore())
-                .build();
-        });
-        responder.respond(emptyMap());
+        switch (modelStore.createService(serviceConfig)) {
+            case SUCCESS:
+                responder.respond(emptyMap());
+                return;
+            default:
+                responder.error("service name conflict");
+        }
     }
 }

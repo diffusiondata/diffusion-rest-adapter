@@ -15,13 +15,22 @@
 
 package com.pushtechnology.adapters.rest.model.store;
 
+import static java.util.stream.Collectors.toList;
+
 import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
+import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 
 import net.jcip.annotations.GuardedBy;
 import net.jcip.annotations.ThreadSafe;
@@ -33,6 +42,8 @@ import net.jcip.annotations.ThreadSafe;
  */
 @ThreadSafe
 public final class AsyncMutableModelStore implements ModelStore {
+    private static final Logger LOG = LoggerFactory.getLogger(AsyncMutableModelStore.class);
+
     private final Collection<Consumer<Model>> listeners = new CopyOnWriteArrayList<>();
     private final Object modelMutex = new Object();
     private final Object notificationMutex = new Object();
@@ -66,10 +77,14 @@ public final class AsyncMutableModelStore implements ModelStore {
         synchronized (modelMutex) {
             final Model newModel = operation.apply(model);
 
-            if (newModel.equals(model)) {
-                return this;
-            }
+            updateModel(newModel);
+        }
+        return this;
+    }
 
+    @GuardedBy("modelMutex")
+    private void updateModel(Model newModel) {
+        if (!newModel.equals(model)) {
             model = newModel;
 
             synchronized (notificationMutex) {
@@ -77,7 +92,131 @@ public final class AsyncMutableModelStore implements ModelStore {
                 notifyListeners(notificationVersion, newModel);
             }
         }
-        return this;
+    }
+
+    /**
+     * Atomically add a service to the model.
+     * @param serviceConfig the service to add
+     * @return the result
+     */
+    public CreateResult createService(ServiceConfig serviceConfig) {
+        synchronized (modelMutex) {
+            final Optional<ServiceConfig> currentService = model
+                .getServices()
+                .stream()
+                .filter(service -> service.getName().equals(serviceConfig.getName()))
+                .findFirst();
+
+            if (currentService.isPresent()) {
+                if (serviceConfig.equals(currentService.get())) {
+                    LOG.info("Service {} present", serviceConfig);
+
+                    return CreateResult.SUCCESS;
+                }
+
+                LOG.info("Service {} name used", serviceConfig);
+
+                return CreateResult.CONFLICT;
+            }
+
+            final List<ServiceConfig> serviceConfigs = model.getServices().stream().collect(toList());
+            serviceConfigs.add(serviceConfig);
+
+            LOG.info("Service {} created", serviceConfig);
+
+            updateModel(Model
+                .builder()
+                .active(model.isActive())
+                .diffusion(model.getDiffusion())
+                .services(serviceConfigs)
+                .truststore(model.getTruststore())
+                .build());
+
+            return CreateResult.SUCCESS;
+        }
+    }
+
+    /**
+     * Atomically add an endpoint to the model.
+     * @param serviceName the name of the service to add the endpoint to
+     * @param endpointConfig the endpoint to add
+     * @return the result
+     */
+    public CreateResult createEndpoint(String serviceName, EndpointConfig endpointConfig) {
+        synchronized (modelMutex) {
+            final Optional<ServiceConfig> currentService = model
+                .getServices()
+                .stream()
+                .filter(service -> service.getName().equals(serviceName))
+                .findFirst();
+
+            if (!currentService.isPresent()) {
+                LOG.info("Service {} not found", serviceName);
+                return CreateResult.PARENT_MISSING;
+            }
+            final ServiceConfig serviceConfig = currentService.get();
+
+            final Optional<EndpointConfig> currentEndpoint = serviceConfig
+                .getEndpoints()
+                .stream()
+                .filter(endpoint -> endpoint.getName().equals(endpointConfig.getName()))
+                .findFirst();
+
+            if (currentEndpoint.isPresent()) {
+                if (currentEndpoint.get().equals(endpointConfig)) {
+                    LOG.info("Endpoint {} present under {}", endpointConfig, serviceName);
+
+                    return CreateResult.SUCCESS;
+                }
+
+                LOG.info("Endpoint {} name used under {}", endpointConfig, serviceName);
+
+                return CreateResult.CONFLICT;
+            }
+
+            final List<EndpointConfig> endpointConfigs = serviceConfig
+                .getEndpoints()
+                .stream()
+                .collect(toList());
+            endpointConfigs.add(endpointConfig);
+
+            LOG.info("Endpoint {} created under {}", endpointConfig, serviceName);
+
+            final ServiceConfig updatedService = ServiceConfig
+                .builder()
+                .name(serviceConfig.getName())
+                .host(serviceConfig.getHost())
+                .port(serviceConfig.getPort())
+                .secure(serviceConfig.isSecure())
+                .endpoints(endpointConfigs)
+                .topicRoot(serviceConfig.getTopicRoot())
+                .pollPeriod(serviceConfig.getPollPeriod())
+                .security(serviceConfig.getSecurity())
+                .build();
+
+            final List<ServiceConfig> serviceConfigs = model
+                .getServices()
+                .stream()
+                .map(service -> {
+                    if (serviceConfig.getName().equals(serviceName)) {
+                        return updatedService;
+                    }
+                    else {
+                        return service;
+                    }
+                })
+                .collect(toList());
+
+            updateModel(Model
+                .builder()
+                .active(model.isActive())
+                .diffusion(model.getDiffusion())
+                .services(serviceConfigs)
+                .truststore(model.getTruststore())
+                .build());
+
+            return CreateResult.SUCCESS;
+        }
     }
 
     /**
@@ -122,5 +261,23 @@ public final class AsyncMutableModelStore implements ModelStore {
     @Override
     public String toString() {
         return getClass().getSimpleName();
+    }
+
+    /**
+     * The result of attempting to create an item in the model.
+     */
+    public enum CreateResult {
+        /**
+         * A different item is present with the same name.
+         */
+        CONFLICT,
+        /**
+         * The parent of the item is missing.
+         */
+        PARENT_MISSING,
+        /**
+         * The item is present.
+         */
+        SUCCESS
     }
 }
