@@ -16,13 +16,13 @@ export class RequestContext {
             if (handler) {
                 console.log('Routing response', response);
                 if (response.error) {
-                    handler.resolve(new Error(response.error));
+                    handler.reject(new Error(response.error));
                 }
                 else if (response.response) {
                     handler.resolve(response.response);
                 }
                 else {
-                    handler.resolve(new Error('Badly formatted response'));
+                    handler.reject(new Error('Badly formatted response'));
                 }
                 delete this.conversations[response.id];
             }
