@@ -1,6 +1,5 @@
 
-import * as d from './diffusion.d.ts';
-const diffusion: d.Diffusion = require('diffusion');
+import * as diffusion from 'diffusion';
 
 const jsonDataType = diffusion.datatypes.json();
 

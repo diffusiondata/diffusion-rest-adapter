@@ -1,9 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Model, Service, Endpoint } from './model';
-import * as d from './diffusion.d.ts';
+import * as diffusion from 'diffusion';
 import { RequestContext } from './request-context';
-const diffusion: d.Diffusion = require('diffusion');
-const diffusionConfig: d.Options = require('diffusionConfig');
+const diffusionConfig: diffusion.Options = require('diffusionConfig');
 
 @Injectable()
 export class ModelService {
