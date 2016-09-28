@@ -17,6 +17,7 @@ package com.pushtechnology.adapters.rest.model.latest;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.ToString;
 import lombok.Value;
 
 /**
@@ -29,6 +30,8 @@ import lombok.Value;
 @Value
 @Builder
 @AllArgsConstructor
+@ToString(of = {"host", "port", "secure", "principal", "connectionTimeout", "reconnectionTimeout",
+    "maximumMessageSize", "inputBufferSize", "outputBufferSize", "recoveryBufferSize"})
 public class DiffusionConfig {
     /**
      * The host of the Diffusion server.

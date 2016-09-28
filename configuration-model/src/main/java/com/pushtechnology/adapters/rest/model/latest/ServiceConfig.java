@@ -32,7 +32,6 @@ import lombok.Value;
 @Value
 @Builder
 @AllArgsConstructor
-@ToString(of = {"name"})
 public class ServiceConfig {
     /**
      * The name of the service.
