@@ -212,6 +212,9 @@ import net.jcip.annotations.ThreadSafe;
             case PARENT_MISSING:
                 responder.error("service missing");
                 return;
+            case UNIQUE_VALUE_USED:
+                responder.error("endpoint topic conflict");
+                return;
             default:
                 responder.error("endpoint name conflict");
         }
@@ -249,6 +252,9 @@ import net.jcip.annotations.ThreadSafe;
         switch (modelStore.createService(serviceConfig)) {
             case SUCCESS:
                 responder.respond(emptyMap());
+                return;
+            case UNIQUE_VALUE_USED:
+                responder.error("service root topic conflict");
                 return;
             default:
                 responder.error("service name conflict");

@@ -116,7 +116,20 @@ public final class AsyncMutableModelStore implements ModelStore {
 
                 LOG.info("Service {} name used", serviceConfig);
 
-                return CreateResult.CONFLICT;
+                return CreateResult.NAME_CONFLICT;
+            }
+
+            final boolean isTopicRootInUse = model
+                .getServices()
+                .stream()
+                .filter(service -> service.getTopicRoot().equals(serviceConfig.getTopicRoot()))
+                .findFirst()
+                .isPresent();
+
+            if (isTopicRootInUse) {
+                LOG.info("Service {} topic root used", serviceConfig);
+
+                return CreateResult.UNIQUE_VALUE_USED;
             }
 
             final List<ServiceConfig> serviceConfigs = model.getServices().stream().collect(toList());
@@ -171,7 +184,20 @@ public final class AsyncMutableModelStore implements ModelStore {
 
                 LOG.info("Endpoint {} name used under {}", endpointConfig, serviceName);
 
-                return CreateResult.CONFLICT;
+                return CreateResult.NAME_CONFLICT;
+            }
+
+            final boolean isTopicInUse = serviceConfig
+                .getEndpoints()
+                .stream()
+                .filter(endpoint -> endpoint.getTopic().equals(endpointConfig.getTopic()))
+                .findFirst()
+                .isPresent();
+
+            if (isTopicInUse) {
+                LOG.info("Service {} topic used", serviceConfig);
+
+                return CreateResult.UNIQUE_VALUE_USED;
             }
 
             final List<EndpointConfig> endpointConfigs = serviceConfig
@@ -270,7 +296,11 @@ public final class AsyncMutableModelStore implements ModelStore {
         /**
          * A different item is present with the same name.
          */
-        CONFLICT,
+        NAME_CONFLICT,
+        /**
+         * A different item is present with the same unique value.
+         */
+        UNIQUE_VALUE_USED,
         /**
          * The parent of the item is missing.
          */

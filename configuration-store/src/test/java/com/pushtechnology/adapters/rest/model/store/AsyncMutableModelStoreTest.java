@@ -42,14 +42,21 @@ public final class AsyncMutableModelStoreTest {
     private final EndpointConfig endpointConfig0 = EndpointConfig
         .builder()
         .name("endpoint-0")
-        .topic("topic")
+        .topic("topic-0")
         .url("http://localhost/json")
         .build();
 
     private final EndpointConfig endpointConfig1 = EndpointConfig
         .builder()
         .name("endpoint-1")
-        .topic("topic")
+        .topic("topic-1")
+        .url("http://localhost/json")
+        .build();
+
+    private final EndpointConfig endpointConfig2 = EndpointConfig
+        .builder()
+        .name("endpoint-1")
+        .topic("topic-0")
         .url("http://localhost/json")
         .build();
 
@@ -66,6 +73,16 @@ public final class AsyncMutableModelStoreTest {
     private final ServiceConfig serviceConfig1 = ServiceConfig
         .builder()
         .name("service-0")
+        .host("localhost")
+        .port(8080)
+        .pollPeriod(60000)
+        .endpoints(asList(endpointConfig0, endpointConfig1))
+        .topicRoot("a")
+        .build();
+
+    private final ServiceConfig serviceConfig2 = ServiceConfig
+        .builder()
+        .name("service-1")
         .host("localhost")
         .port(8080)
         .pollPeriod(60000)
@@ -211,7 +228,23 @@ public final class AsyncMutableModelStoreTest {
 
         final CreateResult result = modelStore.createService(ServiceConfig.builder().name("service-0").build());
 
-        assertEquals(CreateResult.CONFLICT, result);
+        assertEquals(CreateResult.NAME_CONFLICT, result);
+    }
+
+    @Test
+    public void onModelChangeTopicRootConflict() {
+        modelStore.setModel(model);
+
+        verify(executor).execute(runnableCaptor.capture());
+        runnableCaptor.getValue().run();
+
+        modelStore.onModelChange(consumer);
+
+        verify(consumer).accept(model);
+
+        final CreateResult result = modelStore.createService(serviceConfig2);
+
+        assertEquals(CreateResult.UNIQUE_VALUE_USED, result);
     }
 
     @Test
@@ -233,6 +266,22 @@ public final class AsyncMutableModelStoreTest {
         runnableCaptor.getValue().run();
 
         verify(consumer).accept(modelWithTwoEndpoints);
+    }
+
+    @Test
+    public void onModelChangeTopicConflict() {
+        modelStore.setModel(model);
+
+        verify(executor).execute(runnableCaptor.capture());
+        runnableCaptor.getValue().run();
+
+        modelStore.onModelChange(consumer);
+
+        verify(consumer).accept(model);
+
+        final CreateResult result = modelStore.createEndpoint("service-0", endpointConfig2);
+
+        assertEquals(CreateResult.UNIQUE_VALUE_USED, result);
     }
 
     @Test
@@ -265,7 +314,7 @@ public final class AsyncMutableModelStoreTest {
         final CreateResult result = modelStore
             .createEndpoint("service-0", EndpointConfig.builder().name("endpoint-0").build());
 
-        assertEquals(CreateResult.CONFLICT, result);
+        assertEquals(CreateResult.NAME_CONFLICT, result);
     }
 
     @Test
