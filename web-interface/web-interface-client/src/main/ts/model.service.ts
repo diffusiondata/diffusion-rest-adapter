@@ -53,7 +53,14 @@ export class ModelService {
                 service: service
             }))
             .then(() => {
-                this.model.services.push(JSON.parse(JSON.stringify(service)));
+                var serviceIdx = this
+                    .model
+                    .services
+                    .findIndex((element) => element.name === service.name);
+
+                if (serviceIdx === -1) {
+                    this.model.services.push(JSON.parse(JSON.stringify(service)));
+                }
             });
     }
 
@@ -65,12 +72,20 @@ export class ModelService {
                 endpoint: endpoint
             }))
             .then(() => {
-                this
+                var service = this
                     .model
                     .services
-                    .find((element) => element.name === serviceName)
+                    .find((element) => element.name === serviceName);
+
+                var endpointIdx = service
                     .endpoints
-                    .push(JSON.parse(JSON.stringify(endpoint)));
+                    .findIndex((element) => element.name === endpoint.name);
+
+                if (endpointIdx === -1) {
+                    service
+                        .endpoints
+                        .push(JSON.parse(JSON.stringify(endpoint)));
+                }
             });
     }
 
