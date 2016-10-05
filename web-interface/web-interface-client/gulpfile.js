@@ -3,6 +3,8 @@
 
 var gulp = require('gulp'),
     jasmine = require('gulp-jasmine'),
+    TerminalReporter = require('jasmine-terminal-reporter'),
+    reporters = require('jasmine-reporters'),
     ts = require('gulp-typescript'),
     tsdoc = require('gulp-typedoc'),
     tslint = require('gulp-tslint'),
@@ -13,7 +15,8 @@ var gulp = require('gulp'),
     rename = require('gulp-rename'),
     uglify = require('gulp-uglify'),
     typings = require('gulp-typings'),
-    buffer = require('vinyl-buffer');
+    buffer = require('vinyl-buffer'),
+    istanbul = require('gulp-istanbul');
 
 gulp.task('install-typings', function(done) {
     return gulp
@@ -130,6 +133,28 @@ gulp.task('checks', function() {
         .pipe(tslint.report('verbose'));
 });
 
+gulp.task('unit-test', ['generate-javascript-debug'], function(done) {
+    var reporter = new reporters.JUnitXmlReporter({
+        savePath : "./target/jasmine",
+        filePrefix : "JUnit-",
+        consolidateAll : false,
+    });
+
+    var terminalReporter = new TerminalReporter();
+
+    return gulp.src(['src/test/js/**/*.js'])
+        .pipe(jasmine({
+            reporter : [reporter, terminalReporter],
+            requireStackTrace : true,
+            includeStackTrace : true
+        }))
+        .on('error', done)
+        .pipe(istanbul.writeReports({
+            dir : "./target/coverage",
+            reporters : ['cobertura', 'html']
+        }));
+});
+
 gulp.task('doc', function() {
     return gulp.src(['src/main/ts/*.ts'])
         .pipe(tsdoc({
@@ -143,5 +168,5 @@ gulp.task('doc', function() {
         }));
 });
 
-gulp.task('default', ['install-typings', 'generate-javascript', 'generate-dist', 'checks']);
-gulp.task('debug', ['install-typings', 'generate-javascript-debug', 'generate-dist-debug', 'checks']);
+gulp.task('default', ['install-typings', 'generate-javascript', 'generate-dist', 'unit-test', 'checks']);
+gulp.task('debug', ['install-typings', 'generate-javascript-debug', 'generate-dist-debug', 'unit-test', 'checks']);
