@@ -34,12 +34,12 @@ gulp.task('generate-javascript', ['install-typings'], function() {
         }));
 
     // Pipe the generated JavaScript to the build directory
-    tsResult.js
+    var output = tsResult.js
         .pipe(gulp.dest('target/js'));
 
     // Return the result of generating the JavaScript to fail the build if
     // there are any TypeScript errors
-    return tsResult;
+    return merge(tsResult, output);
 });
 
 gulp.task('generate-dist', ['generate-javascript'], function(done) {
@@ -83,12 +83,12 @@ gulp.task('generate-javascript-debug', ['install-typings'], function() {
         }));
 
     // Pipe the generated JavaScript to the build directory
-    tsResult.js
+    var output = tsResult.js
         .pipe(gulp.dest('target/debug/js'));
 
     // Return the result of generating the JavaScript to fail the build if
     // there are any TypeScript errors
-    return tsResult;
+    return merge(tsResult, output);
 });
 
 gulp.task('generate-dist-debug', ['generate-javascript-debug'], function(done) {
