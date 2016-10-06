@@ -73,34 +73,14 @@ gulp.task('generate-dist', ['generate-javascript'], function(done) {
     });
 });
 
-gulp.task('generate-javascript-debug', ['install-typings'], function() {
-    var tsResult = gulp.src(['src/main/ts/**/*.ts', 'target/typings/**/*.d.ts'])
-        .pipe(ts({
-            target : 'ES5',
-            module : 'commonjs',
-            moduleResolution : 'node',
-            declaration : true,
-            emitDecoratorMetadata: true,
-            experimentalDecorators : true
-        }));
-
-    // Pipe the generated JavaScript to the build directory
-    var output = tsResult.js
-        .pipe(gulp.dest('target/debug/js'));
-
-    // Return the result of generating the JavaScript to fail the build if
-    // there are any TypeScript errors
-    return merge(tsResult, output);
-});
-
-gulp.task('generate-dist-debug', ['generate-javascript-debug'], function(done) {
+gulp.task('generate-dist-debug', ['generate-javascript'], function(done) {
     // Package both the source JavaScript and the generated JavaScript using
     // browserify
-    globby(['target/debug/js/**/*.js', 'src/main/js/**/*.js']).then(function(entries) {
+    globby(['target/js/**/*.js', 'src/main/js/**/*.js']).then(function(entries) {
         browserify({
             entries: entries,
             debug: false,
-            paths: ['target/debug/js'],
+            paths: ['target/js'],
             debug : true
         })
         .transform('browserify-shim')
@@ -132,7 +112,7 @@ gulp.task('checks', function() {
         .pipe(tslint.report('verbose'));
 });
 
-gulp.task('unit-test', ['generate-javascript-debug'], function(done) {
+gulp.task('unit-test', ['generate-javascript'], function(done) {
     var reporter = new reporters.JUnitXmlReporter({
         savePath : "./target/jasmine",
         filePrefix : "JUnit-",
@@ -163,5 +143,5 @@ gulp.task('doc', function() {
         }));
 });
 
-gulp.task('default', ['install-typings', 'generate-javascript', 'generate-dist', 'unit-test', 'checks']);
-gulp.task('debug', ['install-typings', 'generate-javascript-debug', 'generate-dist-debug', 'unit-test', 'checks']);
+gulp.task('default', ['generate-dist', 'unit-test', 'checks']);
+gulp.task('debug', ['generate-dist-debug', 'unit-test', 'checks']);

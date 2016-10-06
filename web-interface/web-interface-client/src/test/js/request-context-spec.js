@@ -1,5 +1,5 @@
 
-var rc = require('../../../target/debug/js/request-context'),
+var rc = require('../../../target/js/request-context'),
     when = require('saywhen'),
     diffusion = require('diffusion');
 
