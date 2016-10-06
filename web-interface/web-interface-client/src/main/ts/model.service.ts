@@ -1,8 +1,7 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Inject } from '@angular/core';
 import { Model, Service, Endpoint } from './model';
 import * as diffusion from 'diffusion';
 import { RequestContext } from './request-context';
-const diffusionConfig: diffusion.Options = require('diffusionConfig');
 
 @Injectable()
 export class ModelService {
@@ -11,6 +10,9 @@ export class ModelService {
     model: Model = {
         services: []
     };
+
+    constructor(@Inject("diffusion.config") private diffusionConfig: diffusion.Options) {
+    }
 
     private init(): Promise<any> {
         if (!this.session) {
