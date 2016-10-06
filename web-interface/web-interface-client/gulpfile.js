@@ -15,8 +15,7 @@ var gulp = require('gulp'),
     rename = require('gulp-rename'),
     uglify = require('gulp-uglify'),
     typings = require('gulp-typings'),
-    buffer = require('vinyl-buffer'),
-    istanbul = require('gulp-istanbul');
+    buffer = require('vinyl-buffer');
 
 gulp.task('install-typings', function(done) {
     return gulp
@@ -149,10 +148,6 @@ gulp.task('unit-test', ['generate-javascript-debug'], function(done) {
             includeStackTrace : true
         }))
         .on('error', done)
-        .pipe(istanbul.writeReports({
-            dir : "./target/coverage",
-            reporters : ['cobertura', 'html']
-        }));
 });
 
 gulp.task('doc', function() {
