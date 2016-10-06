@@ -12,9 +12,12 @@ import { EndpointsListComponent } from './endpoints-list.component';
 import { CreateEndpointComponent } from './create-endpoint.component';
 import { EndpointDetailComponent } from './endpoint-detail.component';
 import { UnselectedComponent } from './unselected.component';
+import { DiffusionService } from './diffusion.service';
 import { ModelService } from './model.service';
 
 import { routing } from './app.routing';
+import * as diffusion from 'diffusion';
+const diffusionConfig: diffusion.Options = require('diffusionConfig');
 
 @NgModule({
     imports: [ BrowserModule, FormsModule, routing ],
@@ -22,6 +25,7 @@ import { routing } from './app.routing';
         provide('diffusion.config', {
             useValue: diffusionConfig
         }),
+        DiffusionService,
         ModelService ],
     declarations: [
         ServicesListComponent,

@@ -1,34 +1,27 @@
 import { Injectable, Inject } from '@angular/core';
 import { Model, Service, Endpoint } from './model';
-import * as diffusion from 'diffusion';
+import { DiffusionService } from './diffusion.service';
 import { RequestContext } from './request-context';
 
 @Injectable()
 export class ModelService {
-    private session: Promise<any>;
+    private session;
     private context: RequestContext;
     model: Model = {
         services: []
     };
 
-    constructor(@Inject("diffusion.config") private diffusionConfig: diffusion.Options) {
+    constructor(private diffusionService: DiffusionService) {
     }
 
     private init(): Promise<any> {
-        if (!this.session) {
-            this.session = new Promise((resolve, reject) => {
-                diffusion.connect(diffusionConfig).then((session) => {
-                    console.log('Connected');
-                    this.context = new RequestContext(session, 'adapter/rest/model/store');
-                    resolve(session);
-                }, (error) => {
-                    console.log(error);
-                    reject(error);
-                });
-            });
-        }
-
-        return this.session;
+        return this.diffusionService.get().then((session) => {
+            if (this.session != session) {
+                this.session = session;
+                this.context = new RequestContext(session, 'adapter/rest/model/store');
+            }
+            return session;
+        });
     }
 
     getModel(): Promise<Model> {
