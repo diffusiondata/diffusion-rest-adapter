@@ -50,8 +50,6 @@ describe('Model service', function() {
         expect(diffusionService.get).toHaveBeenCalled();
         expect(modelPromise).toBeDefined();
 
-        console.log(onConnectSuccess.values());
-
         onConnectSuccess.values()[0](session); // init
         onConnectSuccess.values()[1](); // make request
 
