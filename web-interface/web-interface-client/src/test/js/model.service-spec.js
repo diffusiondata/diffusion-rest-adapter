@@ -2,28 +2,23 @@
 require('reflect-metadata');
 
 var ms = require('../../../target/js/model.service'),
-    when = require('saywhen');
+    when = require('saywhen'),
+    diffusion = require('diffusion');
+
+var jsonDataType = diffusion.datatypes.json();
 
 describe('Model service', function() {
     var diffusionService;
-    var onConnectSuccess;
-    var onConnectFailure;
     var session;
     var onMessage;
     var onSendSuccess;
     var onSendFailure;
     var modelService;
 
-
     beforeEach(function() {
         diffusionService = jasmine.createSpyObj('diffusionService', ['get']);
         onConnectSuccess = when.captor();
         onConnectFailure = when.captor();
-
-        var sessionPromise = jasmine.createSpyObj('promise', ['then']);
-        when(sessionPromise.then).isCalledWith(onConnectSuccess).thenReturn(sessionPromise);
-        when(sessionPromise.then).isCalledWith(onConnectSuccess, onConnectFailure).thenReturn(sessionPromise);
-        when(diffusionService.get).isCalled.thenReturn(sessionPromise);
 
         session = {
             messages : jasmine.createSpyObj('messages', ['listen', 'send'])
@@ -32,11 +27,19 @@ describe('Model service', function() {
         onSendSuccess = when.captor();
         onSendFailure = when.captor();
 
-        var sendPromise = jasmine.createSpyObj('promise', ['then']);
-        when(sendPromise.then).isCalledWith(onSendSuccess).thenReturn(sendPromise);
-        when(sendPromise.then).isCalledWith(onSendSuccess, onSendFailure).thenReturn(sendPromise);
-        when(session.messages.send).isCalled.thenReturn(sendPromise);
+        when(session.messages.send).isCalled.then(function() {
+            onMessage.latest({
+                content: jsonDataType.writeValue({
+                    id: 0,
+                    response: [{
+                        name: 'service0'
+                    }]
+                })
+            });
+        });
         when(session.messages.listen).isCalledWith('adapter/rest/model/store', onMessage);
+
+        when(diffusionService.get).isCalled.thenReturn(Promise.resolve(session));
 
         modelService = new ms.ModelService(diffusionService);
     });
@@ -50,20 +53,10 @@ describe('Model service', function() {
         expect(diffusionService.get).toHaveBeenCalled();
         expect(modelPromise).toBeDefined();
 
-        onConnectSuccess.values()[0](session); // init
-        onConnectSuccess.values()[1](); // make request
-
-        expect(session.messages.send).toHaveBeenCalledWith('adapter/rest/model/store', jasmine.anything());
-        expect(onSendSuccess.latest).toBeDefined();
-        expect(onSendFailure.latest).toBeDefined();
-
-        onConnectSuccess.latest([ 'service0' ]);
-
-        modelPromise.then(function(result) {
+        modelPromise.then(function(model) {
+            expect(session.messages.send).toHaveBeenCalledWith('adapter/rest/model/store', jasmine.anything());
+            expect(model.services[0].name).toBe('service0');
             done();
         }, done.fail);
-
-        onConnectSuccess.latest({});
-
     });
 });
