@@ -59,4 +59,16 @@ describe('Model service', function() {
             done();
         }, done.fail);
     });
+
+    it('can lookup service', function(done) {
+        var modelPromise = modelService.getService('service0');
+        expect(diffusionService.get).toHaveBeenCalled();
+        expect(modelPromise).toBeDefined();
+
+        modelPromise.then(function(service) {
+            expect(session.messages.send).toHaveBeenCalledWith('adapter/rest/model/store', jasmine.anything());
+            expect(service.name).toBe('service0');
+            done();
+        }, done.fail);
+    });
 });
