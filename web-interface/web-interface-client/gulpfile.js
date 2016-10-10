@@ -15,7 +15,8 @@ var gulp = require('gulp'),
     rename = require('gulp-rename'),
     uglify = require('gulp-uglify'),
     typings = require('gulp-typings'),
-    buffer = require('vinyl-buffer');
+    buffer = require('vinyl-buffer'),
+    istanbul = require('gulp-istanbul');
 
 gulp.task('install-typings', function(done) {
     return gulp
@@ -112,7 +113,14 @@ gulp.task('checks', function() {
         .pipe(tslint.report('verbose'));
 });
 
-gulp.task('unit-test', ['generate-javascript'], function(done) {
+gulp.task('instrument', ['generate-javascript'], function() {
+    return gulp.src(['target/js/*.js'])
+        .pipe(istanbul())
+        .pipe(istanbul.hookRequire())
+        .pipe(gulp.dest('target/instrumented'));
+});
+
+gulp.task('unit-test', ['instrument'], function(done) {
     var reporter = new reporters.JUnitXmlReporter({
         savePath : "./target/jasmine",
         filePrefix : "JUnit-",
@@ -128,6 +136,10 @@ gulp.task('unit-test', ['generate-javascript'], function(done) {
             includeStackTrace : true
         }))
         .on('error', done)
+        .pipe(istanbul.writeReports({
+            dir : "./target/coverage",
+            reporters : ['cobertura', 'html']
+        }));
 });
 
 gulp.task('doc', function() {
