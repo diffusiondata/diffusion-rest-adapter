@@ -22,7 +22,6 @@ export class ServicesListComponent implements OnInit {
         services: []
     };
     showCreateComponent = false;
-    selectedService: Service = null;
 
     constructor(private router: Router, private modelService: ModelService) {
         this.model = this.modelService.model;
@@ -34,7 +33,6 @@ export class ServicesListComponent implements OnInit {
     }
 
     createService(): void {
-        this.selectedService = null;
         this.showCreateComponent = true;
     }
 
