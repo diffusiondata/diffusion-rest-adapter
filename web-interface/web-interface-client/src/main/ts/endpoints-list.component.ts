@@ -19,7 +19,6 @@ import { ModelService } from './model.service';
 })
 export class EndpointsListComponent implements OnInit {
     service: Service;
-    showCreateComponent = false;
 
     constructor(private modelService: ModelService, private route: ActivatedRoute) {
     }
