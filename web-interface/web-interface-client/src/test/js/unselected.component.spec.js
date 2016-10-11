@@ -1,8 +1,7 @@
 
 require('reflect-metadata');
 
-var uc = require('../../../target/js/unselected.component'),
-    diffusion = require('diffusion');
+var uc = require('../../../target/js/unselected.component');
 
 describe('Unselected component', function() {
     it('can be created', function() {

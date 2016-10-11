@@ -1,8 +1,7 @@
 
 require('reflect-metadata');
 
-var smc = require('../../../target/js/service-modal.component'),
-    diffusion = require('diffusion');
+var smc = require('../../../target/js/service-modal.component');
 
 describe('Service modal component', function() {
     it('can be created', function() {

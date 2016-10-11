@@ -3,7 +3,6 @@ require('reflect-metadata');
 
 var slc = require('../../../target/js/services-list.component'),
     when = require('saywhen');
-    diffusion = require('diffusion');
 
 describe('Services list component', function() {
     var router;
