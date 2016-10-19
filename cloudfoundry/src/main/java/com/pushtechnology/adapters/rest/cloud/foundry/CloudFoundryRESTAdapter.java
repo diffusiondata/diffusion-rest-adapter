@@ -15,9 +15,21 @@
 
 package com.pushtechnology.adapters.rest.cloud.foundry;
 
+import static java.security.KeyStore.getDefaultType;
+import static javax.net.ssl.TrustManagerFactory.getDefaultAlgorithm;
+import static javax.net.ssl.TrustManagerFactory.getInstance;
+
 import java.io.IOException;
+import java.io.InputStream;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 
 import javax.naming.NamingException;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManagerFactory;
 
 import com.pushtechnology.adapters.rest.integrated.server.RESTAdapterIntegratedServer;
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
@@ -44,16 +56,42 @@ public final class CloudFoundryRESTAdapter {
             .getReappt()
             .getCredentials();
 
+        final SSLContext sslContext;
+        try (InputStream stream = Thread
+                .currentThread()
+                .getContextClassLoader()
+                .getResourceAsStream("reapptTruststore.jks")) {
+
+            final KeyStore keyStore = KeyStore.getInstance(getDefaultType());
+            keyStore.load(stream, null);
+            final TrustManagerFactory trustManagerFactory = getInstance(getDefaultAlgorithm());
+            trustManagerFactory.init(keyStore);
+            sslContext = SSLContext.getInstance("SSL");
+            sslContext.init(null, trustManagerFactory.getTrustManagers(), null);
+
+        }
+        catch (KeyStoreException |
+            CertificateException |
+            NoSuchAlgorithmException |
+            IOException |
+            KeyManagementException e) {
+
+            throw new IllegalArgumentException("An SSLContext could not be created as requested in the" +
+                " configuration for the Diffusion client", e);
+        }
+
         final String port = System.getenv("PORT");
+
         RESTAdapterIntegratedServer
             .create(
                 port != null ? Integer.parseInt(port) : 3000,
                 DiffusionConfig.builder()
                     .host(reapptCredentials.getHost())
-                    .port(80)
-                    .secure(false)
+                    .port(443)
+                    .secure(true)
                     .principal(reapptCredentials.getPrincipal())
-                    .password(reapptCredentials.getCredentials()))
+                    .password(reapptCredentials.getCredentials()),
+                sslContext)
             .start();
     }
 }

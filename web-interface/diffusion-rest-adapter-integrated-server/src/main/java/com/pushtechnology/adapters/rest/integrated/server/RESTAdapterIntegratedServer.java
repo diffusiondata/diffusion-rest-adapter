@@ -27,6 +27,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.concurrent.ScheduledExecutorService;
 
 import javax.naming.NamingException;
+import javax.net.ssl.SSLContext;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.gzip.GzipHandler;
@@ -102,6 +103,18 @@ public final class RESTAdapterIntegratedServer implements AutoCloseable {
             int port,
             DiffusionConfigBuilder baseConfig) throws NamingException, IOException {
 
+        return create(port, baseConfig, null);
+    }
+
+    /**
+     * @param port the port for the application server to listen on
+     * @return a new {@link RESTAdapterIntegratedServer}
+     */
+    public static RESTAdapterIntegratedServer create(
+        int port,
+        DiffusionConfigBuilder baseConfig,
+        SSLContext sslContext) throws NamingException, IOException {
+
         final Path tempFile = Files.createTempFile("web-interface-servlet", ".war");
         extractWarTo(tempFile);
 
@@ -116,7 +129,7 @@ public final class RESTAdapterIntegratedServer implements AutoCloseable {
             .recoveryBufferSize(SessionAttributes.DEFAULT_RECOVERY_BUFFER_SIZE)
             .build();
         final ClientControlledModelStore modelStore = ClientControlledModelStore
-            .create(executor, diffusionConfig, null);
+            .create(executor, diffusionConfig, sslContext);
 
         final Server jettyServer = new Server(port);
         final WebAppContext webapp = new WebAppContext();
