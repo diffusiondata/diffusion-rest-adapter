@@ -137,6 +137,8 @@ public final class RESTAdapterIntegratedServer implements AutoCloseable {
         webapp.setInitParameter("host", diffusionConfig.getHost());
         webapp.setInitParameter("port", "" + diffusionConfig.getPort());
         webapp.setInitParameter("secure", "" + diffusionConfig.isSecure());
+        webapp.setInitParameter("principal", "" + diffusionConfig.getPrincipal());
+        webapp.setInitParameter("credentials", "" + diffusionConfig.getPassword());
         webapp.setWar(tempFile.toAbsolutePath().toString());
         final GzipHandler gzipHandler = new GzipHandler();
         gzipHandler.setHandler(webapp);
