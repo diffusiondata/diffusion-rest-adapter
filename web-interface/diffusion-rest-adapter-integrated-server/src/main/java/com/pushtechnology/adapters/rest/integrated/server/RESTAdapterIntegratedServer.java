@@ -31,6 +31,8 @@ import javax.naming.NamingException;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.gzip.GzipHandler;
 import org.eclipse.jetty.webapp.WebAppContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.adapters.rest.adapter.ServiceListener;
 import com.pushtechnology.adapters.rest.client.RESTAdapterClient;
@@ -48,6 +50,7 @@ import com.pushtechnology.diffusion.client.session.SessionAttributes;
  * @author Push Technology Limited
  */
 public final class RESTAdapterIntegratedServer implements AutoCloseable {
+    private static final Logger LOG = LoggerFactory.getLogger(RESTAdapterIntegratedServer.class);
     private final Server jettyServer;
     private final RESTAdapterClient adapterClient;
     private final ClientControlledModelStore modelStore;
@@ -131,6 +134,8 @@ public final class RESTAdapterIntegratedServer implements AutoCloseable {
             executor,
             executor::shutdown,
             ServiceListener.NULL_LISTENER);
+
+        LOG.info("Running web interface on {}", port);
 
         return new RESTAdapterIntegratedServer(jettyServer, adapterClient, modelStore);
     }
