@@ -13,7 +13,7 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.polling;
+package com.pushtechnology.adapters.rest.adapter;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.mockito.Mockito.verify;
@@ -32,6 +32,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 
+import com.pushtechnology.adapters.rest.polling.EndpointResponse;
 import com.pushtechnology.diffusion.datatype.binary.Binary;
 
 /**

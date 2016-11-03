@@ -13,7 +13,7 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.polling;
+package com.pushtechnology.adapters.rest.adapter;
 
 import org.apache.http.concurrent.FutureCallback;
 

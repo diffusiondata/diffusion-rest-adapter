@@ -17,10 +17,7 @@ package com.pushtechnology.adapters.rest.adapter;
 
 import org.apache.http.concurrent.FutureCallback;
 
-import com.pushtechnology.adapters.rest.polling.BinaryParsingHandler;
 import com.pushtechnology.adapters.rest.polling.EndpointResponse;
-import com.pushtechnology.adapters.rest.polling.JSONParsingHandler;
-import com.pushtechnology.adapters.rest.polling.StringParsingHandler;
 import com.pushtechnology.diffusion.datatype.binary.Binary;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 

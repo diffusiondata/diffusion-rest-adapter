@@ -29,10 +29,8 @@ import org.mockito.Mock;
 
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.adapters.rest.polling.BinaryParsingHandler;
 import com.pushtechnology.adapters.rest.polling.EndpointResponse;
 import com.pushtechnology.adapters.rest.polling.PollHandlerFactory;
-import com.pushtechnology.adapters.rest.polling.StringParsingHandler;
 import com.pushtechnology.adapters.rest.publication.PublishingClient;
 import com.pushtechnology.diffusion.datatype.binary.Binary;
 import com.pushtechnology.diffusion.datatype.json.JSON;

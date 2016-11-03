@@ -13,15 +13,13 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.polling;
+package com.pushtechnology.adapters.rest.adapter;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.isA;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
-
-import java.io.IOException;
 
 import org.apache.http.concurrent.FutureCallback;
 import org.junit.After;
@@ -31,26 +29,27 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 
+import com.pushtechnology.diffusion.datatype.InvalidDataException;
+import com.pushtechnology.diffusion.datatype.json.JSON;
+
 /**
- * Unit tests for {@link StringParsingHandler}.
+ * Unit tests for {@link JSONParsingHandler}.
  *
  * @author Push Technology Limited
  */
-public final class StringParsingHandlerTest {
+public final class JSONParsingHandlerTest {
     @Mock
-    private EndpointResponse endpointResponse;
-    @Mock
-    private FutureCallback<String> delegate;
+    private FutureCallback<JSON> delegate;
     @Captor
-    private ArgumentCaptor<String> stringCaptor;
+    private ArgumentCaptor<JSON> jsonCaptor;
 
-    private FutureCallback<EndpointResponse> handler;
+    private FutureCallback<String> handler;
 
     @Before
     public void setUp() {
         initMocks(this);
 
-        handler = new StringParsingHandler(delegate);
+        handler = new JSONParsingHandler(delegate);
     }
 
     @After
@@ -59,29 +58,19 @@ public final class StringParsingHandlerTest {
     }
 
     @Test
-    public void completed() throws IOException {
-        when(endpointResponse.getHeader("content-type")).thenReturn("text/plain; charset=UTF-8");
-        when(endpointResponse.getResponse()).thenReturn("{\"foo\":\"bar\"}".getBytes("UTF-8"));
+    public void completed() {
+        handler.completed("{\"foo\":\"bar\"}");
+        verify(delegate).completed(jsonCaptor.capture());
 
-        handler.completed(endpointResponse);
-        verify(delegate).completed(stringCaptor.capture());
+        final JSON json = jsonCaptor.getValue();
 
-        final String json = stringCaptor.getValue();
-
-        assertEquals("{\"foo\":\"bar\"}", json);
+        assertEquals("{\"foo\":\"bar\"}", json.toJsonString());
     }
 
     @Test
-    public void completedCharsetMissing() throws IOException {
-        when(endpointResponse.getHeader("content-type")).thenReturn("text/plain");
-        when(endpointResponse.getResponse()).thenReturn("{\"foo\":\"bar\"}".getBytes("ISO-8859-1"));
-
-        handler.completed(endpointResponse);
-        verify(delegate).completed(stringCaptor.capture());
-
-        final String json = stringCaptor.getValue();
-
-        assertEquals("{\"foo\":\"bar\"}", json);
+    public void parsingFailure() {
+        handler.completed("{\"foo\":\"");
+        verify(delegate).failed(isA(InvalidDataException.class));
     }
 
     @Test

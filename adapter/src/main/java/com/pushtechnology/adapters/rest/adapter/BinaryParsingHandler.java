@@ -13,35 +13,35 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.polling;
+package com.pushtechnology.adapters.rest.adapter;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.http.concurrent.FutureCallback;
 
+import com.pushtechnology.adapters.rest.polling.EndpointResponse;
+import com.pushtechnology.diffusion.client.Diffusion;
+import com.pushtechnology.diffusion.datatype.binary.Binary;
+
 /**
- * Handler that parses a response body as {@link String}.
+ * Handler that parses a response body as {@link Binary}.
  *
  * @author Push Technology Limited
  */
-public final class StringParsingHandler implements FutureCallback<EndpointResponse> {
-    private static final Pattern CHARSET_PATTERN = Pattern.compile(".+; charset=(\\S+)");
-    private final FutureCallback<String> delegate;
+public final class BinaryParsingHandler implements FutureCallback<EndpointResponse> {
+    private final FutureCallback<Binary> delegate;
 
     /**
      * Constructor.
      */
-    public StringParsingHandler(FutureCallback<String> delegate) {
+    public BinaryParsingHandler(FutureCallback<Binary> delegate) {
         this.delegate = delegate;
     }
 
     @Override
-    public void completed(EndpointResponse response) {
+    public void completed(EndpointResponse result) {
         try {
-            delegate.completed(new String(response.getResponse(), getResponseCharset(response)));
+            delegate.completed(Diffusion.dataTypes().binary().readValue(result.getResponse()));
         }
         catch (IOException e) {
             delegate.failed(e);
@@ -56,19 +56,5 @@ public final class StringParsingHandler implements FutureCallback<EndpointRespon
     @Override
     public void cancelled() {
         delegate.cancelled();
-    }
-
-    private Charset getResponseCharset(EndpointResponse response) {
-        final String contentType = response.getHeader("content-type");
-        if (contentType != null) {
-            final Matcher matcher = CHARSET_PATTERN.matcher(contentType);
-
-            if (matcher.matches()) {
-                final String charset = matcher.group(1);
-                return Charset.forName(charset);
-            }
-        }
-
-        return Charset.forName("ISO-8859-1");
     }
 }
