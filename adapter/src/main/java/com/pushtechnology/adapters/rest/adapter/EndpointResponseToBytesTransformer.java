@@ -17,44 +17,31 @@ package com.pushtechnology.adapters.rest.adapter;
 
 import java.io.IOException;
 
-import org.apache.http.concurrent.FutureCallback;
-
 import com.pushtechnology.adapters.rest.polling.EndpointResponse;
-import com.pushtechnology.diffusion.client.Diffusion;
-import com.pushtechnology.diffusion.datatype.binary.Binary;
+import com.pushtechnology.diffusion.transform.transformer.TransformationException;
+import com.pushtechnology.diffusion.transform.transformer.Transformer;
 
 /**
- * Handler that parses a response body as {@link Binary}.
+ * Transformer from {@link EndpointResponse} to {@link byte[]}.
  *
  * @author Push Technology Limited
  */
-public final class BinaryParsingHandler implements FutureCallback<EndpointResponse> {
-    private final FutureCallback<Binary> delegate;
-
+/*package*/ final class EndpointResponseToBytesTransformer implements Transformer<EndpointResponse, byte[]> {
     /**
-     * Constructor.
+     * Instance of the transformer.
      */
-    public BinaryParsingHandler(FutureCallback<Binary> delegate) {
-        this.delegate = delegate;
+    static final Transformer<EndpointResponse, byte[]> INSTANCE = new EndpointResponseToBytesTransformer();
+
+    private EndpointResponseToBytesTransformer() {
     }
 
     @Override
-    public void completed(EndpointResponse result) {
+    public byte[] transform(EndpointResponse endpointResponse) throws TransformationException {
         try {
-            delegate.completed(Diffusion.dataTypes().binary().readValue(result.getResponse()));
+            return endpointResponse.getResponse();
         }
         catch (IOException e) {
-            delegate.failed(e);
+            throw new TransformationException(e);
         }
-    }
-
-    @Override
-    public void failed(Exception ex) {
-        delegate.failed(ex);
-    }
-
-    @Override
-    public void cancelled() {
-        delegate.cancelled();
     }
 }

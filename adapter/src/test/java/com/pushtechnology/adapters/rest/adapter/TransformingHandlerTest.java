@@ -15,70 +15,50 @@
 
 package com.pushtechnology.adapters.rest.adapter;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.isA;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import org.apache.http.concurrent.FutureCallback;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 
-import com.pushtechnology.diffusion.datatype.InvalidDataException;
-import com.pushtechnology.diffusion.datatype.json.JSON;
+import com.pushtechnology.diffusion.transform.transformer.TransformationException;
+import com.pushtechnology.diffusion.transform.transformer.Transformer;
+import com.pushtechnology.diffusion.transform.transformer.Transformers;
 
 /**
- * Unit tests for {@link JSONParsingHandler}.
+ * Unit tests for {@link TransformingHandler}.
  *
  * @author Push Technology Limited
  */
-public final class JSONParsingHandlerTest {
+public final class TransformingHandlerTest {
     @Mock
-    private FutureCallback<JSON> delegate;
-    @Captor
-    private ArgumentCaptor<JSON> jsonCaptor;
+    private FutureCallback<String> delegate;
 
-    private FutureCallback<String> handler;
+    private TransformingHandler<String, String> handler;
 
     @Before
     public void setUp() {
         initMocks(this);
 
-        handler = new JSONParsingHandler(delegate);
-    }
-
-    @After
-    public void postConditions() {
-        verifyNoMoreInteractions(delegate);
+        handler = new TransformingHandler<>(Transformers.identity(), delegate);
     }
 
     @Test
     public void completed() {
-        handler.completed("{\"foo\":\"bar\"}");
-        verify(delegate).completed(jsonCaptor.capture());
+        handler.completed("a");
 
-        final JSON json = jsonCaptor.getValue();
-
-        assertEquals("{\"foo\":\"bar\"}", json.toJsonString());
-    }
-
-    @Test
-    public void parsingFailure() {
-        handler.completed("{\"foo\":\"");
-        verify(delegate).failed(isA(InvalidDataException.class));
+        verify(delegate).completed("a");
     }
 
     @Test
     public void failed() {
-        final Exception ex = new Exception("Intentional exception for test");
-        handler.failed(ex);
+        final Exception e = new Exception("Intentionally created for test");
 
-        verify(delegate).failed(ex);
+        handler.failed(e);
+
+        verify(delegate).failed(e);
     }
 
     @Test
@@ -86,5 +66,20 @@ public final class JSONParsingHandlerTest {
         handler.cancelled();
 
         verify(delegate).cancelled();
+    }
+
+    @Test
+    public void completedThrowsException() {
+        final TransformationException e = new TransformationException("Intentionally created for test");
+
+        handler = new TransformingHandler<>(
+            (Transformer<String, String>) value -> {
+                throw e;
+            },
+            delegate);
+
+        handler.completed("a");
+
+        verify(delegate).failed(e);
     }
 }

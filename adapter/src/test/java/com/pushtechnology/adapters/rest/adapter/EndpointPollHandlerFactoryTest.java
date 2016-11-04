@@ -90,7 +90,7 @@ public final class EndpointPollHandlerFactoryTest {
     public void createJson() {
         final FutureCallback<EndpointResponse> callback = pollHandlerFactory.create(serviceConfig, jsonEndpoint);
 
-        assertTrue(callback instanceof StringParsingHandler);
+        assertTrue(callback instanceof TransformingHandler);
         verify(publishingClient).createUpdateContext(serviceConfig, jsonEndpoint, JSON.class);
     }
 
@@ -98,7 +98,7 @@ public final class EndpointPollHandlerFactoryTest {
     public void createBinary() {
         final FutureCallback<EndpointResponse> callback = pollHandlerFactory.create(serviceConfig, binaryEndpoint);
 
-        assertTrue(callback instanceof BinaryParsingHandler);
+        assertTrue(callback instanceof TransformingHandler);
         verify(publishingClient).createUpdateContext(serviceConfig, binaryEndpoint, Binary.class);
     }
 
@@ -106,7 +106,7 @@ public final class EndpointPollHandlerFactoryTest {
     public void createPlainText() {
         final FutureCallback<EndpointResponse> callback = pollHandlerFactory.create(serviceConfig, plainTextEndpoint);
 
-        assertTrue(callback instanceof StringParsingHandler);
+        assertTrue(callback instanceof TransformingHandler);
         verify(publishingClient).createUpdateContext(serviceConfig, plainTextEndpoint, String.class);
     }
 

@@ -15,11 +15,14 @@
 
 package com.pushtechnology.adapters.rest.adapter;
 
+import static com.pushtechnology.diffusion.transform.transformer.Transformers.chain;
+
 import org.apache.http.concurrent.FutureCallback;
 
 import com.pushtechnology.adapters.rest.polling.EndpointResponse;
 import com.pushtechnology.diffusion.datatype.binary.Binary;
 import com.pushtechnology.diffusion.datatype.json.JSON;
+import com.pushtechnology.diffusion.transform.transformer.Transformers;
 
 /**
  * Factory to create parsing handlers.
@@ -33,13 +36,19 @@ public final class ParsingHandlerFactory {
     @SuppressWarnings("unchecked")
     public <T> FutureCallback<EndpointResponse> create(Class<T> type, FutureCallback<T> handler) {
         if (type.equals(JSON.class)) {
-            return new StringParsingHandler(new JSONParsingHandler((FutureCallback<JSON>) handler));
+            return new TransformingHandler<>(
+                chain(EndpointResponseToStringTransformer.INSTANCE, StringToJSONTransformer.INSTANCE),
+                (FutureCallback<JSON>) handler);
         }
         else if (type.equals(Binary.class)) {
-            return new BinaryParsingHandler((FutureCallback<Binary>) handler);
+            return new TransformingHandler<>(
+                chain(EndpointResponseToBytesTransformer.INSTANCE, Transformers.byteArrayToBinary()),
+                (FutureCallback<Binary>) handler);
         }
         else if (type.equals(String.class)) {
-            return new StringParsingHandler((FutureCallback<String>) handler);
+            return new TransformingHandler<>(
+                EndpointResponseToStringTransformer.INSTANCE,
+                (FutureCallback<String>) handler);
         }
         else {
             throw new IllegalArgumentException("Unsupported type \"" + type + "\"");

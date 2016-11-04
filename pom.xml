@@ -192,6 +192,12 @@
             </dependency>
 
             <dependency>
+                <groupId>com.pushtechnology.diffusion.transform</groupId>
+                <artifactId>transformers</artifactId>
+                <version>1.0.0</version>
+            </dependency>
+
+            <dependency>
                 <groupId>com.fasterxml.jackson.dataformat</groupId>
                 <artifactId>jackson-dataformat-cbor</artifactId>
                 <version>${jackson.version}</version>

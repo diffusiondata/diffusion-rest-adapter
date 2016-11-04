@@ -16,88 +16,54 @@
 package com.pushtechnology.adapters.rest.adapter;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.io.IOException;
 
-import org.apache.http.concurrent.FutureCallback;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 
 import com.pushtechnology.adapters.rest.polling.EndpointResponse;
+import com.pushtechnology.diffusion.transform.transformer.TransformationException;
 
 /**
- * Unit tests for {@link StringParsingHandler}.
+ * Unit tests for {@link EndpointResponseToStringTransformer}.
  *
  * @author Push Technology Limited
  */
-public final class StringParsingHandlerTest {
+public final class EndpointResponseToStringTransformerTest {
+    public static final byte[] BYTES = new byte[0];
+
     @Mock
     private EndpointResponse endpointResponse;
-    @Mock
-    private FutureCallback<String> delegate;
-    @Captor
-    private ArgumentCaptor<String> stringCaptor;
-
-    private FutureCallback<EndpointResponse> handler;
 
     @Before
     public void setUp() {
         initMocks(this);
-
-        handler = new StringParsingHandler(delegate);
-    }
-
-    @After
-    public void postConditions() {
-        verifyNoMoreInteractions(delegate);
     }
 
     @Test
-    public void completed() throws IOException {
+    public void testTransformation() throws TransformationException, IOException {
         when(endpointResponse.getHeader("content-type")).thenReturn("text/plain; charset=UTF-8");
         when(endpointResponse.getResponse()).thenReturn("{\"foo\":\"bar\"}".getBytes("UTF-8"));
-
-        handler.completed(endpointResponse);
-        verify(delegate).completed(stringCaptor.capture());
-
-        final String json = stringCaptor.getValue();
-
-        assertEquals("{\"foo\":\"bar\"}", json);
+        final String value = EndpointResponseToStringTransformer.INSTANCE.transform(endpointResponse);
+        assertEquals("{\"foo\":\"bar\"}", value);
     }
 
     @Test
-    public void completedCharsetMissing() throws IOException {
+    public void testTransformationCharsetMissing() throws TransformationException, IOException {
         when(endpointResponse.getHeader("content-type")).thenReturn("text/plain");
         when(endpointResponse.getResponse()).thenReturn("{\"foo\":\"bar\"}".getBytes("ISO-8859-1"));
-
-        handler.completed(endpointResponse);
-        verify(delegate).completed(stringCaptor.capture());
-
-        final String json = stringCaptor.getValue();
-
-        assertEquals("{\"foo\":\"bar\"}", json);
+        final String value = EndpointResponseToStringTransformer.INSTANCE.transform(endpointResponse);
+        assertEquals("{\"foo\":\"bar\"}", value);
     }
 
-    @Test
-    public void failed() {
-        final Exception ex = new Exception("Intentional exception for test");
-        handler.failed(ex);
-
-        verify(delegate).failed(ex);
-    }
-
-    @Test
-    public void cancelled() {
-        handler.cancelled();
-
-        verify(delegate).cancelled();
+    @Test(expected = TransformationException.class)
+    public void testException() throws TransformationException, IOException {
+        doThrow(new IOException("Intentionally thrown by test")).when(endpointResponse).getResponse();
+        EndpointResponseToStringTransformer.INSTANCE.transform(endpointResponse);
     }
 }

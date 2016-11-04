@@ -17,37 +17,37 @@ package com.pushtechnology.adapters.rest.adapter;
 
 import org.apache.http.concurrent.FutureCallback;
 
-import com.pushtechnology.diffusion.client.Diffusion;
-import com.pushtechnology.diffusion.datatype.InvalidDataException;
-import com.pushtechnology.diffusion.datatype.json.JSON;
+import com.pushtechnology.diffusion.transform.transformer.TransformationException;
+import com.pushtechnology.diffusion.transform.transformer.Transformer;
 
 /**
- * Handler that parses a response body as {@link JSON}.
+ * A {@link FutureCallback} that applies a transformer and delegates to another {@link FutureCallback}.
  *
+ * @param <S> the type to transform from
+ * @param <T> the type to transform to
  * @author Push Technology Limited
  */
-public final class JSONParsingHandler implements FutureCallback<String> {
-    private final FutureCallback<JSON> delegate;
+/*package*/ final class TransformingHandler<S, T> implements FutureCallback<S> {
+    private final Transformer<S, T> transformer;
+    private final FutureCallback<T> delegate;
 
     /**
      * Constructor.
      */
-    public JSONParsingHandler(FutureCallback<JSON> delegate) {
+    public TransformingHandler(Transformer<S, T> transformer, FutureCallback<T> delegate) {
+        this.transformer = transformer;
         this.delegate = delegate;
     }
 
     @Override
-    public void completed(String result) {
-        final JSON json;
+    public void completed(S result) {
         try {
-             json = Diffusion.dataTypes().json().fromJsonString(result);
+            final T transformedResult = transformer.transform(result);
+            delegate.completed(transformedResult);
         }
-        catch (InvalidDataException e) {
-            failed(e);
-            return;
+        catch (TransformationException e) {
+            delegate.failed(e);
         }
-
-        delegate.completed(json);
     }
 
     @Override

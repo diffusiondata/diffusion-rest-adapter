@@ -20,44 +20,33 @@ import java.nio.charset.Charset;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.http.concurrent.FutureCallback;
-
 import com.pushtechnology.adapters.rest.polling.EndpointResponse;
+import com.pushtechnology.diffusion.transform.transformer.TransformationException;
+import com.pushtechnology.diffusion.transform.transformer.Transformer;
 
 /**
- * Handler that parses a response body as {@link String}.
+ * Transformer from {@link EndpointResponse} to {@link String}.
  *
  * @author Push Technology Limited
  */
-public final class StringParsingHandler implements FutureCallback<EndpointResponse> {
+/*package*/ final class EndpointResponseToStringTransformer implements Transformer<EndpointResponse, String> {
     private static final Pattern CHARSET_PATTERN = Pattern.compile(".+; charset=(\\S+)");
-    private final FutureCallback<String> delegate;
-
     /**
-     * Constructor.
+     * Instance of the transformer.
      */
-    public StringParsingHandler(FutureCallback<String> delegate) {
-        this.delegate = delegate;
+    static final Transformer<EndpointResponse, String> INSTANCE = new EndpointResponseToStringTransformer();
+
+    private EndpointResponseToStringTransformer() {
     }
 
     @Override
-    public void completed(EndpointResponse response) {
+    public String transform(EndpointResponse response) throws TransformationException {
         try {
-            delegate.completed(new String(response.getResponse(), getResponseCharset(response)));
+            return new String(response.getResponse(), getResponseCharset(response));
         }
         catch (IOException e) {
-            delegate.failed(e);
+            throw new TransformationException(e);
         }
-    }
-
-    @Override
-    public void failed(Exception ex) {
-        delegate.failed(ex);
-    }
-
-    @Override
-    public void cancelled() {
-        delegate.cancelled();
     }
 
     private Charset getResponseCharset(EndpointResponse response) {
