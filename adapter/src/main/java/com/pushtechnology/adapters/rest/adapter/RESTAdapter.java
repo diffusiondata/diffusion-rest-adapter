@@ -243,7 +243,6 @@ public final class RESTAdapter implements AutoCloseable {
             .addComponent(executor)
             .addComponent(serviceListener)
             .addComponent(HttpClientFactoryImpl.class)
-            .addComponent(ParserFactory.class)
             .addComponent(ServiceManager.class);
     }
 

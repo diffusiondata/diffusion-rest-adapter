@@ -13,8 +13,9 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.adapter;
+package com.pushtechnology.adapters.rest.endpoints;
 
+import static com.pushtechnology.adapters.rest.endpoints.EndpointResponseToStringTransformer.INSTANCE;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
@@ -35,7 +36,6 @@ import com.pushtechnology.diffusion.transform.transformer.TransformationExceptio
  * @author Push Technology Limited
  */
 public final class EndpointResponseToStringTransformerTest {
-    public static final byte[] BYTES = new byte[0];
 
     @Mock
     private EndpointResponse endpointResponse;
@@ -49,7 +49,7 @@ public final class EndpointResponseToStringTransformerTest {
     public void testTransformation() throws TransformationException, IOException {
         when(endpointResponse.getHeader("content-type")).thenReturn("text/plain; charset=UTF-8");
         when(endpointResponse.getResponse()).thenReturn("{\"foo\":\"bar\"}".getBytes("UTF-8"));
-        final String value = EndpointResponseToStringTransformer.INSTANCE.transform(endpointResponse);
+        final String value = INSTANCE.transform(endpointResponse);
         assertEquals("{\"foo\":\"bar\"}", value);
     }
 
@@ -57,13 +57,13 @@ public final class EndpointResponseToStringTransformerTest {
     public void testTransformationCharsetMissing() throws TransformationException, IOException {
         when(endpointResponse.getHeader("content-type")).thenReturn("text/plain");
         when(endpointResponse.getResponse()).thenReturn("{\"foo\":\"bar\"}".getBytes("ISO-8859-1"));
-        final String value = EndpointResponseToStringTransformer.INSTANCE.transform(endpointResponse);
+        final String value = INSTANCE.transform(endpointResponse);
         assertEquals("{\"foo\":\"bar\"}", value);
     }
 
     @Test(expected = TransformationException.class)
     public void testException() throws TransformationException, IOException {
         doThrow(new IOException("Intentionally thrown by test")).when(endpointResponse).getResponse();
-        EndpointResponseToStringTransformer.INSTANCE.transform(endpointResponse);
+        INSTANCE.transform(endpointResponse);
     }
 }

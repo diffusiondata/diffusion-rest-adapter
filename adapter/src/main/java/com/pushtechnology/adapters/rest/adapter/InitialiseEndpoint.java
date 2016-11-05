@@ -17,7 +17,7 @@ package com.pushtechnology.adapters.rest.adapter;
 
 import java.util.function.Consumer;
 
-import com.pushtechnology.adapters.rest.model.EndpointType;
+import com.pushtechnology.adapters.rest.endpoints.EndpointType;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.polling.EndpointClient;
@@ -34,7 +34,6 @@ import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
     private final TopicManagementClient topicManagementClient;
     private final ServiceConfig service;
     private final ServiceSession serviceSession;
-    private final ParserFactory parserFactory;
 
     /**
      * Constructor.
@@ -43,14 +42,12 @@ import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
             EndpointClient endpointClient,
             TopicManagementClient topicManagementClient,
             ServiceConfig service,
-            ServiceSession serviceSession,
-            ParserFactory parserFactory) {
+            ServiceSession serviceSession) {
 
         this.endpointClient = endpointClient;
         this.topicManagementClient = topicManagementClient;
         this.service = service;
         this.serviceSession = serviceSession;
-        this.parserFactory = parserFactory;
     }
 
     @Override
@@ -70,7 +67,7 @@ import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
                         .produces(endpointType.getIdentifier())
                         .build();
                     return new TransformingHandler<>(
-                        parserFactory.create(endpointType.getValueType()),
+                        endpointType.getParser(),
                         new AddTopicForEndpoint<>(
                             topicManagementClient,
                             service,
@@ -79,14 +76,13 @@ import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
                 }));
         }
         else {
-            final Class<?> type = EndpointType.from(produces).getValueType();
             endpointClient.request(
                 service,
                 endpointConfig,
                 new ValidateContentType(
                     endpointConfig,
                     new TransformingHandler<>(
-                        parserFactory.create(type),
+                        EndpointType.from(produces).getParser(),
                         new AddTopicForEndpoint<>(
                             topicManagementClient,
                             service,

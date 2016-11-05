@@ -13,35 +13,53 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.adapter;
+package com.pushtechnology.adapters.rest.endpoints;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.pushtechnology.adapters.rest.polling.EndpointResponse;
 import com.pushtechnology.diffusion.transform.transformer.TransformationException;
 import com.pushtechnology.diffusion.transform.transformer.Transformer;
 
 /**
- * Transformer from {@link EndpointResponse} to {@link byte[]}.
+ * Transformer from {@link EndpointResponse} to {@link String}.
  *
  * @author Push Technology Limited
  */
-/*package*/ final class EndpointResponseToBytesTransformer implements Transformer<EndpointResponse, byte[]> {
+/*package*/ final class EndpointResponseToStringTransformer implements Transformer<EndpointResponse, String> {
+    private static final Pattern CHARSET_PATTERN = Pattern.compile(".+; charset=(\\S+)");
     /**
      * Instance of the transformer.
      */
-    static final Transformer<EndpointResponse, byte[]> INSTANCE = new EndpointResponseToBytesTransformer();
+    static final Transformer<EndpointResponse, String> INSTANCE = new EndpointResponseToStringTransformer();
 
-    private EndpointResponseToBytesTransformer() {
+    private EndpointResponseToStringTransformer() {
     }
 
     @Override
-    public byte[] transform(EndpointResponse endpointResponse) throws TransformationException {
+    public String transform(EndpointResponse response) throws TransformationException {
         try {
-            return endpointResponse.getResponse();
+            return new String(response.getResponse(), getResponseCharset(response));
         }
         catch (IOException e) {
             throw new TransformationException(e);
         }
+    }
+
+    private Charset getResponseCharset(EndpointResponse response) {
+        final String contentType = response.getHeader("content-type");
+        if (contentType != null) {
+            final Matcher matcher = CHARSET_PATTERN.matcher(contentType);
+
+            if (matcher.matches()) {
+                final String charset = matcher.group(1);
+                return Charset.forName(charset);
+            }
+        }
+
+        return Charset.forName("ISO-8859-1");
     }
 }

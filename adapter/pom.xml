@@ -38,8 +38,8 @@
         </dependency>
 
         <dependency>
-            <groupId>com.pushtechnology.diffusion.transform</groupId>
-            <artifactId>transformers</artifactId>
+            <groupId>com.pushtechnology.adapters.rest</groupId>
+            <artifactId>endpoints</artifactId>
         </dependency>
 
         <dependency>

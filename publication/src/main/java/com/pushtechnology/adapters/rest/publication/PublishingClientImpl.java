@@ -114,7 +114,7 @@ public final class PublishingClientImpl implements PublishingClient {
     public <T> UpdateContext<T> createUpdateContext(
             ServiceConfig serviceConfig,
             EndpointConfig endpointConfig,
-            Class<T> type) {
+            Class<?> type) {
 
         final UpdaterSet updaterSet = updaters.get(serviceConfig);
         if (updaterSet == null) {

@@ -17,7 +17,7 @@ package com.pushtechnology.adapters.rest.adapter;
 
 import org.apache.http.concurrent.FutureCallback;
 
-import com.pushtechnology.adapters.rest.model.EndpointType;
+import com.pushtechnology.adapters.rest.endpoints.EndpointType;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.polling.EndpointPollHandlerFactory;
@@ -31,27 +31,22 @@ import com.pushtechnology.adapters.rest.publication.PublishingClient;
  */
 public final class EndpointPollHandlerFactoryImpl implements EndpointPollHandlerFactory {
     private final PublishingClient publishingClient;
-    private final ParserFactory parserFactory;
 
     /**
      * Constructor.
      */
-    public EndpointPollHandlerFactoryImpl(
-            PublishingClient publishingClient,
-            ParserFactory parserFactory) {
+    public EndpointPollHandlerFactoryImpl(PublishingClient publishingClient) {
         this.publishingClient = publishingClient;
-        this.parserFactory = parserFactory;
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public FutureCallback<EndpointResponse> create(ServiceConfig serviceConfig, EndpointConfig endpointConfig) {
         final EndpointType endpointType = EndpointType.from(endpointConfig.getProduces());
-        final Class valueType = endpointType.getValueType();
         return new TransformingHandler<>(
-            parserFactory.create(valueType),
+            endpointType.getParser(),
             new PublicationHandler<>(
                 endpointConfig,
-                publishingClient.createUpdateContext(serviceConfig, endpointConfig, valueType)));
+                publishingClient.createUpdateContext(serviceConfig, endpointConfig, endpointType.getValueType())));
     }
 }

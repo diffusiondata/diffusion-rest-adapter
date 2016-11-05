@@ -77,8 +77,7 @@ public final class ServiceSessionStarterImplTest {
             topicManagementClient,
             endpointClient,
             publishingClient,
-            serviceListener,
-            new ParserFactory());
+            serviceListener);
 
         when(publishingClient.addService(serviceConfig)).thenReturn(source);
         when(source.onStandby(isA(Runnable.class))).thenReturn(source);

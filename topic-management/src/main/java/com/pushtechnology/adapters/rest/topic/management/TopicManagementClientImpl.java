@@ -17,7 +17,7 @@ package com.pushtechnology.adapters.rest.topic.management;
 
 import java.nio.charset.Charset;
 
-import com.pushtechnology.adapters.rest.model.EndpointType;
+import com.pushtechnology.adapters.rest.endpoints.EndpointType;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.diffusion.client.Diffusion;

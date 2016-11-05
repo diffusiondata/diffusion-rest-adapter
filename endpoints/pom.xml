@@ -9,22 +9,22 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>topic-management</artifactId>
+    <artifactId>endpoints</artifactId>
 
     <dependencies>
         <dependency>
+            <groupId>com.pushtechnology.adapters.rest</groupId>
+            <artifactId>polling</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.pushtechnology.diffusion.transform</groupId>
+            <artifactId>transformers</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>com.pushtechnology.diffusion</groupId>
             <artifactId>diffusion-client</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.pushtechnology.adapters.rest</groupId>
-            <artifactId>endpoints</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.pushtechnology.adapters.rest</groupId>
-            <artifactId>configuration-model</artifactId>
         </dependency>
 
         <dependency>
@@ -38,11 +38,4 @@
         </dependency>
     </dependencies>
 
-    <build>
-        <plugins>
-            <plugin>
-                <artifactId>maven-pmd-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
 </project>

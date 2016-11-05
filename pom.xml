@@ -23,6 +23,7 @@
         <module>configuration-model-conversion</module>
         <module>configuration-persistence</module>
         <module>configuration-store</module>
+        <module>endpoints</module>
         <module>polling</module>
         <module>publication</module>
         <module>session-management</module>
@@ -95,6 +96,12 @@
             <dependency>
                 <groupId>com.pushtechnology.adapters.rest</groupId>
                 <artifactId>diffusion-rest-adapter-integrated-server</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.pushtechnology.adapters.rest</groupId>
+                <artifactId>endpoints</artifactId>
                 <version>${project.version}</version>
             </dependency>
 

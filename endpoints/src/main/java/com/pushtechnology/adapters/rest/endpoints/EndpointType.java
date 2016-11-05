@@ -13,16 +13,20 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.model;
+package com.pushtechnology.adapters.rest.endpoints;
 
+import static com.pushtechnology.diffusion.transform.transformer.Transformers.chain;
 import static java.util.Arrays.asList;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.pushtechnology.adapters.rest.polling.EndpointResponse;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
 import com.pushtechnology.diffusion.datatype.binary.Binary;
+import com.pushtechnology.diffusion.transform.transformer.Transformer;
+import com.pushtechnology.diffusion.transform.transformer.Transformers;
 
 /**
  * The supported endpoint types that can be processed by the adapter.
@@ -30,33 +34,61 @@ import com.pushtechnology.diffusion.datatype.binary.Binary;
  * @author Push Technology Limited
  */
 public enum EndpointType {
-    JSON(asList("json", "application/json", "text/json"), TopicType.JSON, com.pushtechnology.diffusion.datatype.json.JSON.class) {
+    /**
+     * Endpoint type for JSON endpoints.
+     */
+    JSON(
+        asList("json", "application/json", "text/json"),
+        TopicType.JSON,
+        com.pushtechnology.diffusion.datatype.json.JSON.class,
+        chain(
+            EndpointResponseToStringTransformer.INSTANCE,
+            StringToJSONTransformer.INSTANCE)) {
+
         @Override
         public boolean canHandle(String contentType) {
             return contentType != null &&
                 (contentType.startsWith("application/json") || contentType.startsWith("text/json"));
         }
     },
-    PLAIN_TEXT(asList("string", "text/plain"), TopicType.BINARY, String.class) {
+    /**
+     * Endpoint type for text endpoints.
+     */
+    PLAIN_TEXT(
+        asList("string", "text/plain"),
+        TopicType.BINARY,
+        String.class,
+        chain(
+            EndpointResponseToBytesTransformer.INSTANCE,
+            Transformers.byteArrayToBinary())) {
+
         @Override
         public boolean canHandle(String contentType) {
             return contentType != null && (contentType.startsWith("text/plain") || JSON.canHandle(contentType));
         }
     },
-    BINARY(asList("binary", "application/octet-stream"), TopicType.BINARY, Binary.class) {
+    /**
+     * Endpoint type for Binary endpoints.
+     */
+    BINARY(
+        asList("binary", "application/octet-stream"),
+        TopicType.BINARY,
+        Binary.class,
+        EndpointResponseToStringTransformer.INSTANCE) {
+
         @Override
         public boolean canHandle(String contentType) {
             return true;
         }
     };
 
-    private static final Map<String, EndpointType> identifierLookup = new HashMap<>();
+    private static final Map<String, EndpointType> IDENTIFIER_LOOKUP = new HashMap<>();
 
     static {
         for (EndpointType type : EndpointType.values()) {
             type.identifiers
                 .stream()
-                .map(identifier -> identifierLookup.putIfAbsent(identifier, type))
+                .map(identifier -> IDENTIFIER_LOOKUP.putIfAbsent(identifier, type))
                 .filter(current -> current != null)
                 .forEach(result -> {
                     throw new IllegalStateException(
@@ -68,11 +100,21 @@ public enum EndpointType {
     private final Collection<String> identifiers;
     private final TopicType topicType;
     private final Class<?> valueType;
+    private final Transformer<EndpointResponse, ?> parser;
 
-    EndpointType(Collection<String> identifiers, TopicType topicType, Class<?> valueType) {
+    /**
+     * Constructor.
+     */
+    EndpointType(
+            Collection<String> identifiers,
+            TopicType topicType,
+            Class<?> valueType,
+            Transformer<EndpointResponse, ?> parser) {
+
         this.identifiers = identifiers;
         this.topicType = topicType;
         this.valueType = valueType;
+        this.parser = parser;
     }
 
     /**
@@ -97,6 +139,13 @@ public enum EndpointType {
     }
 
     /**
+     * @return parser for endpoints
+     */
+    public Transformer<EndpointResponse, ?> getParser() {
+        return parser;
+    }
+
+    /**
      * @return if the content type if valid for the endpoint type
      */
     public abstract boolean canHandle(String contentType);
@@ -106,7 +155,7 @@ public enum EndpointType {
      * @throws IllegalArgumentException if the endpoint type is unknown
      */
     public static EndpointType from(String identifier) {
-        final EndpointType endpointType = identifierLookup.get(identifier);
+        final EndpointType endpointType = IDENTIFIER_LOOKUP.get(identifier);
         if (endpointType == null) {
             throw new IllegalArgumentException("Unknown endpoint type " + identifier);
         }

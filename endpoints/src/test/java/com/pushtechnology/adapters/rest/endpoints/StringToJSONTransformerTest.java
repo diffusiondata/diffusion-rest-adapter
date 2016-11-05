@@ -13,31 +13,26 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.adapter;
+package com.pushtechnology.adapters.rest.endpoints;
 
-import static org.junit.Assert.assertSame;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.when;
+import static com.pushtechnology.adapters.rest.endpoints.StringToJSONTransformer.INSTANCE;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.io.IOException;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
 
-import com.pushtechnology.adapters.rest.polling.EndpointResponse;
+import com.pushtechnology.diffusion.datatype.json.JSON;
 import com.pushtechnology.diffusion.transform.transformer.TransformationException;
 
 /**
- * Unit tests for {@link EndpointResponseToBytesTransformer}.
+ * Unit tests for {@link StringToJSONTransformer}.
  *
  * @author Push Technology Limited
  */
-public final class EndpointResponseToBytesTransformerTest {
-    public static final byte[] BYTES = new byte[0];
-    @Mock
-    private EndpointResponse endpointResponse;
+public final class StringToJSONTransformerTest {
 
     @Before
     public void setUp() {
@@ -46,14 +41,12 @@ public final class EndpointResponseToBytesTransformerTest {
 
     @Test
     public void testTransformation() throws TransformationException, IOException {
-        when(endpointResponse.getResponse()).thenReturn(BYTES);
-        final byte[] value = EndpointResponseToBytesTransformer.INSTANCE.transform(endpointResponse);
-        assertSame(BYTES, value);
+        final JSON value = INSTANCE.transform("{\"foo\":\"bar\"}");
+        assertEquals("{\"foo\":\"bar\"}", value.toJsonString());
     }
 
     @Test(expected = TransformationException.class)
-    public void testException() throws TransformationException, IOException {
-        doThrow(new IOException("Intentionally thrown by test")).when(endpointResponse).getResponse();
-        EndpointResponseToBytesTransformer.INSTANCE.transform(endpointResponse);
+    public void parsingFailure() throws TransformationException {
+        INSTANCE.transform("{\"foo\":\"");
     }
 }

@@ -19,7 +19,7 @@ import java.util.function.Function;
 
 import org.apache.http.concurrent.FutureCallback;
 
-import com.pushtechnology.adapters.rest.model.EndpointType;
+import com.pushtechnology.adapters.rest.endpoints.EndpointType;
 import com.pushtechnology.adapters.rest.polling.EndpointResponse;
 
 /**

@@ -59,5 +59,5 @@ public interface PublishingClient {
     <T> UpdateContext<T> createUpdateContext(
         ServiceConfig serviceConfig,
         EndpointConfig endpointConfig,
-        Class<T> type);
+        Class<?> type);
 }

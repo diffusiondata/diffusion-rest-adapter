@@ -13,25 +13,32 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.adapter;
+package com.pushtechnology.adapters.rest.endpoints;
 
-import static org.junit.Assert.assertEquals;
+import static com.pushtechnology.adapters.rest.endpoints.EndpointResponseToBytesTransformer.INSTANCE;
+import static org.junit.Assert.assertSame;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.io.IOException;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
 
-import com.pushtechnology.diffusion.datatype.json.JSON;
+import com.pushtechnology.adapters.rest.polling.EndpointResponse;
 import com.pushtechnology.diffusion.transform.transformer.TransformationException;
 
 /**
- * Unit tests for {@link StringToJSONTransformer}.
+ * Unit tests for {@link EndpointResponseToBytesTransformer}.
  *
  * @author Push Technology Limited
  */
-public final class StringToJSONTransformerTest {
+public final class EndpointResponseToBytesTransformerTest {
+    public static final byte[] BYTES = new byte[0];
+    @Mock
+    private EndpointResponse endpointResponse;
 
     @Before
     public void setUp() {
@@ -40,12 +47,14 @@ public final class StringToJSONTransformerTest {
 
     @Test
     public void testTransformation() throws TransformationException, IOException {
-        final JSON value = StringToJSONTransformer.INSTANCE.transform("{\"foo\":\"bar\"}");
-        assertEquals("{\"foo\":\"bar\"}", value.toJsonString());
+        when(endpointResponse.getResponse()).thenReturn(BYTES);
+        final byte[] value = INSTANCE.transform(endpointResponse);
+        assertSame(BYTES, value);
     }
 
     @Test(expected = TransformationException.class)
-    public void parsingFailure() throws TransformationException {
-        StringToJSONTransformer.INSTANCE.transform("{\"foo\":\"");
+    public void testException() throws TransformationException, IOException {
+        doThrow(new IOException("Intentionally thrown by test")).when(endpointResponse).getResponse();
+        INSTANCE.transform(endpointResponse);
     }
 }

@@ -13,7 +13,7 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.adapter;
+package com.pushtechnology.adapters.rest.endpoints;
 
 import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.datatype.InvalidDataException;

@@ -13,7 +13,7 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.model;
+package com.pushtechnology.adapters.rest.endpoints;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
