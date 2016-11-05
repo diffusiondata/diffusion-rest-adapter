@@ -35,7 +35,7 @@ public final class ServiceSessionStarterImpl implements ServiceSessionStarter {
     private final EndpointClient endpointClient;
     private final PublishingClient publishingClient;
     private final ServiceListener serviceListener;
-    private final ParsingHandlerFactory parsingHandlerFactory;
+    private final ParserFactory parserFactory;
 
     /**
      * Constructor.
@@ -45,12 +45,12 @@ public final class ServiceSessionStarterImpl implements ServiceSessionStarter {
             EndpointClient endpointClient,
             PublishingClient publishingClient,
             ServiceListener serviceListener,
-            ParsingHandlerFactory parsingHandlerFactory) {
+            ParserFactory parserFactory) {
         this.topicManagementClient = topicManagementClient;
         this.endpointClient = endpointClient;
         this.publishingClient = publishingClient;
         this.serviceListener = serviceListener;
-        this.parsingHandlerFactory = parsingHandlerFactory;
+        this.parserFactory = parserFactory;
     }
 
     @Override
@@ -72,7 +72,7 @@ public final class ServiceSessionStarterImpl implements ServiceSessionStarter {
                         topicManagementClient,
                         serviceConfig,
                         serviceSession,
-                        parsingHandlerFactory));
+                        parserFactory));
                 serviceSession.start();
             })
             .onClose(() -> {

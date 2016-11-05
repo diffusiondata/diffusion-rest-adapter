@@ -78,7 +78,7 @@ public final class EndpointPollHandlerFactoryTest {
     public void setUp() {
         initMocks(this);
 
-        pollHandlerFactory = new EndpointPollHandlerFactoryImpl(publishingClient, new ParsingHandlerFactory());
+        pollHandlerFactory = new EndpointPollHandlerFactoryImpl(publishingClient, new ParserFactory());
     }
 
     @After

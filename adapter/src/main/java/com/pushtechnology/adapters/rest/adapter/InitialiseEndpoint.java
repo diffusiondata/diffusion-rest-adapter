@@ -34,7 +34,7 @@ import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
     private final TopicManagementClient topicManagementClient;
     private final ServiceConfig service;
     private final ServiceSession serviceSession;
-    private final ParsingHandlerFactory parsingHandlerFactory;
+    private final ParserFactory parserFactory;
 
     /**
      * Constructor.
@@ -44,13 +44,13 @@ import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
             TopicManagementClient topicManagementClient,
             ServiceConfig service,
             ServiceSession serviceSession,
-            ParsingHandlerFactory parsingHandlerFactory) {
+            ParserFactory parserFactory) {
 
         this.endpointClient = endpointClient;
         this.topicManagementClient = topicManagementClient;
         this.service = service;
         this.serviceSession = serviceSession;
-        this.parsingHandlerFactory = parsingHandlerFactory;
+        this.parserFactory = parserFactory;
     }
 
     @Override
@@ -69,12 +69,13 @@ import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
                         .url(endpointConfig.getUrl())
                         .produces(endpointType.getIdentifier())
                         .build();
-                    return parsingHandlerFactory.create(endpointType.getValueType(),
+                    return new TransformingHandler<>(
+                        parserFactory.create(endpointType.getValueType()),
                         new AddTopicForEndpoint<>(
                             topicManagementClient,
                             service,
                             inferredEndpointConfig,
-                            new AddEndpointToServiceSession(inferredEndpointConfig, serviceSession)));
+                            new AddEndpointToServiceSession(endpointConfig, serviceSession)));
                 }));
         }
         else {
@@ -84,7 +85,8 @@ import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
                 endpointConfig,
                 new ValidateContentType(
                     endpointConfig,
-                    parsingHandlerFactory.create(type,
+                    new TransformingHandler<>(
+                        parserFactory.create(type),
                         new AddTopicForEndpoint<>(
                             topicManagementClient,
                             service,

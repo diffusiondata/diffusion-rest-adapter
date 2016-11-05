@@ -31,16 +31,16 @@ import com.pushtechnology.adapters.rest.publication.PublishingClient;
  */
 public final class EndpointPollHandlerFactoryImpl implements EndpointPollHandlerFactory {
     private final PublishingClient publishingClient;
-    private final ParsingHandlerFactory parsingHandlerFactory;
+    private final ParserFactory parserFactory;
 
     /**
      * Constructor.
      */
     public EndpointPollHandlerFactoryImpl(
             PublishingClient publishingClient,
-            ParsingHandlerFactory parsingHandlerFactory) {
+            ParserFactory parserFactory) {
         this.publishingClient = publishingClient;
-        this.parsingHandlerFactory = parsingHandlerFactory;
+        this.parserFactory = parserFactory;
     }
 
     @SuppressWarnings("unchecked")
@@ -48,8 +48,8 @@ public final class EndpointPollHandlerFactoryImpl implements EndpointPollHandler
     public FutureCallback<EndpointResponse> create(ServiceConfig serviceConfig, EndpointConfig endpointConfig) {
         final EndpointType endpointType = EndpointType.from(endpointConfig.getProduces());
         final Class valueType = endpointType.getValueType();
-        return parsingHandlerFactory.create(
-            valueType,
+        return new TransformingHandler<>(
+            parserFactory.create(valueType),
             new PublicationHandler<>(
                 endpointConfig,
                 publishingClient.createUpdateContext(serviceConfig, endpointConfig, valueType)));

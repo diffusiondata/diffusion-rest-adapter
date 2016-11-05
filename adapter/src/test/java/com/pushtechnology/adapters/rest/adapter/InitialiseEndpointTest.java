@@ -75,7 +75,7 @@ public final class InitialiseEndpointTest {
             topicManagementClient,
             serviceConfig,
             serviceSession,
-            new ParsingHandlerFactory());
+            new ParserFactory());
     }
 
     @After
