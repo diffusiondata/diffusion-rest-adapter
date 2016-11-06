@@ -23,6 +23,7 @@ import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
+import com.pushtechnology.diffusion.datatype.Bytes;
 
 /**
  * Add topic for an endpoint when a response is successfully received.
@@ -30,7 +31,7 @@ import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
  * @param <T> the value type of the topic to add
  * @author Push Technology Limited
  */
-/*package*/ final class AddTopicForEndpoint<T> implements FutureCallback<T> {
+/*package*/ final class AddTopicForEndpoint<T extends Bytes> implements FutureCallback<T> {
     private static final Logger LOG = LoggerFactory.getLogger(AddTopicForEndpoint.class);
     private final TopicManagementClient topicManagementClient;
     private final ServiceConfig service;

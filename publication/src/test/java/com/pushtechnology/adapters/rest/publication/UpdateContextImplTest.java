@@ -19,7 +19,6 @@ import static com.pushtechnology.adapters.rest.publication.UpdateTopicCallback.I
 import static com.pushtechnology.diffusion.client.session.Session.State.CLOSED_BY_CLIENT;
 import static com.pushtechnology.diffusion.client.session.Session.State.CONNECTED_ACTIVE;
 import static com.pushtechnology.diffusion.client.session.Session.State.RECOVERING_RECONNECT;
-import static java.nio.charset.Charset.forName;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -31,29 +30,30 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 
-import com.pushtechnology.diffusion.client.Diffusion;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
+import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.ValueUpdater;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.datatype.binary.Binary;
 
 /**
- * Unit tests for {@link StringUpdateContext}.
+ * Unit tests for {@link UpdateContextImpl}.
  *
  * @author Push Technology Limited
  */
-public final class StringUpdateContextTest {
+public final class UpdateContextImplTest {
     @Mock
     private Session session;
     @Mock
-    private TopicUpdateControl.ValueUpdater<Binary> updater;
+    private ValueUpdater<Binary> updater;
+    @Mock
+    private Binary binary;
 
-    private StringUpdateContext updateContext;
+    private UpdateContextImpl<Binary> updateContext;
 
     @Before
     public void setUp() {
         initMocks(this);
 
-        updateContext = new StringUpdateContext(session, updater, "a/topic");
+        updateContext = new UpdateContextImpl<>(session, updater, "a/topic");
     }
 
     @After
@@ -64,34 +64,22 @@ public final class StringUpdateContextTest {
     @Test
     public void testPublish() {
         when(session.getState()).thenReturn(CONNECTED_ACTIVE);
-        updateContext.publish("hello");
+        updateContext.publish(binary);
 
         verify(session).getState();
-        verify(updater).update(
-            "a/topic",
-            Diffusion.dataTypes().binary().readValue("hello".getBytes(forName("UTF-8"))),
-            "a/topic",
-            INSTANCE);
+        verify(updater).update("a/topic", binary, "a/topic", INSTANCE);
     }
 
     @Test
     public void testRecovery() {
         when(session.getState()).thenReturn(RECOVERING_RECONNECT);
-        updateContext.publish("hello");
-        verify(updater, never()).update(
-            "a/topic",
-            Diffusion.dataTypes().binary().readValue("hello".getBytes(forName("UTF-8"))),
-            "a/topic",
-            INSTANCE);
+        updateContext.publish(binary);
+        verify(updater, never()).update("a/topic", binary, "a/topic", INSTANCE);
 
         updateContext.onSessionStateChanged(session, RECOVERING_RECONNECT, CONNECTED_ACTIVE);
 
         verify(session).getState();
-        verify(updater).update(
-            "a/topic",
-            Diffusion.dataTypes().binary().readValue("hello".getBytes(forName("UTF-8"))),
-            "a/topic",
-            INSTANCE);
+        verify(updater).update("a/topic", binary, "a/topic", INSTANCE);
     }
 
     @Test(expected = IllegalStateException.class)
@@ -99,7 +87,7 @@ public final class StringUpdateContextTest {
         when(session.getState()).thenReturn(CLOSED_BY_CLIENT);
 
         try {
-            updateContext.publish("hello");
+            updateContext.publish(binary);
         }
         finally {
             verify(session).getState();

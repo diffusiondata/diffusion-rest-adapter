@@ -15,11 +15,14 @@
 
 package com.pushtechnology.adapters.rest.publication;
 
+import static com.pushtechnology.adapters.rest.publication.UpdateTopicCallback.INSTANCE;
+
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.ValueUpdater;
 import com.pushtechnology.diffusion.client.session.Session;
 
 /**
@@ -28,13 +31,20 @@ import com.pushtechnology.diffusion.client.session.Session;
  * @param <T> The type of updates the context accepts
  * @author Push Technology Limited
  */
-/*package*/ abstract class AbstractUpdateContext<T> implements UpdateContext<T>, Session.Listener {
-    private static final Logger LOG = LoggerFactory.getLogger(AbstractUpdateContext.class);
+/*package*/ final class UpdateContextImpl<T> implements UpdateContext<T>, Session.Listener {
+    private static final Logger LOG = LoggerFactory.getLogger(UpdateContextImpl.class);
     private AtomicReference<T> cachedValue = new AtomicReference<>(null);
     private final Session session;
+    private final ValueUpdater<T> updater;
+    private final String topicPath;
 
-    protected AbstractUpdateContext(Session session) {
+    /**
+     * Constructor.
+     */
+    UpdateContextImpl(Session session, ValueUpdater<T> updater, String topicPath) {
         this.session = session;
+        this.updater = updater;
+        this.topicPath = topicPath;
     }
 
     @Override
@@ -43,7 +53,7 @@ import com.pushtechnology.diffusion.client.session.Session;
             final T value = cachedValue.getAndSet(null);
             if (value != null) {
                 LOG.debug("Publishing cached value on recovery");
-                publishValue(value);
+                updater.update(topicPath, value, topicPath, INSTANCE);
             }
         }
     }
@@ -60,12 +70,6 @@ import com.pushtechnology.diffusion.client.session.Session;
             return;
         }
 
-        publishValue(value);
+        updater.update(topicPath, value, topicPath, INSTANCE);
     }
-
-    /**
-     * Publish the provided value to Diffusion.
-     * @param value the value
-     */
-    protected abstract void publishValue(T value);
 }

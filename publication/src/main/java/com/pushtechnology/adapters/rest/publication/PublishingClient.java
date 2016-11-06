@@ -19,8 +19,8 @@ import java.util.concurrent.CompletableFuture;
 
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.diffusion.datatype.binary.Binary;
-import com.pushtechnology.diffusion.datatype.json.JSON;
+import com.pushtechnology.diffusion.client.topics.details.TopicType;
+import com.pushtechnology.diffusion.datatype.Bytes;
 
 /**
  * Publishing client to update Diffusion.
@@ -39,25 +39,10 @@ public interface PublishingClient {
     CompletableFuture<ServiceConfig> removeService(ServiceConfig serviceConfig);
 
     /**
-     * Update the topic associated with an endpoint.
-     */
-    void publish(ServiceConfig serviceConfig, EndpointConfig endpointConfig, JSON json);
-
-    /**
-     * Update the topic associated with an endpoint.
-     */
-    void publish(ServiceConfig serviceConfig, EndpointConfig endpointConfig, Binary binary);
-
-    /**
-     * Update the topic associated with an endpoint.
-     */
-    void publish(ServiceConfig serviceConfig, EndpointConfig endpointConfig, String value);
-
-    /**
      * Create an update context.
      */
-    <T> UpdateContext<T> createUpdateContext(
+    <T extends Bytes> UpdateContext<T> createUpdateContext(
         ServiceConfig serviceConfig,
         EndpointConfig endpointConfig,
-        Class<?> type);
+        TopicType topicType);
 }

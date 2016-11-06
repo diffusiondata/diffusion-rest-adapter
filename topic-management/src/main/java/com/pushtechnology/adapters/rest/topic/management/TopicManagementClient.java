@@ -18,6 +18,7 @@ package com.pushtechnology.adapters.rest.topic.management;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.AddCallback;
+import com.pushtechnology.diffusion.datatype.Bytes;
 
 /**
  * Topic management client for Diffusion server.
@@ -45,9 +46,9 @@ public interface TopicManagementClient {
      * @param initialValue the initial value of the topic
      * @param callback callback for completion. The onTopicAddFailed with the reason EXISTS.
      */
-    <V> void addEndpoint(
+    void addEndpoint(
         ServiceConfig serviceConfig,
         EndpointConfig endpointConfig,
-        V initialValue,
+        Bytes initialValue,
         AddCallback callback);
 }

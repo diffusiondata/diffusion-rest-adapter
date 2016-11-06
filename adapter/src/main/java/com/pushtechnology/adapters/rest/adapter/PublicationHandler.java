@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.publication.UpdateContext;
+import com.pushtechnology.diffusion.datatype.Bytes;
 
 /**
  * Handler for a poll request that publishes the response using a {@link UpdateContext}.
@@ -28,7 +29,7 @@ import com.pushtechnology.adapters.rest.publication.UpdateContext;
  * @param <T> the type of values it publishes
  * @author Push Technology Limited
  */
-/*package*/ final class PublicationHandler<T> implements FutureCallback<T> {
+/*package*/ final class PublicationHandler<T extends Bytes> implements FutureCallback<T> {
     private static final Logger LOG = LoggerFactory.getLogger(PublicationHandler.class);
     private final EndpointConfig endpointConfig;
     private final UpdateContext<T> updateContext;

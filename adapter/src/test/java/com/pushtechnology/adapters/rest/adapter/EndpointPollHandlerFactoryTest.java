@@ -15,6 +15,8 @@
 
 package com.pushtechnology.adapters.rest.adapter;
 
+import static com.pushtechnology.diffusion.client.topics.details.TopicType.BINARY;
+import static com.pushtechnology.diffusion.client.topics.details.TopicType.JSON;
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
@@ -32,8 +34,6 @@ import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.polling.EndpointResponse;
 import com.pushtechnology.adapters.rest.polling.PollHandlerFactory;
 import com.pushtechnology.adapters.rest.publication.PublishingClient;
-import com.pushtechnology.diffusion.datatype.binary.Binary;
-import com.pushtechnology.diffusion.datatype.json.JSON;
 
 /**
  * Unit tests for {@link EndpointPollHandlerFactoryImpl}.
@@ -91,7 +91,7 @@ public final class EndpointPollHandlerFactoryTest {
         final FutureCallback<EndpointResponse> callback = pollHandlerFactory.create(serviceConfig, jsonEndpoint);
 
         assertTrue(callback instanceof TransformingHandler);
-        verify(publishingClient).createUpdateContext(serviceConfig, jsonEndpoint, JSON.class);
+        verify(publishingClient).createUpdateContext(serviceConfig, jsonEndpoint, JSON);
     }
 
     @Test
@@ -99,7 +99,7 @@ public final class EndpointPollHandlerFactoryTest {
         final FutureCallback<EndpointResponse> callback = pollHandlerFactory.create(serviceConfig, binaryEndpoint);
 
         assertTrue(callback instanceof TransformingHandler);
-        verify(publishingClient).createUpdateContext(serviceConfig, binaryEndpoint, Binary.class);
+        verify(publishingClient).createUpdateContext(serviceConfig, binaryEndpoint, BINARY);
     }
 
     @Test
@@ -107,7 +107,7 @@ public final class EndpointPollHandlerFactoryTest {
         final FutureCallback<EndpointResponse> callback = pollHandlerFactory.create(serviceConfig, plainTextEndpoint);
 
         assertTrue(callback instanceof TransformingHandler);
-        verify(publishingClient).createUpdateContext(serviceConfig, plainTextEndpoint, String.class);
+        verify(publishingClient).createUpdateContext(serviceConfig, plainTextEndpoint, BINARY);
     }
 
     @Test(expected = IllegalArgumentException.class)

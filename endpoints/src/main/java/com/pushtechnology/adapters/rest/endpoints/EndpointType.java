@@ -15,7 +15,9 @@
 
 package com.pushtechnology.adapters.rest.endpoints;
 
+import static com.pushtechnology.diffusion.transform.transformer.Transformers.byteArrayToBinary;
 import static com.pushtechnology.diffusion.transform.transformer.Transformers.chain;
+import static com.pushtechnology.diffusion.transform.transformer.Transformers.toSuperClass;
 import static java.util.Arrays.asList;
 
 import java.util.Collection;
@@ -24,9 +26,8 @@ import java.util.Map;
 
 import com.pushtechnology.adapters.rest.polling.EndpointResponse;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
-import com.pushtechnology.diffusion.datatype.binary.Binary;
+import com.pushtechnology.diffusion.datatype.Bytes;
 import com.pushtechnology.diffusion.transform.transformer.Transformer;
-import com.pushtechnology.diffusion.transform.transformer.Transformers;
 
 /**
  * The supported endpoint types that can be processed by the adapter.
@@ -40,10 +41,11 @@ public enum EndpointType {
     JSON(
         asList("json", "application/json", "text/json"),
         TopicType.JSON,
-        com.pushtechnology.diffusion.datatype.json.JSON.class,
         chain(
-            EndpointResponseToStringTransformer.INSTANCE,
-            StringToJSONTransformer.INSTANCE)) {
+            chain(
+                EndpointResponseToStringTransformer.INSTANCE,
+                StringToJSONTransformer.INSTANCE),
+            toSuperClass())) {
 
         @Override
         public boolean canHandle(String contentType) {
@@ -57,10 +59,11 @@ public enum EndpointType {
     PLAIN_TEXT(
         asList("string", "text/plain"),
         TopicType.BINARY,
-        String.class,
         chain(
-            EndpointResponseToBytesTransformer.INSTANCE,
-            Transformers.byteArrayToBinary())) {
+            chain(
+                EndpointResponseToStringTransformer.INSTANCE,
+                StringToBinaryTransformer.INSTANCE),
+            toSuperClass())) {
 
         @Override
         public boolean canHandle(String contentType) {
@@ -73,8 +76,11 @@ public enum EndpointType {
     BINARY(
         asList("binary", "application/octet-stream"),
         TopicType.BINARY,
-        Binary.class,
-        EndpointResponseToStringTransformer.INSTANCE) {
+        chain(
+            chain(
+                EndpointResponseToBytesTransformer.INSTANCE,
+                byteArrayToBinary()),
+            toSuperClass())) {
 
         @Override
         public boolean canHandle(String contentType) {
@@ -99,8 +105,7 @@ public enum EndpointType {
 
     private final Collection<String> identifiers;
     private final TopicType topicType;
-    private final Class<?> valueType;
-    private final Transformer<EndpointResponse, ?> parser;
+    private final Transformer<EndpointResponse, Bytes> parser;
 
     /**
      * Constructor.
@@ -108,12 +113,10 @@ public enum EndpointType {
     EndpointType(
             Collection<String> identifiers,
             TopicType topicType,
-            Class<?> valueType,
-            Transformer<EndpointResponse, ?> parser) {
+            Transformer<EndpointResponse, Bytes> parser) {
 
         this.identifiers = identifiers;
         this.topicType = topicType;
-        this.valueType = valueType;
         this.parser = parser;
     }
 
@@ -122,13 +125,6 @@ public enum EndpointType {
      */
     public TopicType getTopicType() {
         return topicType;
-    }
-
-    /**
-     * @return the value type of the endpoint type
-     */
-    public Class<?> getValueType() {
-        return valueType;
     }
 
     /**
@@ -141,7 +137,7 @@ public enum EndpointType {
     /**
      * @return parser for endpoints
      */
-    public Transformer<EndpointResponse, ?> getParser() {
+    public Transformer<EndpointResponse, Bytes> getParser() {
         return parser;
     }
 

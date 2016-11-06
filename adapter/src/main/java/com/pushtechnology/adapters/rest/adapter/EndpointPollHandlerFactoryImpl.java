@@ -47,6 +47,6 @@ public final class EndpointPollHandlerFactoryImpl implements EndpointPollHandler
             endpointType.getParser(),
             new PublicationHandler<>(
                 endpointConfig,
-                publishingClient.createUpdateContext(serviceConfig, endpointConfig, endpointType.getValueType())));
+                publishingClient.createUpdateContext(serviceConfig, endpointConfig, endpointType.getTopicType())));
     }
 }

@@ -15,19 +15,15 @@
 
 package com.pushtechnology.adapters.rest.topic.management;
 
-import java.nio.charset.Charset;
-
 import com.pushtechnology.adapters.rest.endpoints.EndpointType;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.callbacks.TopicTreeHandler;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.AddCallback;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
 import com.pushtechnology.diffusion.datatype.Bytes;
-import com.pushtechnology.diffusion.datatype.binary.BinaryDataType;
 
 /**
  * Topic management client to control Diffusion topic tree.
@@ -35,7 +31,6 @@ import com.pushtechnology.diffusion.datatype.binary.BinaryDataType;
  * @author Push Technology Limited
  */
 public final class TopicManagementClientImpl implements TopicManagementClient {
-    private static final BinaryDataType BINARY_DATA_TYPE = Diffusion.dataTypes().binary();
     private final Session session;
 
     /**
@@ -68,23 +63,11 @@ public final class TopicManagementClientImpl implements TopicManagementClient {
     }
 
     @Override
-    public <V> void addEndpoint(
+    public void addEndpoint(
             ServiceConfig serviceConfig,
             EndpointConfig endpointConfig,
-            V initialValue,
+            Bytes initialValue,
             AddCallback callback) {
-
-        final Bytes value;
-        if (initialValue instanceof String) {
-            final String stringValue = (String) initialValue;
-            value = BINARY_DATA_TYPE.readValue(stringValue.getBytes(Charset.forName("UTF-8")));
-        }
-        else if (initialValue instanceof Bytes) {
-            value = (Bytes) initialValue;
-        }
-        else {
-            throw new IllegalArgumentException("Values of the type " + initialValue.getClass() + " are not supported");
-        }
 
         final String produces = endpointConfig.getProduces();
         final String topicPath = serviceConfig.getTopicRoot() + "/" + endpointConfig.getTopic();
@@ -92,6 +75,6 @@ public final class TopicManagementClientImpl implements TopicManagementClient {
 
         session
             .feature(TopicControl.class)
-            .addTopic(topicPath, topicType, value, new TopicSetupCallback(callback));
+            .addTopic(topicPath, topicType, initialValue, new TopicSetupCallback(callback));
     }
 }

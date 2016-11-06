@@ -170,7 +170,7 @@ public final class TopicManagementClientImplTest {
 
     @Test
     public void addStringEndpointWithValue() {
-        topicManagementClient.addEndpoint(serviceConfig, stringEndpointConfig, "", addCallback);
+        topicManagementClient.addEndpoint(serviceConfig, stringEndpointConfig, binary, addCallback);
 
         verify(topicControl)
             .addTopic(eq("service/stringEndpoint"), eq(TopicType.BINARY), isA(Binary.class), callbackCaptor.capture());
