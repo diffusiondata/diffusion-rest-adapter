@@ -15,6 +15,7 @@
 
 package com.pushtechnology.adapters.rest.model.store;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.verify;
@@ -46,17 +47,19 @@ public final class MutableModelStoreTest {
     private final EndpointConfig endpointConfig = EndpointConfig
         .builder()
         .name("endpoint-0")
-        .topic("topic")
+        .topicPath("topic")
         .url("http://localhost/json")
+        .produces("json")
         .build();
 
     private final ServiceConfig serviceConfig = ServiceConfig
         .builder()
+        .name("service")
         .host("localhost")
         .port(8080)
         .pollPeriod(60000)
         .endpoints(singletonList(endpointConfig))
-        .topicRoot("a")
+        .topicPathRoot("a")
         .build();
 
     private final DiffusionConfig diffusionConfig = DiffusionConfig
@@ -73,7 +76,11 @@ public final class MutableModelStoreTest {
         .services(singletonList(serviceConfig))
         .build();
 
-    private final Model emptyModel = Model.builder().build();
+    private final Model emptyModel = Model
+        .builder()
+        .diffusion(diffusionConfig)
+        .services(emptyList())
+        .build();
 
     private MutableModelStore modelStore;
 

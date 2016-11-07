@@ -57,11 +57,16 @@ public final class ServiceSessionFactoryImplTest {
 
     private final EndpointConfig endpointConfig = EndpointConfig
         .builder()
+        .name("endpoint")
         .url("/a/url")
+        .produces("json")
+        .topicPath("url")
         .build();
     private final ServiceConfig serviceConfig = ServiceConfig
         .builder()
+        .name("service")
         .host("localhost")
+        .topicPathRoot("test")
         .port(80)
         .pollPeriod(5000L)
         .endpoints(singletonList(endpointConfig))

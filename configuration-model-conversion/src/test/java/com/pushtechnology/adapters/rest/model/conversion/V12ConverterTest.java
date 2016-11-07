@@ -1,6 +1,6 @@
 package com.pushtechnology.adapters.rest.model.conversion;
 
-import static com.pushtechnology.adapters.rest.model.conversion.V11Converter.INSTANCE;
+import static com.pushtechnology.adapters.rest.model.conversion.V12Converter.INSTANCE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -10,30 +10,30 @@ import java.util.List;
 
 import org.junit.Test;
 
-import com.pushtechnology.adapters.rest.model.v12.BasicAuthenticationConfig;
-import com.pushtechnology.adapters.rest.model.v12.DiffusionConfig;
-import com.pushtechnology.adapters.rest.model.v12.EndpointConfig;
-import com.pushtechnology.adapters.rest.model.v12.Model;
-import com.pushtechnology.adapters.rest.model.v12.ServiceConfig;
+import com.pushtechnology.adapters.rest.model.latest.BasicAuthenticationConfig;
+import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
+import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
+import com.pushtechnology.adapters.rest.model.latest.Model;
+import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.diffusion.client.session.SessionAttributes;
 
 /**
- * Unit tests for {@link V11Converter}.
+ * Unit tests for {@link V12Converter}.
  *
  * @author Push Technology Limited
  */
-public final class V11ConverterTest {
+public final class V12ConverterTest {
     @Test
     public void testConvert() {
         final Model model = INSTANCE.convert(
-            com.pushtechnology.adapters.rest.model.v11.Model
+            com.pushtechnology.adapters.rest.model.v12.Model
                 .builder()
                 .services(Collections.singletonList(
-                    com.pushtechnology.adapters.rest.model.v11.ServiceConfig
+                    com.pushtechnology.adapters.rest.model.v12.ServiceConfig
                         .builder()
                         .host("localhost")
                         .port(80)
-                        .endpoints(Collections.singletonList(com.pushtechnology.adapters.rest.model.v11.EndpointConfig
+                        .endpoints(Collections.singletonList(com.pushtechnology.adapters.rest.model.v12.EndpointConfig
                             .builder()
                             .name("endpoint")
                             .topic("topic")
@@ -42,9 +42,9 @@ public final class V11ConverterTest {
                             .build()))
                         .pollPeriod(5000)
                         .topicRoot("a")
-                        .security(com.pushtechnology.adapters.rest.model.v11.SecurityConfig
+                        .security(com.pushtechnology.adapters.rest.model.v12.SecurityConfig
                             .builder()
-                            .basic(com.pushtechnology.adapters.rest.model.v11.BasicAuthenticationConfig
+                            .basic(com.pushtechnology.adapters.rest.model.v12.BasicAuthenticationConfig
                                 .builder()
                                 .principal("control")
                                 .credential("password")
@@ -52,7 +52,7 @@ public final class V11ConverterTest {
                             .build())
                         .build()
                 ))
-                .diffusion(com.pushtechnology.adapters.rest.model.v11.DiffusionConfig
+                .diffusion(com.pushtechnology.adapters.rest.model.v12.DiffusionConfig
                     .builder()
                     .host("localhost")
                     .port(8080)
@@ -73,7 +73,7 @@ public final class V11ConverterTest {
         assertEquals(80, service.getPort());
         assertEquals(1, endpoints.size());
         assertEquals(5000, service.getPollPeriod());
-        assertEquals("a", service.getTopicRoot());
+        assertEquals("a", service.getTopicPathRoot());
 
         assertEquals("localhost", diffusion.getHost());
         assertEquals(8080, diffusion.getPort());
@@ -87,12 +87,12 @@ public final class V11ConverterTest {
         assertEquals(SessionAttributes.DEFAULT_RECOVERY_BUFFER_SIZE, diffusion.getRecoveryBufferSize());
 
         assertEquals("endpoint", endpoints.get(0).getName());
-        assertEquals("topic", endpoints.get(0).getTopic());
+        assertEquals("topic", endpoints.get(0).getTopicPath());
         assertEquals("/url", endpoints.get(0).getUrl());
         assertEquals("binary", endpoints.get(0).getProduces());
         assertNotNull(basic);
-        assertEquals("control", basic.getPrincipal());
-        assertEquals("password", basic.getCredential());
+        assertEquals("control", basic.getUserid());
+        assertEquals("password", basic.getPassword());
     }
 
     @Test(expected = IllegalArgumentException.class)

@@ -17,11 +17,12 @@ package com.pushtechnology.adapters.rest.model.latest;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.NonNull;
 import lombok.ToString;
 import lombok.Value;
 
 /**
- * Endpoint configuration. Version 12.
+ * Endpoint configuration. Version 13.
  * <p>
  * Description of a REST endpoint to poll.
  *
@@ -35,17 +36,34 @@ public class EndpointConfig {
     /**
      * The name of the endpoint.
      */
+    @NonNull
     String name;
     /**
      * The URL of the endpoint.
      */
+    @NonNull
     String url;
     /**
-     * The topic to map the endpoint to.
+     * The topic path to map the endpoint to. It is relative to the service
+     * topic path root.
      */
-    String topic;
+    @NonNull
+    String topicPath;
     /**
      * The type of content produced by the endpoint.
+     * <p>
+     * Supports the values:
+     * <ul>
+     *     <li>auto</li>
+     *     <li>json</li>
+     *     <li>application/json</li>
+     *     <li>text/json</li>
+     *     <li>string</li>
+     *     <li>text/plain</li>
+     *     <li>binary</li>
+     *     <li>application/octet-stream</li>
+     * </ul>
      */
+    @NonNull
     String produces;
 }

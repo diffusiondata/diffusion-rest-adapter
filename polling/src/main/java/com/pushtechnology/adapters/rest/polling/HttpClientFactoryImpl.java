@@ -72,7 +72,7 @@ public final class HttpClientFactoryImpl implements HttpClientFactory {
 
     private static Credentials getCredentials(BasicAuthenticationConfig basicAuthenticationConfig) {
         return new UsernamePasswordCredentials(
-            basicAuthenticationConfig.getPrincipal(),
-            basicAuthenticationConfig.getCredential());
+            basicAuthenticationConfig.getUserid(),
+            basicAuthenticationConfig.getPassword());
     }
 }

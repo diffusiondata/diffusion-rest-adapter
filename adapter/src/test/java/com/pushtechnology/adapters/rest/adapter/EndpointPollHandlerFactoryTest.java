@@ -46,29 +46,39 @@ public final class EndpointPollHandlerFactoryTest {
 
     private final EndpointConfig jsonEndpoint = EndpointConfig
         .builder()
+        .name("endpoint-0")
+        .topicPath("path")
         .url("/a/url/json")
         .produces("json")
         .build();
     private final EndpointConfig binaryEndpoint = EndpointConfig
         .builder()
+        .name("endpoint-1")
+        .topicPath("path")
         .url("/a/url/binary")
         .produces("binary")
         .build();
     private final EndpointConfig plainTextEndpoint = EndpointConfig
         .builder()
+        .name("endpoint-2")
+        .topicPath("path")
         .url("/a/url/text")
         .produces("text/plain")
         .build();
     private final EndpointConfig xmlEndpoint = EndpointConfig
         .builder()
+        .name("endpoint-3")
+        .topicPath("path")
         .url("/a/url/text")
         .produces("text/xml")
         .build();
     private final ServiceConfig serviceConfig = ServiceConfig
         .builder()
+        .name("service")
         .host("localhost")
         .port(80)
         .pollPeriod(5000L)
+        .topicPathRoot("topic")
         .endpoints(asList(jsonEndpoint, binaryEndpoint, plainTextEndpoint, xmlEndpoint))
         .build();
 

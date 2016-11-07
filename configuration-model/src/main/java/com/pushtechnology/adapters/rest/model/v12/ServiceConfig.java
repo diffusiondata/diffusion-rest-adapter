@@ -13,18 +13,16 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.model.latest;
+package com.pushtechnology.adapters.rest.model.v12;
 
 import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.NonNull;
-import lombok.ToString;
 import lombok.Value;
 
 /**
- * Service configuration. Version 13.
+ * Service configuration. Version 12.
  * <p>
  * Description of a REST service to poll.
  *
@@ -37,13 +35,11 @@ public class ServiceConfig {
     /**
      * The name of the service.
      */
-    @NonNull
     String name;
 
     /**
      * The host of the service.
      */
-    @NonNull
     String host;
 
     /**
@@ -59,7 +55,6 @@ public class ServiceConfig {
     /**
      * The endpoints the service makes available.
      */
-    @NonNull
     List<EndpointConfig> endpoints;
 
     /**
@@ -68,10 +63,9 @@ public class ServiceConfig {
     long pollPeriod;
 
     /**
-     * The topic path that is the root of the service.
+     * The topic root.
      */
-    @NonNull
-    String topicPathRoot;
+    String topicRoot;
 
     /**
      * The security configuration for the service.

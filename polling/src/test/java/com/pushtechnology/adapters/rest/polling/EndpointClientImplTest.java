@@ -28,6 +28,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 
+import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
@@ -57,9 +58,29 @@ public final class EndpointClientImplTest {
     @Captor
     private ArgumentCaptor<EndpointResponse> responseCaptor;
 
-    private final EndpointConfig endpointConfig = EndpointConfig.builder().url("/a/url.json").build();
-    private final ServiceConfig serviceConfig = ServiceConfig.builder().host("localhost").port(8080).build();
-    private final Model model = Model.builder().services(singletonList(serviceConfig)).build();
+    private final EndpointConfig endpointConfig = EndpointConfig
+        .builder()
+        .name("endpoint")
+        .url("/a/url.json")
+        .produces("json")
+        .topicPath("url")
+        .build();
+    private final ServiceConfig serviceConfig = ServiceConfig
+        .builder()
+        .name("service")
+        .host("localhost")
+        .port(8080)
+        .endpoints(singletonList(endpointConfig))
+        .topicPathRoot("test")
+        .build();
+    private final Model model = Model
+        .builder()
+        .diffusion(DiffusionConfig
+            .builder()
+            .host("example.com")
+            .build())
+        .services(singletonList(serviceConfig))
+        .build();
 
     private EndpointClientImpl endpointClient;
 

@@ -15,6 +15,7 @@
 
 package com.pushtechnology.adapters.rest.adapter;
 
+import static java.util.Collections.emptyList;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.isA;
 import static org.mockito.Mockito.times;
@@ -24,6 +25,7 @@ import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.io.IOException;
+import java.util.Collections;
 
 import org.apache.http.concurrent.FutureCallback;
 import org.junit.After;
@@ -57,9 +59,27 @@ public final class InitialiseEndpointTest {
     @Captor
     private ArgumentCaptor<FutureCallback<EndpointResponse>> callbackCaptor;
 
-    private final EndpointConfig endpointConfig = EndpointConfig.builder().produces("json").build();
-    private final EndpointConfig inferEndpointConfig = EndpointConfig.builder().produces("auto").build();
-    private final ServiceConfig serviceConfig = ServiceConfig.builder().build();
+    private final EndpointConfig endpointConfig = EndpointConfig
+        .builder()
+        .name("endpoint")
+        .url("path")
+        .topicPath("topic")
+        .produces("json")
+        .build();
+    private final EndpointConfig inferEndpointConfig = EndpointConfig
+        .builder()
+        .name("endpoint")
+        .url("path")
+        .topicPath("topic")
+        .produces("auto")
+        .build();
+    private final ServiceConfig serviceConfig = ServiceConfig
+        .builder()
+        .name("service")
+        .host("example.com")
+        .topicPathRoot("path")
+        .endpoints(emptyList())
+        .build();
 
     private InitialiseEndpoint initialiseEndpoint;
 

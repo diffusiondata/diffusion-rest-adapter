@@ -15,9 +15,12 @@
 
 package com.pushtechnology.adapters.rest.adapter;
 
+import static java.util.Collections.emptyList;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.MockitoAnnotations.initMocks;
+
+import java.util.Collections;
 
 import org.junit.After;
 import org.junit.Before;
@@ -44,8 +47,20 @@ public final class AddTopicForEndpointTest {
     @Mock
     private TopicControl.AddCallback callback;
 
-    private ServiceConfig serviceConfig = ServiceConfig.builder().build();
-    private final EndpointConfig endpointConfig = EndpointConfig.builder().build();
+    private ServiceConfig serviceConfig = ServiceConfig
+        .builder()
+        .name("endpoint")
+        .topicPathRoot("path")
+        .endpoints(emptyList())
+        .host("example.com")
+        .build();
+    private final EndpointConfig endpointConfig = EndpointConfig
+        .builder()
+        .name("endpoint")
+        .topicPath("path")
+        .url("url")
+        .produces("json")
+        .build();
 
     private AddTopicForEndpoint<JSON> handler;
 

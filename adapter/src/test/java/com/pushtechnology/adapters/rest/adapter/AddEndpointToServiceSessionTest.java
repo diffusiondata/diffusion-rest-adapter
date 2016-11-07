@@ -38,7 +38,13 @@ public final class AddEndpointToServiceSessionTest {
     @Mock
     private ServiceSession serviceSession;
 
-    private final EndpointConfig endpoint = EndpointConfig.builder().build();
+    private final EndpointConfig endpoint = EndpointConfig
+        .builder()
+        .name("endpoint")
+        .topicPath("path")
+        .url("url")
+        .produces("json")
+        .build();
 
     private AddEndpointToServiceSession addEndpointToServiceSession;
 

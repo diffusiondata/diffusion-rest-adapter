@@ -105,111 +105,116 @@ public final class BasicIT {
     private static final EndpointConfig INCREMENT_ENDPOINT = EndpointConfig
         .builder()
         .name("increment")
-        .topic("increment")
+        .topicPath("increment")
         .url("/rest/increment")
         .produces("json")
         .build();
     private static final EndpointConfig TIMESTAMP_ENDPOINT = EndpointConfig
         .builder()
         .name("timestamp")
-        .topic("timestamp")
+        .topicPath("timestamp")
         .url("/rest/timestamp")
         .produces("json")
         .build();
     private static final EndpointConfig INCREMENT_BINARY_ENDPOINT = EndpointConfig
         .builder()
         .name("increment")
-        .topic("increment")
+        .topicPath("increment")
         .url("/rest/increment")
         .produces("binary")
         .build();
     private static final EndpointConfig TIMESTAMP_BINARY_ENDPOINT = EndpointConfig
         .builder()
         .name("timestamp")
-        .topic("timestamp")
+        .topicPath("timestamp")
         .url("/rest/timestamp")
         .produces("binary")
         .build();
     private static final EndpointConfig INCREMENT_STRING_ENDPOINT = EndpointConfig
         .builder()
         .name("increment")
-        .topic("increment")
+        .topicPath("increment")
         .url("/rest/increment")
         .produces("string")
         .build();
     private static final EndpointConfig TIMESTAMP_STRING_ENDPOINT = EndpointConfig
         .builder()
         .name("timestamp")
-        .topic("timestamp")
+        .topicPath("timestamp")
         .url("/rest/timestamp")
         .produces("string")
         .build();
     private static final EndpointConfig TIMESTAMP_AUTO_ENDPOINT = EndpointConfig
         .builder()
         .name("timestamp")
-        .topic("timestamp")
+        .topicPath("timestamp")
         .url("/rest/timestamp")
         .produces("auto")
         .build();
     private static final EndpointConfig AUTHENTICATED_INCREMENT_ENDPOINT = EndpointConfig
         .builder()
         .name("increment")
-        .topic("increment")
+        .topicPath("increment")
         .url("/auth/rest/increment")
         .produces("json")
         .build();
     private static final EndpointConfig AUTHENTICATED_TIMESTAMP_ENDPOINT = EndpointConfig
         .builder()
         .name("timestamp")
-        .topic("timestamp")
+        .topicPath("timestamp")
         .url("/auth/rest/timestamp")
         .produces("json")
         .build();
     private static final BasicAuthenticationConfig BASIC_AUTHENTICATION_CONFIG = BasicAuthenticationConfig
         .builder()
-        .principal("principal")
-        .credential("credential")
+        .userid("principal")
+        .password("credential")
         .build();
     private static final ServiceConfig INSECURE_SERVICE = ServiceConfig
         .builder()
+        .name("service-0")
         .host("localhost")
         .port(8081)
         .pollPeriod(500)
-        .topicRoot("rest/json")
+        .topicPathRoot("rest/json")
         .endpoints(asList(INCREMENT_ENDPOINT, TIMESTAMP_ENDPOINT))
         .build();
     private static final ServiceConfig INSECURE_BINARY_SERVICE = ServiceConfig
         .builder()
+        .name("service-1")
         .host("localhost")
         .port(8081)
         .pollPeriod(500)
-        .topicRoot("rest/binary")
+        .topicPathRoot("rest/binary")
         .endpoints(asList(INCREMENT_BINARY_ENDPOINT, TIMESTAMP_BINARY_ENDPOINT))
         .build();
     private static final ServiceConfig INSECURE_STRING_SERVICE = ServiceConfig
         .builder()
+        .name("service-2")
         .host("localhost")
         .port(8081)
         .pollPeriod(500)
-        .topicRoot("rest/string")
+        .topicPathRoot("rest/string")
         .endpoints(asList(INCREMENT_STRING_ENDPOINT, TIMESTAMP_STRING_ENDPOINT))
         .build();
     private static final ServiceConfig SECURE_SERVICE = ServiceConfig
         .builder()
+        .name("service-3")
         .host("localhost")
         .port(8444)
         .secure(true)
         .pollPeriod(500)
-        .topicRoot("rest/tls")
+        .topicPathRoot("rest/tls")
         .security(SecurityConfig.builder().basic(BASIC_AUTHENTICATION_CONFIG).build())
         .endpoints(asList(AUTHENTICATED_INCREMENT_ENDPOINT, AUTHENTICATED_TIMESTAMP_ENDPOINT))
         .build();
     private static final ServiceConfig INFERRED_SERVICE = ServiceConfig
         .builder()
+        .name("service-4")
         .host("localhost")
         .port(8081)
         .pollPeriod(500)
-        .topicRoot("rest/auto")
+        .topicPathRoot("rest/auto")
         .endpoints(singletonList(TIMESTAMP_AUTO_ENDPOINT))
         .build();
 

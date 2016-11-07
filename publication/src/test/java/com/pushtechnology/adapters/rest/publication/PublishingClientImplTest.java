@@ -99,17 +99,19 @@ public final class PublishingClientImplTest {
         endpointConfig = EndpointConfig
             .builder()
             .name("endpoint-0")
-            .topic("topic")
+            .topicPath("topic")
             .url("http://localhost/json")
+            .produces("json")
             .build();
 
         serviceConfig = ServiceConfig
             .builder()
+            .name("service")
             .host("localhost")
             .port(8080)
             .pollPeriod(60000)
             .endpoints(singletonList(endpointConfig))
-            .topicRoot("a")
+            .topicPathRoot("a")
             .build();
 
         eventedListener = new EventedSessionListener();

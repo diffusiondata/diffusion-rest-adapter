@@ -15,12 +15,14 @@
 
 package com.pushtechnology.adapters.rest.session.management;
 
+import static java.util.Collections.emptyList;
 import static org.junit.Assert.assertNull;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import org.junit.Before;
 import org.junit.Test;
 
+import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.session.management.SSLContextFactory;
 
@@ -31,7 +33,14 @@ import com.pushtechnology.adapters.rest.session.management.SSLContextFactory;
  */
 public final class SSLContextFactoryTest {
 
-    private final Model model = Model.builder().build();
+    private final Model model = Model
+        .builder()
+        .diffusion(DiffusionConfig
+            .builder()
+            .host("localhost")
+            .build())
+        .services(emptyList())
+        .build();
 
     private final SSLContextFactory contextFactory = new SSLContextFactory();
 

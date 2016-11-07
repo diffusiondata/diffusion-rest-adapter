@@ -21,10 +21,11 @@ import com.pushtechnology.adapters.rest.model.AnyModel;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.NonNull;
 import lombok.Value;
 
 /**
- * Configuration model. Version 12.
+ * Configuration model. Version 13.
  *
  * @author Push Technology Limited
  */
@@ -35,7 +36,7 @@ public class Model implements AnyModel {
     /**
      * The version of the model.
      */
-    public static final int VERSION = 12;
+    public static final int VERSION = 13;
 
     /**
      * If the client should run.
@@ -45,15 +46,21 @@ public class Model implements AnyModel {
     /**
      * The Diffusion server.
      */
+    @NonNull
     private DiffusionConfig diffusion;
 
     /**
      * The REST services to poll.
      */
+    @NonNull
     List<ServiceConfig> services;
 
     /**
      * The location of the trust store.
+     * <p>
+     * The location will first be resolved as a classpath resource. If this
+     * fails it will fallback to trying to load the store from this
+     * location on the file system.
      */
     String truststore;
 }

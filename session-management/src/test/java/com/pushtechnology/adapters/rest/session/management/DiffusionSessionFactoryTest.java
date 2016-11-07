@@ -1,12 +1,15 @@
 package com.pushtechnology.adapters.rest.session.management;
 
 import static com.pushtechnology.diffusion.client.session.SessionAttributes.Transport.WEBSOCKET;
+import static java.util.Collections.emptyList;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.isA;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
+
+import java.util.Collections;
 
 import org.junit.After;
 import org.junit.Before;
@@ -45,6 +48,7 @@ public final class DiffusionSessionFactoryTest {
             .outputBufferSize(32000)
             .recoveryBufferSize(256)
             .build())
+        .services(emptyList())
         .build();
 
     private final Model authModel = Model
@@ -62,6 +66,7 @@ public final class DiffusionSessionFactoryTest {
             .outputBufferSize(32000)
             .recoveryBufferSize(256)
             .build())
+        .services(emptyList())
         .build();
 
     @Before

@@ -15,6 +15,7 @@
 
 package com.pushtechnology.adapters.rest.adapter;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -27,6 +28,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 
+import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.polling.ServiceSession;
@@ -49,8 +51,21 @@ public final class ServiceManagerTest {
     @Mock
     private ServiceSession serviceSession;
 
-    private ServiceConfig serviceConfig = ServiceConfig.builder().build();
-    private Model model = Model.builder().services(singletonList(serviceConfig)).build();
+    private ServiceConfig serviceConfig = ServiceConfig
+        .builder()
+        .name("service-0")
+        .host("localhost")
+        .endpoints(emptyList())
+        .topicPathRoot("root")
+        .build();
+    private Model model = Model
+        .builder()
+        .diffusion(DiffusionConfig
+            .builder()
+            .host("localhost")
+            .build())
+        .services(singletonList(serviceConfig))
+        .build();
 
     private ServiceManagerContext context;
 

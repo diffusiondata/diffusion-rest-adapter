@@ -21,7 +21,7 @@ import lombok.ToString;
 import lombok.Value;
 
 /**
- * Basic authentication configuration. Version 12.
+ * Basic authentication configuration. Version 13.
  * <p>
  * Description of the basic authentication parameters.
  *
@@ -30,8 +30,8 @@ import lombok.Value;
 @Value
 @Builder
 @AllArgsConstructor
-@ToString(of = {"principal"})
+@ToString(of = {"userid"})
 public class BasicAuthenticationConfig {
-    String principal;
-    String credential;
+    String userid;
+    String password;
 }

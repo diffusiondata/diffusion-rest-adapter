@@ -15,6 +15,7 @@
 
 package com.pushtechnology.adapters.rest.adapter;
 
+import static java.util.Collections.emptyList;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -66,7 +67,13 @@ public final class ServiceSessionStarterImplTest {
     private ArgumentCaptor<Runnable> runnableCaptor;
 
     private ServiceSessionStarter binder;
-    private ServiceConfig serviceConfig = ServiceConfig.builder().build();
+    private ServiceConfig serviceConfig = ServiceConfig
+        .builder()
+        .name("service-0")
+        .host("localhost")
+        .endpoints(emptyList())
+        .topicPathRoot("root")
+        .build();
 
     @SuppressWarnings("unchecked")
     @Before

@@ -42,22 +42,25 @@ public final class AsyncMutableModelStoreTest {
     private final EndpointConfig endpointConfig0 = EndpointConfig
         .builder()
         .name("endpoint-0")
-        .topic("topic-0")
+        .topicPath("topic-0")
         .url("http://localhost/json")
+        .produces("json")
         .build();
 
     private final EndpointConfig endpointConfig1 = EndpointConfig
         .builder()
         .name("endpoint-1")
-        .topic("topic-1")
+        .topicPath("topic-1")
         .url("http://localhost/json")
+        .produces("json")
         .build();
 
     private final EndpointConfig endpointConfig2 = EndpointConfig
         .builder()
         .name("endpoint-1")
-        .topic("topic-0")
+        .topicPath("topic-0")
         .url("http://localhost/json")
+        .produces("json")
         .build();
 
     private final ServiceConfig serviceConfig0 = ServiceConfig
@@ -67,7 +70,7 @@ public final class AsyncMutableModelStoreTest {
         .port(8080)
         .pollPeriod(60000)
         .endpoints(singletonList(endpointConfig0))
-        .topicRoot("a")
+        .topicPathRoot("a")
         .build();
 
     private final ServiceConfig serviceConfig1 = ServiceConfig
@@ -77,7 +80,7 @@ public final class AsyncMutableModelStoreTest {
         .port(8080)
         .pollPeriod(60000)
         .endpoints(asList(endpointConfig0, endpointConfig1))
-        .topicRoot("a")
+        .topicPathRoot("a")
         .build();
 
     private final ServiceConfig serviceConfig2 = ServiceConfig
@@ -87,7 +90,7 @@ public final class AsyncMutableModelStoreTest {
         .port(8080)
         .pollPeriod(60000)
         .endpoints(asList(endpointConfig0, endpointConfig1))
-        .topicRoot("a")
+        .topicPathRoot("a")
         .build();
 
     private final DiffusionConfig diffusionConfig = DiffusionConfig
@@ -110,7 +113,11 @@ public final class AsyncMutableModelStoreTest {
         .services(singletonList(serviceConfig1))
         .build();
 
-    private final Model emptyModel = Model.builder().build();
+    private final Model emptyModel = Model
+        .builder()
+        .diffusion(diffusionConfig)
+        .services(emptyList())
+        .build();
 
     private final Model modelWithDiffusion = Model
         .builder()
@@ -226,7 +233,13 @@ public final class AsyncMutableModelStoreTest {
 
         verify(consumer).accept(model);
 
-        final CreateResult result = modelStore.createService(ServiceConfig.builder().name("service-0").build());
+        final CreateResult result = modelStore.createService(ServiceConfig
+            .builder()
+            .name("service-0")
+            .host("localhost")
+            .endpoints(singletonList(endpointConfig0))
+            .topicPathRoot("a")
+            .build());
 
         assertEquals(CreateResult.NAME_CONFLICT, result);
     }
@@ -311,8 +324,15 @@ public final class AsyncMutableModelStoreTest {
 
         verify(consumer).accept(model);
 
-        final CreateResult result = modelStore
-            .createEndpoint("service-0", EndpointConfig.builder().name("endpoint-0").build());
+        final CreateResult result = modelStore.createEndpoint(
+            "service-0",
+            EndpointConfig
+                .builder()
+                .name("endpoint-0")
+                .topicPath("topic-1")
+                .url("http://localhost/json")
+                .produces("json")
+                .build());
 
         assertEquals(CreateResult.NAME_CONFLICT, result);
     }

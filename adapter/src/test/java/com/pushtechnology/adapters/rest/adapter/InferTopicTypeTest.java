@@ -46,10 +46,6 @@ public final class InferTopicTypeTest {
     @Mock
     private Function<EndpointType, FutureCallback<EndpointResponse>> factory;
 
-    private EndpointConfig jsonEndpoint = EndpointConfig.builder().produces("application/json").build();
-    private EndpointConfig plainEndpoint = EndpointConfig.builder().produces("text/plain").build();
-    private EndpointConfig binaryEndpoint = EndpointConfig.builder().produces("binary").build();
-
     private InferTopicType inferTopicType;
 
     @Before

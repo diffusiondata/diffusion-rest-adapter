@@ -64,14 +64,14 @@ public final class PublishingClientImpl implements PublishingClient {
     @Override
     public synchronized EventedUpdateSource addService(ServiceConfig serviceConfig) {
 
-        final EventedUpdateSource source = new EventedUpdateSourceImpl(serviceConfig.getTopicRoot())
+        final EventedUpdateSource source = new EventedUpdateSourceImpl(serviceConfig.getTopicPathRoot())
             .onActive(updater -> {
                 synchronized (PublishingClientImpl.this) {
                     final ValueUpdater<JSON> jsonUpdater = updater.valueUpdater(JSON.class);
                     final ValueUpdater<Binary> binaryUpdater = updater.valueUpdater(Binary.class);
                     // Remove cached values to prevent stale values poisoning the delta calculation
                     // The cache is shared by all updaters
-                    jsonUpdater.removeCachedValues(serviceConfig.getTopicRoot());
+                    jsonUpdater.removeCachedValues(serviceConfig.getTopicPathRoot());
                     updaters.put(serviceConfig, new UpdaterSet(jsonUpdater, binaryUpdater));
                 }
             })
@@ -121,7 +121,7 @@ public final class PublishingClientImpl implements PublishingClient {
             throw new IllegalStateException("The service has not been added or is not active, no updater found");
         }
 
-        final String topicPath = serviceConfig.getTopicRoot() + "/" + endpointConfig.getTopic();
+        final String topicPath = serviceConfig.getTopicPathRoot() + "/" + endpointConfig.getTopicPath();
         if (TopicType.JSON.equals(topicType)) {
             final UpdateContextImpl jsonUpdateContext =
                 new UpdateContextImpl(session, updaterSet.jsonUpdater, topicPath);

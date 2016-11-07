@@ -17,35 +17,35 @@ package com.pushtechnology.adapters.rest.model.conversion;
 
 import static java.util.stream.Collectors.toList;
 
-import com.pushtechnology.adapters.rest.model.v12.BasicAuthenticationConfig;
-import com.pushtechnology.adapters.rest.model.v12.DiffusionConfig;
-import com.pushtechnology.adapters.rest.model.v12.EndpointConfig;
-import com.pushtechnology.adapters.rest.model.v12.Model;
-import com.pushtechnology.adapters.rest.model.v12.SecurityConfig;
-import com.pushtechnology.adapters.rest.model.v12.ServiceConfig;
+import com.pushtechnology.adapters.rest.model.latest.BasicAuthenticationConfig;
+import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
+import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
+import com.pushtechnology.adapters.rest.model.latest.Model;
+import com.pushtechnology.adapters.rest.model.latest.SecurityConfig;
+import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.diffusion.client.session.SessionAttributes;
 
 import net.jcip.annotations.Immutable;
 
 /**
- * Converter between different version 11 of the model and version 12.
+ * Converter between different version 12 of the model and version 13.
  *
  * @author Push Technology Limited
  */
 @Immutable
-public final class V11Converter
-        extends AbstractModelConverter<com.pushtechnology.adapters.rest.model.v11.Model, Model> {
+public final class V12Converter
+        extends AbstractModelConverter<com.pushtechnology.adapters.rest.model.v12.Model, Model> {
     /**
      * The converter.
      */
-    public static final V11Converter INSTANCE = new V11Converter();
+    public static final V12Converter INSTANCE = new V12Converter();
 
-    private V11Converter() {
-        super(com.pushtechnology.adapters.rest.model.v11.Model.class);
+    private V12Converter() {
+        super(com.pushtechnology.adapters.rest.model.v12.Model.class);
     }
 
     @Override
-    protected Model convertFrom(com.pushtechnology.adapters.rest.model.v11.Model model) {
+    protected Model convertFrom(com.pushtechnology.adapters.rest.model.v12.Model model) {
         return Model
             .builder()
             .active(true)
@@ -65,20 +65,20 @@ public final class V11Converter
                             .builder()
                             .name(oldEndpoint.getName())
                             .url(oldEndpoint.getUrl())
-                            .topic(oldEndpoint.getTopic())
+                            .topicPath(oldEndpoint.getTopic())
                             .produces(oldEndpoint.getProduces())
                             .build())
                         .collect(toList()))
                     .pollPeriod(oldService.getPollPeriod())
-                    .topicRoot(oldService.getTopicRoot())
+                    .topicPathRoot(oldService.getTopicRoot())
                     .security(SecurityConfig
                         .builder()
                         .basic(oldService.getSecurity().getBasic() == null ?
                             null :
                             BasicAuthenticationConfig
                                 .builder()
-                                .principal(oldService.getSecurity().getBasic().getPrincipal())
-                                .credential(oldService.getSecurity().getBasic().getCredential())
+                                .userid(oldService.getSecurity().getBasic().getPrincipal())
+                                .password(oldService.getSecurity().getBasic().getCredential())
                                 .build())
                         .build())
                     .build())

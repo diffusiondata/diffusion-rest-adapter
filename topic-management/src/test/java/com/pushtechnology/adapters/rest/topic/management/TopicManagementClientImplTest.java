@@ -62,29 +62,30 @@ public final class TopicManagementClientImplTest {
         .builder()
         .name("jsonEndpoint")
         .url("endpoint")
-        .topic("jsonEndpoint")
+        .topicPath("jsonEndpoint")
         .produces("json")
         .build();
     private final EndpointConfig binaryEndpointConfig = EndpointConfig
         .builder()
         .name("binaryEndpoint")
         .url("endpoint")
-        .topic("binaryEndpoint")
+        .topicPath("binaryEndpoint")
         .produces("binary")
         .build();
     private final EndpointConfig stringEndpointConfig = EndpointConfig
         .builder()
         .name("stringEndpoint")
         .url("endpoint")
-        .topic("stringEndpoint")
+        .topicPath("stringEndpoint")
         .produces("string")
         .build();
     private final ServiceConfig serviceConfig = ServiceConfig
         .builder()
+        .name("service")
         .host("localhost")
         .port(80)
         .pollPeriod(5000)
-        .topicRoot("service")
+        .topicPathRoot("service")
         .endpoints(asList(jsonEndpointConfig, binaryEndpointConfig, stringEndpointConfig))
         .build();
 

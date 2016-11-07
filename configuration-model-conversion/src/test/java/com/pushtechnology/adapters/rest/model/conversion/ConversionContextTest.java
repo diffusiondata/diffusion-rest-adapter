@@ -9,7 +9,6 @@ import org.junit.Test;
 
 import com.pushtechnology.adapters.rest.model.AnyModel;
 import com.pushtechnology.adapters.rest.model.latest.Model;
-import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 
 /**
  * Unit tests for {@link ConversionContext}.
@@ -19,8 +18,14 @@ import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 public final class ConversionContextTest {
 
     @Test
-    public void testConvertFromV1() {
-        final Model model = FULL_CONTEXT.convert(Model.builder().services(Collections.<ServiceConfig>emptyList()).build());
+    public void testConvertFromV11() {
+        final Model model = FULL_CONTEXT.convert(com.pushtechnology.adapters.rest.model.v11.Model
+            .builder()
+            .diffusion(com.pushtechnology.adapters.rest.model.v11.DiffusionConfig
+                .builder()
+                .host("example.com")
+                .build())
+            .services(Collections.<com.pushtechnology.adapters.rest.model.v11.ServiceConfig>emptyList()).build());
 
         assertEquals(0, model.getServices().size());
     }

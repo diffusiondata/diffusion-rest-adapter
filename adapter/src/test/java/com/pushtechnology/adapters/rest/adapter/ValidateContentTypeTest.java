@@ -41,9 +41,27 @@ public final class ValidateContentTypeTest {
     @Mock
     private EndpointResponse endpointResponse;
 
-    private EndpointConfig jsonEndpoint = EndpointConfig.builder().produces("application/json").build();
-    private EndpointConfig plainEndpoint = EndpointConfig.builder().produces("text/plain").build();
-    private EndpointConfig binaryEndpoint = EndpointConfig.builder().produces("binary").build();
+    private EndpointConfig jsonEndpoint = EndpointConfig
+        .builder()
+        .name("endpoint")
+        .topicPath("path")
+        .url("url")
+        .produces("application/json")
+        .build();
+    private EndpointConfig plainEndpoint = EndpointConfig
+        .builder()
+        .name("endpoint")
+        .topicPath("path")
+        .url("url")
+        .produces("text/plain")
+        .build();
+    private EndpointConfig binaryEndpoint = EndpointConfig
+        .builder()
+        .name("endpoint")
+        .topicPath("path")
+        .url("url")
+        .produces("binary")
+        .build();
 
     private ValidateContentType validateJson;
     private ValidateContentType validatePlain;

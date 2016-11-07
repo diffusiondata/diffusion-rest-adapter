@@ -113,9 +113,9 @@ public final class LiveIT {
                 .builder()
                 .name("GBP")
                 .produces("application/json")
-                .topic("GBP")
+                .topicPath("GBP")
                 .url("/ticker/global/GBP").build()))
-            .topicRoot("bitcoin")
+            .topicPathRoot("bitcoin")
             .build();
 
         final ServiceConfig icndb = ServiceConfig
@@ -128,10 +128,10 @@ public final class LiveIT {
                 .builder()
                 .name("Random Chuck Norris jokes")
                 .produces("application/json")
-                .topic("random")
+                .topicPath("random")
                 .url("/jokes/random")
                 .build()))
-            .topicRoot("icndb")
+            .topicPathRoot("icndb")
             .build();
 
         modelStore.setModel(Model

@@ -122,7 +122,7 @@ public final class AsyncMutableModelStore implements ModelStore {
             final boolean isTopicRootInUse = model
                 .getServices()
                 .stream()
-                .filter(service -> service.getTopicRoot().equals(serviceConfig.getTopicRoot()))
+                .filter(service -> service.getTopicPathRoot().equals(serviceConfig.getTopicPathRoot()))
                 .findFirst()
                 .isPresent();
 
@@ -190,7 +190,7 @@ public final class AsyncMutableModelStore implements ModelStore {
             final boolean isTopicInUse = serviceConfig
                 .getEndpoints()
                 .stream()
-                .filter(endpoint -> endpoint.getTopic().equals(endpointConfig.getTopic()))
+                .filter(endpoint -> endpoint.getTopicPath().equals(endpointConfig.getTopicPath()))
                 .findFirst()
                 .isPresent();
 
@@ -215,7 +215,7 @@ public final class AsyncMutableModelStore implements ModelStore {
                 .port(serviceConfig.getPort())
                 .secure(serviceConfig.isSecure())
                 .endpoints(endpointConfigs)
-                .topicRoot(serviceConfig.getTopicRoot())
+                .topicPathRoot(serviceConfig.getTopicPathRoot())
                 .pollPeriod(serviceConfig.getPollPeriod())
                 .security(serviceConfig.getSecurity())
                 .build();

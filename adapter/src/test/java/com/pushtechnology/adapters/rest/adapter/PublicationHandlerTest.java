@@ -29,17 +29,9 @@ public final class PublicationHandlerTest {
     private final EndpointConfig endpointConfig = EndpointConfig
         .builder()
         .name("endpoint-0")
-        .topic("topic")
+        .topicPath("topic")
         .url("http://localhost/json")
-        .build();
-
-    private final ServiceConfig serviceConfig = ServiceConfig
-        .builder()
-        .host("localhost")
-        .port(8080)
-        .pollPeriod(60000)
-        .endpoints(singletonList(endpointConfig))
-        .topicRoot("a")
+        .produces("json")
         .build();
 
     private PublicationHandler<JSON> pollHandler;

@@ -15,6 +15,7 @@
 
 package com.pushtechnology.adapters.rest.adapter;
 
+import static java.util.Collections.emptyList;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -47,7 +48,13 @@ public final class ServiceTest {
     @Mock
     private ServiceSession serviceSession;
 
-    private ServiceConfig serviceConfig = ServiceConfig.builder().name("service").build();
+    private ServiceConfig serviceConfig = ServiceConfig
+        .builder()
+        .name("service")
+        .host("localhost")
+        .endpoints(emptyList())
+        .topicPathRoot("root")
+        .build();
 
     private ServiceManagerContext context;
 

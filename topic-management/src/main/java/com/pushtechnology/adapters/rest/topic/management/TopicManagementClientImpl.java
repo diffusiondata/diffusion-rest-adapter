@@ -44,7 +44,7 @@ public final class TopicManagementClientImpl implements TopicManagementClient {
     public void addService(ServiceConfig serviceConfig) {
         session
             .feature(TopicControl.class)
-            .removeTopicsWithSession(serviceConfig.getTopicRoot(), new TopicTreeHandler.Default());
+            .removeTopicsWithSession(serviceConfig.getTopicPathRoot(), new TopicTreeHandler.Default());
     }
 
     @Override
@@ -54,7 +54,7 @@ public final class TopicManagementClientImpl implements TopicManagementClient {
             AddCallback callback) {
 
         final String produces = endpointConfig.getProduces();
-        final String topicPath = serviceConfig.getTopicRoot() + "/" + endpointConfig.getTopic();
+        final String topicPath = serviceConfig.getTopicPathRoot() + "/" + endpointConfig.getTopicPath();
         final TopicType topicType = EndpointType.from(produces).getTopicType();
 
         session
@@ -70,7 +70,7 @@ public final class TopicManagementClientImpl implements TopicManagementClient {
             AddCallback callback) {
 
         final String produces = endpointConfig.getProduces();
-        final String topicPath = serviceConfig.getTopicRoot() + "/" + endpointConfig.getTopic();
+        final String topicPath = serviceConfig.getTopicPathRoot() + "/" + endpointConfig.getTopicPath();
         final TopicType topicType = EndpointType.from(produces).getTopicType();
 
         session

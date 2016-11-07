@@ -13,68 +13,25 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.model.latest;
-
-import java.util.List;
+package com.pushtechnology.adapters.rest.model.v12;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.NonNull;
 import lombok.ToString;
 import lombok.Value;
 
 /**
- * Service configuration. Version 13.
+ * Basic authentication configuration. Version 12.
  * <p>
- * Description of a REST service to poll.
+ * Description of the basic authentication parameters.
  *
  * @author Push Technology Limited
  */
 @Value
 @Builder
 @AllArgsConstructor
-public class ServiceConfig {
-    /**
-     * The name of the service.
-     */
-    @NonNull
-    String name;
-
-    /**
-     * The host of the service.
-     */
-    @NonNull
-    String host;
-
-    /**
-     * The port to connect to.
-     */
-    int port;
-
-    /**
-     * If a secure transport should be used.
-     */
-    boolean secure;
-
-    /**
-     * The endpoints the service makes available.
-     */
-    @NonNull
-    List<EndpointConfig> endpoints;
-
-    /**
-     * The time in milliseconds between polls.
-     */
-    long pollPeriod;
-
-    /**
-     * The topic path that is the root of the service.
-     */
-    @NonNull
-    String topicPathRoot;
-
-    /**
-     * The security configuration for the service.
-     */
-    SecurityConfig security;
+@ToString(of = {"principal"})
+public class BasicAuthenticationConfig {
+    String principal;
+    String credential;
 }

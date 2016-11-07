@@ -62,7 +62,7 @@ import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
                     final EndpointConfig inferredEndpointConfig = EndpointConfig
                         .builder()
                         .name(endpointConfig.getName())
-                        .topic(endpointConfig.getTopic())
+                        .topicPath(endpointConfig.getTopicPath())
                         .url(endpointConfig.getUrl())
                         .produces(endpointType.getIdentifier())
                         .build();

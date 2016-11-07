@@ -34,6 +34,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 
+import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.store.AsyncMutableModelStore;
 import com.pushtechnology.diffusion.client.session.SessionId;
@@ -70,7 +71,16 @@ public final class ModelControllerTest {
         modelStore = new AsyncMutableModelStore(executor);
 
         // Set the initial model
-        modelStore.setModel(Model.builder().services(emptyList()).build());
+        modelStore.setModel(Model
+            .builder()
+            .diffusion(DiffusionConfig
+                .builder()
+                .host("localhost")
+                .principal("control")
+                .password("password")
+                .build())
+            .services(emptyList())
+            .build());
         verify(executor).execute(runnableCaptor.capture());
         runnableCaptor.getValue().run();
     }

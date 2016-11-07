@@ -13,16 +13,15 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.model.latest;
+package com.pushtechnology.adapters.rest.model.v12;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.NonNull;
 import lombok.ToString;
 import lombok.Value;
 
 /**
- * Diffusion configuration. Version 13.
+ * Diffusion configuration. Version 12.
  * <p>
  * Description of a Diffusion server to publish to.
  *
@@ -37,7 +36,6 @@ public class DiffusionConfig {
     /**
      * The host of the Diffusion server.
      */
-    @NonNull
     String host;
     /**
      * The port the Diffusion server listens on.
