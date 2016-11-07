@@ -12,6 +12,7 @@ import { EndpointsListComponent } from './endpoints-list.component';
 import { CreateEndpointComponent } from './create-endpoint.component';
 import { EndpointDetailComponent } from './endpoint-detail.component';
 import { UnselectedComponent } from './unselected.component';
+import { DiffusionConfigService } from './diffusion-config.service';
 import { DiffusionService } from './diffusion.service';
 import { ModelService } from './model.service';
 
@@ -25,6 +26,7 @@ const diffusionConfig: diffusion.Options = require('diffusionConfig');
         provide('diffusion.config', {
             useValue: diffusionConfig
         }),
+        DiffusionConfigService,
         DiffusionService,
         ModelService ],
     declarations: [

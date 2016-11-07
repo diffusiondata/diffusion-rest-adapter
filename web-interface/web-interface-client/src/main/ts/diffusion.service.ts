@@ -1,35 +1,44 @@
-import { Injectable, Inject } from '@angular/core';
+import { Injectable } from '@angular/core';
 import * as diffusion from 'diffusion';
+import { DiffusionConfigService } from './diffusion-config.service';
 
 @Injectable()
 export class DiffusionService {
     private session: Promise<any>;
 
-    constructor(@Inject('diffusion.config') private diffusionConfig: diffusion.Options) {
+    constructor(private configService: DiffusionConfigService) {
     }
 
     private immediateAttemptToConnect(): Promise<diffusion.Session> {
-        return new Promise((resolve, reject) => {
-            diffusion.connect(this.diffusionConfig).then((session) => {
+        return this.configService
+            .get()
+            .then((diffusionConfig) => {
+                return diffusion.connect(diffusionConfig);
+            })
+            .then((session) => {
                 console.log('Connected');
-                resolve(session);
+                return session;
             }, (error) => {
                 console.log(error);
-                reject(error);
+                return error;
             });
-        });
     }
 
     private deferAttemptToConnect(): Promise<diffusion.Session> {
         return new Promise((resolve, reject) => {
             setTimeout(() => {
-                diffusion.connect(this.diffusionConfig).then((session) => {
-                    console.log('Connected');
-                    resolve(session);
-                }, (error) => {
-                    console.log(error);
-                    reject(error);
-                });
+                this.configService
+                    .get()
+                    .then((diffusionConfig) => {
+                        return diffusion.connect(diffusionConfig);
+                    })
+                    .then((session) => {
+                        console.log('Connected');
+                        resolve(session);
+                    }, (error) => {
+                        console.log(error);
+                        reject(error);
+                    });
             }, 5000);
         });
     }
