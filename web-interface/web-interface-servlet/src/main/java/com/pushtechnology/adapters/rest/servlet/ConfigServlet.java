@@ -40,9 +40,7 @@ public final class ConfigServlet extends HttpServlet {
         response.getWriter().println("window.diffusionConfig = {\n" +
             "host: \"" + context.getInitParameter("host") + "\",\n" +
             "port: " + context.getInitParameter("port") + ",\n" +
-            "secure: " + context.getInitParameter("secure") + ",\n" +
-            "principal: \"" + context.getInitParameter("principal") + "\",\n" +
-            "credentials: \"" + context.getInitParameter("credentials") + "\"\n" +
+            "secure: " + context.getInitParameter("secure") + "\n" +
             "};");
     }
 
