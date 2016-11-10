@@ -1,41 +1,42 @@
 import { Injectable } from '@angular/core';
 import * as diffusion from 'diffusion';
-import { DiffusionConfigService } from './diffusion-config.service';
 
 @Injectable()
 export class DiffusionService {
     private session: Promise<any>;
+    private diffusionConfig: diffusion.Options;
 
-    constructor(private configService: DiffusionConfigService) {
+    constructor() {
+        this.session = Promise
+            .reject(new Error('Session not yet created'))
+            .then(() => {}, (e) => { return e; });
     }
 
     private immediateAttemptToConnect(): Promise<diffusion.Session> {
-        return this.configService
-            .get()
-            .then((diffusionConfig) => {
-                return diffusion.connect(diffusionConfig);
-            })
-            .then((session) => {
-                console.log('Connected');
-                return session;
-            }, (error) => {
-                console.log(error);
-                return error;
-            });
+        return new Promise((resolve, reject) => {
+            diffusion
+                .connect(this.diffusionConfig)
+                .then((session) => {
+                    console.log('Connected');
+                    resolve(session);
+                },
+                (error) => {
+                    console.log(error);
+                    reject(error);
+                });
+        });
     }
 
     private deferAttemptToConnect(): Promise<diffusion.Session> {
         return new Promise((resolve, reject) => {
             setTimeout(() => {
-                this.configService
-                    .get()
-                    .then((diffusionConfig) => {
-                        return diffusion.connect(diffusionConfig);
-                    })
+                diffusion
+                    .connect(this.diffusionConfig)
                     .then((session) => {
                         console.log('Connected');
                         resolve(session);
-                    }, (error) => {
+                    },
+                    (error) => {
                         console.log(error);
                         reject(error);
                     });
@@ -49,7 +50,7 @@ export class DiffusionService {
         });
     }
 
-    private createSession(): Promise<diffusion.Session> {
+    private internalCreateSession(): Promise<diffusion.Session> {
         return this.immediateAttemptToConnect().catch(() => {
             return this.deferCreateSession();
         });
@@ -61,14 +62,21 @@ export class DiffusionService {
                 return session;
             }
             else {
-                return this.createSession();
+                return this.internalCreateSession();
             }
         });
     }
 
+    createSession(options: diffusion.Options): Promise<diffusion.Session> {
+        this.diffusionConfig = options;
+        this.session = this.immediateAttemptToConnect();
+
+        return this.session;
+    }
+
     get(): Promise<diffusion.Session> {
         if (!this.session) {
-            this.session = this.checkSession(this.createSession());
+            this.session = this.checkSession(this.internalCreateSession());
         }
 
         return this.session;

@@ -4,19 +4,33 @@ import { Routes, RouterModule } from '@angular/router';
 import { CreateServiceComponent } from './create-service.component';
 import { ServiceDetailComponent } from './service-detail.component';
 import { UnselectedComponent } from './unselected.component';
+import { LoginComponent } from './login.component';
+
+import { SessionEstablishmentGuard } from './session-establishment.guard';
 
 const appRoutes: Routes = [
     {
         path: '',
-        component: UnselectedComponent
+        component: LoginComponent
+    },
+    {
+        path: 'login',
+        component: LoginComponent
+    },
+    {
+        path: 'home',
+        component: UnselectedComponent,
+        canActivate: [SessionEstablishmentGuard]
     },
     {
         path: 'createService',
-        component: CreateServiceComponent
+        component: CreateServiceComponent,
+        canActivate: [SessionEstablishmentGuard]
     },
     {
         path: 'service/:name',
-        component: ServiceDetailComponent
+        component: ServiceDetailComponent,
+        canActivate: [SessionEstablishmentGuard]
     }
 ];
 
