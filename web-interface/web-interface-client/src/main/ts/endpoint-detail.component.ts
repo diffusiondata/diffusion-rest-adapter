@@ -15,8 +15,8 @@ import { Service, Endpoint } from './model';
         <p id="url" class="form-control-static">{{endpoint.url}}</p>
     </div>
     <div class="form-group">
-        <label for="topic" class="col-sm-2 control-label">Topic</label>
-        <p id="topic" class="form-control-static">{{endpoint.topic}}</p>
+        <label for="topicPath" class="col-sm-2 control-label">Topic path</label>
+        <p id="topicPath" class="form-control-static">{{endpoint.topicPath}}</p>
     </div>
     <div class="form-group">
         <label for="produces" class="col-sm-2 control-label">Produces</label>

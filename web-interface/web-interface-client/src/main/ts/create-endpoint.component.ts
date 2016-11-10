@@ -30,12 +30,12 @@ import { Endpoint } from './model';
                 </div>
             </div>
             <div class="form-group">
-                <label for="topic" class="col-sm-2 control-label">Topic</label>
+                <label for="topicPath" class="col-sm-2 control-label">Topic path</label>
                 <div class="col-sm-10">
-                    <input id="topic" required [(ngModel)]="endpoint.topic" name="topic" #topic="ngModel">
-                    <div [hidden]="topic.valid || topic.pristine"
+                    <input id="topicPath" required [(ngModel)]="endpoint.topicPath" name="topicPath" #topicPath="ngModel">
+                    <div [hidden]="topicPath.valid || topicPath.pristine"
                          class="alert alert-danger">
-                      Topic is required
+                      Topic path is required
                     </div>
                 </div>
             </div>
@@ -60,7 +60,7 @@ export class CreateEndpointComponent implements OnInit {
     endpoint: Endpoint = {
         name: '',
         url: '',
-        topic: '',
+        topicPath: '',
         produces: 'binary'
     };
 
@@ -81,7 +81,7 @@ export class CreateEndpointComponent implements OnInit {
         this.endpoint = {
             name: '',
             url: '',
-            topic: '',
+            topicPath: '',
             produces: 'binary'
         };
         setTimeout(() => this.active = true, 0);

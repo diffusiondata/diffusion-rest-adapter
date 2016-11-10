@@ -123,7 +123,7 @@ public final class ModelControllerTest {
         service.put("port", 80);
         service.put("secure", false);
         service.put("pollPeriod", 50000);
-        service.put("topicRoot", "");
+        service.put("topicPathRoot", "");
 
         message.put("service", service);
 

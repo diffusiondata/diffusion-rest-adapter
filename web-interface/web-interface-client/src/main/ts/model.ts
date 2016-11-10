@@ -2,7 +2,7 @@
 export interface Endpoint {
     name: string;
     url: string;
-    topic: string;
+    topicPath: string;
     produces: string;
 }
 
@@ -22,7 +22,7 @@ export interface Service {
     secure: boolean;
     endpoints: Endpoint[];
     pollPeriod: number;
-    topicRoot: string;
+    topicPathRoot: string;
     security?: Security;
 }
 

@@ -28,8 +28,8 @@ import { ModelService } from './model.service';
                 <p id="pollPeriod" class="form-control-static">{{service.pollPeriod}}</p>
             </div>
             <div class="form-group">
-                <label for="topicRoot" class="col-sm-2 control-label">Topic root</label>
-                <p id="topicRoot" class="form-control-static">{{service.topicRoot}}</p>
+                <label for="topicPathRoot" class="col-sm-2 control-label">Topic path root</label>
+                <p id="topicPathRoot" class="form-control-static">{{service.topicPathRoot}}</p>
             </div>
             <div>
                 <button class="btn btn-default" (click)="onRemove()">Remove service</button>

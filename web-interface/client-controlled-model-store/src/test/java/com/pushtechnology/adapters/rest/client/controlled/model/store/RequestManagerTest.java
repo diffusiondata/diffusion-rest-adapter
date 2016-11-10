@@ -82,7 +82,7 @@ public final class RequestManagerTest {
         createServiceMessage = new ContentImpl(Diffusion
             .dataTypes()
             .json()
-            .fromJsonString("{\"type\":\"create-service\",\"id\":1,\"service\":{\"name\":\"\",\"host\":\"\",\"port\":80,\"secure\":\"false\",\"pollPeriod\":5000,\"topicRoot\":\"\"}}")
+            .fromJsonString("{\"type\":\"create-service\",\"id\":1,\"service\":{\"name\":\"\",\"host\":\"\",\"port\":80,\"secure\":\"false\",\"pollPeriod\":5000,\"topicPathRoot\":\"\"}}")
             .toByteArray());
     }
 

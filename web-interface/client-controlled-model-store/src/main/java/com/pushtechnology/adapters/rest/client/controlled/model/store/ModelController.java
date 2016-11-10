@@ -200,7 +200,7 @@ import net.jcip.annotations.ThreadSafe;
         final EndpointConfig endpointConfig = EndpointConfig
             .builder()
             .name((String) endpoint.get("name"))
-            .topicPath((String) endpoint.get("topic"))
+            .topicPath((String) endpoint.get("topicPath"))
             .url((String) endpoint.get("url"))
             .produces((String) endpoint.get("produces"))
             .build();
@@ -246,7 +246,7 @@ import net.jcip.annotations.ThreadSafe;
             .secure((Boolean) service.get("secure"))
             .endpoints(emptyList())
             .pollPeriod((Integer) service.get("pollPeriod"))
-            .topicPathRoot((String) service.get("topicRoot"))
+            .topicPathRoot((String) service.get("topicPathRoot"))
             .build();
 
         switch (modelStore.createService(serviceConfig)) {

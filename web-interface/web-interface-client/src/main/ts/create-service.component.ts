@@ -62,12 +62,12 @@ import { Service } from './model';
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="topicRoot" class="col-sm-2 control-label">Topic root</label>
+                    <label for="topicPathRoot" class="col-sm-2 control-label">Topic path root</label>
                     <div class="col-sm-10">
-                        <input id="topicRoot" required [(ngModel)]="service.topicRoot" name="topicRoot" #topicRoot="ngModel">
+                        <input id="topicPathRoot" required [(ngModel)]="service.topicPathRoot" name="topicPathRoot" #topicPathRoot="ngModel">
                         <div [hidden]="name.valid || name.pristine"
                              class="alert alert-danger">
-                          Topic root is required
+                          Topic path root is required
                         </div>
                     </div>
                 </div>
@@ -88,7 +88,7 @@ export class CreateServiceComponent {
         secure: false,
         endpoints: [],
         pollPeriod: null,
-        topicRoot: null,
+        topicPathRoot: null,
         security: null
     };
 
@@ -118,7 +118,7 @@ export class CreateServiceComponent {
             secure: false,
             endpoints: [],
             pollPeriod: null,
-            topicRoot: null,
+            topicPathRoot: null,
             security: null
         };
         setTimeout(() => this.active = true, 0);
