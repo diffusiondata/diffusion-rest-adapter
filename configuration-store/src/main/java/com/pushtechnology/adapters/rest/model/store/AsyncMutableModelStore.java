@@ -224,7 +224,7 @@ public final class AsyncMutableModelStore implements ModelStore {
                 .getServices()
                 .stream()
                 .map(service -> {
-                    if (serviceConfig.getName().equals(serviceName)) {
+                    if (service.getName().equals(serviceName)) {
                         return updatedService;
                     }
                     else {

@@ -233,7 +233,7 @@ import net.jcip.annotations.ThreadSafe;
 
         if (serviceObject == null || !(serviceObject instanceof Map)) {
             LOG.error("No or invalid service message component");
-            responder.respond(error("No service provided"));
+            responder.error("no service provided");
             return;
         }
 
