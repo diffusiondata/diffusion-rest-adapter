@@ -93,6 +93,36 @@ public final class AsyncMutableModelStoreTest {
         .topicPathRoot("a")
         .build();
 
+    private final ServiceConfig serviceConfig3 = ServiceConfig
+        .builder()
+        .name("service-0")
+        .host("localhost")
+        .port(8080)
+        .pollPeriod(60000)
+        .endpoints(singletonList(endpointConfig1))
+        .topicPathRoot("a")
+        .build();
+
+    private final ServiceConfig serviceConfig4 = ServiceConfig
+        .builder()
+        .name("service-1")
+        .host("localhost")
+        .port(8080)
+        .pollPeriod(60000)
+        .endpoints(emptyList())
+        .topicPathRoot("b")
+        .build();
+
+    private final ServiceConfig serviceConfig5 = ServiceConfig
+        .builder()
+        .name("service-1")
+        .host("localhost")
+        .port(8080)
+        .pollPeriod(60000)
+        .endpoints(singletonList(endpointConfig1))
+        .topicPathRoot("b")
+        .build();
+
     private final DiffusionConfig diffusionConfig = DiffusionConfig
         .builder()
         .host("localhost")
@@ -105,6 +135,18 @@ public final class AsyncMutableModelStoreTest {
         .builder()
         .diffusion(diffusionConfig)
         .services(singletonList(serviceConfig0))
+        .build();
+
+    private final Model modelWithTwoServices = Model
+        .builder()
+        .diffusion(diffusionConfig)
+        .services(asList(serviceConfig0, serviceConfig4))
+        .build();
+
+    private final Model modelWithTwoServicesAndTwoEndpoints = Model
+        .builder()
+        .diffusion(diffusionConfig)
+        .services(asList(serviceConfig0, serviceConfig5))
         .build();
 
     private final Model modelWithTwoEndpoints = Model
@@ -204,6 +246,8 @@ public final class AsyncMutableModelStoreTest {
         runnableCaptor.getValue().run();
 
         verify(consumer).accept(model);
+
+        assertEquals(model, modelStore.get());
     }
 
     @Test
@@ -220,6 +264,8 @@ public final class AsyncMutableModelStoreTest {
         final CreateResult result = modelStore.createService(serviceConfig0);
 
         assertEquals(CreateResult.SUCCESS, result);
+
+        assertEquals(model, modelStore.get());
     }
 
     @Test
@@ -351,6 +397,33 @@ public final class AsyncMutableModelStoreTest {
         final CreateResult result = modelStore.createEndpoint("service-1", endpointConfig0);
 
         assertEquals(CreateResult.PARENT_MISSING, result);
+    }
+
+    @Test
+    public void createEndpointTwoServices() {
+        modelStore.setModel(model);
+
+        verify(executor).execute(runnableCaptor.capture());
+        runnableCaptor.getValue().run();
+
+        modelStore.onModelChange(consumer);
+
+        verify(consumer).accept(model);
+
+        final CreateResult serviceResult = modelStore.createService(serviceConfig4);
+        assertEquals(CreateResult.SUCCESS, serviceResult);
+
+        verify(executor, times(2)).execute(runnableCaptor.capture());
+        runnableCaptor.getValue().run();
+        verify(consumer).accept(modelWithTwoServices);
+
+        final CreateResult result = modelStore.createEndpoint("service-1", endpointConfig1);
+
+        assertEquals(CreateResult.SUCCESS, result);
+
+        verify(executor, times(3)).execute(runnableCaptor.capture());
+        runnableCaptor.getValue().run();
+        verify(consumer).accept(modelWithTwoServicesAndTwoEndpoints);
     }
 
     @Test
