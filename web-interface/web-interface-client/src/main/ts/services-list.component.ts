@@ -6,7 +6,7 @@ import { ModelService } from './model.service';
 
 @Component({
     selector: 'services-list',
-    template: `<div class="col-md-4">
+    template: `<div class="col-md-3">
     <div class="panel panel-default">
         <div class="panel-body scroll-panel">
             <div class="list-group">

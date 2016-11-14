@@ -7,75 +7,63 @@ import { Service } from './model';
 @Component({
   selector: 'create-service',
   template: `<services-list></services-list>
-<div class="col-md-8">
-    <div class="row">
-        <div class="col-md-12">
-            <h3>Create service</h3>
-            <form *ngIf="active" #createServiceForm="ngForm" (ngSubmit)="onCreateService($event)" class="form-horizontal">
-                <div class="form-group">
-                    <label for="name" class="col-sm-2 control-label">Name</label>
-                    <div class="col-sm-10">
-                        <input id="name" required [(ngModel)]="service.name" name="name" #name="ngModel">
-                        <div [hidden]="name.valid || name.pristine"
-                             class="alert alert-danger">
-                          Name is required
-                        </div>
-                    </div>
+<div class="row">
+    <div class="col-md-8">
+        <form *ngIf="active" #createServiceForm="ngForm" (ngSubmit)="onCreateService($event)" class="form-horizontal">
+            <div class="form-group">
+                <h3>Create service</h3>
+            </div>
+            <div class="form-group" [class.has-error]="!name.valid && !name.pristine">
+                <label for="name" class="col-sm-2 control-label">Name</label>
+                <div class="col-sm-4">
+                    <input id="name" required [(ngModel)]="service.name" name="name" #name="ngModel" class="form-control">
                 </div>
-                <div class="form-group">
-                    <label for="host" class="col-sm-2 control-label">Host</label>
-                    <div class="col-sm-10">
-                    <input id="host" required [(ngModel)]="service.host" name="host" #host="ngModel">
-                    <div [hidden]="host.valid || host.pristine"
-                         class="alert alert-danger">
-                      Host is required
-                    </div>
-                    </div>
+                <span class="help-block col-sm-4">The name is required to uniquely identify the service</span>
+            </div>
+            <div class="form-group" [class.has-error]="!host.valid && !host.pristine">
+                <label for="host" class="col-sm-2 control-label">Host</label>
+                <div class="col-sm-4">
+                    <input id="host" required [(ngModel)]="service.host" name="host" #host="ngModel" class="form-control">
                 </div>
-                <div class="form-group">
-                    <label for="port" class="col-sm-2 control-label">Port</label>
-                    <div class="col-sm-10">
-                        <input id="port" required [(ngModel)]="service.port" name="port" #port="ngModel">
-                        <div [hidden]="port.valid || port.pristine"
-                             class="alert alert-danger">
-                          Port is required
-                        </div>
-                    </div>
+                <span class="help-block col-sm-4">The host is required to to describe the location of the service</span>
+            </div>
+            <div class="form-group" [class.has-error]="!port.valid && !port.pristine">
+                <label for="port" class="col-sm-2 control-label">Port</label>
+                <div class="col-sm-4">
+                    <input id="port" required [(ngModel)]="service.port" name="port" #port="ngModel" class="form-control">
                 </div>
-                <div class="form-group">
-                    <label for="secure" class="col-sm-2 control-label">Secure</label>
-                    <div class="col-sm-10">
-                        <select id="secure" required [(ngModel)]="service.secure" name="secure">
-                            <option value="true">Secure</option>
-                            <option value="false">Insecure</option>
-                        </select>
-                    </div>
+                <span class="help-block col-sm-4">The port is required to to describe the location of the service</span>
+            </div>
+            <div class="form-group">
+                <label for="secure" class="col-sm-2 control-label">Secure</label>
+                <div class="col-sm-4">
+                    <select id="secure" required [(ngModel)]="service.secure" name="secure" class="form-control">
+                        <option selected="selected" value="true">Secure</option>
+                        <option value="false">Insecure</option>
+                    </select>
                 </div>
-                <div class="form-group">
-                    <label for="pollPeriod" class="col-sm-2 control-label">Poll period</label>
-                    <div class="col-sm-10">
-                        <input id="pollPeriod" required [(ngModel)]="service.pollPeriod" name="pollPeriod" #pollPeriod="ngModel">
-                        <div [hidden]="pollPeriod.valid || pollPeriod.pristine"
-                             class="alert alert-danger">
-                          Poll period is required
-                        </div>
-                    </div>
+                <span class="help-block col-sm-4">Indicates how to communicate with the service</span>
+            </div>
+            <div class="form-group" [class.has-error]="!pollPeriod.valid && !pollPeriod.pristine">
+                <label for="pollPeriod" class="col-sm-2 control-label">Poll period</label>
+                <div class="col-sm-4">
+                    <input id="pollPeriod" required [(ngModel)]="service.pollPeriod" name="pollPeriod" #pollPeriod="ngModel" class="form-control">
                 </div>
-                <div class="form-group">
-                    <label for="topicPathRoot" class="col-sm-2 control-label">Topic path root</label>
-                    <div class="col-sm-10">
-                        <input id="topicPathRoot" required [(ngModel)]="service.topicPathRoot" name="topicPathRoot" #topicPathRoot="ngModel">
-                        <div [hidden]="name.valid || name.pristine"
-                             class="alert alert-danger">
-                          Topic path root is required
-                        </div>
-                    </div>
+                <span class="help-block col-sm-4">Indicates how frequently the service endpoints should be polled</span>
+            </div>
+            <div class="form-group" [class.has-error]="!topicPathRoot.valid && !topicPathRoot.pristine">
+                <label for="topicPathRoot" class="col-sm-2 control-label">Topic path root</label>
+                <div class="col-sm-4">
+                    <input id="topicPathRoot" required [(ngModel)]="service.topicPathRoot" name="topicPathRoot" #topicPathRoot="ngModel" class="form-control">
                 </div>
-                <div>
+                <span class="help-block col-sm-4">Indicates the Diffusion topic that the service is published under</span>
+            </div>
+            <div>
+                <div class="col-sm-offset-2 col-sm-8">
                     <button class="btn btn-default" [disabled]="!createServiceForm.form.valid" type="submit">Create service</button>
                 </div>
-            </form>
-        </div>
+            </div>
+        </form>
     </div>
 </div>`
 })
