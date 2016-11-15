@@ -9,47 +9,39 @@ import { Endpoint } from './model';
   template: `<div class="list-group-item">
     <form *ngIf="active" #createEndpointForm="ngForm" (ngSubmit)="onCreateEndpoint($event)" class="form-horizontal">
         <div>
-            <div class="form-group">
+            <div class="form-group" [class.has-error]="!name.valid && !name.pristine">
                 <label for="name" class="col-sm-2 control-label">Name</label>
-                <div class="col-sm-10">
-                    <input id="name" required [(ngModel)]="endpoint.name" name="name" #name="ngModel">
-                    <div [hidden]="name.valid || name.pristine"
-                         class="alert alert-danger">
-                      Name is required
-                    </div>
+                <div class="col-md-4">
+                    <input id="name" required [(ngModel)]="endpoint.name" name="name" #name="ngModel" class="form-control">
                 </div>
             </div>
-            <div class="form-group">
+            <div class="form-group" [class.has-error]="!url.valid && !url.pristine">
                 <label for="url" class="col-sm-2 control-label">URL</label>
-                <div class="col-sm-10">
-                    <input id="url" required [(ngModel)]="endpoint.url" name="url" #url="ngModel">
-                    <div [hidden]="url.valid || url.pristine"
-                         class="alert alert-danger">
-                      URL is required
-                    </div>
+                <div class="col-sm-4">
+                    <input id="url" required [(ngModel)]="endpoint.url" name="url" #url="ngModel" class="form-control">
                 </div>
             </div>
-            <div class="form-group">
+            <div class="form-group" [class.has-error]="!topicPath.valid && !topicPath.pristine">
                 <label for="topicPath" class="col-sm-2 control-label">Topic path</label>
-                <div class="col-sm-10">
-                    <input id="topicPath" required [(ngModel)]="endpoint.topicPath" name="topicPath" #topicPath="ngModel">
-                    <div [hidden]="topicPath.valid || topicPath.pristine"
-                         class="alert alert-danger">
-                      Topic path is required
-                    </div>
+                <div class="col-sm-4">
+                    <input id="topicPath" required [(ngModel)]="endpoint.topicPath" name="topicPath" #topicPath="ngModel" class="form-control">
                 </div>
             </div>
             <div class="form-group">
                 <label for="produces" class="col-sm-2 control-label">Produces</label>
-                <div class="col-sm-10">
-                    <select id="produces" required [(ngModel)]="endpoint.produces" name="produces">
+                <div class="col-sm-4">
+                    <select id="produces" required [(ngModel)]="endpoint.produces" name="produces" class="form-control">
                         <option value="json">JSON</option>
                         <option value="binary">Binary</option>
                         <option value="string">String</option>
                     </select>
                 </div>
             </div>
-            <button class="btn btn-default" [disabled]="!createEndpointForm.form.valid" type="submit">Create endpoint</button>
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-8">
+                    <button class="btn btn-default" [disabled]="!createEndpointForm.form.valid" type="submit">Create endpoint</button>
+                </div>
+            </div>
         </div>
     </form>
 </div>`
