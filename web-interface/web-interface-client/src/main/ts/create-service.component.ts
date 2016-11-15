@@ -38,7 +38,7 @@ import { Service } from './model';
                 <label for="secure" class="col-sm-2 control-label">Secure</label>
                 <div class="col-sm-4">
                     <select id="secure" required [(ngModel)]="service.secure" name="secure" class="form-control">
-                        <option selected="selected" value="true">Secure</option>
+                        <option value="true">Secure</option>
                         <option value="false">Insecure</option>
                     </select>
                 </div>
@@ -72,8 +72,8 @@ export class CreateServiceComponent {
     service: any = {
         name: null,
         host: null,
-        port: null,
-        secure: false,
+        port: 443,
+        secure: true,
         endpoints: [],
         pollPeriod: null,
         topicPathRoot: null,
@@ -102,8 +102,8 @@ export class CreateServiceComponent {
         this.service = {
             name: null,
             host: null,
-            port: null,
-            secure: false,
+            port: 443,
+            secure: true,
             endpoints: [],
             pollPeriod: null,
             topicPathRoot: null,
