@@ -7,37 +7,41 @@ import { ModelService } from './model.service';
 @Component({
   selector: 'service-detail',
   template: `<services-list></services-list>
-<div class="col-md-8">
-    <div class="row">
-        <div class="col-md-12"><form *ngIf="service" class="form-horizontal">
-            <h3>{{service.name}}</h3>
+<div class="row">
+    <div class="col-md-8">
+        <div *ngIf="service" class="form-horizontal">
+            <div class="form-group">
+                <h3>{{service.name}}</h3>
+            </div>
             <div class="form-group">
                 <label for="host" class="col-sm-2 control-label">Host</label>
-                <p id="host" class="form-control-static">{{service.host}}</p>
+                <p id="host" class="form-control-static col-sm-4">{{service.host}}</p>
             </div>
             <div class="form-group">
                 <label for="port" class="col-sm-2 control-label">Port</label>
-                <p id="port" class="form-control-static">{{service.port}}</p>
+                <p id="port" class="form-control-static col-sm-4">{{service.port}}</p>
             </div>
             <div class="form-group">
                 <label for="secure" class="col-sm-2 control-label">Secure</label>
-                <p id="secure" class="form-control-static">{{service.secure}}</p>
+                <p id="secure" class="form-control-static col-sm-4">{{service.secure}}</p>
             </div>
             <div class="form-group">
                 <label for="pollPeriod" class="col-sm-2 control-label">Poll period</label>
-                <p id="pollPeriod" class="form-control-static">{{service.pollPeriod}}</p>
+                <p id="pollPeriod" class="form-control-static col-sm-4">{{service.pollPeriod}}</p>
             </div>
             <div class="form-group">
                 <label for="topicPathRoot" class="col-sm-2 control-label">Topic path root</label>
-                <p id="topicPathRoot" class="form-control-static">{{service.topicPathRoot}}</p>
+                <p id="topicPathRoot" class="form-control-static col-sm-4">{{service.topicPathRoot}}</p>
             </div>
-            <div>
-                <button class="btn btn-default" (click)="onRemove()">Remove service</button>
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-8">
+                    <button class="btn btn-default" (click)="onRemove()">Remove service</button>
+                </div>
             </div>
             <div class="form-group">
                 <endpoints-list></endpoints-list>
             </div>
-        </form>
+        </div>
     </div>
 </div>`
 })
