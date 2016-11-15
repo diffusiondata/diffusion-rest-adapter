@@ -58,7 +58,7 @@ import { Service } from './model';
                 </div>
                 <span class="help-block col-sm-4">Indicates the Diffusion topic that the service is published under</span>
             </div>
-            <div>
+            <div class="form-group">
                 <div class="col-sm-offset-2 col-sm-8">
                     <button class="btn btn-default" [disabled]="!createServiceForm.form.valid" type="submit">Create service</button>
                 </div>
