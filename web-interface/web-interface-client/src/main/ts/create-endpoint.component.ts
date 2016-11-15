@@ -14,18 +14,21 @@ import { Endpoint } from './model';
                 <div class="col-md-4">
                     <input id="name" required [(ngModel)]="endpoint.name" name="name" #name="ngModel" class="form-control">
                 </div>
+                <span class="help-block col-sm-4">The name is required to uniquely identify the endpoint</span>
             </div>
             <div class="form-group" [class.has-error]="!url.valid && !url.pristine">
                 <label for="url" class="col-sm-2 control-label">URL</label>
                 <div class="col-sm-4">
                     <input id="url" required [(ngModel)]="endpoint.url" name="url" #url="ngModel" class="form-control">
                 </div>
+                <span class="help-block col-sm-4">The host is required to to describe the location of the endpoint</span>
             </div>
             <div class="form-group" [class.has-error]="!topicPath.valid && !topicPath.pristine">
                 <label for="topicPath" class="col-sm-2 control-label">Topic path</label>
                 <div class="col-sm-4">
                     <input id="topicPath" required [(ngModel)]="endpoint.topicPath" name="topicPath" #topicPath="ngModel" class="form-control">
                 </div>
+                <span class="help-block col-sm-4">Indicates the Diffusion topic that the endpoint is published to</span>
             </div>
             <div class="form-group">
                 <label for="produces" class="col-sm-2 control-label">Produces</label>
@@ -36,6 +39,7 @@ import { Endpoint } from './model';
                         <option value="string">String</option>
                     </select>
                 </div>
+                <span class="help-block col-sm-4">Indicates the type of response returned by the endpoint and the type of Diffusion topic it is published to</span>
             </div>
             <div class="form-group">
                 <div class="col-sm-offset-2 col-sm-8">
