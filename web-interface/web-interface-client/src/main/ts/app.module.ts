@@ -16,6 +16,7 @@ import { RootComponent } from './root.component';
 import { DiffusionService } from './diffusion.service';
 import { ModelService } from './model.service';
 import { SessionEstablishmentGuard } from './session-establishment.guard';
+import { EndpointTypePipe } from './endpoint-type.pipe';
 
 import { routing } from './app.routing';
 import * as diffusion from 'diffusion';
@@ -39,7 +40,8 @@ const diffusionConfig: diffusion.Options = require('diffusionConfig');
         CreateEndpointComponent,
         EndpointDetailComponent,
         LoginComponent,
-        RootComponent
+        RootComponent,
+        EndpointTypePipe
     ],
     bootstrap: [ RootComponent ]
 })

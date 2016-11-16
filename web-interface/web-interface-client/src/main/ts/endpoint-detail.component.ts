@@ -20,7 +20,7 @@ import { Service, Endpoint } from './model';
     </div>
     <div class="form-group">
         <label for="produces" class="col-sm-2 control-label">Produces</label>
-        <p id="produces" class="form-control-static col-sm-4">{{endpoint.produces}}</p>
+        <p id="produces" class="form-control-static col-sm-4">{{endpoint.produces | asEndpointType}}</p>
     </div>
     <div class="form-group">
         <div class="col-sm-offset-2 col-sm-8">
