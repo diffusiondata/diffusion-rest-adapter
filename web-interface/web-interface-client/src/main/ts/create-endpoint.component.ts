@@ -33,8 +33,9 @@ import { Endpoint } from './model';
             <label for="produces" class="col-sm-2 control-label">Produces</label>
             <div class="col-sm-4">
                 <select id="produces" required [(ngModel)]="endpoint.produces" name="produces" class="form-control">
-                    <option value="json">JSON</option>
+                    <option value="auto">Auto</option>
                     <option value="binary">Binary</option>
+                    <option value="json">JSON</option>
                     <option value="string">String</option>
                 </select>
             </div>
@@ -55,7 +56,7 @@ export class CreateEndpointComponent implements OnInit {
         name: '',
         url: '',
         topicPath: '',
-        produces: 'binary'
+        produces: 'auto'
     };
 
     constructor(private modelService: ModelService, private route: ActivatedRoute) {}

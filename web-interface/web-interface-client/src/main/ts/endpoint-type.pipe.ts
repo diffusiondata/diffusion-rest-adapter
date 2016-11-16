@@ -13,6 +13,9 @@ export class EndpointTypePipe implements PipeTransform {
     else if (value === 'string') {
         return 'String';
     }
+    else if (value === 'auto') {
+        return 'Auto';
+    }
     else {
         return 'Unknown type';
     }
