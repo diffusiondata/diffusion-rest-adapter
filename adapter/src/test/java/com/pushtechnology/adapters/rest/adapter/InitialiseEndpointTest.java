@@ -15,6 +15,7 @@
 
 package com.pushtechnology.adapters.rest.adapter;
 
+import static com.pushtechnology.diffusion.client.Diffusion.dataTypes;
 import static java.util.Collections.emptyList;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.isA;
@@ -25,7 +26,7 @@ import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.io.IOException;
-import java.util.Collections;
+import java.nio.charset.Charset;
 
 import org.apache.http.concurrent.FutureCallback;
 import org.junit.After;
@@ -41,6 +42,7 @@ import com.pushtechnology.adapters.rest.polling.EndpointClient;
 import com.pushtechnology.adapters.rest.polling.EndpointResponse;
 import com.pushtechnology.adapters.rest.polling.ServiceSession;
 import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
+import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.AddCallback;
 
 /**
  * Unit tests for {@link InitialiseEndpoint}.
@@ -87,8 +89,8 @@ public final class InitialiseEndpointTest {
     public void setUp() throws IOException {
         initMocks(this);
 
-        when(response.getHeader("content-type")).thenReturn("application/json");
-        when(response.getResponse()).thenReturn(new byte[0]);
+        when(response.getHeader("content-type")).thenReturn("application/json; charset=utf-8");
+        when(response.getResponse()).thenReturn("{}".getBytes(Charset.forName("UTF-8")));
 
         initialiseEndpoint = new InitialiseEndpoint(
             endpointClient,
@@ -120,5 +122,11 @@ public final class InitialiseEndpointTest {
 
         verify(response, times(2)).getHeader("content-type");
         verify(response).getResponse();
+
+        verify(topicManagementClient).addEndpoint(
+            eq(serviceConfig),
+            eq(endpointConfig),
+            eq(dataTypes().json().fromJsonString("{}")),
+            isA(AddCallback.class));
     }
 }

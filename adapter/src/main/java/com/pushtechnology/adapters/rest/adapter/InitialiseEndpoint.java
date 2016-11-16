@@ -72,7 +72,7 @@ import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
                             topicManagementClient,
                             service,
                             inferredEndpointConfig,
-                            new AddEndpointToServiceSession(endpointConfig, serviceSession)));
+                            new AddEndpointToServiceSession(inferredEndpointConfig, serviceSession)));
                 }));
         }
         else {
