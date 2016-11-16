@@ -10,8 +10,12 @@ import { ModelService } from './model.service';
     <div class="panel panel-default">
         <div class="panel-body scroll-panel">
             <div *ngIf="service" class="list-group">
-                <endpoint-detail *ngFor="let endpoint of service.endpoints" [service]="service" [endpoint]="endpoint"></endpoint-detail>
-                <create-endpoint></create-endpoint>
+                <div *ngFor="let endpoint of service.endpoints" class="list-group-item">
+                    <endpoint-detail [service]="service" [endpoint]="endpoint"></endpoint-detail>
+                </div>
+                <div class="list-group-item">
+                    <create-endpoint></create-endpoint>
+                </div>
             </div>
         </div>
     <div>

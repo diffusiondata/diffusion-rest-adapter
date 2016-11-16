@@ -6,49 +6,47 @@ import { Endpoint } from './model';
 
 @Component({
   selector: 'create-endpoint',
-  template: `<div class="list-group-item">
-    <form *ngIf="active" #createEndpointForm="ngForm" (ngSubmit)="onCreateEndpoint($event)" class="form-horizontal">
-        <div>
-            <div class="form-group" [class.has-error]="!name.valid && !name.pristine">
-                <label for="name" class="col-sm-2 control-label">Name</label>
-                <div class="col-md-4">
-                    <input id="name" required [(ngModel)]="endpoint.name" name="name" #name="ngModel" class="form-control">
-                </div>
-                <span class="help-block col-sm-4">The name is required to uniquely identify the endpoint</span>
+  template: `<form *ngIf="active" #createEndpointForm="ngForm" (ngSubmit)="onCreateEndpoint($event)" class="form-horizontal">
+    <div>
+        <div class="form-group" [class.has-error]="!name.valid && !name.pristine">
+            <label for="name" class="col-sm-2 control-label">Name</label>
+            <div class="col-md-4">
+                <input id="name" required [(ngModel)]="endpoint.name" name="name" #name="ngModel" class="form-control">
             </div>
-            <div class="form-group" [class.has-error]="!url.valid && !url.pristine">
-                <label for="url" class="col-sm-2 control-label">URL</label>
-                <div class="col-sm-4">
-                    <input id="url" required [(ngModel)]="endpoint.url" name="url" #url="ngModel" class="form-control">
-                </div>
-                <span class="help-block col-sm-4">The host is required to to describe the location of the endpoint</span>
+            <span class="help-block col-sm-4">The name is required to uniquely identify the endpoint</span>
+        </div>
+        <div class="form-group" [class.has-error]="!url.valid && !url.pristine">
+            <label for="url" class="col-sm-2 control-label">URL</label>
+            <div class="col-sm-4">
+                <input id="url" required [(ngModel)]="endpoint.url" name="url" #url="ngModel" class="form-control">
             </div>
-            <div class="form-group" [class.has-error]="!topicPath.valid && !topicPath.pristine">
-                <label for="topicPath" class="col-sm-2 control-label">Topic path</label>
-                <div class="col-sm-4">
-                    <input id="topicPath" required [(ngModel)]="endpoint.topicPath" name="topicPath" #topicPath="ngModel" class="form-control">
-                </div>
-                <span class="help-block col-sm-4">Indicates the Diffusion topic that the endpoint is published to</span>
+            <span class="help-block col-sm-4">The host is required to to describe the location of the endpoint</span>
+        </div>
+        <div class="form-group" [class.has-error]="!topicPath.valid && !topicPath.pristine">
+            <label for="topicPath" class="col-sm-2 control-label">Topic path</label>
+            <div class="col-sm-4">
+                <input id="topicPath" required [(ngModel)]="endpoint.topicPath" name="topicPath" #topicPath="ngModel" class="form-control">
             </div>
-            <div class="form-group">
-                <label for="produces" class="col-sm-2 control-label">Produces</label>
-                <div class="col-sm-4">
-                    <select id="produces" required [(ngModel)]="endpoint.produces" name="produces" class="form-control">
-                        <option value="json">JSON</option>
-                        <option value="binary">Binary</option>
-                        <option value="string">String</option>
-                    </select>
-                </div>
-                <span class="help-block col-sm-4">Indicates the type of response returned by the endpoint and the type of Diffusion topic it is published to</span>
+            <span class="help-block col-sm-4">Indicates the Diffusion topic that the endpoint is published to</span>
+        </div>
+        <div class="form-group">
+            <label for="produces" class="col-sm-2 control-label">Produces</label>
+            <div class="col-sm-4">
+                <select id="produces" required [(ngModel)]="endpoint.produces" name="produces" class="form-control">
+                    <option value="json">JSON</option>
+                    <option value="binary">Binary</option>
+                    <option value="string">String</option>
+                </select>
             </div>
-            <div class="form-group">
-                <div class="col-sm-offset-2 col-sm-8">
-                    <button class="btn btn-default" [disabled]="!createEndpointForm.form.valid" type="submit">Create endpoint</button>
-                </div>
+            <span class="help-block col-sm-4">Indicates the type of response returned by the endpoint and the type of Diffusion topic it is published to</span>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-8">
+                <button class="btn btn-default" [disabled]="!createEndpointForm.form.valid" type="submit">Create endpoint</button>
             </div>
         </div>
-    </form>
-</div>`
+    </div>
+</form>`
 })
 export class CreateEndpointComponent implements OnInit {
     active = true;
