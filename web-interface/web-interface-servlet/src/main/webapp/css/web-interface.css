@@ -100,3 +100,7 @@ button {
     background-color: #d3d3d3;
     width: 85%;
 }
+
+.errorMessage {
+    padding: 15px;
+}

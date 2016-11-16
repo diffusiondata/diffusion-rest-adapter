@@ -25,13 +25,18 @@ import * as diffusion from 'diffusion';
         </div>
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-8">
-                <button class="btn btn-default" [disabled]="!loginForm.form.valid" type="submit">Login</button>
+                <button class="btn btn-primary" [disabled]="!loginForm.form.valid" type="submit">Login</button>
             </div>
+        </div>
+        <div *ngIf="failed" class="form-group">
+            <p class="bg-danger errorMessage col-sm-offset-2 col-sm-8">{{failureMessage}}</p>
         </div>
     </form>
 </div>`
 })
 export class LoginComponent {
+    failed = false;
+    failureMessage = '';
     active = true;
     user: any = {
         username: null,
@@ -45,6 +50,7 @@ export class LoginComponent {
     }
 
     doLogin() {
+        this.failed = false;
         try {
             this.diffusionService.createSession({
                 host: this.diffusionConfig.host,
@@ -53,11 +59,16 @@ export class LoginComponent {
                 principal: this.user.username,
                 credentials: this.user.password
             }).then((session) => {
-                console.log(session);
                 this.router.navigate(['/home']);
             },
             (error) => {
-                console.log(error);
+                this.failed = true;
+                if (error.message) {
+                    this.failureMessage = error.message;
+                }
+                else {
+                    this.failureMessage = error.toString();
+                }
             });
         }
         catch (e) {
