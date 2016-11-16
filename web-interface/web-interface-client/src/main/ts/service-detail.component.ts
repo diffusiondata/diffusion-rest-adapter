@@ -59,6 +59,6 @@ export class ServiceDetailComponent implements OnInit {
 
     onRemove() {
         this.modelService.deleteService(this.service.name);
-        this.router.navigate(['/']);
+        this.router.navigate(['/home']);
     }
 }

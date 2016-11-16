@@ -53,7 +53,7 @@ describe('Service detail component', function() {
             component.onRemove('service0');
 
             expect(modelService.deleteService).toHaveBeenCalledWith('service0');
-            expect(router.navigate).toHaveBeenCalledWith(['/']);
+            expect(router.navigate).toHaveBeenCalledWith(['/home']);
             done();
         }, 0);
     });
