@@ -77,7 +77,7 @@ export class CreateEndpointComponent implements OnInit {
             name: '',
             url: '',
             topicPath: '',
-            produces: 'binary'
+            produces: 'auto'
         };
         setTimeout(() => this.active = true, 0);
     }
