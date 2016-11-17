@@ -104,11 +104,12 @@ public final class InitialiseEndpointTest {
         verifyNoMoreInteractions(endpointClient, topicManagementClient, serviceSession, response);
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void accept() {
         initialiseEndpoint.accept(endpointConfig);
 
-        verify(endpointClient).request(eq(serviceConfig), eq(endpointConfig), isA(ValidateContentType.class));
+        verify(endpointClient).request(eq(serviceConfig), eq(endpointConfig), isA(FutureCallback.class));
     }
 
     @Test

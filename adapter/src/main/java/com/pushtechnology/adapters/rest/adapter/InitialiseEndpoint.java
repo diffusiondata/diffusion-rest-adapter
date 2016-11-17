@@ -17,10 +17,15 @@ package com.pushtechnology.adapters.rest.adapter;
 
 import java.util.function.Consumer;
 
+import org.apache.http.concurrent.FutureCallback;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.pushtechnology.adapters.rest.endpoints.EndpointType;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.polling.EndpointClient;
+import com.pushtechnology.adapters.rest.polling.EndpointResponse;
 import com.pushtechnology.adapters.rest.polling.ServiceSession;
 import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
 
@@ -30,6 +35,7 @@ import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
  * @author Push Technology Limited
  */
 /*package*/ final class InitialiseEndpoint implements Consumer<EndpointConfig> {
+    private static final Logger LOG = LoggerFactory.getLogger(InitialiseEndpoint.class);
     private final EndpointClient endpointClient;
     private final TopicManagementClient topicManagementClient;
     private final ServiceConfig service;
@@ -54,40 +60,54 @@ import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
     public void accept(EndpointConfig endpointConfig) {
         final String produces = endpointConfig.getProduces();
 
-        if ("auto".equals(produces)) {
-            endpointClient.request(
-                service,
-                endpointConfig,
-                new InferTopicType((endpointType) -> {
-                    final EndpointConfig inferredEndpointConfig = EndpointConfig
-                        .builder()
-                        .name(endpointConfig.getName())
-                        .topicPath(endpointConfig.getTopicPath())
-                        .url(endpointConfig.getUrl())
-                        .produces(endpointType.getIdentifier())
-                        .build();
-                    return new TransformingHandler<>(
-                        endpointType.getParser(),
-                        new AddTopicForEndpoint<>(
-                            topicManagementClient,
-                            service,
-                            inferredEndpointConfig,
-                            new AddEndpointToServiceSession(inferredEndpointConfig, serviceSession)));
-                }));
-        }
-        else {
-            endpointClient.request(
-                service,
-                endpointConfig,
-                new ValidateContentType(
-                    endpointConfig,
-                    new TransformingHandler<>(
-                        EndpointType.from(produces).getParser(),
-                        new AddTopicForEndpoint<>(
-                            topicManagementClient,
-                            service,
+        endpointClient.request(
+            service,
+            endpointConfig,
+            new FutureCallback<EndpointResponse>() {
+                @Override
+                public void completed(EndpointResponse result) {
+                    if ("auto".equals(produces)) {
+                        new InferTopicType((endpointType) -> {
+                            final EndpointConfig inferredEndpointConfig = EndpointConfig
+                                .builder()
+                                .name(endpointConfig.getName())
+                                .topicPath(endpointConfig.getTopicPath())
+                                .url(endpointConfig.getUrl())
+                                .produces(endpointType.getIdentifier())
+                                .build();
+                            return new TransformingHandler<>(
+                                endpointType.getParser(),
+                                new AddTopicForEndpoint<>(
+                                    topicManagementClient,
+                                    service,
+                                    inferredEndpointConfig,
+                                    new AddEndpointToServiceSession(inferredEndpointConfig, serviceSession)));
+                        })
+                            .completed(result);
+                    }
+                    else {
+                        new ValidateContentType(
                             endpointConfig,
-                            new AddEndpointToServiceSession(endpointConfig, serviceSession)))));
-        }
+                            new TransformingHandler<>(
+                                EndpointType.from(produces).getParser(),
+                                new AddTopicForEndpoint<>(
+                                    topicManagementClient,
+                                    service,
+                                    endpointConfig,
+                                    new AddEndpointToServiceSession(endpointConfig, serviceSession))))
+                            .completed(result);
+                    }
+                }
+
+                @Override
+                public void failed(Exception ex) {
+                    LOG.warn("Endpoint {} not initialised. First request failed.", endpointConfig);
+                }
+
+                @Override
+                public void cancelled() {
+                    LOG.warn("Endpoint {} not initialised. First request cancelled.", endpointConfig);
+                }
+            });
     }
 }
