@@ -9,38 +9,40 @@ import { ModelService } from './model.service';
   template: `<services-list></services-list>
 <div class="row">
     <div class="col-md-8">
-        <div *ngIf="service" class="form-horizontal">
-            <div class="form-group">
-                <h3>{{service.name}}</h3>
+        <div *ngIf="service" class="panel panel-default">
+            <div class="panel-heading page-header">
+                <h4>{{service.name}}</h4>
             </div>
-            <div class="form-group">
-                <label for="host" class="col-sm-2 control-label">Host</label>
-                <p id="host" class="form-control-static col-sm-4">{{service.host}}</p>
-            </div>
-            <div class="form-group">
-                <label for="port" class="col-sm-2 control-label">Port</label>
-                <p id="port" class="form-control-static col-sm-4">{{service.port}}</p>
-            </div>
-            <div class="form-group">
-                <label for="secure" class="col-sm-2 control-label">Secure</label>
-                <p id="secure" class="form-control-static col-sm-4">{{service.secure}}</p>
-            </div>
-            <div class="form-group">
-                <label for="pollPeriod" class="col-sm-2 control-label">Poll period</label>
-                <p id="pollPeriod" class="form-control-static col-sm-4">{{service.pollPeriod}}</p>
-            </div>
-            <div class="form-group">
-                <label for="topicPathRoot" class="col-sm-2 control-label">Topic path root</label>
-                <p id="topicPathRoot" class="form-control-static col-sm-4">{{service.topicPathRoot}}</p>
-            </div>
-            <div class="form-group">
-                <div class="col-sm-offset-2 col-sm-8">
-                    <button class="btn btn-default" (click)="onRemove()">Remove service</button>
+            <div class="panel-body">
+                <div class="form-horizontal">
+                    <div class="form-group">
+                        <label for="host" class="col-sm-2 control-label">Host</label>
+                        <p id="host" class="form-control-static col-sm-4">{{service.host}}</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="port" class="col-sm-2 control-label">Port</label>
+                        <p id="port" class="form-control-static col-sm-4">{{service.port}}</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="secure" class="col-sm-2 control-label">Secure</label>
+                        <p id="secure" class="form-control-static col-sm-4">{{service.secure}}</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="pollPeriod" class="col-sm-2 control-label">Poll period</label>
+                        <p id="pollPeriod" class="form-control-static col-sm-4">{{service.pollPeriod}}</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="topicPathRoot" class="col-sm-2 control-label">Topic path root</label>
+                        <p id="topicPathRoot" class="form-control-static col-sm-4">{{service.topicPathRoot}}</p>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-offset-2 col-sm-8">
+                            <button class="btn btn-default" (click)="onRemove()">Remove service</button>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="form-group">
-                <endpoints-list></endpoints-list>
-            </div>
+            <endpoints-list></endpoints-list>
         </div>
     </div>
 </div>`
