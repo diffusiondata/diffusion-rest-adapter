@@ -35,6 +35,10 @@ import { ModelService } from './model.service';
                         <label for="topicPathRoot" class="col-sm-2 control-label">Topic path root</label>
                         <p id="topicPathRoot" class="form-control-static col-sm-4">{{service.topicPathRoot}}</p>
                     </div>
+                    <div class="form-group" *ngIf="service.security && service.security.basic">
+                        <label for="basicUserID" class="col-sm-2 control-label">User ID</label>
+                        <p id="basicUserID" class="form-control-static col-sm-4">{{service.security.basic.userid}}</p>
+                    </div>
                     <div class="form-group">
                         <div class="col-sm-offset-2 col-sm-8">
                             <button class="btn btn-default" (click)="onRemove()">Remove service</button>

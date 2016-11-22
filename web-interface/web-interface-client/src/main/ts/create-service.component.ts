@@ -60,6 +60,27 @@ import { Service } from './model';
                         </div>
                         <span class="help-block col-sm-4">Indicates the Diffusion topic that the service is published under</span>
                     </div>
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">Basic authentication<span class="pull-right clickable glyphicon glyphicon-chevron-up"></span></h3>
+                        </div>
+                        <div class="panel-body">
+                            <div class="form-group">
+                                <label for="userid" class="col-sm-3 control-label">User ID</label>
+                                <div class="col-sm-4">
+                                    <input id="userid" [(ngModel)]="authentication.userid" name="userid" #userid="ngModel" class="form-control">
+                                </div>
+                                <span class="help-block col-sm-4">The user ID for basic authentication</span>
+                            </div>
+                            <div class="form-group">
+                                <label for="password" class="col-sm-3 control-label">Password</label>
+                                <div class="col-sm-4">
+                                    <input id="password" [(ngModel)]="authentication.password" name="password" #password="ngModel" class="form-control" type="password">
+                                </div>
+                                <span class="help-block col-sm-4">The password for basic authentication</span>
+                            </div>
+                        </div>
+                    </div>
                     <div class="form-group">
                         <div class="col-sm-offset-3 col-sm-8">
                             <button class="btn btn-default" [disabled]="!createServiceForm.form.valid" type="submit">Create service</button>
@@ -83,6 +104,10 @@ export class CreateServiceComponent {
         topicPathRoot: null,
         security: null
     };
+    authentication = {
+        userid: null,
+        password: null
+    }
 
     constructor(private router: Router, private modelService: ModelService) {}
 
@@ -91,6 +116,12 @@ export class CreateServiceComponent {
         this.service.port = parseInt(this.service.port);
         this.service.pollPeriod = parseInt(this.service.pollPeriod);
         this.service.secure = this.service.secure === true || this.service.secure === "true";
+
+        if (this.authentication.userid && this.authentication.password) {
+            this.service.security = {
+                basic: this.authentication
+            };
+        }
 
         try {
             this.modelService.createService(this.service);
@@ -113,6 +144,10 @@ export class CreateServiceComponent {
             topicPathRoot: null,
             security: null
         };
+        this.authentication = {
+            userid: null,
+            password: null
+        }
         setTimeout(() => this.active = true, 0);
     }
 }

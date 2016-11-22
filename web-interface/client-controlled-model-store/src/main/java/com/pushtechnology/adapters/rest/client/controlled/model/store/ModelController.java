@@ -26,8 +26,10 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.pushtechnology.adapters.rest.model.latest.BasicAuthenticationConfig;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
+import com.pushtechnology.adapters.rest.model.latest.SecurityConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.model.store.AsyncMutableModelStore;
 
@@ -223,7 +225,7 @@ import net.jcip.annotations.ThreadSafe;
         }
 
         final Map<String, Object> service = (Map<String, Object>) serviceObject;
-        final ServiceConfig serviceConfig = ServiceConfig
+        final ServiceConfig.ServiceConfigBuilder serviceConfigBuilder = ServiceConfig
             .builder()
             .name((String) service.get("name"))
             .host((String) service.get("host"))
@@ -231,10 +233,27 @@ import net.jcip.annotations.ThreadSafe;
             .secure((Boolean) service.get("secure"))
             .endpoints(emptyList())
             .pollPeriod((Integer) service.get("pollPeriod"))
-            .topicPathRoot((String) service.get("topicPathRoot"))
-            .build();
+            .topicPathRoot((String) service.get("topicPathRoot"));
 
-        switch (modelStore.createService(serviceConfig)) {
+        final Object securityObject = service.get("security");
+        if (securityObject != null && securityObject instanceof Map) {
+            final Map<String, Object> security = (Map<String, Object>) securityObject;
+            final Object basicObject = security.get("basic");
+            if (basicObject != null && basicObject instanceof Map) {
+                final Map<String, String> basic = (Map<String, String>) basicObject;
+                serviceConfigBuilder
+                    .security(SecurityConfig
+                        .builder()
+                        .basic(BasicAuthenticationConfig
+                            .builder()
+                            .userid(basic.get("userid"))
+                            .password(basic.get("password"))
+                            .build())
+                        .build());
+            }
+        }
+
+        switch (modelStore.createService(serviceConfigBuilder.build())) {
             case SUCCESS:
                 responder.respond(emptyMap());
                 return;

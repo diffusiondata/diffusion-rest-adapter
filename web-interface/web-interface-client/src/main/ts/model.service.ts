@@ -54,7 +54,11 @@ export class ModelService {
                     .findIndex((element) => element.name === service.name);
 
                 if (serviceIdx === -1) {
-                    this.model.services.push(JSON.parse(JSON.stringify(service)));
+                    var serviceCopy = JSON.parse(JSON.stringify(service));
+                    if (serviceCopy.security && serviceCopy.security.basic) {
+                        serviceCopy.security.basic.password = null;
+                    }
+                    this.model.services.push(serviceCopy);
                 }
             });
     }

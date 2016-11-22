@@ -40,9 +40,11 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 
+import com.pushtechnology.adapters.rest.model.latest.BasicAuthenticationConfig;
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
+import com.pushtechnology.adapters.rest.model.latest.SecurityConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.model.store.AsyncMutableModelStore;
 import com.pushtechnology.diffusion.client.session.SessionId;
@@ -152,6 +154,57 @@ public final class ModelControllerTest {
                 .pollPeriod(50000)
                 .topicPathRoot("")
                 .endpoints(emptyList())
+                .build(),
+            services.get(0));
+    }
+
+    @Test
+    public void onCreateServiceWithBasicAuthenticationMessage() {
+        final ModelController controller = new ModelController(modelStore);
+
+        final Map<String, Object> message = new HashMap<>();
+        message.put("type", "create-service");
+        final Map<String, Object> basicAuthentication = new HashMap<>();
+        basicAuthentication.put("userid", "user");
+        basicAuthentication.put("password", "password");
+        final Map<String, Object> security = new HashMap<>();
+        security.put("basic", basicAuthentication);
+        final Map<String, Object> service = new HashMap<>();
+        service.put("name", "");
+        service.put("host", "");
+        service.put("port", 80);
+        service.put("secure", false);
+        service.put("pollPeriod", 50000);
+        service.put("topicPathRoot", "");
+        service.put("security", security);
+
+        message.put("service", service);
+
+        controller.onRequest(message, responder);
+
+        verify(executor, times(2)).execute(runnableCaptor.capture());
+        verify(responder).respond(emptyMap());
+
+        final List<ServiceConfig> services = modelStore.get().getServices();
+        assertEquals(1, services.size());
+        assertEquals(
+            ServiceConfig
+                .builder()
+                .name("")
+                .host("")
+                .port(80)
+                .secure(false)
+                .pollPeriod(50000)
+                .topicPathRoot("")
+                .endpoints(emptyList())
+                .security(SecurityConfig
+                    .builder()
+                    .basic(BasicAuthenticationConfig
+                        .builder()
+                        .userid("user")
+                        .password("password")
+                        .build())
+                    .build())
                 .build(),
             services.get(0));
     }
