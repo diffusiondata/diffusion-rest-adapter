@@ -42,8 +42,8 @@ import { ModelService } from './model.service';
                     </div>
                 </div>
             </div>
-            <endpoints-list></endpoints-list>
         </div>
+        <endpoints-list></endpoints-list>
     </div>
 </div>`
 })

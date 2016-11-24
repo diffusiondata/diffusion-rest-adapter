@@ -6,7 +6,7 @@ import { ModelService } from './model.service';
 
 @Component({
     selector: 'endpoints-list',
-    template: `<div class="panel-default">
+    template: `<div class="panel panel-default">
     <div class="panel-heading">Endpoints</div>
     <div class="panel-body">
         <div *ngIf="service" class="list-group">
