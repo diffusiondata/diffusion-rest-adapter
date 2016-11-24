@@ -62,9 +62,9 @@ import { Service } from './model';
                     </div>
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            <h3 class="panel-title">Basic authentication<span class="pull-right clickable glyphicon glyphicon-chevron-up"></span></h3>
+                            <a role="button" href="#basicAuthPanel" data-toggle="collapse"><h3 class="panel-title">Basic authentication<span class="pull-right clickable glyphicon glyphicon-chevron-up"></span></h3></a>
                         </div>
-                        <div class="panel-body">
+                        <div class="panel-body collapse" id="basicAuthPanel">
                             <div class="form-group">
                                 <label for="userid" class="col-sm-3 control-label">User ID</label>
                                 <div class="col-sm-4">
