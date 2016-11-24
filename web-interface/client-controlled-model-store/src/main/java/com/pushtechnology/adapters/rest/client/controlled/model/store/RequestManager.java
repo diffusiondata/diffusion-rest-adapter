@@ -15,22 +15,25 @@
 
 package com.pushtechnology.adapters.rest.client.controlled.model.store;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import static com.pushtechnology.diffusion.client.Diffusion.content;
+import static com.pushtechnology.diffusion.client.Diffusion.dataTypes;
+import static com.pushtechnology.diffusion.transform.transformer.Transformers.fromMap;
+import static com.pushtechnology.diffusion.transform.transformer.Transformers.toMapOf;
+
 import java.util.HashMap;
 import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.cbor.CBORFactory;
 import com.pushtechnology.diffusion.client.content.Content;
 import com.pushtechnology.diffusion.client.features.control.topics.MessagingControl;
 import com.pushtechnology.diffusion.client.session.SessionId;
 import com.pushtechnology.diffusion.client.types.ReceiveContext;
-import com.pushtechnology.diffusion.content.ContentImpl;
+import com.pushtechnology.diffusion.datatype.Bytes;
+import com.pushtechnology.diffusion.transform.transformer.TransformationException;
+import com.pushtechnology.diffusion.transform.transformer.Transformer;
+import com.pushtechnology.diffusion.transform.transformer.Transformers;
 
 import net.jcip.annotations.Immutable;
 import net.jcip.annotations.ThreadSafe;
@@ -42,8 +45,18 @@ import net.jcip.annotations.ThreadSafe;
 @ThreadSafe
 public final class RequestManager {
     private static final Logger LOG = LoggerFactory.getLogger(RequestManager.class);
-    private final CBORFactory factory = new CBORFactory();
-    private final ObjectMapper mapper = new ObjectMapper(factory);
+    private static final Transformer<Content, Map<String, Object>> DESERIALISER = Transformers
+        .builder(Content.class)
+        .transform(Content::toBytes)
+        .transform(dataTypes().json()::readValue)
+        .transform(toMapOf(Object.class))
+        .build();
+    private static final Transformer<Map<String, Object>, Content> SERIALISER = Transformers
+        .<Map<String, Object>>builder()
+        .transform(fromMap())
+        .transform(Bytes::toByteArray)
+        .transform(content()::newContent)
+        .build();
     private final MessagingControl messagingControl;
 
     /**
@@ -104,9 +117,9 @@ public final class RequestManager {
 
             final Map<String, Object> request;
             try {
-                request = mapper.readValue(content.toBytes(), new TypeReference<Map<String, Object>>() { });
+                request = DESERIALISER.transform(content);
             }
-            catch (IOException e) {
+            catch (TransformationException e) {
                 LOG.error("Did not receive a valid JSON value: {}", content);
                 return;
             }
@@ -137,22 +150,18 @@ public final class RequestManager {
                 }
 
                 private void sendResponse(Map<String, Object> responseObject) {
-                    final ByteArrayOutputStream out = new ByteArrayOutputStream();
-
-                    try {
-                        mapper.writeValue(out, responseObject);
-                    }
-                    catch (IOException e) {
-                        throw new IllegalStateException("Failed to create response", e);
-                    }
-
                     LOG.info("Responding to request id {}", id);
 
-                    messagingControl.send(
-                        sessionId,
-                        path,
-                        new ContentImpl(out.toByteArray()),
-                        new MessagingControl.SendCallback.Default());
+                    try {
+                        messagingControl.send(
+                            sessionId,
+                            path,
+                            SERIALISER.transform(responseObject),
+                            new MessagingControl.SendCallback.Default());
+                    }
+                    catch (TransformationException e) {
+                        throw new IllegalStateException("Failed to create response", e);
+                    }
                 }
             });
         }
