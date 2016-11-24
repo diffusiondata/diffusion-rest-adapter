@@ -150,8 +150,6 @@ public final class RequestManager {
                 }
 
                 private void sendResponse(Map<String, Object> responseObject) {
-                    LOG.info("Responding to request id {}", id);
-
                     try {
                         messagingControl.send(
                             sessionId,

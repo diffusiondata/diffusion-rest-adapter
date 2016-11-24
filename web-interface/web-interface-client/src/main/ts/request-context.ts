@@ -9,11 +9,9 @@ export class RequestContext {
 
     constructor(private session: any, private path: string) {
         session.messages.listen(path, (message) => {
-            console.log('Received message on path %s', path);
             let response = jsonDataType.readValue(message.content).get();
             let handler = this.conversations[response.id];
             if (handler) {
-                console.log('Routing response', response);
                 if (response.error) {
                     handler.reject(new Error(response.error));
                 }
@@ -43,18 +41,14 @@ export class RequestContext {
                 reject : reject
             };
 
-            console.log('Sending request', message);
-
             this
                 .session
                 .messages
                 .send(this.path, jsonDataType.from(message))
                 .then(
                     () => {
-                        console.log('Sending request %d complete', requestId);
                     },
                     (error) => {
-                        console.log('Sending request %d failed', requestId);
                         reject(error);
                         delete this.conversations[requestId];
                     });

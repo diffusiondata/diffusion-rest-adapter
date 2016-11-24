@@ -110,10 +110,6 @@ import net.jcip.annotations.ThreadSafe;
                             .filter(endpointConfig -> !endpointConfig.getName().equals(endpointObject))
                             .collect(toList());
 
-                        if (!endpointConfigs.equals(serviceConfig.getEndpoints())) {
-                            LOG.info("Removing endpoint {} from {}", endpointObject, serviceObject);
-                        }
-
                         return ServiceConfig
                             .builder()
                             .name(serviceConfig.getName())
@@ -131,10 +127,6 @@ import net.jcip.annotations.ThreadSafe;
                     }
                 })
                 .collect(toList());
-
-            if (serviceConfigs.equals(model.getServices())) {
-                LOG.info("Failed to find endpoint {} on {}", endpointObject, serviceObject);
-            }
 
             return Model
                 .builder()
@@ -161,13 +153,6 @@ import net.jcip.annotations.ThreadSafe;
                 .stream()
                 .filter(serviceConfig -> !serviceConfig.getName().equals(serviceObject))
                 .collect(toList());
-
-            if (serviceConfigs.equals(model.getServices())) {
-                LOG.info("Failed to find service {}", serviceObject);
-            }
-            else {
-                LOG.info("Removing service {}", serviceObject);
-            }
 
             return Model
                 .builder()
