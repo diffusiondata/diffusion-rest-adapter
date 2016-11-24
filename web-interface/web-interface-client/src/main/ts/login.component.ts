@@ -5,33 +5,37 @@ import * as diffusion from 'diffusion';
 
 @Component({
   template: `<div class="col-md-10">
-    <form *ngIf="active" #loginForm="ngForm" (ngSubmit)="doLogin()" class="form-horizontal">
-        <div class="form-goup">
-            <h3>Login</h3>
+    <div class="panel panel-default">
+        <div class="panel-heading page-header">
+            <h4>Login</h4>
         </div>
-        <div class="form-group" [class.has-error]="!username.valid && !username.pristine">
-            <label for="username" class="col-sm-2 control-label">Username</label>
-            <div class="col-sm-4">
-                <input id="username" required [(ngModel)]="user.username" name="username" #username="ngModel" class="form-control">
-            </div>
-            <span class="help-block col-sm-4">The username is required to access the web interface</span>
+        <div class="panel-body">
+            <form *ngIf="active" #loginForm="ngForm" (ngSubmit)="doLogin()" class="form-horizontal">
+                <div class="form-group" [class.has-error]="!username.valid && !username.pristine">
+                    <label for="username" class="col-sm-2 control-label">Username</label>
+                    <div class="col-sm-4">
+                        <input id="username" required [(ngModel)]="user.username" name="username" #username="ngModel" class="form-control">
+                    </div>
+                    <span class="help-block col-sm-4">The username is required to access the web interface</span>
+                </div>
+                <div class="form-group" [class.has-error]="!password.valid && !password.pristine">
+                    <label for="password" class="col-sm-2 control-label">Password</label>
+                    <div class="col-sm-4">
+                        <input id="password" required [(ngModel)]="user.password" name="password" #password="ngModel" type="password" class="form-control">
+                    </div>
+                    <div class="help-block col-sm-4">The host is required to access the web interface</div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-8">
+                        <button class="btn btn-primary" [disabled]="!loginForm.form.valid" type="submit">Login</button>
+                    </div>
+                </div>
+                <div *ngIf="failed" class="form-group">
+                    <p class="bg-danger errorMessage col-sm-offset-2 col-sm-8">{{failureMessage}}</p>
+                </div>
+            </form>
         </div>
-        <div class="form-group" [class.has-error]="!password.valid && !password.pristine">
-            <label for="password" class="col-sm-2 control-label">Password</label>
-            <div class="col-sm-4">
-                <input id="password" required [(ngModel)]="user.password" name="password" #password="ngModel" type="password" class="form-control">
-            </div>
-            <div class="help-block col-sm-4">The host is required to access the web interface</div>
-        </div>
-        <div class="form-group">
-            <div class="col-sm-offset-2 col-sm-8">
-                <button class="btn btn-primary" [disabled]="!loginForm.form.valid" type="submit">Login</button>
-            </div>
-        </div>
-        <div *ngIf="failed" class="form-group">
-            <p class="bg-danger errorMessage col-sm-offset-2 col-sm-8">{{failureMessage}}</p>
-        </div>
-    </form>
+    </div>
 </div>`
 })
 export class LoginComponent {
