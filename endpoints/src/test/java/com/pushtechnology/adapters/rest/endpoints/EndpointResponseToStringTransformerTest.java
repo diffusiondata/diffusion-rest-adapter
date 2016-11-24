@@ -28,7 +28,6 @@ import org.junit.Test;
 import org.mockito.Mock;
 
 import com.pushtechnology.adapters.rest.polling.EndpointResponse;
-import com.pushtechnology.diffusion.transform.transformer.TransformationException;
 
 /**
  * Unit tests for {@link EndpointResponseToStringTransformer}.
@@ -46,7 +45,7 @@ public final class EndpointResponseToStringTransformerTest {
     }
 
     @Test
-    public void testTransformation() throws TransformationException, IOException {
+    public void testTransformation() throws Exception {
         when(endpointResponse.getHeader("content-type")).thenReturn("text/plain; charset=UTF-8");
         when(endpointResponse.getResponse()).thenReturn("{\"foo\":\"bar\"}".getBytes("UTF-8"));
         final String value = INSTANCE.transform(endpointResponse);
@@ -54,15 +53,15 @@ public final class EndpointResponseToStringTransformerTest {
     }
 
     @Test
-    public void testTransformationCharsetMissing() throws TransformationException, IOException {
+    public void testTransformationCharsetMissing() throws Exception {
         when(endpointResponse.getHeader("content-type")).thenReturn("text/plain");
         when(endpointResponse.getResponse()).thenReturn("{\"foo\":\"bar\"}".getBytes("ISO-8859-1"));
         final String value = INSTANCE.transform(endpointResponse);
         assertEquals("{\"foo\":\"bar\"}", value);
     }
 
-    @Test(expected = TransformationException.class)
-    public void testException() throws TransformationException, IOException {
+    @Test(expected = IOException.class)
+    public void testException() throws Exception {
         doThrow(new IOException("Intentionally thrown by test")).when(endpointResponse).getResponse();
         INSTANCE.transform(endpointResponse);
     }

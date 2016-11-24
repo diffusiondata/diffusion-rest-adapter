@@ -15,38 +15,31 @@
 
 package com.pushtechnology.adapters.rest.endpoints;
 
-import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.pushtechnology.adapters.rest.polling.EndpointResponse;
-import com.pushtechnology.diffusion.transform.transformer.TransformationException;
-import com.pushtechnology.diffusion.transform.transformer.Transformer;
+import com.pushtechnology.diffusion.transform.transformer.UnsafeTransformer;
 
 /**
  * Transformer from {@link EndpointResponse} to {@link String}.
  *
  * @author Push Technology Limited
  */
-/*package*/ final class EndpointResponseToStringTransformer implements Transformer<EndpointResponse, String> {
+/*package*/ final class EndpointResponseToStringTransformer implements UnsafeTransformer<EndpointResponse, String> {
     private static final Pattern CHARSET_PATTERN = Pattern.compile(".+; charset=(\\S+)");
     /**
      * Instance of the transformer.
      */
-    static final Transformer<EndpointResponse, String> INSTANCE = new EndpointResponseToStringTransformer();
+    static final UnsafeTransformer<EndpointResponse, String> INSTANCE = new EndpointResponseToStringTransformer();
 
     private EndpointResponseToStringTransformer() {
     }
 
     @Override
-    public String transform(EndpointResponse response) throws TransformationException {
-        try {
-            return new String(response.getResponse(), getResponseCharset(response));
-        }
-        catch (IOException e) {
-            throw new TransformationException(e);
-        }
+    public String transform(EndpointResponse response) throws Exception {
+        return new String(response.getResponse(), getResponseCharset(response));
     }
 
     private Charset getResponseCharset(EndpointResponse response) {
