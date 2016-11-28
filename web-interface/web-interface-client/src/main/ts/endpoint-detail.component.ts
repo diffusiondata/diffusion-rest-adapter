@@ -6,8 +6,10 @@ import { Service, Endpoint } from './model';
 @Component({
     selector: 'endpoint-detail',
     template: `<div class="panel panel-default">
-    <div class="panel-heading">{{endpoint.name}}</div>
-    <div class="panel-body">
+    <div class="panel-heading">
+        <a role="button" href="#endpoint-{{endpointIndex}}" data-toggle="collapse"><h3 class="panel-title">{{endpoint.name}}<span class="pull-right clickable glyphicon glyphicon-chevron-up"></span></h3></a>
+    </div>
+    <div class="panel-body collapse" id="endpoint-{{endpointIndex}}">
         <div class="form-horizontal">
             <div class="form-group">
                 <label for="url" class="col-sm-2 control-label">URL</label>
@@ -33,6 +35,7 @@ import { Service, Endpoint } from './model';
 export class EndpointDetailComponent {
     @Input() service: Service;
     @Input() endpoint: Endpoint;
+    @Input() endpointIndex: Number;
 
     constructor(private modelService: ModelService) {
     }

@@ -7,7 +7,7 @@ import { ModelService } from './model.service';
 @Component({
     selector: 'endpoints-list',
     template: `<div *ngIf="service">
-    <endpoint-detail *ngFor="let endpoint of service.endpoints" [service]="service" [endpoint]="endpoint"></endpoint-detail>
+    <endpoint-detail *ngFor="let endpoint of service.endpoints; let endpointIndex = index;" [service]="service" [endpoint]="endpoint" [endpointIndex]="endpointIndex"></endpoint-detail>
     <create-endpoint></create-endpoint>
 </div>`
 })
