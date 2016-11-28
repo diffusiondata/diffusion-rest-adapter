@@ -6,18 +6,9 @@ import { ModelService } from './model.service';
 
 @Component({
     selector: 'endpoints-list',
-    template: `<div class="panel panel-default">
-    <div class="panel-heading">Endpoints</div>
-    <div class="panel-body">
-        <div *ngIf="service" class="list-group">
-            <div *ngFor="let endpoint of service.endpoints" class="list-group-item">
-                <endpoint-detail [service]="service" [endpoint]="endpoint"></endpoint-detail>
-            </div>
-            <div class="list-group-item">
-                <create-endpoint></create-endpoint>
-            </div>
-        </div>
-    </div>
+    template: `<div *ngIf="service">
+    <endpoint-detail *ngFor="let endpoint of service.endpoints" [service]="service" [endpoint]="endpoint"></endpoint-detail>
+    <create-endpoint></create-endpoint>
 </div>`
 })
 export class EndpointsListComponent implements OnInit {
