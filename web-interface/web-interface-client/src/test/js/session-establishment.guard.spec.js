@@ -9,13 +9,21 @@ describe('Session establishment guard', function() {
     var router;
     var guard;
     var session;
+    var route;
+    var state;
+    var stackService;
 
     beforeEach(function() {
         diffusionService = jasmine.createSpyObj('diffusionService', ['get']);
         router = jasmine.createSpyObj('router', ['navigate']);
         session = jasmine.createSpyObj('session', ['isConnected']);
+        stackService = jasmine.createSpyObj('stackService', ['push', 'pop']);
+        route = {};
+        state = {
+            url: 'url'
+        };
 
-        guard = new seg.SessionEstablishmentGuard(router, diffusionService);
+        guard = new seg.SessionEstablishmentGuard(router, diffusionService, stackService);
     });
 
     it('can be created', function() {
@@ -25,7 +33,8 @@ describe('Session establishment guard', function() {
     it('presents login page when no session', function(done) {
         when(diffusionService.get).isCalled.thenReturn(Promise.reject(new Error('No session')));
 
-        guard.canActivate().then((result) => {
+        guard.canActivate(route, state).then((result) => {
+            expect(stackService.push).toHaveBeenCalledWith('url');
             expect(result).toBe(false);
             expect(router.navigate).toHaveBeenCalled();
             done();
@@ -36,7 +45,8 @@ describe('Session establishment guard', function() {
         when(session.isConnected).isCalled.thenReturn(false);
         when(diffusionService.get).isCalled.thenReturn(Promise.resolve(session));
 
-        guard.canActivate().then((result) => {
+        guard.canActivate(route, state).then((result) => {
+            expect(stackService.push).toHaveBeenCalledWith('url');
             expect(result).toBe(false);
             expect(router.navigate).toHaveBeenCalled();
             done();
@@ -47,7 +57,7 @@ describe('Session establishment guard', function() {
         when(session.isConnected).isCalled.thenReturn(true);
         when(diffusionService.get).isCalled.thenReturn(Promise.resolve(session));
 
-        guard.canActivate().then((result) => {
+        guard.canActivate(route, state).then((result) => {
             expect(result).toBe(true);
             done();
         }, done.fail);

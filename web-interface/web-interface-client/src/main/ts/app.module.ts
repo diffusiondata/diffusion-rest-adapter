@@ -15,6 +15,7 @@ import { UnselectedComponent } from './unselected.component';
 import { RootComponent } from './root.component';
 import { DiffusionService } from './diffusion.service';
 import { ModelService } from './model.service';
+import { StackService } from './stack.service';
 import { SessionEstablishmentGuard } from './session-establishment.guard';
 import { EndpointTypePipe } from './endpoint-type.pipe';
 
@@ -30,6 +31,7 @@ const diffusionConfig: diffusion.Options = require('diffusionConfig');
         }),
         DiffusionService,
         ModelService,
+        StackService,
         SessionEstablishmentGuard ],
     declarations: [
         ServicesListComponent,

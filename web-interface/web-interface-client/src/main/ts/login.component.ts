@@ -1,6 +1,7 @@
 import { Component, Input, Inject } from '@angular/core';
 import { DiffusionService } from './diffusion.service';
 import { Router } from '@angular/router';
+import { StackService } from './stack.service';
 import * as diffusion from 'diffusion';
 
 @Component({
@@ -50,11 +51,13 @@ export class LoginComponent {
     constructor(
         private router: Router,
         private diffusionService: DiffusionService,
-        @Inject('diffusion.config') private diffusionConfig: diffusion.Options) {
+        @Inject('diffusion.config') private diffusionConfig: diffusion.Options,
+        private stackService: StackService) {
     }
 
     doLogin() {
         this.failed = false;
+        let returnUrl = this.stackService.pop();
         try {
             this.diffusionService.createSession({
                 host: this.diffusionConfig.host,
@@ -63,7 +66,12 @@ export class LoginComponent {
                 principal: this.user.username,
                 credentials: this.user.password
             }).then((session) => {
-                this.router.navigate(['/home']);
+                if (returnUrl) {
+                    this.router.navigate([returnUrl]);
+                }
+                else {
+                    this.router.navigate(['/home']);
+                }
             },
             (error) => {
                 this.failed = true;
