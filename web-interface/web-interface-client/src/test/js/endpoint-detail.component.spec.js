@@ -1,8 +1,7 @@
 
 require('reflect-metadata');
 
-var edc = require('../../../target/js/endpoint-detail.component'),
-    when = require('saywhen');
+var edc = require('../../../target/js/endpoint-detail.component');
 
 describe('Endpoint detail component', function() {
     var modelService;

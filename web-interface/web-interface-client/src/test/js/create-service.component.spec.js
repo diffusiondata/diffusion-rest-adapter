@@ -1,8 +1,7 @@
 
 require('reflect-metadata');
 
-var csc = require('../../../target/js/create-service.component'),
-    when = require('saywhen');
+var csc = require('../../../target/js/create-service.component');
 
 describe('Create service component', function() {
     var modelService;
@@ -27,7 +26,7 @@ describe('Create service component', function() {
     it('can create a service', function() {
         component.onCreateService();
 
-        expect(modelService.createService).toHaveBeenCalled;
+        expect(modelService.createService).toHaveBeenCalled();
     });
 
     it('can be reset', function(done) {

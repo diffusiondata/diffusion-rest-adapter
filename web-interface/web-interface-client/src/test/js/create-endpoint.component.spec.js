@@ -1,8 +1,7 @@
 
 require('reflect-metadata');
 
-var cec = require('../../../target/js/create-endpoint.component'),
-    when = require('saywhen');
+var cec = require('../../../target/js/create-endpoint.component');
 
 describe('Create endpoint component', function() {
     var activeService;
@@ -42,7 +41,7 @@ describe('Create endpoint component', function() {
 
         component.onCreateEndpoint();
 
-        expect(modelService.createEndpoint).toHaveBeenCalled;
+        expect(modelService.createEndpoint).toHaveBeenCalled();
     });
 
     it('can be reset', function(done) {
