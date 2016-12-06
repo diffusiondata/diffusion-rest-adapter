@@ -1,7 +1,7 @@
 
 require('reflect-metadata');
 
-var etp = require('../../../target/js/endpoints-type.pipe'),
+var etp = require('../../../target/js/endpoint-type.pipe'),
     when = require('saywhen');
 
 describe('Endpoint type pipe', function() {
