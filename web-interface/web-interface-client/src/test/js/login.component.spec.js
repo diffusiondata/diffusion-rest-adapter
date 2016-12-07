@@ -17,6 +17,11 @@ describe('Login component', function() {
     var component;
 
     beforeEach(function() {
+        global.window = {
+            location : {
+                protocol : 'https:'
+            }
+        };
         router = jasmine.createSpyObj('router', ['navigate']);
         diffusionService = jasmine.createSpyObj('diffusionService', ['createSession']);
         stackService = jasmine.createSpyObj('stackService', ['push', 'pop']);

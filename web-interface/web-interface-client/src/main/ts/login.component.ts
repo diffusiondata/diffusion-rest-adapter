@@ -11,6 +11,16 @@ import * as diffusion from 'diffusion';
             <h4>Login</h4>
         </div>
         <div class="panel-body">
+            <div *ngIf="!loadedSecurely" class="alert alert-danger" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error:</span>
+                Not loading web interface over TLS.
+            </div>
+            <div *ngIf="!diffusionConfig.secure" class="alert alert-danger" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error:</span>
+                Not connecting to Diffusion server over TLS.
+            </div>
             <form *ngIf="active" #loginForm="ngForm" (ngSubmit)="doLogin()" class="form-horizontal">
                 <div class="form-group" [class.has-error]="!username.valid && !username.pristine">
                     <label for="username" class="col-sm-2 control-label">Username</label>
@@ -47,6 +57,7 @@ export class LoginComponent {
         username: null,
         password: null
     };
+    loadedSecurely = window.location.protocol === "https:";
 
     constructor(
         private router: Router,
