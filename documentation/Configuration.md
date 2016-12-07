@@ -35,7 +35,7 @@ The `endpoints` are the endpoints to poll.
 
 | Also see |
 | --- |
-| [Services](documentation/Services.md) |
+| [Services](Services.md) |
 
 #### Endpoint
 
@@ -47,7 +47,7 @@ The `topic` indicates the topic that should be updated with the result of the po
 
 | Also see |
 | --- |
-| [Endpoints](documentation/Endpoints.md) |
+| [Endpoints](Endpoints.md) |
 
 #### Security
 
