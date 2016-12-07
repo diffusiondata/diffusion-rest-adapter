@@ -27,7 +27,7 @@ To run both the embedded services tests and the live service tests enable the pr
 
 The integration tests assume that the ports 8080, 8081, 8443 and 8444 are available to listen on.
 
-### Build artifact overview
+## Deployable artifact overview
 
 ### adapter-client
 
@@ -38,12 +38,20 @@ If the client is closed the JVM process will be terminated.
 ### adapter
 
 The `adapter` module is more suitable for embedding the adapter in other applications.
-It expects to be notified of changes to the model.
+It expects to be notified of changes to the model instead of reading from the file system.
 
 ### diffusion-rest-adapter-integrated-server
 
 The `diffusion-rest-adapter-integrated-server` module creates an integrated application server and `adapter-client`.
-It is used to deploy an instance of the Diffusion REST Adapter with a web front end as a CloudFoundry application.
+It is used to deploy an instance of the Diffusion REST Adapter with a web front end as a single executable.
+The configuration model is provided through the web interface.
+
+### cloudfoundry
+
+The `cloudfoundry` module provides an artifact that can be deployed as a CloudFoundry application.
+It deploys an instance of the `diffusion-rest-adapter-integrated-server` that connects to a
+[Reappt](https://www.reappt.io/) service bound to the application.
+It can be deployed to [IBM Bluemix](https://www.ibm.com/cloud-computing/bluemix/).
 
 ## Connecting to Diffusion
 
