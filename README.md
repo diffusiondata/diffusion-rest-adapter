@@ -1,5 +1,7 @@
 # Diffusion REST Adapter
 
+| Section |
+| --- |
 | [Overview](documentation/Overview.md) |
 | [Configuration](documentation/Configuration.md) |
 | [Services](documentation/Services.md) |
