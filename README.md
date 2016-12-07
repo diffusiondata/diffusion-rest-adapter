@@ -1,12 +1,13 @@
 # Diffusion REST Adapter
 
-| Section |
+| Documentation |
 | --- |
 | [Overview](documentation/Overview.md) |
 | [Configuration](documentation/Configuration.md) |
 | [Services](documentation/Services.md) |
 | [Endpoints](documentation/Endpoints.md) |
 | [ServiceSessions](documentation/ServiceSessions.md) |
+| [Web Interface](documentation/WebInterface.md) |
 
 ## Building
 
