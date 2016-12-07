@@ -24,8 +24,8 @@ If an `Endpoint` is initialised it will be added to the `ServiceSession`.
 
 When the `EventedUpdateSource` of a service enters stand by it waits to be made active.
 
-## Also see
-
+| Also see |
+| --- |
 | [Endpoints](Endpoints.md) |
 | [ServiceSessions](ServiceSessions.md) |
 | [README](../README.md) |

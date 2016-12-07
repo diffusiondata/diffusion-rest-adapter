@@ -23,8 +23,8 @@ an update to Diffusion.
 
 Stopping a `ServiceSession` cancels the tasks used to trigger a poll of all endpoints that have been added.
 
-## Also see
-
+| Also see |
+| --- |
 | [Services](Services.md) |
 | [Endpoints](Endpoints.md) |
 | [ServiceSessions](ServiceSessions.md) |

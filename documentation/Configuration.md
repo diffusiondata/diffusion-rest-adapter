@@ -33,8 +33,8 @@ The `topicRoot` is the part of the topic tree the service will be mapped to.
 The `security` describes how to the HTTP client will authenticate with the service.
 The `endpoints` are the endpoints to poll.
 
-##### Also see
-
+| Also see |
+| --- |
 | [Services](documentation/Services.md) |
 
 #### Endpoint
@@ -45,8 +45,8 @@ The `url` indicates the URL of the service to poll.
 The `topic` indicates the topic that should be updated with the result of the poll, this topic is relative to the
 `topicRoot` of the service.
 
-##### Also see
-
+| Also see |
+| --- |
 | [Endpoints](documentation/Endpoints.md) |
 
 #### Security
@@ -79,6 +79,6 @@ Once the model has been loaded it is converted to the latest implementation of t
 Adding default values or inferring values from the previous model.
 The filesystem persistence will write back changes to the model after the conversion process.
 
-## Also see
-
+| Also see |
+| --- |
 | [README](../README.md) |

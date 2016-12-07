@@ -12,8 +12,8 @@ When an endpoint is initialised the client performs a chain of actions.
 
 If any stage fails the subsequent stages will not be attempted.
 
-## Also see
-
+| Also see |
+| --- |
 | [Services](Services.md) |
 | [ServiceSessions](ServiceSessions.md) |
 | [README](../README.md) |

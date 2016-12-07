@@ -27,6 +27,6 @@ On reconfiguration new components are first created and started.
 Once the new components are in place the old components are stopped and removed.
 The new components may be in standby until the old components are stopped.
 
-## Also see
-
+| Also see |
+| --- |
 | [README](../README.md) |
