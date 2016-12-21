@@ -43,6 +43,13 @@
         </repository>
     </repositories>
 
+    <scm>
+        <url>https://github.com/pushtechnology/diffusion-rest-adapter</url>
+        <connection>scm:git:https://github.com/pushtechnology/diffusion-rest-adapter</connection>
+        <developerConnection>scm:git:ssh://git@github.com/pushtechnology/diffusion-rest-adapter.git</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
+
     <dependencyManagement>
         <dependencies>
             <dependency>
