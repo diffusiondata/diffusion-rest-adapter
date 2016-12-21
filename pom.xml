@@ -50,6 +50,19 @@
         <tag>HEAD</tag>
     </scm>
 
+    <distributionManagement>
+        <repository>
+            <id>public-push-repository</id>
+            <name>Public Push Repository</name>
+            <url>scp://download.pushtechnology.com</url>
+            <layout>default</layout>
+        </repository>
+        <site>
+            <id>website</id>
+            <url>https://pushtechnology.github.io/diffusion-transform/</url>
+        </site>
+    </distributionManagement>
+
     <dependencyManagement>
         <dependencies>
             <dependency>
