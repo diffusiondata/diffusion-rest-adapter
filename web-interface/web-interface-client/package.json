@@ -42,6 +42,7 @@
     "vinyl-source-stream": "1.1.0",
     "jasmine-terminal-reporter": "1.0.2",
     "jasmine-reporters": "2.2.0",
-    "gulp-istanbul": "0.10.3"
+    "gulp-istanbul": "0.10.3",
+    "diffusion": "5.9.2"
   }
 }
