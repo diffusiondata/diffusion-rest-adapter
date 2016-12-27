@@ -17,7 +17,7 @@
         <module>adapter</module>
         <module>adapter-client</module>
         <module>build-rules</module>
-        <module>cloudfoundry</module>
+        <module>cloudfoundry-parent</module>
         <module>configuration-model</module>
         <module>configuration-model-conversion</module>
         <module>configuration-persistence</module>
@@ -84,7 +84,7 @@
 
             <dependency>
                 <groupId>com.pushtechnology.adapters.rest</groupId>
-                <artifactId>cloudfoundry</artifactId>
+                <artifactId>cloudfoundry-parent</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
@@ -109,6 +109,12 @@
             <dependency>
                 <groupId>com.pushtechnology.adapters.rest</groupId>
                 <artifactId>configuration-store</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.pushtechnology.adapters.rest</groupId>
+                <artifactId>diffusion-rest-adapter-cf-integrated-server</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
