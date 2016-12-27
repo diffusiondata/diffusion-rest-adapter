@@ -32,7 +32,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
 
 import com.pushtechnology.adapters.rest.cloud.foundry.vcap.ReapptCredentials;
-import com.pushtechnology.adapters.rest.cloud.foundry.vcap.VCAPServicesParser;
+import com.pushtechnology.adapters.rest.cloud.foundry.vcap.VCAP;
 import com.pushtechnology.adapters.rest.integrated.server.RESTAdapterIntegratedServer;
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 
@@ -55,9 +55,7 @@ public final class CloudFoundryRESTAdapter {
     public static void main(String[] args) throws NamingException, IOException {
         // CHECKSTYLE.ON: UncommentedMain
 
-        final VCAPServicesParser parser = new VCAPServicesParser();
-        final ReapptCredentials reapptCredentials = parser
-            .parse(System.getenv("VCAP_SERVICES"))
+        final ReapptCredentials reapptCredentials = VCAP.getServices()
             .getReappt()
             .getCredentials();
 
@@ -85,11 +83,9 @@ public final class CloudFoundryRESTAdapter {
                 " configuration for the Diffusion client", e);
         }
 
-        final String port = System.getenv("PORT");
-
         RESTAdapterIntegratedServer
             .create(
-                port != null ? Integer.parseInt(port) : 3000,
+                VCAP.getPort(),
                 DiffusionConfig.builder()
                     .host(reapptCredentials.getHost())
                     .port(443)
