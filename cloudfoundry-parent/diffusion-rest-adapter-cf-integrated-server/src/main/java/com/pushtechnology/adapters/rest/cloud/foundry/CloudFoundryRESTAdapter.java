@@ -31,6 +31,8 @@ import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
 
+import com.pushtechnology.adapters.rest.cloud.foundry.vcap.ReapptCredentials;
+import com.pushtechnology.adapters.rest.cloud.foundry.vcap.VCAPServicesParser;
 import com.pushtechnology.adapters.rest.integrated.server.RESTAdapterIntegratedServer;
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 
@@ -40,6 +42,9 @@ import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
  * @author Push Technology Limited
  */
 public final class CloudFoundryRESTAdapter {
+    private CloudFoundryRESTAdapter() {
+    }
+
     /**
      * Entry point for Cloud Foundry REST Adapter.
      * @param args The command line arguments

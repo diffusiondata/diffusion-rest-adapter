@@ -13,26 +13,9 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.cloud.foundry;
-
-import java.util.List;
-
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-import lombok.Value;
-
 /**
- * Value object for a service.
+ * Package for Diffusion Cloud Foundry REST Adapter.
  *
  * @author Push Technology Limited
  */
-@Value
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class ServiceEntry<T> {
-    String name;
-    String plan;
-    String label;
-    String syslog_drain_url;
-    List<String> tags;
-    T credentials;
-}
+package com.pushtechnology.adapters.rest.cloud.foundry;

@@ -13,6 +13,7 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>vcap-parsing</module>
         <module>diffusion-rest-adapter-cf-integrated-server</module>
     </modules>
 

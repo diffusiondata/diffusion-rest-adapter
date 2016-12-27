@@ -1,4 +1,4 @@
-package com.pushtechnology.adapters.rest.cloud.foundry;
+package com.pushtechnology.adapters.rest.cloud.foundry.vcap;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -12,7 +12,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 /**
  * Unit tests for {@link VCAPServicesParser}.
  *
- * @author Matt Champion on 19/10/2016
+ * @author Push Technology Limited
  */
 public final class VCAPServicesParserTest {
 

@@ -13,18 +13,25 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.cloud.foundry;
+package com.pushtechnology.adapters.rest.cloud.foundry.vcap;
 
-import lombok.Value;
+import java.io.IOException;
+
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
- * Value object for Reappt service credentials.
+ * Parser for VCAP_SERVICES.
  *
  * @author Push Technology Limited
  */
-@Value
-public class ReapptCredentials {
-    String host;
-    String principal;
-    String credentials;
+public final class VCAPServicesParser {
+    private final ObjectMapper mapper = new ObjectMapper(new JsonFactory());
+
+    /**
+     * Parse a VCAP_SERVICES value.
+     */
+    public VCAPServices parse(String vcapServices) throws IOException {
+        return mapper.readValue(vcapServices, VCAPServices.class);
+    }
 }

@@ -13,7 +13,7 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.cloud.foundry;
+package com.pushtechnology.adapters.rest.cloud.foundry.vcap;
 
 import java.util.List;
 

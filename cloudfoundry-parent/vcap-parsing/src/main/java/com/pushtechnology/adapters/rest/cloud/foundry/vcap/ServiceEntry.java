@@ -13,25 +13,26 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.cloud.foundry;
+package com.pushtechnology.adapters.rest.cloud.foundry.vcap;
 
-import java.io.IOException;
+import java.util.List;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import lombok.Value;
 
 /**
- * Parser for VCAP_SERVICES.
+ * Value object for a service.
  *
  * @author Push Technology Limited
  */
-public final class VCAPServicesParser {
-    private final ObjectMapper mapper = new ObjectMapper(new JsonFactory());
-
-    /**
-     * Parse a VCAP_SERVICES value.
-     */
-    public VCAPServices parse(String vcapServices) throws IOException {
-        return mapper.readValue(vcapServices, VCAPServices.class);
-    }
+@Value
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class ServiceEntry<T> {
+    String name;
+    String plan;
+    String label;
+    String syslog_drain_url;
+    List<String> tags;
+    T credentials;
 }

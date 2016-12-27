@@ -156,6 +156,12 @@
 
             <dependency>
                 <groupId>com.pushtechnology.adapters.rest</groupId>
+                <artifactId>vcap-parsing</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.pushtechnology.adapters.rest</groupId>
                 <artifactId>web-interface</artifactId>
                 <version>${project.version}</version>
             </dependency>
