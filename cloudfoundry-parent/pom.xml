@@ -15,6 +15,7 @@
     <modules>
         <module>vcap-parsing</module>
         <module>diffusion-rest-adapter-cf-integrated-server</module>
+        <module>cloudfoundry-web-interface</module>
     </modules>
 
 </project>
