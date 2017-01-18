@@ -19,7 +19,7 @@ applications:
   route: "rest-adapter"
   memory: "384M"
   disk_quota: "256M"
-  path: "../../../target/cloudfoundry-1.0.0-SNAPSHOT.jar"
+  path: "../../../target/cloudfoundry-1.0.1-SNAPSHOT.jar"
   timeout: 60
   env:
     JVM: openjdk
