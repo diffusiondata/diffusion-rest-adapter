@@ -15,10 +15,6 @@
 
 package com.pushtechnology.adapters.rest.cloud.foundry.web;
 
-import static java.security.KeyStore.getDefaultType;
-import static javax.net.ssl.TrustManagerFactory.getDefaultAlgorithm;
-import static javax.net.ssl.TrustManagerFactory.getInstance;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -26,14 +22,6 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.security.KeyManagementException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
-
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManagerFactory;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.gzip.GzipHandler;
@@ -63,30 +51,6 @@ public final class CloudFoundryWebInterface {
         final ReapptCredentials reapptCredentials = VCAP.getServices()
             .getReappt()
             .getCredentials();
-
-        final SSLContext sslContext;
-        try (InputStream stream = Thread
-            .currentThread()
-            .getContextClassLoader()
-            .getResourceAsStream("reapptTruststore.jks")) {
-
-            final KeyStore keyStore = KeyStore.getInstance(getDefaultType());
-            keyStore.load(stream, null);
-            final TrustManagerFactory trustManagerFactory = getInstance(getDefaultAlgorithm());
-            trustManagerFactory.init(keyStore);
-            sslContext = SSLContext.getInstance("SSL");
-            sslContext.init(null, trustManagerFactory.getTrustManagers(), null);
-
-        }
-        catch (KeyStoreException |
-            CertificateException |
-            NoSuchAlgorithmException |
-            IOException |
-            KeyManagementException e) {
-
-            throw new IllegalArgumentException("An SSLContext could not be created as requested in the" +
-                " configuration for the Diffusion client", e);
-        }
 
         final Path tempFile = Files.createTempFile("web-interface-servlet", ".war");
         extractWarTo(tempFile);

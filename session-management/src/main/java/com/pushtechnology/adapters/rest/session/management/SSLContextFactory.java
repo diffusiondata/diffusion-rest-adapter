@@ -52,6 +52,13 @@ public final class SSLContextFactory extends ProviderAdapter {
     public SSLContext provide(Model model) {
         final String truststoreLocation = model.getTruststore();
 
+        return loadFromResource(truststoreLocation);
+    }
+
+    /**
+     * @return an {@link SSLContext} from a trust store
+     */
+    public static SSLContext loadFromResource(String truststoreLocation) {
         if (truststoreLocation == null) {
             return null;
         }
@@ -71,8 +78,7 @@ public final class SSLContextFactory extends ProviderAdapter {
             IOException |
             KeyManagementException e) {
 
-            throw new IllegalArgumentException("An SSLContext could not be created as requested in the" +
-                " configuration for the Diffusion client", e);
+            throw new IllegalArgumentException("An SSLContext could not be created from " + truststoreLocation, e);
         }
     }
 

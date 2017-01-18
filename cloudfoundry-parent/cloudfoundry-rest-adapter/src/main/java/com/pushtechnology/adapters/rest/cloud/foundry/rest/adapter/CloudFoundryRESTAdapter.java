@@ -15,23 +15,13 @@
 
 package com.pushtechnology.adapters.rest.cloud.foundry.rest.adapter;
 
-import static java.security.KeyStore.getDefaultType;
 import static java.util.concurrent.Executors.newSingleThreadScheduledExecutor;
-import static javax.net.ssl.TrustManagerFactory.getDefaultAlgorithm;
-import static javax.net.ssl.TrustManagerFactory.getInstance;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.security.KeyManagementException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
 import java.util.concurrent.ScheduledExecutorService;
 
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManagerFactory;
 
 import com.pushtechnology.adapters.rest.adapter.ServiceListener;
 import com.pushtechnology.adapters.rest.client.RESTAdapterClient;
@@ -39,6 +29,7 @@ import com.pushtechnology.adapters.rest.client.controlled.model.store.ClientCont
 import com.pushtechnology.adapters.rest.cloud.foundry.vcap.ReapptCredentials;
 import com.pushtechnology.adapters.rest.cloud.foundry.vcap.VCAP;
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
+import com.pushtechnology.adapters.rest.session.management.SSLContextFactory;
 import com.pushtechnology.diffusion.client.session.SessionAttributes;
 
 /**
@@ -64,29 +55,7 @@ public final class CloudFoundryRESTAdapter {
             .getReappt()
             .getCredentials();
 
-        final SSLContext sslContext;
-        try (InputStream stream = Thread
-            .currentThread()
-            .getContextClassLoader()
-            .getResourceAsStream("reapptTruststore.jks")) {
-
-            final KeyStore keyStore = KeyStore.getInstance(getDefaultType());
-            keyStore.load(stream, null);
-            final TrustManagerFactory trustManagerFactory = getInstance(getDefaultAlgorithm());
-            trustManagerFactory.init(keyStore);
-            sslContext = SSLContext.getInstance("SSL");
-            sslContext.init(null, trustManagerFactory.getTrustManagers(), null);
-
-        }
-        catch (KeyStoreException |
-            CertificateException |
-            NoSuchAlgorithmException |
-            IOException |
-            KeyManagementException e) {
-
-            throw new IllegalArgumentException("An SSLContext could not be created as requested in the" +
-                " configuration for the Diffusion client", e);
-        }
+        final SSLContext sslContext = SSLContextFactory.loadFromResource("reapptTruststore.jks");
 
         final ScheduledExecutorService executor = newSingleThreadScheduledExecutor();
 
