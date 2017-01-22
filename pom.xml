@@ -23,6 +23,7 @@
         <module>configuration-persistence</module>
         <module>configuration-store</module>
         <module>endpoints</module>
+        <module>metrics</module>
         <module>polling</module>
         <module>publication</module>
         <module>services</module>
@@ -128,6 +129,12 @@
             <dependency>
                 <groupId>com.pushtechnology.adapters.rest</groupId>
                 <artifactId>endpoints</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.pushtechnology.adapters.rest</groupId>
+                <artifactId>metrics</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
