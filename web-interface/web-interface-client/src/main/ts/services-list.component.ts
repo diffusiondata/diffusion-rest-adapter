@@ -8,13 +8,14 @@ import { ModelService } from './model.service';
     selector: 'services-list',
     template: `<div class="col-md-3">
     <div class="panel panel-default">
-        <div class="panel-body scroll-panel">
-            <div class="list-group">
-                <a *ngFor="let service of model.services" (click)="onSelect(service)" class="list-group-item"><span class="list-group-item-text">{{service.name}}</span></a>
-                <a routerLink="/createService" class="list-group-item"><span class="list-group-item-text">Create new service</span></a>
-            </div>
+        <div class="panel-heading">
+            <h3 class="panel-title">Services</h3>
         </div>
-    <div>
+        <ul class="list-group">
+            <li *ngFor="let service of model.services" (click)="onSelect(service)" class="list-group-item"><span class="list-group-item-text">{{service.name}}</span></li>
+            <li routerLink="/createService" class="list-group-item"><span class="list-group-item-text">Create new service</span></li>
+        </ul>
+    </div>
 </div>`
 })
 export class ServicesListComponent implements OnInit {
