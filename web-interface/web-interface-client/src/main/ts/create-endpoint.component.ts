@@ -8,7 +8,7 @@ import { Endpoint } from './model';
   selector: 'create-endpoint',
   template: `<div class="panel panel-default">
     <div class="panel-heading">
-        <a role="button" href="#create-endpoint" data-toggle="collapse"><h3 class="panel-title">Create endpoint<span class="pull-right clickable glyphicon glyphicon-chevron-up"></span></h3></a>
+        <a role="button" href="#create-endpoint" data-toggle="collapse"><h3 class="panel-title">Create endpoint<span class="pull-right clickable fa fa-chevron-down"></span></h3></a>
     </div>
     <div class="panel-body collapse" id="create-endpoint">
         <form *ngIf="active" #createEndpointForm="ngForm" (ngSubmit)="onCreateEndpoint($event)" class="form-horizontal">

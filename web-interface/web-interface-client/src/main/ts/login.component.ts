@@ -12,12 +12,12 @@ import * as diffusion from 'diffusion';
         </div>
         <div class="panel-body">
             <div *ngIf="!loadedSecurely" class="alert alert-danger" role="alert">
-                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="fa fa-exclamation" aria-hidden="true"></span>
                 <span class="sr-only">Error:</span>
                 Not loading web interface over TLS.
             </div>
             <div *ngIf="!diffusionConfig.secure" class="alert alert-danger" role="alert">
-                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="fa fa-exclamation" aria-hidden="true"></span>
                 <span class="sr-only">Error:</span>
                 Not connecting to Diffusion server over TLS.
             </div>

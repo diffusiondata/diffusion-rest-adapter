@@ -7,7 +7,7 @@ import { Service, Endpoint } from './model';
     selector: 'endpoint-detail',
     template: `<div class="panel panel-default">
     <div class="panel-heading">
-        <a role="button" href="#endpoint-{{endpointIndex}}" data-toggle="collapse"><h3 class="panel-title">{{endpoint.name}}<span class="pull-right clickable glyphicon glyphicon-chevron-up"></span></h3></a>
+        <a role="button" href="#endpoint-{{endpointIndex}}" data-toggle="collapse"><h3 class="panel-title">{{endpoint.name}}<span class="pull-right clickable fa fa-chevron-down"></span></h3></a>
     </div>
     <div class="panel-body collapse" id="endpoint-{{endpointIndex}}">
         <div class="form-horizontal">
