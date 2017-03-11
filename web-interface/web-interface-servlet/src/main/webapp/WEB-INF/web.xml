@@ -40,7 +40,7 @@
 
     <servlet-mapping>
         <servlet-name>DefaultServlet</servlet-name>
-        <url-pattern>/css/*</url-pattern>
+        <url-pattern>/style/*</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
