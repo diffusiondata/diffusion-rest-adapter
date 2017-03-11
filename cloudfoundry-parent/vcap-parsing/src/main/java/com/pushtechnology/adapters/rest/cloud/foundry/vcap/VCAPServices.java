@@ -27,22 +27,22 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public final class VCAPServices {
-    private final ServiceEntry<ReapptCredentials> reappt;
+    private final ServiceEntry<DiffusionCloudCredentials> diffusionCloud;
 
     /**
      * Constructor.
      */
-    public VCAPServices(@JsonProperty("push-reappt") List<ServiceEntry<ReapptCredentials>> reappts) {
-        if (reappts.size() < 1) {
+    public VCAPServices(@JsonProperty("push-reappt") List<ServiceEntry<DiffusionCloudCredentials>> diffusionClouds) {
+        if (diffusionClouds.size() < 1) {
             throw new IllegalArgumentException("The push-reappt key should contain a non-empty list");
         }
-        reappt = reappts.get(0);
+        diffusionCloud = diffusionClouds.get(0);
     }
 
     /**
-     * @return the Reappt services
+     * @return the Diffusion cloud services
      */
-    public ServiceEntry<ReapptCredentials> getReappt() {
-        return reappt;
+    public ServiceEntry<DiffusionCloudCredentials> getDiffusionCloud() {
+        return diffusionCloud;
     }
 }

@@ -26,7 +26,7 @@ import javax.net.ssl.SSLContext;
 import com.pushtechnology.adapters.rest.adapter.ServiceListener;
 import com.pushtechnology.adapters.rest.client.RESTAdapterClient;
 import com.pushtechnology.adapters.rest.client.controlled.model.store.ClientControlledModelStore;
-import com.pushtechnology.adapters.rest.cloud.foundry.vcap.ReapptCredentials;
+import com.pushtechnology.adapters.rest.cloud.foundry.vcap.DiffusionCloudCredentials;
 import com.pushtechnology.adapters.rest.cloud.foundry.vcap.VCAP;
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.session.management.SSLContextFactory;
@@ -51,8 +51,8 @@ public final class CloudFoundryRESTAdapter {
     public static void main(String[] args) throws NamingException, IOException {
         // CHECKSTYLE.ON: UncommentedMain
 
-        final ReapptCredentials reapptCredentials = VCAP.getServices()
-            .getReappt()
+        final DiffusionCloudCredentials diffusionCloudCredentials = VCAP.getServices()
+            .getDiffusionCloud()
             .getCredentials();
 
         final SSLContext sslContext = SSLContextFactory.loadFromResource("reapptTruststore.jks");
@@ -61,11 +61,11 @@ public final class CloudFoundryRESTAdapter {
 
         final DiffusionConfig diffusionConfig = DiffusionConfig
             .builder()
-            .host(reapptCredentials.getHost())
+            .host(diffusionCloudCredentials.getHost())
             .port(443)
             .secure(true)
-            .principal(reapptCredentials.getPrincipal())
-            .password(reapptCredentials.getCredentials())
+            .principal(diffusionCloudCredentials.getPrincipal())
+            .password(diffusionCloudCredentials.getCredentials())
             .connectionTimeout(SessionAttributes.DEFAULT_CONNECTION_TIMEOUT)
             .reconnectionTimeout(SessionAttributes.DEFAULT_RECONNECTION_TIMEOUT)
             .maximumMessageSize(SessionAttributes.DEFAULT_MAXIMUM_MESSAGE_SIZE)

@@ -20,7 +20,7 @@ import java.io.IOException;
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
 
-import com.pushtechnology.adapters.rest.cloud.foundry.vcap.ReapptCredentials;
+import com.pushtechnology.adapters.rest.cloud.foundry.vcap.DiffusionCloudCredentials;
 import com.pushtechnology.adapters.rest.cloud.foundry.vcap.VCAP;
 import com.pushtechnology.adapters.rest.integrated.server.RESTAdapterIntegratedServer;
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
@@ -45,8 +45,8 @@ public final class CloudFoundryRESTAdapter {
     public static void main(String[] args) throws NamingException, IOException {
         // CHECKSTYLE.ON: UncommentedMain
 
-        final ReapptCredentials reapptCredentials = VCAP.getServices()
-            .getReappt()
+        final DiffusionCloudCredentials diffusionCloudCredentials = VCAP.getServices()
+            .getDiffusionCloud()
             .getCredentials();
 
         final SSLContext sslContext = SSLContextFactory.loadFromResource("reapptTruststore.jks");
@@ -55,11 +55,11 @@ public final class CloudFoundryRESTAdapter {
             .create(
                 VCAP.getPort(),
                 DiffusionConfig.builder()
-                    .host(reapptCredentials.getHost())
+                    .host(diffusionCloudCredentials.getHost())
                     .port(443)
                     .secure(true)
-                    .principal(reapptCredentials.getPrincipal())
-                    .password(reapptCredentials.getCredentials()),
+                    .principal(diffusionCloudCredentials.getPrincipal())
+                    .password(diffusionCloudCredentials.getCredentials()),
                 sslContext)
             .start();
     }

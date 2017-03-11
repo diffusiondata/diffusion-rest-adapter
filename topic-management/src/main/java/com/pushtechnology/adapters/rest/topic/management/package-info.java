@@ -14,7 +14,7 @@
  *******************************************************************************/
 
 /**
- * Package for managing the topics of a Diffusion server or Reappt service.
+ * Package for managing the topics of a Diffusion server.
  *
  * @author Push Technology Limited
  */

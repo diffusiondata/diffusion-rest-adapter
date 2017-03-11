@@ -27,7 +27,7 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.gzip.GzipHandler;
 import org.eclipse.jetty.webapp.WebAppContext;
 
-import com.pushtechnology.adapters.rest.cloud.foundry.vcap.ReapptCredentials;
+import com.pushtechnology.adapters.rest.cloud.foundry.vcap.DiffusionCloudCredentials;
 import com.pushtechnology.adapters.rest.cloud.foundry.vcap.VCAP;
 
 /**
@@ -48,8 +48,8 @@ public final class CloudFoundryWebInterface {
     public static void main(String[] args) throws Exception {
         // CHECKSTYLE.ON: UncommentedMain
 
-        final ReapptCredentials reapptCredentials = VCAP.getServices()
-            .getReappt()
+        final DiffusionCloudCredentials diffusionCloudCredentials = VCAP.getServices()
+            .getDiffusionCloud()
             .getCredentials();
 
         final Path tempFile = Files.createTempFile("web-interface-servlet", ".war");
@@ -58,7 +58,7 @@ public final class CloudFoundryWebInterface {
         final Server jettyServer = new Server(VCAP.getPort());
         final WebAppContext webapp = new WebAppContext();
         webapp.setContextPath("/");
-        webapp.setInitParameter("host", reapptCredentials.getHost());
+        webapp.setInitParameter("host", diffusionCloudCredentials.getHost());
         webapp.setInitParameter("port", "443");
         webapp.setInitParameter("secure", "true");
         webapp.setWar(tempFile.toAbsolutePath().toString());

@@ -18,12 +18,12 @@ package com.pushtechnology.adapters.rest.cloud.foundry.vcap;
 import lombok.Value;
 
 /**
- * Value object for Reappt service credentials.
+ * Value object for Diffusion cloud service credentials.
  *
  * @author Push Technology Limited
  */
 @Value
-public class ReapptCredentials {
+public class DiffusionCloudCredentials {
     String host;
     String principal;
     String credentials;

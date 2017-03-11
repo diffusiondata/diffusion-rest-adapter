@@ -5,7 +5,7 @@ var lc = require('../../../target/js/login.component'),
     when = require('saywhen');
 
 describe('Login component', function() {
-    var reappt = {
+    var diffusionCloud = {
         host: 'example.reappt.io',
         port: 443,
         secure: true
@@ -26,7 +26,7 @@ describe('Login component', function() {
         diffusionService = jasmine.createSpyObj('diffusionService', ['createSession']);
         stackService = jasmine.createSpyObj('stackService', ['push', 'pop']);
 
-        component = new lc.LoginComponent(router, diffusionService, reappt, stackService);
+        component = new lc.LoginComponent(router, diffusionService, diffusionCloud, stackService);
     });
 
     it('can be created', function() {

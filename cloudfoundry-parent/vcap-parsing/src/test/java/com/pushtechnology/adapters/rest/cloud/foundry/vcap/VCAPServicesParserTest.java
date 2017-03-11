@@ -59,13 +59,13 @@ public final class VCAPServicesParserTest {
         final VCAPServices vcapServices = parser.parse(testVcapServices);
         assertNotNull(vcapServices);
 
-        final ServiceEntry<ReapptCredentials> serviceEntry = vcapServices.getReappt();
+        final ServiceEntry<DiffusionCloudCredentials> serviceEntry = vcapServices.getDiffusionCloud();
         assertNotNull(serviceEntry);
 
         assertEquals("push-reappt", serviceEntry.getLabel());
         assertEquals("cloudfoundry-name", serviceEntry.getName());
 
-        final ReapptCredentials credentials = serviceEntry.getCredentials();
+        final DiffusionCloudCredentials credentials = serviceEntry.getCredentials();
         assertNotNull(credentials);
 
         assertEquals("example.us.reappt.io", credentials.getHost());

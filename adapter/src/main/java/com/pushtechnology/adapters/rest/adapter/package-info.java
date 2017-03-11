@@ -14,7 +14,7 @@
  *******************************************************************************/
 
 /**
- * Package for adapter that polls REST services and republishes data to Diffusion servers or Reappt services.
+ * Package for adapter that polls REST services and republishes data to Diffusion servers.
  *
  * @author Push Technology Limited
  */

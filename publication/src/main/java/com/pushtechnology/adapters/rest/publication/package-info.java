@@ -14,7 +14,7 @@
  *******************************************************************************/
 
 /**
- * Package for publication of data to a Diffusion server or Reappt service.
+ * Package for publication of data to a Diffusion server.
  *
  * @author Push Technology Limited
  */

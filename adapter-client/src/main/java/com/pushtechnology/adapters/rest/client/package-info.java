@@ -14,7 +14,7 @@
  *******************************************************************************/
 
 /**
- * Package for Diffusion client that polls REST services and republishes data to Diffusion servers or Reappt services.
+ * Package for Diffusion client that polls REST services and republishes data to Diffusion servers.
  *
  * @author Push Technology Limited
  */

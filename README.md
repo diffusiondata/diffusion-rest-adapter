@@ -51,7 +51,7 @@ The configuration model is provided through the web interface.
 
 The `cloudfoundry` module provides an artifact that can be deployed as a CloudFoundry application.
 It deploys an instance of the `diffusion-rest-adapter-integrated-server` that connects to a
-[Reappt](https://www.reappt.io/) service bound to the application.
+[Diffusion Cloud](https://docs.pushtechnology.com/cloud/latest/) service bound to the application.
 It can be deployed to [IBM Bluemix](https://www.ibm.com/cloud-computing/bluemix/).
 
 ## Connecting to Diffusion
