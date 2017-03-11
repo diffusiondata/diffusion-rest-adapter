@@ -30,7 +30,7 @@ export class ModelService {
                 type: 'list-services'
             }))
             .then((response) => {
-                this.model.services = response
+                this.model.services = response as Service[];
                 return this.model;
             });
     }
