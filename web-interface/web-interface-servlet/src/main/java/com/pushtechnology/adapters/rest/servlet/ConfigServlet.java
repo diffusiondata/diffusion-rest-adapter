@@ -37,6 +37,7 @@ public final class ConfigServlet extends HttpServlet {
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         final ServletContext context = getServletContext();
         response.setContentType("application/javascript");
+        response.setCharacterEncoding("UTF-8");
         response.getWriter().println("window.diffusionConfig = {\n" +
             "host: \"" + context.getInitParameter("host") + "\",\n" +
             "port: " + context.getInitParameter("port") + ",\n" +
