@@ -10,8 +10,8 @@ import { ModelService } from './model.service';
 <div class="row">
     <div class="col-md-8">
         <div *ngIf="service" class="panel panel-default">
-            <div class="panel-heading page-header">
-                <h4>{{service.name}}</h4>
+            <div class="panel-heading">
+                <h3 class="panel-title">{{service.name}}</h3>
             </div>
             <div class="panel-body">
                 <div class="form-horizontal">

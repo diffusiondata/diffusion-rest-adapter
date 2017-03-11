@@ -10,8 +10,8 @@ import { Service } from './model';
 <div class="row">
     <div class="col-md-8">
         <div class="panel panel-default">
-            <div class="panel-heading page-header">
-                <h4>Create service</h4>
+            <div class="panel-heading">
+                <h3 class="panel-title">Create service</h3>
             </div>
             <div class="panel-body">
                 <form *ngIf="active" #createServiceForm="ngForm" (ngSubmit)="onCreateService($event)" class="form-horizontal">
