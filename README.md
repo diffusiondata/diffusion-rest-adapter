@@ -47,12 +47,31 @@ The `diffusion-rest-adapter-integrated-server` module creates an integrated appl
 It is used to deploy an instance of the Diffusion REST Adapter with a web front end as a single executable.
 The configuration model is provided through the web interface.
 
-### cloudfoundry
+### diffusion-rest-adapter-cf-integrated-server
 
-The `cloudfoundry` module provides an artifact that can be deployed as a CloudFoundry application.
+The `diffusion-rest-adapter-cf-integrated-server` module provides an artifact that can be deployed as a CloudFoundry
+application.
 It deploys an instance of the `diffusion-rest-adapter-integrated-server` that connects to a
 [Diffusion Cloud](https://docs.pushtechnology.com/cloud/latest/) service bound to the application.
 It can be deployed to [IBM Bluemix](https://www.ibm.com/cloud-computing/bluemix/).
+
+### cloudfoundry-rest-adapter
+
+The `cloudfoundry-rest-adapter` module provides an artifact that can be deployed as a CloudFoundry
+application.
+It deploys an instance of the `adapter-client` with the `client-controlled-model-store` that connects to a
+[Reappt](https://www.reappt.io/) service bound to the application.
+It can be deployed to [IBM Bluemix](https://www.ibm.com/cloud-computing/bluemix/).
+The `cloudfoundry-web-interface` should also be deployed along with it.
+
+### cloudfoundry-web-interface
+
+The `cloudfoundry-web-interface` module provides an artifact that can be deployed as a CloudFoundry
+application.
+It deploys an instance of the web interface that connects to a [Reappt](https://www.reappt.io/) service bound to the
+application.
+It can be deployed to [IBM Bluemix](https://www.ibm.com/cloud-computing/bluemix/).
+The `cloudfoundry-rest-adapter` should also be deployed along with it.
 
 ## Connecting to Diffusion
 
