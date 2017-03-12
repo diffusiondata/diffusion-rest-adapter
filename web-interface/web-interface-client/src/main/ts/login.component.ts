@@ -41,8 +41,8 @@ import * as diffusion from 'diffusion';
                         <button class="btn btn-primary" [disabled]="!loginForm.form.valid" type="submit">Login</button>
                     </div>
                 </div>
-                <div *ngIf="failed" class="form-group">
-                    <p class="bg-danger errorMessage col-sm-offset-2 col-sm-8">{{failureMessage}}</p>
+                <div *ngIf="failed" class="alert alert-danger col-sm-offset-2 col-sm-8" role="alert">
+                    <span>{{failureMessage}}</span>
                 </div>
             </form>
         </div>
