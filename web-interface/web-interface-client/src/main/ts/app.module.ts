@@ -16,8 +16,10 @@ import { RootComponent } from './root.component';
 import { DiffusionService } from './diffusion.service';
 import { ModelService } from './model.service';
 import { StackService } from './stack.service';
+import { ErrorService } from './error.service';
 import { SessionEstablishmentGuard } from './session-establishment.guard';
 import { EndpointTypePipe } from './endpoint-type.pipe';
+import {DisplayErrorComponent} from "./display-error.component";
 
 import { routing } from './app.routing';
 import * as diffusion from 'diffusion';
@@ -32,6 +34,7 @@ const diffusionConfig: diffusion.Options = require('diffusionConfig');
         DiffusionService,
         ModelService,
         StackService,
+        ErrorService,
         SessionEstablishmentGuard ],
     declarations: [
         ServicesListComponent,
@@ -42,6 +45,7 @@ const diffusionConfig: diffusion.Options = require('diffusionConfig');
         CreateEndpointComponent,
         EndpointDetailComponent,
         LoginComponent,
+        DisplayErrorComponent,
         RootComponent,
         EndpointTypePipe
     ],

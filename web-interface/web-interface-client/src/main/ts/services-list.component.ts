@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 
 import { Model, Service } from './model';
 import { ModelService } from './model.service';
+import { ErrorService } from "./error.service";
 
 @Component({
     selector: 'services-list',
@@ -24,7 +25,7 @@ export class ServicesListComponent implements OnInit {
     };
     showCreateComponent = false;
 
-    constructor(private router: Router, private modelService: ModelService) {
+    constructor(private router: Router, private modelService: ModelService, private errorService: ErrorService) {
         this.model = this.modelService.model;
     }
 
@@ -40,6 +41,7 @@ export class ServicesListComponent implements OnInit {
     ngOnInit(): void {
         this.modelService.getModel().then(model => {}, error => {
             console.error(error);
+            this.errorService.onError('Failed to load services');
         });
     }
 }
