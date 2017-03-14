@@ -27,5 +27,7 @@ export class DisplayErrorComponent implements OnInit, OnDestroy {
     setError(errorMessage: String) {
         this.hasError = true;
         this.errorMessage = errorMessage;
+        // Scroll to top so the failed operation appeared to do something
+        scrollTo(0, 0);
     }
 }
