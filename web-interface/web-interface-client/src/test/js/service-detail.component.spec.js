@@ -2,7 +2,8 @@
 require('reflect-metadata');
 
 var sdc = require('../../../target/js/service-detail.component'),
-    when = require('saywhen');
+    when = require('saywhen'),
+    p = require('when');
 
 describe('Service detail component', function() {
     var router;
@@ -25,7 +26,8 @@ describe('Service detail component', function() {
         activeRoute = {
             params: [activeService]
         };
-        when(modelService.getService).isCalledWith('service0').thenReturn(Promise.resolve(activeService));
+        when(modelService.getService).isCalledWith('service0').thenReturn(p.Promise.resolve(activeService));
+        when(modelService.deleteService).isCalled.thenReturn(p.Promise.resolve(null));
 
         component = new sdc.ServiceDetailComponent(router, modelService, activeRoute);
     });
@@ -52,9 +54,12 @@ describe('Service detail component', function() {
         setTimeout(function() {
             component.onRemove('service0');
 
-            expect(modelService.deleteService).toHaveBeenCalledWith('service0');
-            expect(router.navigate).toHaveBeenCalledWith(['/home']);
-            done();
+            // Timeout needed to allow promise to invoke resolve handler
+            setTimeout(function() {
+                expect(modelService.deleteService).toHaveBeenCalledWith('service0');
+                expect(router.navigate).toHaveBeenCalledWith(['/home']);
+                done();
+            });
         }, 0);
     });
 });

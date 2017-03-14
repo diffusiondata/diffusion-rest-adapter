@@ -70,7 +70,9 @@ export class ServiceDetailComponent implements OnInit {
     }
 
     onRemove() {
-        this.modelService.deleteService(this.service.name);
-        this.router.navigate(['/home']);
+        this.modelService
+            .deleteService(this.service.name)
+            .then(() => this.router.navigate(['/home']))
+            .catch(() => this.errorService.onError('Failed to remove service'));
     }
 }
