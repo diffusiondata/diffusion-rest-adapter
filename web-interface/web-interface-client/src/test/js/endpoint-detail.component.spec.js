@@ -1,7 +1,9 @@
 
 require('reflect-metadata');
 
-var edc = require('../../../target/js/endpoint-detail.component');
+var edc = require('../../../target/js/endpoint-detail.component'),
+    when = require('saywhen'),
+    p = require('when');
 
 describe('Endpoint detail component', function() {
     var modelService;
@@ -9,6 +11,7 @@ describe('Endpoint detail component', function() {
 
     beforeEach(function() {
         modelService = jasmine.createSpyObj('modelService', ['deleteEndpoint']);
+        when(modelService.deleteEndpoint).isCalled.thenReturn(p.Promise.resolve(null));
 
         component = new edc.EndpointDetailComponent(modelService);
         // Injected by Angular

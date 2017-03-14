@@ -1,6 +1,7 @@
 import { Component, Input } from '@angular/core';
 
 import { ModelService } from './model.service';
+import { ErrorService } from './error.service';
 import { Service, Endpoint } from './model';
 
 @Component({
@@ -37,10 +38,12 @@ export class EndpointDetailComponent {
     @Input() endpoint: Endpoint;
     @Input() endpointIndex: Number;
 
-    constructor(private modelService: ModelService) {
+    constructor(private modelService: ModelService, private errorService: ErrorService) {
     }
 
     onRemove() {
-        this.modelService.deleteEndpoint(this.service.name, this.endpoint.name);
+        this.modelService
+            .deleteEndpoint(this.service.name, this.endpoint.name)
+            .catch(() => this.errorService.onError('Failed to remove endpoint from service'));
     }
 }
