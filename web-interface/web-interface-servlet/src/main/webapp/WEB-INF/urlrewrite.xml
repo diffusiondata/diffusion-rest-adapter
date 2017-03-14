@@ -8,6 +8,10 @@
         <to type="forward" last="true">/index.html</to>
     </rule>
     <rule>
+        <from>^/login$</from>
+        <to type="forward" last="true">/index.html</to>
+    </rule>
+    <rule>
         <from>^/createService$</from>
         <to type="forward" last="true">/index.html</to>
     </rule>
