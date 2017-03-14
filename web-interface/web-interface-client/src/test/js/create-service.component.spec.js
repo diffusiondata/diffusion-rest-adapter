@@ -1,7 +1,8 @@
 
 require('reflect-metadata');
 
-var csc = require('../../../target/js/create-service.component');
+var csc = require('../../../target/js/create-service.component'),
+    when = require('saywhen');
 
 describe('Create service component', function() {
     var modelService;
@@ -11,6 +12,7 @@ describe('Create service component', function() {
     beforeEach(function() {
         router = jasmine.createSpyObj('router', ['navigate']);
         modelService = jasmine.createSpyObj('modelService', ['createService']);
+        when(modelService.createService).isCalled.thenReturn(Promise.resolve(null));
 
         component = new csc.CreateServiceComponent(router, modelService);
     });

@@ -1,8 +1,7 @@
-
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { ModelService } from './model.service';
-import { Service } from './model';
+import { ErrorService } from './error.service';
 
 @Component({
   selector: 'create-service',
@@ -105,9 +104,9 @@ export class CreateServiceComponent {
     authentication = {
         userid: null,
         password: null
-    }
+    };
 
-    constructor(private router: Router, private modelService: ModelService) {}
+    constructor(private router: Router, private modelService: ModelService, private errorService: ErrorService) {}
 
     onCreateService(): void {
         // Fix types from data entry
@@ -121,13 +120,13 @@ export class CreateServiceComponent {
             };
         }
 
-        try {
-            this.modelService.createService(this.service);
-            this.reset();
-        }
-        catch (e) {
-            console.error(e);
-        }
+        this.modelService
+            .createService(this.service)
+            .then(() => this.reset())
+            .catch(error => {
+                console.log(error);
+                this.errorService.onError('Failed to create service');
+            });
     }
 
     private reset(): void {
@@ -145,7 +144,7 @@ export class CreateServiceComponent {
         this.authentication = {
             userid: null,
             password: null
-        }
+        };
         setTimeout(() => this.active = true, 0);
     }
 }
