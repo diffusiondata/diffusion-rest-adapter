@@ -3,6 +3,7 @@ import { ActivatedRoute, Params } from '@angular/router';
 
 import { ModelService } from './model.service';
 import { Endpoint } from './model';
+import { ErrorService } from "./error.service";
 
 @Component({
   selector: 'create-endpoint',
@@ -64,16 +65,13 @@ export class CreateEndpointComponent implements OnInit {
         produces: 'auto'
     };
 
-    constructor(private modelService: ModelService, private route: ActivatedRoute) {}
+    constructor(private modelService: ModelService, private route: ActivatedRoute, private errorService: ErrorService) {}
 
     onCreateEndpoint(): void {
-        try {
-            this.modelService.createEndpoint(this.serviceName, this.endpoint);
-            this.reset();
-        }
-        catch (e) {
-            console.error(e);
-        }
+        this.modelService
+            .createEndpoint(this.serviceName, this.endpoint)
+            .then(() => this.reset())
+            .catch(() => this.errorService.onError('Failed to create endpoint for service'));
     }
 
     private reset(): void {

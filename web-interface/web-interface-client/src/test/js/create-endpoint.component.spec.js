@@ -1,7 +1,8 @@
 
 require('reflect-metadata');
 
-var cec = require('../../../target/js/create-endpoint.component');
+var cec = require('../../../target/js/create-endpoint.component'),
+    when = require('saywhen');
 
 describe('Create endpoint component', function() {
     var activeService;
@@ -18,6 +19,7 @@ describe('Create endpoint component', function() {
             params: [activeService]
         };
         modelService = jasmine.createSpyObj('modelService', ['createEndpoint']);
+        when(modelService.createEndpoint).isCalled.thenReturn(Promise.resolve(null));
 
         component = new cec.CreateEndpointComponent(modelService, activeRoute);
     });
