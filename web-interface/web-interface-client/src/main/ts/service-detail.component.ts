@@ -3,6 +3,7 @@ import { ActivatedRoute, Params, Router } from '@angular/router';
 
 import { Service } from './model';
 import { ModelService } from './model.service';
+import { ErrorService } from './error.service';
 
 @Component({
   selector: 'service-detail',
@@ -52,12 +53,19 @@ import { ModelService } from './model.service';
 export class ServiceDetailComponent implements OnInit {
     private service: Service;
 
-    constructor(private router: Router, private modelService: ModelService, private route: ActivatedRoute) {}
+    constructor(
+        private router: Router,
+        private modelService: ModelService,
+        private route: ActivatedRoute,
+        private errorService: ErrorService) {}
 
     ngOnInit(): void {
         this.route.params.forEach((params: Params) => {
             let name: string = params['name'];
-            this.modelService.getService(name).then(service => this.service = service);
+            this.modelService
+                .getService(name)
+                .then(service => this.service = service)
+                .catch(() => this.errorService.onError('Failed to load service detail'));
         });
     }
 
