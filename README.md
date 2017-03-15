@@ -8,6 +8,7 @@
 | [Endpoints](documentation/Endpoints.md) |
 | [ServiceSessions](documentation/ServiceSessions.md) |
 | [Web Interface](documentation/WebInterface.md) |
+| [CloudFoundry](documentation/CloudFoundry.md) |
 
 ## Building
 
