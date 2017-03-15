@@ -55,7 +55,7 @@ public final class CloudFoundryRESTAdapter {
             .getDiffusionCloud()
             .getCredentials();
 
-        final SSLContext sslContext = SSLContextFactory.loadFromResource("reapptTruststore.jks");
+        final SSLContext sslContext = SSLContextFactory.loadFromResource("diffusionCloudTruststore.jks");
 
         final ScheduledExecutorService executor = newSingleThreadScheduledExecutor();
 
