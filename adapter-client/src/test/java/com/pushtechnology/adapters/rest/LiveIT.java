@@ -102,9 +102,10 @@ public final class LiveIT {
     }
 
     @Test
-    public void testInitialValuesAreRecievedForEndpoints() throws IOException {
+    public void testInitialValuesAreReceivedForEndpoints() throws IOException {
         final ServiceConfig bitcoinaverage = ServiceConfig
             .builder()
+            .name("bitcoin")
             .host("api.bitcoinaverage.com")
             .port(443)
             .secure(true)
@@ -120,6 +121,7 @@ public final class LiveIT {
 
         final ServiceConfig icndb = ServiceConfig
             .builder()
+            .name("icndb")
             .host("api.icndb.com")
             .port(80)
             .secure(false)
