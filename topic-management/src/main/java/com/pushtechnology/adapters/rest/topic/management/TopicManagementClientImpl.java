@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.pushtechnology.adapters.rest.endpoints.EndpointType;
+import com.pushtechnology.adapters.rest.metrics.TopicCreationListener;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.diffusion.client.callbacks.Registration;
@@ -38,12 +39,14 @@ import net.jcip.annotations.GuardedBy;
 public final class TopicManagementClientImpl implements TopicManagementClient {
     @GuardedBy("this")
     private final Map<ServiceConfig, Registration> handles = new HashMap<>();
+    private final TopicCreationListener topicCreationListener;
     private final Session session;
 
     /**
      * Constructor.
      */
-    public TopicManagementClientImpl(Session session) {
+    public TopicManagementClientImpl(TopicCreationListener topicCreationListener, Session session) {
+        this.topicCreationListener = topicCreationListener;
         this.session = session;
     }
 
@@ -70,9 +73,15 @@ public final class TopicManagementClientImpl implements TopicManagementClient {
         final String topicPath = serviceConfig.getTopicPathRoot() + "/" + endpointConfig.getTopicPath();
         final TopicType topicType = EndpointType.from(produces).getTopicType();
 
+        topicCreationListener.onTopicCreationRequest(serviceConfig, endpointConfig);
         session
             .feature(TopicControl.class)
-            .addTopic(topicPath, topicType, new TopicSetupCallback(callback));
+            .addTopic(
+                topicPath,
+                topicType,
+                new TopicSetupCallback(
+                    new ListenerNotifierWithoutInitialValue(topicCreationListener, serviceConfig, endpointConfig),
+                    callback));
     }
 
     @SuppressWarnings("deprecation")
@@ -87,9 +96,20 @@ public final class TopicManagementClientImpl implements TopicManagementClient {
         final String topicPath = serviceConfig.getTopicPathRoot() + "/" + endpointConfig.getTopicPath();
         final TopicType topicType = EndpointType.from(produces).getTopicType();
 
+        topicCreationListener.onTopicCreationRequest(serviceConfig, endpointConfig, initialValue);
         session
             .feature(TopicControl.class)
-            .addTopic(topicPath, topicType, initialValue, new TopicSetupCallback(callback));
+            .addTopic(
+                topicPath,
+                topicType,
+                initialValue,
+                new TopicSetupCallback(
+                    new ListenerNotifierWithInitialValue(
+                        topicCreationListener,
+                        serviceConfig,
+                        endpointConfig,
+                        initialValue),
+                    callback));
     }
 
     @Override

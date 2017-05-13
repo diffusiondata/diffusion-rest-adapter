@@ -33,6 +33,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 
+import com.pushtechnology.adapters.rest.metrics.TopicCreationListener;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.diffusion.client.callbacks.Registration;
@@ -60,6 +61,8 @@ public final class TopicManagementClientImplTest {
     private Binary binary;
     @Mock
     private Registration registration;
+    @Mock
+    private TopicCreationListener topicCreationListener;
     @Captor
     private ArgumentCaptor<TopicControl.AddCallback> callbackCaptor;
 
@@ -100,7 +103,7 @@ public final class TopicManagementClientImplTest {
     public void setUp() {
         initMocks(this);
 
-        topicManagementClient = new TopicManagementClientImpl(session);
+        topicManagementClient = new TopicManagementClientImpl(topicCreationListener, session);
 
         when(session.feature(TopicControl.class)).thenReturn(topicControl);
         when(topicControl.removeTopicsWithSession(any())).thenReturn(CompletableFuture.completedFuture(registration));
@@ -108,7 +111,7 @@ public final class TopicManagementClientImplTest {
 
     @After
     public void postConditions() {
-        verifyNoMoreInteractions(topicControl, addCallback);
+        verifyNoMoreInteractions(topicControl, addCallback, topicCreationListener);
     }
 
     @Test
@@ -123,6 +126,7 @@ public final class TopicManagementClientImplTest {
     public void addJSONEndpoint() {
         topicManagementClient.addEndpoint(serviceConfig, jsonEndpointConfig, addCallback);
 
+        verify(topicCreationListener).onTopicCreationRequest(serviceConfig, jsonEndpointConfig);
         verify(topicControl).addTopic(eq("service/jsonEndpoint"), eq(TopicType.JSON), callbackCaptor.capture());
 
         callbackCaptor.getValue().onDiscard();
@@ -135,6 +139,7 @@ public final class TopicManagementClientImplTest {
     public void addBinaryEndpoint() {
         topicManagementClient.addEndpoint(serviceConfig, binaryEndpointConfig, addCallback);
 
+        verify(topicCreationListener).onTopicCreationRequest(serviceConfig, binaryEndpointConfig);
         verify(topicControl).addTopic(eq("service/binaryEndpoint"), eq(TopicType.BINARY), callbackCaptor.capture());
 
         callbackCaptor.getValue().onDiscard();
@@ -147,6 +152,7 @@ public final class TopicManagementClientImplTest {
     public void addStringEndpoint() {
         topicManagementClient.addEndpoint(serviceConfig, stringEndpointConfig, addCallback);
 
+        verify(topicCreationListener).onTopicCreationRequest(serviceConfig, stringEndpointConfig);
         verify(topicControl).addTopic(eq("service/stringEndpoint"), eq(TopicType.BINARY), callbackCaptor.capture());
 
         callbackCaptor.getValue().onDiscard();
@@ -159,6 +165,7 @@ public final class TopicManagementClientImplTest {
     public void addJSONEndpointWithValue() {
         topicManagementClient.addEndpoint(serviceConfig, jsonEndpointConfig, json, addCallback);
 
+        verify(topicCreationListener).onTopicCreationRequest(serviceConfig, jsonEndpointConfig, json);
         verify(topicControl)
             .addTopic(eq("service/jsonEndpoint"), eq(TopicType.JSON), eq(json), callbackCaptor.capture());
 
@@ -172,6 +179,7 @@ public final class TopicManagementClientImplTest {
     public void addBinaryEndpointWithValue() {
         topicManagementClient.addEndpoint(serviceConfig, binaryEndpointConfig, binary, addCallback);
 
+        verify(topicCreationListener).onTopicCreationRequest(serviceConfig, binaryEndpointConfig, binary);
         verify(topicControl)
             .addTopic(eq("service/binaryEndpoint"), eq(TopicType.BINARY), eq(binary), callbackCaptor.capture());
 
@@ -185,6 +193,7 @@ public final class TopicManagementClientImplTest {
     public void addStringEndpointWithValue() {
         topicManagementClient.addEndpoint(serviceConfig, stringEndpointConfig, binary, addCallback);
 
+        verify(topicCreationListener).onTopicCreationRequest(serviceConfig, stringEndpointConfig, binary);
         verify(topicControl)
             .addTopic(eq("service/stringEndpoint"), eq(TopicType.BINARY), isA(Binary.class), callbackCaptor.capture());
 

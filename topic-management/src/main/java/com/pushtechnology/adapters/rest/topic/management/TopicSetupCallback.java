@@ -24,22 +24,26 @@ import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
  * @author Push Technology Limited
  */
 public final class TopicSetupCallback implements TopicControl.AddCallback {
+    private final ListenerNotifier listenerNotifier;
     private final TopicControl.AddCallback delegate;
 
     /**
      * Constructor.
      */
-    public TopicSetupCallback(TopicControl.AddCallback delegate) {
+    public TopicSetupCallback(ListenerNotifier listenerNotifier, TopicControl.AddCallback delegate) {
+        this.listenerNotifier = listenerNotifier;
         this.delegate = delegate;
     }
 
     @Override
     public void onTopicAdded(String topicPath) {
+        listenerNotifier.notifyTopicCreated();
         delegate.onTopicAdded(topicPath);
     }
 
     @Override
     public void onTopicAddFailed(String topicPath, TopicAddFailReason reason) {
+        listenerNotifier.notifyTopicCreationFailed(reason);
         if (TopicAddFailReason.EXISTS.equals(reason)) {
             delegate.onTopicAdded(topicPath);
         }
