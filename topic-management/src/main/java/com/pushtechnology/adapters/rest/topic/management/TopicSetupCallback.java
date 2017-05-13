@@ -15,6 +15,7 @@
 
 package com.pushtechnology.adapters.rest.topic.management;
 
+import com.pushtechnology.adapters.rest.metrics.TopicCreationListener.TopicCreationCompletionListener;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicAddFailReason;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 
@@ -24,26 +25,26 @@ import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
  * @author Push Technology Limited
  */
 public final class TopicSetupCallback implements TopicControl.AddCallback {
-    private final ListenerNotifier listenerNotifier;
+    private final TopicCreationCompletionListener completionListener;
     private final TopicControl.AddCallback delegate;
 
     /**
      * Constructor.
      */
-    public TopicSetupCallback(ListenerNotifier listenerNotifier, TopicControl.AddCallback delegate) {
-        this.listenerNotifier = listenerNotifier;
+    public TopicSetupCallback(TopicCreationCompletionListener completionListener, TopicControl.AddCallback delegate) {
+        this.completionListener = completionListener;
         this.delegate = delegate;
     }
 
     @Override
     public void onTopicAdded(String topicPath) {
-        listenerNotifier.notifyTopicCreated();
+        completionListener.onTopicCreated();
         delegate.onTopicAdded(topicPath);
     }
 
     @Override
     public void onTopicAddFailed(String topicPath, TopicAddFailReason reason) {
-        listenerNotifier.notifyTopicCreationFailed(reason);
+        completionListener.onTopicCreationFailed(reason);
         if (TopicAddFailReason.EXISTS.equals(reason)) {
             delegate.onTopicAdded(topicPath);
         }

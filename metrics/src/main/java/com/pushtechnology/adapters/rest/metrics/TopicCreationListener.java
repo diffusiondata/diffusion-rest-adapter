@@ -32,7 +32,9 @@ public interface TopicCreationListener {
      * @param serviceConfig the service
      * @param endpointConfig the endpoint
      */
-    void onTopicCreationRequest(ServiceConfig serviceConfig, EndpointConfig endpointConfig);
+    TopicCreationCompletionListener onTopicCreationRequest(
+        ServiceConfig serviceConfig,
+        EndpointConfig endpointConfig);
 
     /**
      * Notified when an attempt to create a Diffusion topic is made and there is an initial value.
@@ -41,84 +43,58 @@ public interface TopicCreationListener {
      * @param endpointConfig the endpoint
      * @param value the initial value
      */
-    void onTopicCreationRequest(ServiceConfig serviceConfig, EndpointConfig endpointConfig, Bytes value);
-
-    /**
-     * Notified when a Diffusion topic is created and there is no initial value.
-     *
-     * @param serviceConfig the service
-     * @param endpointConfig the endpoint
-     */
-    void onTopicCreated(ServiceConfig serviceConfig, EndpointConfig endpointConfig);
-
-    /**
-     * Notified when a Diffusion topic is created and there is an initial value.
-     *
-     * @param serviceConfig the service
-     * @param endpointConfig the endpoint
-     * @param value the initial value
-     */
-    void onTopicCreated(ServiceConfig serviceConfig, EndpointConfig endpointConfig, Bytes value);
-
-    /**
-     * Notified when a Diffusion topic cannot be created and there is no initial value.
-     *
-     * @param serviceConfig the service
-     * @param endpointConfig the endpoint
-     * @param reason the cause of failure
-     */
-    void onTopicCreationFailed(
+    TopicCreationCompletionListener onTopicCreationRequest(
         ServiceConfig serviceConfig,
         EndpointConfig endpointConfig,
-        TopicAddFailReason reason);
+        Bytes value);
 
     /**
-     * Notified when a Diffusion topic cannot be created and there is an initial value.
-     *
-     * @param serviceConfig the service
-     * @param endpointConfig the endpoint
-     * @param value the initial value
-     * @param reason the cause of failure
+     * Listener for the completion of a topic creation request.
      */
-    void onTopicCreationFailed(
-        ServiceConfig serviceConfig,
-        EndpointConfig endpointConfig,
-        Bytes value,
-        TopicAddFailReason reason);
+    interface TopicCreationCompletionListener {
+        /**
+         * Notified when a Diffusion topic is created.
+         */
+        void onTopicCreated();
+
+        /**
+         * Notified when a Diffusion topic cannot be created.
+         *
+         * @param reason the cause of failure
+         */
+        void onTopicCreationFailed(TopicAddFailReason reason);
+
+        /**
+         * Implementation of {@link TopicCreationCompletionListener} that ignores notifications.
+         */
+        TopicCreationCompletionListener NULL_LISTENER = new TopicCreationCompletionListener() {
+            @Override
+            public void onTopicCreated() {
+            }
+
+            @Override
+            public void onTopicCreationFailed(TopicAddFailReason reason) {
+            }
+        };
+    }
 
     /**
      * Implementation of {@link TopicCreationListener} that ignores notifications.
      */
     TopicCreationListener NULL_LISTENER = new TopicCreationListener() {
         @Override
-        public void onTopicCreationRequest(ServiceConfig serviceConfig, EndpointConfig endpointConfig) {
+        public TopicCreationCompletionListener onTopicCreationRequest(
+                ServiceConfig serviceConfig,
+                EndpointConfig endpointConfig) {
+            return TopicCreationCompletionListener.NULL_LISTENER;
         }
 
         @Override
-        public void onTopicCreationRequest(ServiceConfig serviceConfig, EndpointConfig endpointConfig, Bytes value) {
-        }
-
-        @Override
-        public void onTopicCreated(ServiceConfig serviceConfig, EndpointConfig endpointConfig) {
-        }
-
-        @Override
-        public void onTopicCreated(ServiceConfig serviceConfig, EndpointConfig endpointConfig, Bytes value) {
-        }
-
-        @Override
-        public void onTopicCreationFailed(
-            ServiceConfig serviceConfig,
-            EndpointConfig endpointConfig,
-            TopicAddFailReason reason) {
-        }
-
-        @Override
-        public void onTopicCreationFailed(
-            ServiceConfig serviceConfig,
-            EndpointConfig endpointConfig,
-            Bytes value,
-            TopicAddFailReason reason) {
+        public TopicCreationCompletionListener onTopicCreationRequest(
+                ServiceConfig serviceConfig,
+                EndpointConfig endpointConfig,
+                Bytes value) {
+            return TopicCreationCompletionListener.NULL_LISTENER;
         }
     };
 }

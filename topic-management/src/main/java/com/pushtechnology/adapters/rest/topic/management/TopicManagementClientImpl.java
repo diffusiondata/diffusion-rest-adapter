@@ -20,6 +20,7 @@ import java.util.Map;
 
 import com.pushtechnology.adapters.rest.endpoints.EndpointType;
 import com.pushtechnology.adapters.rest.metrics.TopicCreationListener;
+import com.pushtechnology.adapters.rest.metrics.TopicCreationListener.TopicCreationCompletionListener;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.diffusion.client.callbacks.Registration;
@@ -73,15 +74,14 @@ public final class TopicManagementClientImpl implements TopicManagementClient {
         final String topicPath = serviceConfig.getTopicPathRoot() + "/" + endpointConfig.getTopicPath();
         final TopicType topicType = EndpointType.from(produces).getTopicType();
 
-        topicCreationListener.onTopicCreationRequest(serviceConfig, endpointConfig);
+        final TopicCreationCompletionListener completionListener =
+            topicCreationListener.onTopicCreationRequest(serviceConfig, endpointConfig);
         session
             .feature(TopicControl.class)
             .addTopic(
                 topicPath,
                 topicType,
-                new TopicSetupCallback(
-                    new ListenerNotifierWithoutInitialValue(topicCreationListener, serviceConfig, endpointConfig),
-                    callback));
+                new TopicSetupCallback(completionListener, callback));
     }
 
     @SuppressWarnings("deprecation")
@@ -96,20 +96,15 @@ public final class TopicManagementClientImpl implements TopicManagementClient {
         final String topicPath = serviceConfig.getTopicPathRoot() + "/" + endpointConfig.getTopicPath();
         final TopicType topicType = EndpointType.from(produces).getTopicType();
 
-        topicCreationListener.onTopicCreationRequest(serviceConfig, endpointConfig, initialValue);
+        final TopicCreationCompletionListener completionListener =
+            topicCreationListener.onTopicCreationRequest(serviceConfig, endpointConfig, initialValue);
         session
             .feature(TopicControl.class)
             .addTopic(
                 topicPath,
                 topicType,
                 initialValue,
-                new TopicSetupCallback(
-                    new ListenerNotifierWithInitialValue(
-                        topicCreationListener,
-                        serviceConfig,
-                        endpointConfig,
-                        initialValue),
-                    callback));
+                new TopicSetupCallback(completionListener, callback));
     }
 
     @Override

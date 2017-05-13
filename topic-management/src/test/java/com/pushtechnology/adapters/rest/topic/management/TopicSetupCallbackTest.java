@@ -24,6 +24,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 
+import com.pushtechnology.adapters.rest.metrics.TopicCreationListener.TopicCreationCompletionListener;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicAddFailReason;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 
@@ -36,7 +37,7 @@ public final class TopicSetupCallbackTest {
     @Mock
     private TopicControl.AddCallback delegate;
     @Mock
-    private ListenerNotifier listenerNotifier;
+    private TopicCreationCompletionListener completionListener;
 
     private TopicControl.AddCallback callback;
 
@@ -44,12 +45,12 @@ public final class TopicSetupCallbackTest {
     public void setUp() {
         initMocks(this);
 
-        callback = new TopicSetupCallback(listenerNotifier, delegate);
+        callback = new TopicSetupCallback(completionListener, delegate);
     }
 
     @After
     public void postConditions() {
-        verifyNoMoreInteractions(delegate, listenerNotifier);
+        verifyNoMoreInteractions(delegate, completionListener);
     }
 
     @Test
@@ -57,7 +58,7 @@ public final class TopicSetupCallbackTest {
         callback.onTopicAdded("a/topic");
 
         verify(delegate).onTopicAdded("a/topic");
-        verify(listenerNotifier).notifyTopicCreated();
+        verify(completionListener).onTopicCreated();
     }
 
     @Test
@@ -65,7 +66,7 @@ public final class TopicSetupCallbackTest {
         callback.onTopicAddFailed("a/topic", TopicAddFailReason.TOPIC_NOT_FOUND);
 
         verify(delegate).onTopicAddFailed("a/topic", TopicAddFailReason.TOPIC_NOT_FOUND);
-        verify(listenerNotifier).notifyTopicCreationFailed(TopicAddFailReason.TOPIC_NOT_FOUND);
+        verify(completionListener).onTopicCreationFailed(TopicAddFailReason.TOPIC_NOT_FOUND);
     }
 
     @Test
@@ -80,6 +81,6 @@ public final class TopicSetupCallbackTest {
         callback.onTopicAddFailed("a/topic", TopicAddFailReason.EXISTS);
 
         verify(delegate).onTopicAdded("a/topic");
-        verify(listenerNotifier).notifyTopicCreationFailed(TopicAddFailReason.EXISTS);
+        verify(completionListener).onTopicCreationFailed(TopicAddFailReason.EXISTS);
     }
 }
