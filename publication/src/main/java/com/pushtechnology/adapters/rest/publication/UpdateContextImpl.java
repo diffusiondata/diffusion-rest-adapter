@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.ValueUpdater;
 import com.pushtechnology.diffusion.client.session.Session;
+import com.pushtechnology.diffusion.datatype.Bytes;
 
 /**
  * Implementation of {@link UpdateContext} that supports recovery.
@@ -31,7 +32,7 @@ import com.pushtechnology.diffusion.client.session.Session;
  * @param <T> The type of updates the context accepts
  * @author Push Technology Limited
  */
-/*package*/ final class UpdateContextImpl<T> implements UpdateContext<T>, Session.Listener {
+/*package*/ final class UpdateContextImpl<T extends Bytes> implements UpdateContext<T>, Session.Listener {
     private static final Logger LOG = LoggerFactory.getLogger(UpdateContextImpl.class);
     private final AtomicReference<T> cachedValue = new AtomicReference<>(null);
     private final Session session;

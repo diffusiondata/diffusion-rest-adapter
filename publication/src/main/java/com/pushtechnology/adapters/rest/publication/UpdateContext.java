@@ -15,13 +15,15 @@
 
 package com.pushtechnology.adapters.rest.publication;
 
+import com.pushtechnology.diffusion.datatype.Bytes;
+
 /**
  * Update context for an endpoint.
  *
  * @param <T> The type of updates the context accepts
  * @author Push Technology Limited
  */
-public interface UpdateContext<T> {
+public interface UpdateContext<T extends Bytes> {
     /**
      * Publish an update to a Diffusion server.
      */
