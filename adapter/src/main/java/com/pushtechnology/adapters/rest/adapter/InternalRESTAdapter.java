@@ -27,6 +27,7 @@ import javax.net.ssl.SSLContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.pushtechnology.adapters.rest.metrics.PollListener;
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
@@ -191,7 +192,7 @@ public final class InternalRESTAdapter implements RESTAdapterListener, AutoClose
     }
 
     private void reconfigureServiceManager() {
-        endpointClient = new EndpointClientImpl(currentModel, sslContext, httpClientFactory);
+        endpointClient = new EndpointClientImpl(currentModel, sslContext, httpClientFactory, PollListener.NULL_LISTENER);
         final ServiceSessionStarterImpl serviceSessionStarter = new ServiceSessionStarterImpl(
             topicManagementClient,
             endpointClient,

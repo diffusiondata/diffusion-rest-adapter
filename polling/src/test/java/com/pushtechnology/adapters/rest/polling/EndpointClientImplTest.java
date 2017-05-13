@@ -28,6 +28,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 
+import com.pushtechnology.adapters.rest.metrics.PollListener;
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
@@ -53,6 +54,8 @@ public final class EndpointClientImplTest {
     private HttpEntity entity;
     @Mock
     private StatusLine statusLine;
+    @Mock
+    private PollListener pollListener;
     @Captor
     private ArgumentCaptor<FutureCallback<HttpResponse>> callbackCaptor;
     @Captor
@@ -98,12 +101,12 @@ public final class EndpointClientImplTest {
         when(response.getHeaders("content-type")).thenReturn(new Header[0]);
         when(statusLine.getStatusCode()).thenReturn(200);
 
-        endpointClient = new EndpointClientImpl(model, null, clientFactory);
+        endpointClient = new EndpointClientImpl(model, null, clientFactory, pollListener);
     }
 
     @After
     public void postConditions() {
-        verifyNoMoreInteractions(httpClient, callback, callback);
+        verifyNoMoreInteractions(httpClient, callback, callback, pollListener);
     }
 
     @Test
@@ -125,6 +128,7 @@ public final class EndpointClientImplTest {
         final Future<?> handle =  endpointClient.request(serviceConfig, endpointConfig, callback);
 
         assertEquals(future, handle);
+        verify(pollListener).onPollRequest(serviceConfig, endpointConfig);
         verify(httpClient).execute(isA(HttpHost.class), isA(HttpRequest.class), isA(FutureCallback.class));
     }
 
@@ -138,11 +142,13 @@ public final class EndpointClientImplTest {
         final Future<?> handle =  endpointClient.request(serviceConfig, endpointConfig, callback);
 
         assertEquals(future, handle);
+        verify(pollListener).onPollRequest(serviceConfig, endpointConfig);
         verify(httpClient).execute(isA(HttpHost.class), isA(HttpRequest.class), callbackCaptor.capture());
 
         final FutureCallback<HttpResponse> responseCallback = callbackCaptor.getValue();
 
         responseCallback.completed(response);
+        verify(pollListener).onPollResponse(serviceConfig, endpointConfig, response);
         verify(callback).completed(responseCaptor.capture());
         final EndpointResponse endpointResponse = responseCaptor.getValue();
         final byte[] response = endpointResponse.getResponse();
@@ -159,12 +165,14 @@ public final class EndpointClientImplTest {
         final Future<?> handle =  endpointClient.request(serviceConfig, endpointConfig, callback);
 
         assertEquals(future, handle);
+        verify(pollListener).onPollRequest(serviceConfig, endpointConfig);
         verify(httpClient).execute(isA(HttpHost.class), isA(HttpRequest.class), callbackCaptor.capture());
 
         final FutureCallback<HttpResponse> responseCallback = callbackCaptor.getValue();
 
         final Exception exception = new Exception("Intentional for test");
         responseCallback.failed(exception);
+        verify(pollListener).onPollFailure(serviceConfig, endpointConfig, exception);
         verify(callback).failed(exception);
     }
 
@@ -178,6 +186,7 @@ public final class EndpointClientImplTest {
         final Future<?> handle =  endpointClient.request(serviceConfig, endpointConfig, callback);
 
         assertEquals(future, handle);
+        verify(pollListener).onPollRequest(serviceConfig, endpointConfig);
         verify(httpClient).execute(isA(HttpHost.class), isA(HttpRequest.class), callbackCaptor.capture());
 
         final FutureCallback<HttpResponse> responseCallback = callbackCaptor.getValue();

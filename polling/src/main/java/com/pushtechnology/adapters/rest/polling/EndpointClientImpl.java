@@ -31,6 +31,7 @@ import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.pushtechnology.adapters.rest.metrics.PollListener;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
@@ -48,15 +49,21 @@ public final class EndpointClientImpl implements EndpointClient {
     private final Model model;
     private final SSLContext sslContext;
     private final HttpClientFactory clientFactory;
+    private final PollListener pollListener;
     private volatile CloseableHttpAsyncClient client;
 
     /**
      * Constructor.
      */
-    public EndpointClientImpl(Model model, SSLContext sslContext, HttpClientFactory clientFactory) {
+    public EndpointClientImpl(
+            Model model,
+            SSLContext sslContext,
+            HttpClientFactory clientFactory,
+            PollListener pollListener) {
         this.model = model;
         this.sslContext = sslContext;
         this.clientFactory = clientFactory;
+        this.pollListener = pollListener;
     }
 
     @Override
@@ -65,10 +72,11 @@ public final class EndpointClientImpl implements EndpointClient {
             EndpointConfig endpointConfig,
             final FutureCallback<EndpointResponse> callback) {
 
-
         if (client == null) {
             throw new IllegalStateException("Client not running");
         }
+
+        pollListener.onPollRequest(serviceConfig, endpointConfig);
 
         return client.execute(
             new HttpHost(serviceConfig.getHost(), serviceConfig.getPort(), serviceConfig.isSecure() ? "https" : "http"),
@@ -82,11 +90,13 @@ public final class EndpointClientImpl implements EndpointClient {
                         return;
                     }
 
+                    pollListener.onPollResponse(serviceConfig, endpointConfig, httpResponse);
                     callback.completed(new EndpointResponseImpl(httpResponse));
                 }
 
                 @Override
                 public void failed(Exception e) {
+                    pollListener.onPollFailure(serviceConfig, endpointConfig, e);
                     callback.failed(e);
                 }
 
