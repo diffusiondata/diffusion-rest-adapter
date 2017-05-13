@@ -51,4 +51,21 @@ public interface PollListener {
      * @param exception the exception associated with the failure
      */
     void onPollFailure(ServiceConfig serviceConfig, EndpointConfig endpointConfig, Exception exception);
+
+    /**
+     * Implementation of {@link PollListener} that ignores notifications.
+     */
+    PollListener NULL_LISTENER = new PollListener() {
+        @Override
+        public void onPollRequest(ServiceConfig serviceConfig, EndpointConfig endpointConfig) {
+        }
+
+        @Override
+        public void onPollResponse(ServiceConfig serviceConfig, EndpointConfig endpointConfig, HttpResponse response) {
+        }
+
+        @Override
+        public void onPollFailure(ServiceConfig serviceConfig, EndpointConfig endpointConfig, Exception exception) {
+        }
+    };
 }
