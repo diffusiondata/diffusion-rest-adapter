@@ -33,7 +33,7 @@ import com.pushtechnology.diffusion.client.session.Session;
  */
 /*package*/ final class UpdateContextImpl<T> implements UpdateContext<T>, Session.Listener {
     private static final Logger LOG = LoggerFactory.getLogger(UpdateContextImpl.class);
-    private AtomicReference<T> cachedValue = new AtomicReference<>(null);
+    private final AtomicReference<T> cachedValue = new AtomicReference<>(null);
     private final Session session;
     private final ValueUpdater<T> updater;
     private final String topicPath;
