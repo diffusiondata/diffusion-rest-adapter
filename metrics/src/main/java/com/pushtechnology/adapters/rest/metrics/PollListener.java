@@ -31,41 +31,44 @@ public interface PollListener {
      *
      * @param serviceConfig the service
      * @param endpointConfig the endpoint
+     * @return a listener for the completion of the poll request
      */
-    void onPollRequest(ServiceConfig serviceConfig, EndpointConfig endpointConfig);
+    PollCompletionListener onPollRequest(ServiceConfig serviceConfig, EndpointConfig endpointConfig);
 
     /**
-     * Notified when a response from an endpoint is received.
-     *
-     * @param serviceConfig the service
-     * @param endpointConfig the endpoint
-     * @param response the response from the endpoint
+     * Listener for the completion of a poll request.
      */
-    void onPollResponse(ServiceConfig serviceConfig, EndpointConfig endpointConfig, HttpResponse response);
+    interface PollCompletionListener {
+        /**
+         * Notified when a response from an endpoint is received.
+         *
+         * @param response the response from the endpoint
+         */
+        void onPollResponse(HttpResponse response);
 
-    /**
-     * Notified when an attempt to poll an endpoint fails.
-     *
-     * @param serviceConfig the service
-     * @param endpointConfig the endpoint
-     * @param exception the exception associated with the failure
-     */
-    void onPollFailure(ServiceConfig serviceConfig, EndpointConfig endpointConfig, Exception exception);
+        /**
+         * Notified when an attempt to poll an endpoint fails.
+         *
+         * @param exception the exception associated with the failure
+         */
+        void onPollFailure(Exception exception);
+
+        /**
+         * Implementation of {@link PollCompletionListener} that ignores notifications.
+         */
+        PollCompletionListener NULL_LISTENER = new PollCompletionListener() {
+            @Override
+            public void onPollResponse(HttpResponse response) {
+            }
+
+            @Override
+            public void onPollFailure(Exception exception) {
+            }
+        };
+    }
 
     /**
      * Implementation of {@link PollListener} that ignores notifications.
      */
-    PollListener NULL_LISTENER = new PollListener() {
-        @Override
-        public void onPollRequest(ServiceConfig serviceConfig, EndpointConfig endpointConfig) {
-        }
-
-        @Override
-        public void onPollResponse(ServiceConfig serviceConfig, EndpointConfig endpointConfig, HttpResponse response) {
-        }
-
-        @Override
-        public void onPollFailure(ServiceConfig serviceConfig, EndpointConfig endpointConfig, Exception exception) {
-        }
-    };
+    PollListener NULL_LISTENER = (serviceConfig, endpointConfig) -> PollCompletionListener.NULL_LISTENER;
 }

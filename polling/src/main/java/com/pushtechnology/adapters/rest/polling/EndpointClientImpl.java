@@ -32,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.adapters.rest.metrics.PollListener;
+import com.pushtechnology.adapters.rest.metrics.PollListener.PollCompletionListener;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
@@ -76,7 +77,7 @@ public final class EndpointClientImpl implements EndpointClient {
             throw new IllegalStateException("Client not running");
         }
 
-        pollListener.onPollRequest(serviceConfig, endpointConfig);
+        final PollCompletionListener completionListener = pollListener.onPollRequest(serviceConfig, endpointConfig);
 
         return client.execute(
             new HttpHost(serviceConfig.getHost(), serviceConfig.getPort(), serviceConfig.isSecure() ? "https" : "http"),
@@ -90,13 +91,13 @@ public final class EndpointClientImpl implements EndpointClient {
                         return;
                     }
 
-                    pollListener.onPollResponse(serviceConfig, endpointConfig, httpResponse);
+                    completionListener.onPollResponse(httpResponse);
                     callback.completed(new EndpointResponseImpl(httpResponse));
                 }
 
                 @Override
                 public void failed(Exception e) {
-                    pollListener.onPollFailure(serviceConfig, endpointConfig, e);
+                    completionListener.onPollFailure(e);
                     callback.failed(e);
                 }
 

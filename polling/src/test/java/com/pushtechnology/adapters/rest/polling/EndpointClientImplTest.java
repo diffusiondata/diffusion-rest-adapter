@@ -29,6 +29,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 
 import com.pushtechnology.adapters.rest.metrics.PollListener;
+import com.pushtechnology.adapters.rest.metrics.PollListener.PollCompletionListener;
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
@@ -56,6 +57,8 @@ public final class EndpointClientImplTest {
     private StatusLine statusLine;
     @Mock
     private PollListener pollListener;
+    @Mock
+    private PollCompletionListener completionListener;
     @Captor
     private ArgumentCaptor<FutureCallback<HttpResponse>> callbackCaptor;
     @Captor
@@ -100,13 +103,14 @@ public final class EndpointClientImplTest {
         when(entity.getContent()).thenReturn(new ByteArrayInputStream("{}".getBytes("UTF-8")));
         when(response.getHeaders("content-type")).thenReturn(new Header[0]);
         when(statusLine.getStatusCode()).thenReturn(200);
+        when(pollListener.onPollRequest(serviceConfig, endpointConfig)).thenReturn(completionListener);
 
         endpointClient = new EndpointClientImpl(model, null, clientFactory, pollListener);
     }
 
     @After
     public void postConditions() {
-        verifyNoMoreInteractions(httpClient, callback, callback, pollListener);
+        verifyNoMoreInteractions(httpClient, callback, callback, pollListener, completionListener);
     }
 
     @Test
@@ -148,7 +152,7 @@ public final class EndpointClientImplTest {
         final FutureCallback<HttpResponse> responseCallback = callbackCaptor.getValue();
 
         responseCallback.completed(response);
-        verify(pollListener).onPollResponse(serviceConfig, endpointConfig, response);
+        verify(completionListener).onPollResponse(response);
         verify(callback).completed(responseCaptor.capture());
         final EndpointResponse endpointResponse = responseCaptor.getValue();
         final byte[] response = endpointResponse.getResponse();
@@ -172,7 +176,7 @@ public final class EndpointClientImplTest {
 
         final Exception exception = new Exception("Intentional for test");
         responseCallback.failed(exception);
-        verify(pollListener).onPollFailure(serviceConfig, endpointConfig, exception);
+        verify(completionListener).onPollFailure(exception);
         verify(callback).failed(exception);
     }
 
