@@ -15,7 +15,7 @@
 
 package com.pushtechnology.adapters.rest.publication;
 
-import com.pushtechnology.diffusion.client.callbacks.ErrorReason;
+import com.pushtechnology.adapters.rest.metrics.PublicationListener.PublicationCompletionListener;
 import com.pushtechnology.diffusion.datatype.Bytes;
 
 /**
@@ -27,15 +27,5 @@ import com.pushtechnology.diffusion.datatype.Bytes;
     /**
      * Notify a {@link com.pushtechnology.adapters.rest.metrics.PublicationListener} of a publication attempt.
      */
-    void notifyPublicationRequest(Bytes bytes);
-
-    /**
-     * Notify a {@link com.pushtechnology.adapters.rest.metrics.PublicationListener} of a publication success.
-     */
-    void notifyPublication(Bytes bytes);
-
-    /**
-     * Notify a {@link com.pushtechnology.adapters.rest.metrics.PublicationListener} of a publication failure.
-     */
-    void notifyPublicationFailed(Bytes bytes, ErrorReason errorReason);
+    PublicationCompletionListener notifyPublicationRequest(Bytes bytes);
 }

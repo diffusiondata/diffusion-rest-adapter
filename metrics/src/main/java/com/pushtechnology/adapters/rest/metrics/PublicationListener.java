@@ -32,50 +32,49 @@ public interface PublicationListener {
      * @param serviceConfig the service
      * @param endpointConfig the endpoint
      * @param value the initial value
+     * @return a listener for the completion of the publication request
      */
-    void onPublicationRequest(ServiceConfig serviceConfig, EndpointConfig endpointConfig, Bytes value);
-
-    /**
-     * Notified when a Diffusion topic is updated.
-     *
-     * @param serviceConfig the service
-     * @param endpointConfig the endpoint
-     * @param value the initial value
-     */
-    void onPublication(ServiceConfig serviceConfig, EndpointConfig endpointConfig, Bytes value);
-
-    /**
-     * Notified when a Diffusion topic cannot be updated.
-     *
-     * @param serviceConfig the service
-     * @param endpointConfig the endpoint
-     * @param value the initial value
-     * @param reason the cause of failure
-     */
-    void onPublicationFailed(
+    PublicationCompletionListener onPublicationRequest(
         ServiceConfig serviceConfig,
         EndpointConfig endpointConfig,
-        Bytes value,
-        ErrorReason reason);
+        Bytes value);
+
+    /**
+     * Listener for the completion of a publication request.
+     */
+    interface PublicationCompletionListener {
+        /**
+         * Notified when a Diffusion topic is updated.
+         *
+         * @param value the initial value
+         */
+        void onPublication(Bytes value);
+
+        /**
+         * Notified when a Diffusion topic cannot be updated.
+         *
+         * @param value the initial value
+         * @param reason the cause of failure
+         */
+        void onPublicationFailed(Bytes value, ErrorReason reason);
+
+        /**
+         * Implementation of {@link PublicationCompletionListener} that ignores notifications.
+         */
+        PublicationCompletionListener NULL_LISTENER = new PublicationCompletionListener() {
+            @Override
+            public void onPublication(Bytes value) {
+            }
+
+            @Override
+            public void onPublicationFailed(Bytes value, ErrorReason reason) {
+            }
+        };
+    }
 
     /**
      * Implementation of {@link PublicationListener} that ignores notifications.
      */
-    PublicationListener NULL_LISTENER = new PublicationListener() {
-        @Override
-        public void onPublicationRequest(ServiceConfig serviceConfig, EndpointConfig endpointConfig, Bytes value) {
-        }
-
-        @Override
-        public void onPublication(ServiceConfig serviceConfig, EndpointConfig endpointConfig, Bytes value) {
-        }
-
-        @Override
-        public void onPublicationFailed(
-            ServiceConfig serviceConfig,
-            EndpointConfig endpointConfig,
-            Bytes value,
-            ErrorReason reason) {
-        }
-    };
+    PublicationListener NULL_LISTENER = (PublicationListener) (serviceConfig, endpointConfig, value) ->
+        PublicationCompletionListener.NULL_LISTENER;
 }

@@ -18,6 +18,7 @@ package com.pushtechnology.adapters.rest.publication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.pushtechnology.adapters.rest.metrics.PublicationListener.PublicationCompletionListener;
 import com.pushtechnology.diffusion.client.callbacks.ErrorReason;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater.UpdateContextCallback;
 import com.pushtechnology.diffusion.datatype.Bytes;
@@ -32,26 +33,26 @@ import net.jcip.annotations.Immutable;
 @Immutable
 public class UpdateTopicCallback implements UpdateContextCallback<String> {
     private static final Logger LOG = LoggerFactory.getLogger(UpdateTopicCallback.class);
-    private final ListenerNotifier listenerNotifier;
+    private final PublicationCompletionListener completionListener;
     private final Bytes bytes;
 
     /**
      * Constructor.
      */
-    /*package*/ UpdateTopicCallback(ListenerNotifier listenerNotifier, Bytes bytes) {
-        this.listenerNotifier = listenerNotifier;
+    /*package*/ UpdateTopicCallback(PublicationCompletionListener completionListener, Bytes bytes) {
+        this.completionListener = completionListener;
         this.bytes = bytes;
     }
 
     @Override
     public void onSuccess(String topicPath) {
         LOG.trace("Updated topic {}", topicPath);
-        listenerNotifier.notifyPublication(bytes);
+        completionListener.onPublication(bytes);
     }
 
     @Override
     public void onError(String topicPath, ErrorReason errorReason) {
         LOG.warn("Failed to update topic {} {}", topicPath, errorReason);
-        listenerNotifier.notifyPublicationFailed(bytes, errorReason);
+        completionListener.onPublicationFailed(bytes, errorReason);
     }
 }

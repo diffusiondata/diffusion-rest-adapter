@@ -20,6 +20,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.pushtechnology.adapters.rest.metrics.PublicationListener.PublicationCompletionListener;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.ValueUpdater;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.datatype.Bytes;
@@ -32,7 +33,7 @@ import com.pushtechnology.diffusion.datatype.Bytes;
  */
 /*package*/ final class UpdateContextImpl<T extends Bytes> implements UpdateContext<T>, Session.Listener {
     private static final Logger LOG = LoggerFactory.getLogger(UpdateContextImpl.class);
-    private final AtomicReference<T> cachedValue = new AtomicReference<>(null);
+    private final AtomicReference<CachedRequest<T>> cachedValue = new AtomicReference<>(null);
     private final ListenerNotifier listenerNotifier;
     private final ValueUpdater<T> updater;
     private final Session session;
@@ -51,10 +52,14 @@ import com.pushtechnology.diffusion.datatype.Bytes;
     @Override
     public void onSessionStateChanged(Session changedSession, Session.State oldState, Session.State newState) {
         if (changedSession == session && oldState.isRecovering() && newState.isConnected()) {
-            final T value = cachedValue.getAndSet(null);
-            if (value != null) {
+            final CachedRequest<T> cachedRequest = cachedValue.getAndSet(null);
+            if (cachedRequest != null) {
                 LOG.debug("Publishing cached value on recovery");
-                updater.update(topicPath, value, topicPath, new UpdateTopicCallback(listenerNotifier, value));
+                updater.update(
+                    topicPath,
+                    cachedRequest.value,
+                    topicPath,
+                    new UpdateTopicCallback(cachedRequest.completionListener, cachedRequest.value));
             }
         }
     }
@@ -67,12 +72,22 @@ import com.pushtechnology.diffusion.datatype.Bytes;
         }
         else if (state.isRecovering()) {
             LOG.debug("Caching value while in recovery");
-            listenerNotifier.notifyPublicationRequest(value);
-            cachedValue.set(value);
+            final PublicationCompletionListener completionListener = listenerNotifier.notifyPublicationRequest(value);
+            cachedValue.set(new CachedRequest<>(value, completionListener));
             return;
         }
 
-        listenerNotifier.notifyPublicationRequest(value);
-        updater.update(topicPath, value, topicPath, new UpdateTopicCallback(listenerNotifier, value));
+        final PublicationCompletionListener completionListener = listenerNotifier.notifyPublicationRequest(value);
+        updater.update(topicPath, value, topicPath, new UpdateTopicCallback(completionListener, value));
+    }
+
+    private static final class CachedRequest<T> {
+        private final T value;
+        private final PublicationCompletionListener completionListener;
+
+        private CachedRequest(T value, PublicationCompletionListener completionListener) {
+            this.value = value;
+            this.completionListener = completionListener;
+        }
     }
 }

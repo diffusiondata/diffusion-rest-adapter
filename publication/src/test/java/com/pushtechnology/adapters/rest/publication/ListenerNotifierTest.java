@@ -1,8 +1,9 @@
 package com.pushtechnology.adapters.rest.publication;
 
-import static com.pushtechnology.diffusion.client.callbacks.ErrorReason.ACCESS_DENIED;
 import static java.util.Collections.singletonList;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import org.junit.Before;
@@ -10,6 +11,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 
 import com.pushtechnology.adapters.rest.metrics.PublicationListener;
+import com.pushtechnology.adapters.rest.metrics.PublicationListener.PublicationCompletionListener;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.diffusion.datatype.Bytes;
@@ -22,6 +24,8 @@ import com.pushtechnology.diffusion.datatype.Bytes;
 public final class ListenerNotifierTest {
     @Mock
     private PublicationListener publicationListener;
+    @Mock
+    private PublicationCompletionListener completionListener;
     @Mock
     private Bytes bytes;
 
@@ -49,32 +53,18 @@ public final class ListenerNotifierTest {
             .endpoints(singletonList(endpointConfig))
             .topicPathRoot("a")
             .build();
+
+        when(publicationListener.onPublicationRequest(serviceConfig, endpointConfig, bytes))
+            .thenReturn(completionListener);
     }
 
     @Test
     public void notifyPublicationRequest() throws Exception {
         final ListenerNotifierImpl notifier = new ListenerNotifierImpl(publicationListener, serviceConfig, endpointConfig);
 
-        notifier.notifyPublicationRequest(bytes);
+        final PublicationCompletionListener listener = notifier.notifyPublicationRequest(bytes);
 
+        assertEquals(completionListener, listener);
         verify(publicationListener).onPublicationRequest(serviceConfig, endpointConfig, bytes);
-    }
-
-    @Test
-    public void notifyPublication() throws Exception {
-        final ListenerNotifierImpl notifier = new ListenerNotifierImpl(publicationListener, serviceConfig, endpointConfig);
-
-        notifier.notifyPublication(bytes);
-
-        verify(publicationListener).onPublication(serviceConfig, endpointConfig, bytes);
-    }
-
-    @Test
-    public void notifyPublicationFailed() throws Exception {
-        final ListenerNotifierImpl notifier = new ListenerNotifierImpl(publicationListener, serviceConfig, endpointConfig);
-
-        notifier.notifyPublicationFailed(bytes, ACCESS_DENIED);
-
-        verify(publicationListener).onPublicationFailed(serviceConfig, endpointConfig, bytes, ACCESS_DENIED);
     }
 }

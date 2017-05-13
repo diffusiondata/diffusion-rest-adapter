@@ -16,9 +16,9 @@
 package com.pushtechnology.adapters.rest.publication;
 
 import com.pushtechnology.adapters.rest.metrics.PublicationListener;
+import com.pushtechnology.adapters.rest.metrics.PublicationListener.PublicationCompletionListener;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.diffusion.client.callbacks.ErrorReason;
 import com.pushtechnology.diffusion.datatype.Bytes;
 
 /**
@@ -41,17 +41,7 @@ import com.pushtechnology.diffusion.datatype.Bytes;
     }
 
     @Override
-    public void notifyPublicationRequest(Bytes bytes) {
-        publicationListener.onPublicationRequest(serviceConfig, endpointConfig, bytes);
-    }
-
-    @Override
-    public void notifyPublication(Bytes bytes) {
-        publicationListener.onPublication(serviceConfig, endpointConfig, bytes);
-    }
-
-    @Override
-    public void notifyPublicationFailed(Bytes bytes, ErrorReason errorReason) {
-        publicationListener.onPublicationFailed(serviceConfig, endpointConfig, bytes, errorReason);
+    public PublicationCompletionListener notifyPublicationRequest(Bytes bytes) {
+        return publicationListener.onPublicationRequest(serviceConfig, endpointConfig, bytes);
     }
 }
