@@ -57,4 +57,25 @@ public interface PublicationListener {
         EndpointConfig endpointConfig,
         Bytes value,
         ErrorReason reason);
+
+    /**
+     * Implementation of {@link PublicationListener} that ignores notifications.
+     */
+    PublicationListener NULL_LISTENER = new PublicationListener() {
+        @Override
+        public void onPublicationRequest(ServiceConfig serviceConfig, EndpointConfig endpointConfig, Bytes value) {
+        }
+
+        @Override
+        public void onPublication(ServiceConfig serviceConfig, EndpointConfig endpointConfig, Bytes value) {
+        }
+
+        @Override
+        public void onPublicationFailed(
+            ServiceConfig serviceConfig,
+            EndpointConfig endpointConfig,
+            Bytes value,
+            ErrorReason reason) {
+        }
+    };
 }
