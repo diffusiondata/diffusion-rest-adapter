@@ -85,4 +85,40 @@ public interface TopicCreationListener {
         EndpointConfig endpointConfig,
         Bytes value,
         TopicAddFailReason reason);
+
+    /**
+     * Implementation of {@link TopicCreationListener} that ignores notifications.
+     */
+    TopicCreationListener NULL_LISTENER = new TopicCreationListener() {
+        @Override
+        public void onTopicCreationRequest(ServiceConfig serviceConfig, EndpointConfig endpointConfig) {
+        }
+
+        @Override
+        public void onTopicCreationRequest(ServiceConfig serviceConfig, EndpointConfig endpointConfig, Bytes value) {
+        }
+
+        @Override
+        public void onTopicCreated(ServiceConfig serviceConfig, EndpointConfig endpointConfig) {
+        }
+
+        @Override
+        public void onTopicCreated(ServiceConfig serviceConfig, EndpointConfig endpointConfig, Bytes value) {
+        }
+
+        @Override
+        public void onTopicCreationFailed(
+            ServiceConfig serviceConfig,
+            EndpointConfig endpointConfig,
+            TopicAddFailReason reason) {
+        }
+
+        @Override
+        public void onTopicCreationFailed(
+            ServiceConfig serviceConfig,
+            EndpointConfig endpointConfig,
+            Bytes value,
+            TopicAddFailReason reason) {
+        }
+    };
 }
