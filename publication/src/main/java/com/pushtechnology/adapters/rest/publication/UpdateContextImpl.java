@@ -26,7 +26,7 @@ import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateCo
 import com.pushtechnology.diffusion.client.session.Session;
 
 /**
- * Abstract {@link UpdateContext} that supports recovery.
+ * Implementation of {@link UpdateContext} that supports recovery.
  *
  * @param <T> The type of updates the context accepts
  * @author Push Technology Limited
