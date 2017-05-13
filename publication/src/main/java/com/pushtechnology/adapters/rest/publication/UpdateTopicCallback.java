@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.diffusion.client.callbacks.ErrorReason;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater.UpdateContextCallback;
+import com.pushtechnology.diffusion.datatype.Bytes;
 
 import net.jcip.annotations.Immutable;
 
@@ -29,21 +30,28 @@ import net.jcip.annotations.Immutable;
  * @author Push Technology Limited
  */
 @Immutable
-public enum  UpdateTopicCallback implements UpdateContextCallback<String> {
-    /**
-     * Instance of the callback.
-     */
-    INSTANCE;
-
+public class UpdateTopicCallback implements UpdateContextCallback<String> {
     private static final Logger LOG = LoggerFactory.getLogger(UpdateTopicCallback.class);
+    private final ListenerNotifier listenerNotifier;
+    private final Bytes bytes;
+
+    /**
+     * Constructor.
+     */
+    /*package*/ UpdateTopicCallback(ListenerNotifier listenerNotifier, Bytes bytes) {
+        this.listenerNotifier = listenerNotifier;
+        this.bytes = bytes;
+    }
 
     @Override
     public void onSuccess(String topicPath) {
         LOG.trace("Updated topic {}", topicPath);
+        listenerNotifier.notifyPublication(bytes);
     }
 
     @Override
     public void onError(String topicPath, ErrorReason errorReason) {
         LOG.warn("Failed to update topic {} {}", topicPath, errorReason);
+        listenerNotifier.notifyPublicationFailed(bytes, errorReason);
     }
 }

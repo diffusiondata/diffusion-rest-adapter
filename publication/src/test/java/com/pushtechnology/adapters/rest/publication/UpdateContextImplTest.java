@@ -15,10 +15,11 @@
 
 package com.pushtechnology.adapters.rest.publication;
 
-import static com.pushtechnology.adapters.rest.publication.UpdateTopicCallback.INSTANCE;
 import static com.pushtechnology.diffusion.client.session.Session.State.CLOSED_BY_CLIENT;
 import static com.pushtechnology.diffusion.client.session.Session.State.CONNECTED_ACTIVE;
 import static com.pushtechnology.diffusion.client.session.Session.State.RECOVERING_RECONNECT;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -30,6 +31,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 
+import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater.UpdateContextCallback;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.ValueUpdater;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.datatype.binary.Binary;
@@ -46,6 +48,8 @@ public final class UpdateContextImplTest {
     private ValueUpdater<Binary> updater;
     @Mock
     private Binary binary;
+    @Mock
+    private ListenerNotifier notifier;
 
     private UpdateContextImpl<Binary> updateContext;
 
@@ -53,33 +57,37 @@ public final class UpdateContextImplTest {
     public void setUp() {
         initMocks(this);
 
-        updateContext = new UpdateContextImpl<>(session, updater, "a/topic");
+        updateContext = new UpdateContextImpl<>(session, updater, "a/topic", notifier);
     }
 
     @After
     public void postConditions() {
-        verifyNoMoreInteractions(session, updater);
+        verifyNoMoreInteractions(session, updater, notifier);
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void testPublish() {
         when(session.getState()).thenReturn(CONNECTED_ACTIVE);
         updateContext.publish(binary);
 
         verify(session).getState();
-        verify(updater).update("a/topic", binary, "a/topic", INSTANCE);
+        verify(updater).update(eq("a/topic"), eq(binary), eq("a/topic"), isA(UpdateContextCallback.class));
+        verify(notifier).notifyPublicationRequest(binary);
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void testRecovery() {
         when(session.getState()).thenReturn(RECOVERING_RECONNECT);
         updateContext.publish(binary);
-        verify(updater, never()).update("a/topic", binary, "a/topic", INSTANCE);
+        verify(updater, never()).update(eq("a/topic"), eq(binary), eq("a/topic"), isA(UpdateContextCallback.class));
+        verify(notifier).notifyPublicationRequest(binary);
 
         updateContext.onSessionStateChanged(session, RECOVERING_RECONNECT, CONNECTED_ACTIVE);
 
         verify(session).getState();
-        verify(updater).update("a/topic", binary, "a/topic", INSTANCE);
+        verify(updater).update(eq("a/topic"), eq(binary), eq("a/topic"), isA(UpdateContextCallback.class));
     }
 
     @Test(expected = IllegalStateException.class)

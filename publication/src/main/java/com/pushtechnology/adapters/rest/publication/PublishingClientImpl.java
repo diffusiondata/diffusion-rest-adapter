@@ -19,9 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import com.pushtechnology.adapters.rest.metrics.PublicationListener;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.session.management.EventedSessionListener;
@@ -45,9 +43,9 @@ import net.jcip.annotations.ThreadSafe;
  */
 @ThreadSafe
 public final class PublishingClientImpl implements PublishingClient {
-    private static final Logger LOG = LoggerFactory.getLogger(PublishingClientImpl.class);
     private final Session session;
     private final EventedSessionListener sessionListener;
+    private final PublicationListener publicationListener;
     @GuardedBy("this")
     private Map<ServiceConfig, EventedUpdateSource> updaterSources = new HashMap<>();
     @GuardedBy("this")
@@ -56,9 +54,13 @@ public final class PublishingClientImpl implements PublishingClient {
     /**
      * Constructor.
      */
-    public PublishingClientImpl(Session session, EventedSessionListener sessionListener) {
+    public PublishingClientImpl(
+            Session session,
+            EventedSessionListener sessionListener,
+            PublicationListener publicationListener) {
         this.session = session;
         this.sessionListener = sessionListener;
+        this.publicationListener = publicationListener;
     }
 
     @Override
@@ -123,14 +125,20 @@ public final class PublishingClientImpl implements PublishingClient {
 
         final String topicPath = serviceConfig.getTopicPathRoot() + "/" + endpointConfig.getTopicPath();
         if (TopicType.JSON.equals(topicType)) {
-            final UpdateContextImpl jsonUpdateContext =
-                new UpdateContextImpl(session, updaterSet.jsonUpdater, topicPath);
+            final UpdateContextImpl jsonUpdateContext = new UpdateContextImpl(
+                session,
+                updaterSet.jsonUpdater,
+                topicPath,
+                new ListenerNotifierImpl(publicationListener, serviceConfig, endpointConfig));
             sessionListener.onSessionStateChange(jsonUpdateContext);
             return jsonUpdateContext;
         }
         else if (TopicType.BINARY.equals(topicType)) {
-            final UpdateContextImpl binaryUpdateContext =
-                new UpdateContextImpl(session, updaterSet.binaryUpdater, topicPath);
+            final UpdateContextImpl binaryUpdateContext = new UpdateContextImpl(
+                session,
+                updaterSet.binaryUpdater,
+                topicPath,
+                new ListenerNotifierImpl(publicationListener, serviceConfig, endpointConfig));
             sessionListener.onSessionStateChange(binaryUpdateContext);
             return binaryUpdateContext;
         }

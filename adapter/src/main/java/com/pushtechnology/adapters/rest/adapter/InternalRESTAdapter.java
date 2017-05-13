@@ -28,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.adapters.rest.metrics.PollListener;
+import com.pushtechnology.adapters.rest.metrics.PublicationListener;
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
@@ -179,20 +180,30 @@ public final class InternalRESTAdapter implements RESTAdapterListener, AutoClose
         else if (isNotPolling(currentModel)) {
             diffusionSession = session;
             topicManagementClient = new TopicManagementClientImpl(diffusionSession);
-            publishingClient = new PublishingClientImpl(diffusionSession, eventedSessionListener);
+            publishingClient = new PublishingClientImpl(
+                diffusionSession,
+                eventedSessionListener,
+                PublicationListener.NULL_LISTENER);
             state = State.STANDBY;
         }
         else {
             diffusionSession = session;
             topicManagementClient = new TopicManagementClientImpl(diffusionSession);
-            publishingClient = new PublishingClientImpl(diffusionSession, eventedSessionListener);
+            publishingClient = new PublishingClientImpl(
+                diffusionSession,
+                eventedSessionListener,
+                PublicationListener.NULL_LISTENER);
             reconfigureServiceManager();
             state = State.ACTIVE;
         }
     }
 
     private void reconfigureServiceManager() {
-        endpointClient = new EndpointClientImpl(currentModel, sslContext, httpClientFactory, PollListener.NULL_LISTENER);
+        endpointClient = new EndpointClientImpl(
+            currentModel,
+            sslContext,
+            httpClientFactory,
+            PollListener.NULL_LISTENER);
         final ServiceSessionStarterImpl serviceSessionStarter = new ServiceSessionStarterImpl(
             topicManagementClient,
             endpointClient,

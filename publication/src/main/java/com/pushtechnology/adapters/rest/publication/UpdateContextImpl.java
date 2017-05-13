@@ -15,8 +15,6 @@
 
 package com.pushtechnology.adapters.rest.publication;
 
-import static com.pushtechnology.adapters.rest.publication.UpdateTopicCallback.INSTANCE;
-
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.slf4j.Logger;
@@ -35,17 +33,19 @@ import com.pushtechnology.diffusion.datatype.Bytes;
 /*package*/ final class UpdateContextImpl<T extends Bytes> implements UpdateContext<T>, Session.Listener {
     private static final Logger LOG = LoggerFactory.getLogger(UpdateContextImpl.class);
     private final AtomicReference<T> cachedValue = new AtomicReference<>(null);
-    private final Session session;
+    private final ListenerNotifier listenerNotifier;
     private final ValueUpdater<T> updater;
+    private final Session session;
     private final String topicPath;
 
     /**
      * Constructor.
      */
-    UpdateContextImpl(Session session, ValueUpdater<T> updater, String topicPath) {
+    UpdateContextImpl(Session session, ValueUpdater<T> updater, String topicPath, ListenerNotifier listenerNotifier) {
         this.session = session;
         this.updater = updater;
         this.topicPath = topicPath;
+        this.listenerNotifier = listenerNotifier;
     }
 
     @Override
@@ -54,7 +54,7 @@ import com.pushtechnology.diffusion.datatype.Bytes;
             final T value = cachedValue.getAndSet(null);
             if (value != null) {
                 LOG.debug("Publishing cached value on recovery");
-                updater.update(topicPath, value, topicPath, INSTANCE);
+                updater.update(topicPath, value, topicPath, new UpdateTopicCallback(listenerNotifier, value));
             }
         }
     }
@@ -67,10 +67,12 @@ import com.pushtechnology.diffusion.datatype.Bytes;
         }
         else if (state.isRecovering()) {
             LOG.debug("Caching value while in recovery");
+            listenerNotifier.notifyPublicationRequest(value);
             cachedValue.set(value);
             return;
         }
 
-        updater.update(topicPath, value, topicPath, INSTANCE);
+        listenerNotifier.notifyPublicationRequest(value);
+        updater.update(topicPath, value, topicPath, new UpdateTopicCallback(listenerNotifier, value));
     }
 }

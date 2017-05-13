@@ -40,6 +40,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 
+import com.pushtechnology.adapters.rest.metrics.PublicationListener;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.session.management.EventedSessionListener;
@@ -48,10 +49,12 @@ import com.pushtechnology.diffusion.client.callbacks.Registration;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.UpdateSource;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater;
+import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater.UpdateContextCallback;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.ValueUpdater;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.session.SessionFactory;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
+import com.pushtechnology.diffusion.datatype.Bytes;
 import com.pushtechnology.diffusion.datatype.binary.Binary;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
@@ -77,6 +80,8 @@ public final class PublishingClientImplTest {
     private JSON json;
     @Mock
     private Binary binary;
+    @Mock
+    private PublicationListener publicationListener;
     @Captor
     private ArgumentCaptor<UpdateSource> updateSourceCaptor;
 
@@ -123,7 +128,7 @@ public final class PublishingClientImplTest {
         verify(factory).listener(captor.capture());
         sessionListener = captor.getValue();
 
-        client = new PublishingClientImpl(session, eventedListener);
+        client = new PublishingClientImpl(session, eventedListener, publicationListener);
     }
 
     @After
@@ -191,6 +196,7 @@ public final class PublishingClientImplTest {
         assertTrue(future.isDone());
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void jsonContext() {
         final EventedUpdateSource source = client.addService(serviceConfig);
@@ -206,11 +212,10 @@ public final class PublishingClientImplTest {
         updateContext.publish(json);
 
         verify(session).getState();
-        verify(jsonUpdater).update("a/topic", json, "a/topic", UpdateTopicCallback.INSTANCE);
-
-        UpdateTopicCallback.INSTANCE.onSuccess("a/topic");
+        verify(jsonUpdater).update(eq("a/topic"), eq(json), eq("a/topic"), isA(UpdateContextCallback.class));
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void binaryContext() {
         final EventedUpdateSource source = client.addService(serviceConfig);
@@ -226,9 +231,7 @@ public final class PublishingClientImplTest {
         updateContext.publish(binary);
 
         verify(session).getState();
-        verify(binaryUpdater).update("a/topic", binary, "a/topic", UpdateTopicCallback.INSTANCE);
-
-        UpdateTopicCallback.INSTANCE.onSuccess("a/topic");
+        verify(binaryUpdater).update(eq("a/topic"), eq(binary), eq("a/topic"), isA(UpdateContextCallback.class));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -249,6 +252,7 @@ public final class PublishingClientImplTest {
         client.createUpdateContext(serviceConfig, endpointConfig, JSON);
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void contextRecovery() {
         final EventedUpdateSource source = client.addService(serviceConfig);
@@ -266,10 +270,10 @@ public final class PublishingClientImplTest {
         updateContext.publish(json);
 
         verify(session).getState();
-        verify(jsonUpdater, never()).update("a/topic", json, "a/topic", UpdateTopicCallback.INSTANCE);
+        verify(jsonUpdater, never()).update(eq("a/topic"), eq(json), eq("a/topic"), isA(UpdateContextCallback.class));
 
         sessionListener.onSessionStateChanged(session, RECOVERING_RECONNECT, CONNECTED_ACTIVE);
 
-        verify(jsonUpdater).update("a/topic", json, "a/topic", UpdateTopicCallback.INSTANCE);
+        verify(jsonUpdater).update(eq("a/topic"), eq(json), eq("a/topic"), isA(UpdateContextCallback.class));
     }
 }
