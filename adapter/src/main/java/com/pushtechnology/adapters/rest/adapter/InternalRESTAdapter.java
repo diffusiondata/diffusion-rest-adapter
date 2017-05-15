@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.adapters.rest.metrics.PollListener;
 import com.pushtechnology.adapters.rest.metrics.PublicationListener;
+import com.pushtechnology.adapters.rest.metrics.TopicCreationListener;
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
@@ -179,7 +180,9 @@ public final class InternalRESTAdapter implements RESTAdapterListener, AutoClose
         }
         else if (isNotPolling(currentModel)) {
             diffusionSession = session;
-            topicManagementClient = new TopicManagementClientImpl(diffusionSession);
+            topicManagementClient = new TopicManagementClientImpl(
+                TopicCreationListener.NULL_LISTENER,
+                diffusionSession);
             publishingClient = new PublishingClientImpl(
                 diffusionSession,
                 eventedSessionListener,
@@ -188,7 +191,9 @@ public final class InternalRESTAdapter implements RESTAdapterListener, AutoClose
         }
         else {
             diffusionSession = session;
-            topicManagementClient = new TopicManagementClientImpl(diffusionSession);
+            topicManagementClient = new TopicManagementClientImpl(
+                TopicCreationListener.NULL_LISTENER,
+                diffusionSession);
             publishingClient = new PublishingClientImpl(
                 diffusionSession,
                 eventedSessionListener,
