@@ -15,6 +15,10 @@
 
 package com.pushtechnology.adapters.rest.metrics.events;
 
+import com.pushtechnology.adapters.rest.metrics.TopicCreationFailedEvent;
+import com.pushtechnology.adapters.rest.metrics.TopicCreationRequestEvent;
+import com.pushtechnology.adapters.rest.metrics.TopicCreationSuccessEvent;
+
 /**
  * Listener for events about topic creation.
  *
