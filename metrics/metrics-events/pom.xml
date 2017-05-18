@@ -3,18 +3,19 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>rest-adapter</artifactId>
+        <artifactId>metrics</artifactId>
         <groupId>com.pushtechnology.adapters.rest</groupId>
         <version>2.0.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>metrics</artifactId>
-    <packaging>pom</packaging>
+    <artifactId>metrics-events</artifactId>
 
-    <modules>
-        <module>metrics-events</module>
-        <module>metrics-listeners</module>
-        <module>metrics-event-listeners</module>
-    </modules>
+    <dependencies>
+        <dependency>
+            <groupId>com.pushtechnology.diffusion</groupId>
+            <artifactId>diffusion-client</artifactId>
+        </dependency>
+    </dependencies>
+
 </project>

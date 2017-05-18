@@ -13,11 +13,7 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.metrics.event.listeners;
-
-import com.pushtechnology.adapters.rest.metrics.events.TopicCreationFailedEvent;
-import com.pushtechnology.adapters.rest.metrics.events.TopicCreationRequestEvent;
-import com.pushtechnology.adapters.rest.metrics.events.TopicCreationSuccessEvent;
+package com.pushtechnology.adapters.rest.metrics.events;
 
 /**
  * Listener for events about topic creation.

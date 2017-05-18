@@ -23,7 +23,7 @@
 
         <dependency>
             <groupId>com.pushtechnology.adapters.rest</groupId>
-            <artifactId>metrics</artifactId>
+            <artifactId>metrics-listeners</artifactId>
         </dependency>
 
         <dependency>

@@ -13,14 +13,11 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.metrics.event.listeners;
+package com.pushtechnology.adapters.rest.metrics.events;
 
 import static java.lang.System.currentTimeMillis;
 
 import com.pushtechnology.adapters.rest.metrics.TopicCreationListener;
-import com.pushtechnology.adapters.rest.metrics.events.TopicCreationFailedEvent;
-import com.pushtechnology.adapters.rest.metrics.events.TopicCreationRequestEvent;
-import com.pushtechnology.adapters.rest.metrics.events.TopicCreationSuccessEvent;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicAddFailReason;

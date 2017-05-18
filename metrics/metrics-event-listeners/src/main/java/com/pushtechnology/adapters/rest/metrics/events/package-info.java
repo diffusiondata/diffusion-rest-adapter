@@ -18,4 +18,4 @@
  *
  * @author Push Technology Limited
  */
-package com.pushtechnology.adapters.rest.metrics.event.listeners;
+package com.pushtechnology.adapters.rest.metrics.events;

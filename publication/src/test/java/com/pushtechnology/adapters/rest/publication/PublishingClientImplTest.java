@@ -54,7 +54,6 @@ import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateCo
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.session.SessionFactory;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
-import com.pushtechnology.diffusion.datatype.Bytes;
 import com.pushtechnology.diffusion.datatype.binary.Binary;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 

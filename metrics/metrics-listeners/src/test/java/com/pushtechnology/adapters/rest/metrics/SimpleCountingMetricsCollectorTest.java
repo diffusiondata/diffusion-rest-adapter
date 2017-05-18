@@ -20,7 +20,6 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
@@ -32,6 +31,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 
 /**
  * Unit tests for {@link SimpleCountingMetricsCollector}.
@@ -59,7 +59,7 @@ public final class SimpleCountingMetricsCollectorTest {
 
     @After
     public void postConditions() {
-        verifyNoMoreInteractions(executor, loggingTask);
+        Mockito.verifyNoMoreInteractions(executor, loggingTask);
     }
 
     @Test
