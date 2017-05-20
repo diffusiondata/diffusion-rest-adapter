@@ -17,6 +17,7 @@ package com.pushtechnology.adapters.rest.metrics.events;
 
 import static java.lang.System.currentTimeMillis;
 
+import com.pushtechnology.adapters.rest.endpoints.EndpointType;
 import com.pushtechnology.adapters.rest.metrics.TopicCreationFailedEvent;
 import com.pushtechnology.adapters.rest.metrics.TopicCreationListener;
 import com.pushtechnology.adapters.rest.metrics.TopicCreationRequestEvent;
@@ -46,7 +47,7 @@ import com.pushtechnology.diffusion.datatype.Bytes;
 
         final TopicCreationRequestEvent requestEvent = new TopicCreationRequestEvent(
             serviceConfig.getTopicPathRoot() + "/" + endpointConfig.getTopicPath(),
-            null,
+            EndpointType.from(endpointConfig.getProduces()).getTopicType(),
             0,
             currentTimeMillis());
 
@@ -63,7 +64,7 @@ import com.pushtechnology.diffusion.datatype.Bytes;
 
         final TopicCreationRequestEvent requestEvent = new TopicCreationRequestEvent(
             serviceConfig.getTopicPathRoot() + "/" + endpointConfig.getTopicPath(),
-            null,
+            EndpointType.from(endpointConfig.getProduces()).getTopicType(),
             value.length(),
             currentTimeMillis());
 
