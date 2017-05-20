@@ -1,6 +1,7 @@
 
 package com.pushtechnology.adapters.rest.metrics;
 
+import com.pushtechnology.diffusion.client.callbacks.ErrorReason
 import com.pushtechnology.diffusion.client.features.control.topics.TopicAddFailReason
 import com.pushtechnology.diffusion.client.topics.details.TopicType
 import java.lang.Exception
@@ -139,6 +140,73 @@ data class PollFailedEvent(
      * @return the failure timestamp
      */
     val failedTimestamp: Long) {
+
+    /**
+     * @return the time to failure
+     */
+    val requestTime: Long
+        get() = failedTimestamp - requestEvent.requestTimestamp
+}
+
+/**
+ * Event describing a publication request.
+ *
+ * @author Matt Champion 17/05/2017
+ */
+data class PublicationRequestEvent(
+        /**
+         * @return the topic path
+         */
+        val path: String,
+        /**
+         * @return the length of the value
+         */
+        val valueLength: Int,
+        /**
+         * @return the request timestamp
+         */
+        val requestTimestamp: Long)
+
+/**
+ * Event describing a successful publication.
+ *
+ * @author Matt Champion 17/05/2017
+ */
+data class PublicationSuccessEvent(
+        /**
+         * @return the publication request event
+         */
+        val requestEvent: PublicationRequestEvent,
+        /**
+         * @return the success timestamp
+         */
+        val successTimestamp: Long) {
+
+    /**
+     * @return the request timestamp
+     */
+    val requestTime: Long
+        get() = successTimestamp - requestEvent.requestTimestamp
+}
+
+/**
+ * Event describing a failed publication.
+ *
+ * @author Matt Champion 17/05/2017
+ */
+data class PublicationFailedEvent(
+        /**
+         * @return the publication request event
+         */
+        val requestEvent: PublicationRequestEvent,
+        /**
+         * @return the error reason
+         */
+        val errorReason: ErrorReason,
+        /**
+         * @return the failure timestamp
+         */
+        val failedTimestamp: Long) {
 
     /**
      * @return the time to failure
