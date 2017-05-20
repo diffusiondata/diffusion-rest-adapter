@@ -31,13 +31,13 @@ import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
  *
  * @author Matt Champion 17/05/2017
  */
-/*package*/ final class PollEventDispatch implements PollListener {
+/*package*/ final class PollEventDispatcher implements PollListener {
     private final PollEventListener pollEventListener;
 
     /**
      * Constructor.
      */
-    /*package*/ PollEventDispatch(PollEventListener pollEventListener) {
+    /*package*/ PollEventDispatcher(PollEventListener pollEventListener) {
         this.pollEventListener = pollEventListener;
     }
 
