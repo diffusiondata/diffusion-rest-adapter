@@ -32,17 +32,7 @@
 
         <dependency>
             <groupId>com.pushtechnology.adapters.rest</groupId>
-            <artifactId>topic-management</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.pushtechnology.adapters.rest</groupId>
             <artifactId>configuration-store</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.pushtechnology.adapters.rest</groupId>
-            <artifactId>endpoints</artifactId>
         </dependency>
 
         <dependency>

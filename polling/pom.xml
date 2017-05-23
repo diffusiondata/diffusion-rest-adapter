@@ -12,11 +12,6 @@
     <dependencies>
         <dependency>
             <groupId>com.pushtechnology.adapters.rest</groupId>
-            <artifactId>configuration-model</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.pushtechnology.adapters.rest</groupId>
             <artifactId>metrics-listeners</artifactId>
         </dependency>
 

@@ -16,8 +16,8 @@
         </dependency>
 
         <dependency>
-            <groupId>com.pushtechnology.diffusion</groupId>
-            <artifactId>diffusion-client</artifactId>
+            <groupId>org.picocontainer</groupId>
+            <artifactId>picocontainer</artifactId>
         </dependency>
 
         <dependency>

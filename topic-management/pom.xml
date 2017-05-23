@@ -11,23 +11,8 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.pushtechnology.diffusion</groupId>
-            <artifactId>diffusion-client</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>com.pushtechnology.adapters.rest</groupId>
             <artifactId>endpoints</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.pushtechnology.adapters.rest</groupId>
-            <artifactId>metrics-listeners</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.pushtechnology.adapters.rest</groupId>
-            <artifactId>configuration-model</artifactId>
         </dependency>
 
         <dependency>
