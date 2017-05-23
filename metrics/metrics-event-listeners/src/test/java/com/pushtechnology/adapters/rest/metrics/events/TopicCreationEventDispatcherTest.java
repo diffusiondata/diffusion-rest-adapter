@@ -22,7 +22,6 @@ import org.mockito.junit.MockitoRule;
 import com.pushtechnology.adapters.rest.metrics.ITopicCreationFailedEvent;
 import com.pushtechnology.adapters.rest.metrics.ITopicCreationRequestEvent;
 import com.pushtechnology.adapters.rest.metrics.ITopicCreationSuccessEvent;
-import com.pushtechnology.adapters.rest.metrics.TopicCreationRequestEvent;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.diffusion.datatype.Bytes;
@@ -107,7 +106,7 @@ public final class TopicCreationEventDispatcherTest {
 
         dispatcher.onTopicCreationRequest(serviceConfig, endpointConfig).onTopicCreated();
 
-        verify(topicCreationEventListener).onTopicCreationRequest(isA(TopicCreationRequestEvent.class));
+        verify(topicCreationEventListener).onTopicCreationRequest(isA(ITopicCreationRequestEvent.class));
         verify(topicCreationEventListener).onTopicCreationSuccess(successCaptor.capture());
         final ITopicCreationSuccessEvent value = successCaptor.getValue();
         assertEquals("service/endpoint", value.getRequestEvent().getPath());
@@ -121,7 +120,7 @@ public final class TopicCreationEventDispatcherTest {
 
         dispatcher.onTopicCreationRequest(serviceConfig, endpointConfig).onTopicCreationFailed(USER_CODE_ERROR);
 
-        verify(topicCreationEventListener).onTopicCreationRequest(isA(TopicCreationRequestEvent.class));
+        verify(topicCreationEventListener).onTopicCreationRequest(isA(ITopicCreationRequestEvent.class));
         verify(topicCreationEventListener).onTopicCreationFailed(failedCaptor.capture());
         final ITopicCreationFailedEvent value = failedCaptor.getValue();
         assertEquals("service/endpoint", value.getRequestEvent().getPath());

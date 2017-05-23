@@ -28,6 +28,18 @@ interface ITopicCreationRequestEvent {
      * @return the request timestamp
      */
     val requestTimestamp: Long
+
+    /**
+     * Factory for {@link ITopicCreationRequestEvent}.
+     */
+    companion object Factory {
+        /**
+         * @return a new instance of {@link ITopicCreationRequestEvent}
+         */
+        fun create(path: String, topicType: TopicType, initialValueLength: Int): ITopicCreationRequestEvent {
+            return TopicCreationRequestEvent(path, topicType, initialValueLength, System.currentTimeMillis())
+        }
+    }
 }
 
 /**
@@ -35,7 +47,7 @@ interface ITopicCreationRequestEvent {
  *
  * @author Matt Champion 17/05/2017
  */
-data class TopicCreationRequestEvent(
+private data class TopicCreationRequestEvent(
     override val path: String,
     override val topicType: TopicType,
     override val initialValueLength: Int,
@@ -59,6 +71,18 @@ interface ITopicCreationSuccessEvent {
      * @return the request timestamp
      */
     val requestTime: Long
+
+    /**
+     * Factory for {@link ITopicCreationSuccessEvent}.
+     */
+    companion object Factory {
+        /**
+         * @return a new instance of {@link ITopicCreationSuccessEvent}
+         */
+        fun create(requestEvent: ITopicCreationRequestEvent): ITopicCreationSuccessEvent {
+            return TopicCreationSuccessEvent(requestEvent, System.currentTimeMillis())
+        }
+    }
 }
 
 /**
@@ -66,7 +90,7 @@ interface ITopicCreationSuccessEvent {
  *
  * @author Matt Champion 17/05/2017
  */
-data class TopicCreationSuccessEvent(
+private data class TopicCreationSuccessEvent(
     override val requestEvent: ITopicCreationRequestEvent,
     override val successTimestamp: Long) : ITopicCreationSuccessEvent {
 
@@ -96,6 +120,18 @@ interface ITopicCreationFailedEvent {
      * @return the time to failure
      */
     val requestTime: Long
+
+    /**
+     * Factory for {@link ITopicCreationFailedEvent}.
+     */
+    companion object Factory {
+        /**
+         * @return a new instance of {@link ITopicCreationFailedEvent}
+         */
+        fun create(requestEvent: ITopicCreationRequestEvent, failReason: TopicAddFailReason): ITopicCreationFailedEvent {
+            return TopicCreationFailedEvent(requestEvent, failReason, System.currentTimeMillis())
+        }
+    }
 }
 
 /**
@@ -103,7 +139,7 @@ interface ITopicCreationFailedEvent {
  *
  * @author Matt Champion 17/05/2017
  */
-data class TopicCreationFailedEvent(
+private data class TopicCreationFailedEvent(
     override val requestEvent: ITopicCreationRequestEvent,
     override val failReason: TopicAddFailReason,
     override val failedTimestamp: Long) : ITopicCreationFailedEvent {
@@ -126,6 +162,18 @@ interface IPollRequestEvent {
      * @return the request timestamp
      */
     val requestTimestamp: Long
+
+    /**
+     * Factory for {@link IPollRequestEvent}.
+     */
+    companion object Factory {
+        /**
+         * @return a new instance of {@link IPollRequestEvent}
+         */
+        fun create(uri: String): IPollRequestEvent {
+            return PollRequestEvent(uri, System.currentTimeMillis())
+        }
+    }
 }
 
 /**
@@ -133,7 +181,7 @@ interface IPollRequestEvent {
  *
  * @author Matt Champion 17/05/2017
  */
-data class PollRequestEvent(
+private data class PollRequestEvent(
     override val uri: String,
     override val requestTimestamp: Long) : IPollRequestEvent
 
@@ -163,6 +211,18 @@ interface IPollSuccessEvent {
      * @return the request timestamp
      */
     val requestTime: Long
+
+    /**
+     * Factory for {@link IPollSuccessEvent}.
+     */
+    companion object Factory {
+        /**
+         * @return a new instance of {@link IPollSuccessEvent}
+         */
+        fun create(requestEvent: IPollRequestEvent, statusCode: Int, responseLength: Long): IPollSuccessEvent {
+            return PollSuccessEvent(requestEvent, statusCode, responseLength, System.currentTimeMillis())
+        }
+    }
 }
 
 /**
@@ -170,7 +230,7 @@ interface IPollSuccessEvent {
  *
  * @author Matt Champion 17/05/2017
  */
-data class PollSuccessEvent(
+private data class PollSuccessEvent(
     override val requestEvent: IPollRequestEvent,
     override val statusCode: Int,
     override val responseLength: Long,
@@ -203,6 +263,18 @@ interface IPollFailedEvent {
      */
     val requestTime: Long
         get() = failedTimestamp - requestEvent.requestTimestamp
+
+    /**
+     * Factory for {@link IPollFailedEvent}.
+     */
+    companion object Factory {
+        /**
+         * @return a new instance of {@link IPollFailedEvent}
+         */
+        fun create(requestEvent: IPollRequestEvent, exception: Exception): IPollFailedEvent {
+            return PollFailedEvent(requestEvent, exception, System.currentTimeMillis())
+        }
+    }
 }
 
 /**
@@ -210,7 +282,7 @@ interface IPollFailedEvent {
  *
  * @author Matt Champion 17/05/2017
  */
-data class PollFailedEvent(
+private data class PollFailedEvent(
     override val requestEvent: IPollRequestEvent,
     override val exception: Exception,
     override val failedTimestamp: Long) : IPollFailedEvent {
@@ -237,6 +309,18 @@ interface IPublicationRequestEvent {
      * @return the request timestamp
      */
     val requestTimestamp: Long
+
+    /**
+     * Factory for {@link IPublicationRequestEvent}.
+     */
+    companion object Factory {
+        /**
+         * @return a new instance of {@link IPublicationRequestEvent}
+         */
+        fun create(path: String, valueLength: Int): IPublicationRequestEvent {
+            return PublicationRequestEvent(path, valueLength, System.currentTimeMillis())
+        }
+    }
 }
 
 /**
@@ -244,7 +328,7 @@ interface IPublicationRequestEvent {
  *
  * @author Matt Champion 17/05/2017
  */
-data class PublicationRequestEvent(
+private data class PublicationRequestEvent(
     /**
      * @return the topic path
      */
@@ -276,6 +360,18 @@ interface IPublicationSuccessEvent {
      * @return the request timestamp
      */
     val requestTime: Long
+
+    /**
+     * Factory for {@link IPublicationSuccessEvent}.
+     */
+    companion object Factory {
+        /**
+         * @return a new instance of {@link IPublicationSuccessEvent}
+         */
+        fun create(requestEvent: IPublicationRequestEvent): IPublicationSuccessEvent {
+            return PublicationSuccessEvent(requestEvent, System.currentTimeMillis())
+        }
+    }
 }
 
 /**
@@ -283,7 +379,7 @@ interface IPublicationSuccessEvent {
  *
  * @author Matt Champion 17/05/2017
  */
-data class PublicationSuccessEvent(
+private data class PublicationSuccessEvent(
     override val requestEvent: IPublicationRequestEvent,
     override val successTimestamp: Long) : IPublicationSuccessEvent {
 
@@ -314,6 +410,18 @@ interface IPublicationFailedEvent {
      */
     val requestTime: Long
         get() = failedTimestamp - requestEvent.requestTimestamp
+
+    /**
+     * Factory for {@link IPublicationFailedEvent}.
+     */
+    companion object Factory {
+        /**
+         * @return a new instance of {@link IPublicationFailedEvent}
+         */
+        fun create(requestEvent: IPublicationRequestEvent, errorReason: ErrorReason): IPublicationFailedEvent {
+            return PublicationFailedEvent(requestEvent, errorReason, System.currentTimeMillis())
+        }
+    }
 }
 
 /**
@@ -321,7 +429,7 @@ interface IPublicationFailedEvent {
  *
  * @author Matt Champion 17/05/2017
  */
-data class PublicationFailedEvent(
+private data class PublicationFailedEvent(
     override val requestEvent: IPublicationRequestEvent,
     override val errorReason: ErrorReason,
     override val failedTimestamp: Long) : IPublicationFailedEvent {

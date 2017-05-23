@@ -15,14 +15,12 @@
 
 package com.pushtechnology.adapters.rest.metrics.events;
 
-import static java.lang.System.currentTimeMillis;
-
 import org.apache.http.HttpResponse;
 
-import com.pushtechnology.adapters.rest.metrics.PollFailedEvent;
+import com.pushtechnology.adapters.rest.metrics.IPollFailedEvent;
+import com.pushtechnology.adapters.rest.metrics.IPollRequestEvent;
+import com.pushtechnology.adapters.rest.metrics.IPollSuccessEvent;
 import com.pushtechnology.adapters.rest.metrics.PollListener;
-import com.pushtechnology.adapters.rest.metrics.PollRequestEvent;
-import com.pushtechnology.adapters.rest.metrics.PollSuccessEvent;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 
@@ -43,13 +41,12 @@ import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 
     @Override
     public PollCompletionListener onPollRequest(ServiceConfig serviceConfig, EndpointConfig endpointConfig) {
-        final PollRequestEvent pollRequestEvent = new PollRequestEvent(
+        final IPollRequestEvent pollRequestEvent = IPollRequestEvent.Factory.create(
             (serviceConfig.isSecure() ? "https://" : "http://") +
                 serviceConfig.getHost() +
                 ":" +
                 serviceConfig.getPort() +
-                endpointConfig.getUrl(),
-            currentTimeMillis());
+                endpointConfig.getUrl());
 
         pollEventListener.onPollRequest(pollRequestEvent);
 
@@ -61,26 +58,25 @@ import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
      * {@link PollEventListener} of events.
      */
     private static final class CompletionListener implements PollListener.PollCompletionListener {
-        private final PollRequestEvent pollRequestEvent;
+        private final IPollRequestEvent pollRequestEvent;
         private final PollEventListener pollEventListener;
 
-        private CompletionListener(PollRequestEvent pollRequestEvent, PollEventListener pollEventListener) {
+        private CompletionListener(IPollRequestEvent pollRequestEvent, PollEventListener pollEventListener) {
             this.pollRequestEvent = pollRequestEvent;
             this.pollEventListener = pollEventListener;
         }
 
         @Override
         public void onPollResponse(HttpResponse response) {
-            pollEventListener.onPollSuccess(new PollSuccessEvent(
+            pollEventListener.onPollSuccess(IPollSuccessEvent.Factory.create(
                 pollRequestEvent,
                 response.getStatusLine().getStatusCode(),
-                response.getEntity().getContentLength(),
-                currentTimeMillis()));
+                response.getEntity().getContentLength()));
         }
 
         @Override
         public void onPollFailure(Exception exception) {
-            pollEventListener.onPollFailed(new PollFailedEvent(pollRequestEvent, exception, currentTimeMillis()));
+            pollEventListener.onPollFailed(IPollFailedEvent.Factory.create(pollRequestEvent, exception));
         }
     }
 }

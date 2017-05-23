@@ -1,11 +1,7 @@
 package com.pushtechnology.adapters.rest.metrics.events;
 
-import static com.pushtechnology.diffusion.client.callbacks.ErrorReason.ACCESS_DENIED;
-import static com.pushtechnology.diffusion.client.topics.details.TopicType.BINARY;
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -26,18 +22,8 @@ import org.mockito.junit.MockitoRule;
 import com.pushtechnology.adapters.rest.metrics.IPollFailedEvent;
 import com.pushtechnology.adapters.rest.metrics.IPollRequestEvent;
 import com.pushtechnology.adapters.rest.metrics.IPollSuccessEvent;
-import com.pushtechnology.adapters.rest.metrics.ITopicCreationFailedEvent;
-import com.pushtechnology.adapters.rest.metrics.ITopicCreationRequestEvent;
-import com.pushtechnology.adapters.rest.metrics.ITopicCreationSuccessEvent;
-import com.pushtechnology.adapters.rest.metrics.PollFailedEvent;
-import com.pushtechnology.adapters.rest.metrics.PollRequestEvent;
-import com.pushtechnology.adapters.rest.metrics.PollSuccessEvent;
-import com.pushtechnology.adapters.rest.metrics.PublicationFailedEvent;
-import com.pushtechnology.adapters.rest.metrics.PublicationRequestEvent;
-import com.pushtechnology.adapters.rest.metrics.PublicationSuccessEvent;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.diffusion.datatype.Bytes;
 
 /**
  * Unit tests for {@link PollEventDispatcher}.
