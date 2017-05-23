@@ -66,6 +66,7 @@ public final class LiveIT {
         .builder()
         .host("localhost")
         .port(8080)
+        .secure(false)
         .principal("control")
         .password("password")
         .connectionTimeout(10000)

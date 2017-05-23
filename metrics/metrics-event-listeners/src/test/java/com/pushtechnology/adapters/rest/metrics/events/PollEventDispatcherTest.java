@@ -52,7 +52,7 @@ public final class PollEventDispatcherTest {
     private final EndpointConfig endpointConfig = EndpointConfig
         .builder()
         .name("endpoint")
-        .url("endpoint")
+        .url("/endpoint")
         .topicPath("endpoint")
         .produces("string")
         .build();
@@ -60,7 +60,6 @@ public final class PollEventDispatcherTest {
         .builder()
         .name("service")
         .host("localhost")
-        .port(80)
         .pollPeriod(5000)
         .topicPathRoot("service")
         .endpoints(singletonList(endpointConfig))
@@ -87,7 +86,7 @@ public final class PollEventDispatcherTest {
 
         verify(pollEventListener).onPollRequest(requestCaptor.capture());
         final PollRequestEvent value = requestCaptor.getValue();
-        assertEquals("http://localhost:80endpoint", value.getUri());
+        assertEquals("https://localhost:443/endpoint", value.getUri());
     }
 
     @Test

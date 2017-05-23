@@ -15,6 +15,9 @@
 
 package com.pushtechnology.adapters.rest.model.latest;
 
+import static java.util.Collections.emptyList;
+
+import java.util.Collections;
 import java.util.List;
 
 import com.pushtechnology.adapters.rest.model.AnyModel;
@@ -39,27 +42,31 @@ public class Model implements AnyModel {
     public static final int VERSION = 14;
 
     /**
-     * If the client should run.
+     * If the client should run. Defaults to true.
      */
-    private boolean active;
+    @Builder.Default
+    private boolean active = true;
 
     /**
      * The Diffusion server.
      */
     @NonNull
-    private DiffusionConfig diffusion;
+    @Builder.Default
+    private DiffusionConfig diffusion = DiffusionConfig.builder().build();
 
     /**
      * The REST services to poll.
      */
     @NonNull
-    List<ServiceConfig> services;
+    @Builder.Default
+    List<ServiceConfig> services = emptyList();
 
     /**
      * The metrics to gather.
      */
     @NonNull
-    private MetricsConfig metrics;
+    @Builder.Default
+    private MetricsConfig metrics = MetricsConfig.builder().build();
 
     /**
      * The location of the trust store.

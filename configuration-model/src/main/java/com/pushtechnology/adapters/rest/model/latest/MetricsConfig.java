@@ -1,5 +1,7 @@
 package com.pushtechnology.adapters.rest.model.latest;
 
+import static com.pushtechnology.adapters.rest.model.latest.MetricsConfig.Type.OFF;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Value;
@@ -16,10 +18,14 @@ import lombok.Value;
 @AllArgsConstructor
 public final class MetricsConfig {
     /**
-     * Type of metrics.
+     * Type of metrics. Defaults to OFF.
      */
-    Type type;
+    @Builder.Default
+    Type type = OFF;
 
+    /**
+     * The type of metrics.
+     */
     public enum Type {
         OFF,
         COUNTING

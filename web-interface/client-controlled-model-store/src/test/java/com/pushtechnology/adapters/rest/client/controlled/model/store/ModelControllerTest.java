@@ -303,7 +303,7 @@ public final class ModelControllerTest {
 
         controller.onRequest(message, responder);
 
-        verify(executor, times(2)).execute(runnableCaptor.capture());
+        verify(executor).execute(runnableCaptor.capture());
         verify(responder).respond(emptyMap());
     }
 
@@ -578,7 +578,7 @@ public final class ModelControllerTest {
 
         controller.onRequest(message, responder);
 
-        verify(executor, times(1)).execute(runnableCaptor.capture());
+        verify(executor).execute(runnableCaptor.capture());
         verify(responder).reject("No endpoint name provided");
     }
 
@@ -593,7 +593,7 @@ public final class ModelControllerTest {
 
         controller.onRequest(message, responder);
 
-        verify(executor, times(2)).execute(runnableCaptor.capture());
+        verify(executor).execute(runnableCaptor.capture());
         verify(responder).respond(emptyMap());
     }
 

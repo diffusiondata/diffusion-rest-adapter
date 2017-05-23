@@ -15,6 +15,9 @@
 
 package com.pushtechnology.adapters.rest.model.latest;
 
+import static java.util.Collections.emptyList;
+
+import java.util.Collections;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
@@ -47,25 +50,29 @@ public class ServiceConfig {
     String host;
 
     /**
-     * The port to connect to.
+     * The port to connect to. Defaults to 443.
      */
-    int port;
+    @Builder.Default
+    int port = 443;
 
     /**
-     * If a secure transport should be used.
+     * If a secure transport should be used. Defaults to true.
      */
-    boolean secure;
+    @Builder.Default
+    boolean secure = true;
 
     /**
-     * The endpoints the service makes available.
+     * The endpoints the service makes available. Defaults to an empty list.
      */
     @NonNull
-    List<EndpointConfig> endpoints;
+    @Builder.Default
+    List<EndpointConfig> endpoints = emptyList();
 
     /**
-     * The time in milliseconds between polls.
+     * The time in milliseconds between polls. Defaults to 60000.
      */
-    long pollPeriod;
+    @Builder.Default
+    long pollPeriod = 60000;
 
     /**
      * The topic path that is the root of the service.

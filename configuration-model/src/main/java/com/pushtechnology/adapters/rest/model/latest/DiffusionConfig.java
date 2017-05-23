@@ -15,6 +15,13 @@
 
 package com.pushtechnology.adapters.rest.model.latest;
 
+import static com.pushtechnology.diffusion.client.session.SessionAttributes.DEFAULT_CONNECTION_TIMEOUT;
+import static com.pushtechnology.diffusion.client.session.SessionAttributes.DEFAULT_INPUT_BUFFER_SIZE;
+import static com.pushtechnology.diffusion.client.session.SessionAttributes.DEFAULT_OUTPUT_BUFFER_SIZE;
+import static com.pushtechnology.diffusion.client.session.SessionAttributes.DEFAULT_RECONNECTION_TIMEOUT;
+import static com.pushtechnology.diffusion.client.session.SessionAttributes.DEFAULT_RECOVERY_BUFFER_SIZE;
+import static com.pushtechnology.diffusion.client.session.SessionAttributes.MAXIMUM_MESSAGE_SIZE_MIN;
+
 import com.pushtechnology.diffusion.client.session.SessionAttributes;
 
 import lombok.AllArgsConstructor;
@@ -38,18 +45,21 @@ import lombok.Value;
     "maximumMessageSize", "inputBufferSize", "outputBufferSize", "recoveryBufferSize"})
 public class DiffusionConfig {
     /**
-     * The host of the Diffusion server.
+     * The host of the Diffusion server. Defaults to the localhost.
      */
     @NonNull
-    String host;
+    @Builder.Default
+    String host = "localhost";
     /**
-     * The port the Diffusion server listens on.
+     * The port the Diffusion server listens on. Defaults to 8080.
      */
-    int port;
+    @Builder.Default
+    int port = 8080;
     /**
-     * If a secure connection should be used.
+     * If a secure connection should be used. Defaults to false.
      */
-    boolean secure;
+    @Builder.Default
+    boolean secure = false;
     /**
      * The principal. Can be {@code null}.
      */
@@ -60,32 +70,38 @@ public class DiffusionConfig {
     String password;
     /**
      * The Diffusion session connection timeout.
+     * Defaults to {@link SessionAttributes#DEFAULT_CONNECTION_TIMEOUT}.
      */
     @Default
-    int connectionTimeout = SessionAttributes.DEFAULT_CONNECTION_TIMEOUT;
+    int connectionTimeout = DEFAULT_CONNECTION_TIMEOUT;
     /**
      * The Diffusion session reconnection timeout.
+     * Defaults to {@link SessionAttributes#DEFAULT_RECONNECTION_TIMEOUT}.
      */
     @Default
-    int reconnectionTimeout = SessionAttributes.DEFAULT_RECONNECTION_TIMEOUT;
+    int reconnectionTimeout = DEFAULT_RECONNECTION_TIMEOUT;
     /**
      * The Diffusion session maximum message size.
+     * Defaults to {@link SessionAttributes#MAXIMUM_MESSAGE_SIZE_MIN}.
      */
     @Default
-    int maximumMessageSize = SessionAttributes.DEFAULT_MAXIMUM_MESSAGE_SIZE;
+    int maximumMessageSize = MAXIMUM_MESSAGE_SIZE_MIN;
     /**
      * The Diffusion session input buffer size.
+     * Defaults to {@link SessionAttributes#DEFAULT_INPUT_BUFFER_SIZE}.
      */
     @Default
-    int inputBufferSize = SessionAttributes.DEFAULT_INPUT_BUFFER_SIZE;
+    int inputBufferSize = DEFAULT_INPUT_BUFFER_SIZE;
     /**
      * The Diffusion session output buffer size.
+     * Defaults to {@link SessionAttributes#DEFAULT_OUTPUT_BUFFER_SIZE}.
      */
     @Default
-    int outputBufferSize = SessionAttributes.DEFAULT_OUTPUT_BUFFER_SIZE;
+    int outputBufferSize = DEFAULT_OUTPUT_BUFFER_SIZE;
     /**
      * The Diffusion session recovery buffer size.
+     * Defaults to {@link SessionAttributes#DEFAULT_RECOVERY_BUFFER_SIZE}.
      */
     @Default
-    int recoveryBufferSize = SessionAttributes.DEFAULT_RECOVERY_BUFFER_SIZE;
+    int recoveryBufferSize = DEFAULT_RECOVERY_BUFFER_SIZE;
 }
