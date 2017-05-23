@@ -140,6 +140,7 @@ import net.jcip.annotations.ThreadSafe;
                 .diffusion(model.getDiffusion())
                 .services(serviceConfigs)
                 .truststore(model.getTruststore())
+                .metrics(model.getMetrics())
                 .build();
         });
         responder.respond(emptyMap());
@@ -165,6 +166,7 @@ import net.jcip.annotations.ThreadSafe;
                 .active(true)
                 .diffusion(model.getDiffusion())
                 .services(serviceConfigs)
+                .metrics(model.getMetrics())
                 .truststore(model.getTruststore())
                 .build();
         });

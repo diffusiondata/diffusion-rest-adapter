@@ -15,6 +15,7 @@
 
 package com.pushtechnology.adapters.rest;
 
+import static com.pushtechnology.adapters.rest.model.latest.MetricsConfig.Type.OFF;
 import static com.pushtechnology.diffusion.client.session.Session.State.CLOSED_BY_CLIENT;
 import static com.pushtechnology.diffusion.client.session.Session.State.CONNECTED_ACTIVE;
 import static com.pushtechnology.diffusion.client.session.Session.State.CONNECTING;
@@ -43,6 +44,7 @@ import com.pushtechnology.adapters.rest.adapter.ServiceListener;
 import com.pushtechnology.adapters.rest.client.RESTAdapterClient;
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
+import com.pushtechnology.adapters.rest.model.latest.MetricsConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.model.store.MutableModelStore;
@@ -141,6 +143,10 @@ public final class LiveIT {
             .active(true)
             .diffusion(DIFFUSION_CONFIG)
             .services(asList(bitcoinaverage, icndb))
+            .metrics(MetricsConfig
+                .builder()
+                .type(OFF)
+                .build())
             .build());
         final RESTAdapterClient client = startClient();
 

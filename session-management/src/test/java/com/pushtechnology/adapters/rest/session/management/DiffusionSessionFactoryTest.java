@@ -15,6 +15,7 @@
 
 package com.pushtechnology.adapters.rest.session.management;
 
+import static com.pushtechnology.adapters.rest.model.latest.MetricsConfig.Type.OFF;
 import static com.pushtechnology.diffusion.client.session.SessionAttributes.Transport.WEBSOCKET;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.isA;
@@ -32,6 +33,8 @@ import org.junit.Test;
 import org.mockito.Mock;
 
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
+import com.pushtechnology.adapters.rest.model.latest.MetricsConfig;
+import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.session.SessionFactory;
 

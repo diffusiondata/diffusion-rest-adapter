@@ -15,6 +15,7 @@
 
 package com.pushtechnology.adapters.rest;
 
+import static com.pushtechnology.adapters.rest.model.latest.MetricsConfig.Type.OFF;
 import static com.pushtechnology.diffusion.client.features.Topics.UnsubscribeReason.REMOVAL;
 import static com.pushtechnology.diffusion.client.session.Session.State.CLOSED_BY_CLIENT;
 import static com.pushtechnology.diffusion.client.session.Session.State.CONNECTED_ACTIVE;
@@ -68,6 +69,7 @@ import com.pushtechnology.adapters.rest.client.RESTAdapterClient;
 import com.pushtechnology.adapters.rest.model.latest.BasicAuthenticationConfig;
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
+import com.pushtechnology.adapters.rest.model.latest.MetricsConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.SecurityConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
@@ -665,6 +667,10 @@ public final class BasicIT {
             .active(true)
             .diffusion(DIFFUSION_CONFIG)
             .services(asList(services))
+            .metrics(MetricsConfig
+                .builder()
+                .type(OFF)
+                .build())
             .truststore("testKeystore.jks")
             .build();
     }

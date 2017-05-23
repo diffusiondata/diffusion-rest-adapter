@@ -15,12 +15,14 @@
 
 package com.pushtechnology.adapters.rest.client.controlled.model.store;
 
+import static com.pushtechnology.adapters.rest.model.latest.MetricsConfig.Type.OFF;
 import static java.util.Collections.emptyList;
 
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Consumer;
 
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
+import com.pushtechnology.adapters.rest.model.latest.MetricsConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.store.AsyncMutableModelStore;
 import com.pushtechnology.adapters.rest.model.store.ModelStore;
@@ -63,6 +65,10 @@ public final class ClientControlledModelStore implements ModelStore {
             .diffusion(diffusionConfig)
             .services(emptyList())
             .truststore(truststore)
+            .metrics(MetricsConfig
+                .builder()
+                .type(OFF)
+                .build())
             .build());
     }
 

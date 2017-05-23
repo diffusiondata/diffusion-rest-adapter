@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Push Technology Ltd.
+ * Copyright (C) 2017 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,57 +13,54 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.model.latest;
+package com.pushtechnology.adapters.rest.model.v13;
+
+import java.util.List;
+
+import com.pushtechnology.adapters.rest.model.AnyModel;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NonNull;
-import lombok.ToString;
 import lombok.Value;
 
 /**
- * Endpoint configuration. Version 14.
- * <p>
- * Description of a REST endpoint to poll.
+ * Configuration model. Version 13.
  *
  * @author Push Technology Limited
  */
 @Value
 @Builder
 @AllArgsConstructor
-@ToString(of = "name")
-public class EndpointConfig {
+public class Model implements AnyModel {
     /**
-     * The name of the endpoint.
+     * The version of the model.
+     */
+    public static final int VERSION = 13;
+
+    /**
+     * If the client should run.
+     */
+    private boolean active;
+
+    /**
+     * The Diffusion server.
      */
     @NonNull
-    String name;
+    private DiffusionConfig diffusion;
+
     /**
-     * The URL of the endpoint.
+     * The REST services to poll.
      */
     @NonNull
-    String url;
+    List<ServiceConfig> services;
+
     /**
-     * The topic path to map the endpoint to. It is relative to the service
-     * topic path root.
-     */
-    @NonNull
-    String topicPath;
-    /**
-     * The type of content produced by the endpoint.
+     * The location of the trust store.
      * <p>
-     * Supports the values:
-     * <ul>
-     *     <li>auto</li>
-     *     <li>json</li>
-     *     <li>application/json</li>
-     *     <li>text/json</li>
-     *     <li>string</li>
-     *     <li>text/plain</li>
-     *     <li>binary</li>
-     *     <li>application/octet-stream</li>
-     * </ul>
+     * The location will first be resolved as a classpath resource. If this
+     * fails it will fallback to trying to load the store from this
+     * location on the file system.
      */
-    @NonNull
-    String produces;
+    String truststore;
 }

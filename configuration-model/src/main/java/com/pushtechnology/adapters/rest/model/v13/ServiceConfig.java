@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Push Technology Ltd.
+ * Copyright (C) 2017 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,57 +13,67 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.model.latest;
+package com.pushtechnology.adapters.rest.model.v13;
+
+import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NonNull;
-import lombok.ToString;
 import lombok.Value;
 
 /**
- * Endpoint configuration. Version 14.
+ * Service configuration. Version 13.
  * <p>
- * Description of a REST endpoint to poll.
+ * Description of a REST service to poll.
  *
  * @author Push Technology Limited
  */
 @Value
 @Builder
 @AllArgsConstructor
-@ToString(of = "name")
-public class EndpointConfig {
+public class ServiceConfig {
     /**
-     * The name of the endpoint.
+     * The name of the service.
      */
     @NonNull
     String name;
+
     /**
-     * The URL of the endpoint.
+     * The host of the service.
      */
     @NonNull
-    String url;
+    String host;
+
     /**
-     * The topic path to map the endpoint to. It is relative to the service
-     * topic path root.
+     * The port to connect to.
+     */
+    int port;
+
+    /**
+     * If a secure transport should be used.
+     */
+    boolean secure;
+
+    /**
+     * The endpoints the service makes available.
      */
     @NonNull
-    String topicPath;
+    List<EndpointConfig> endpoints;
+
     /**
-     * The type of content produced by the endpoint.
-     * <p>
-     * Supports the values:
-     * <ul>
-     *     <li>auto</li>
-     *     <li>json</li>
-     *     <li>application/json</li>
-     *     <li>text/json</li>
-     *     <li>string</li>
-     *     <li>text/plain</li>
-     *     <li>binary</li>
-     *     <li>application/octet-stream</li>
-     * </ul>
+     * The time in milliseconds between polls.
+     */
+    long pollPeriod;
+
+    /**
+     * The topic path that is the root of the service.
      */
     @NonNull
-    String produces;
+    String topicPathRoot;
+
+    /**
+     * The security configuration for the service.
+     */
+    SecurityConfig security;
 }

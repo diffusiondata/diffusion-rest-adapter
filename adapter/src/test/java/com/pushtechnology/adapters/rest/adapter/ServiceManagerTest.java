@@ -15,6 +15,7 @@
 
 package com.pushtechnology.adapters.rest.adapter;
 
+import static com.pushtechnology.adapters.rest.model.latest.MetricsConfig.Type.OFF;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.times;
@@ -29,6 +30,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
+import com.pushtechnology.adapters.rest.model.latest.MetricsConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.services.ServiceSession;
@@ -65,6 +67,10 @@ public final class ServiceManagerTest {
             .host("localhost")
             .build())
         .services(singletonList(serviceConfig))
+        .metrics(MetricsConfig
+            .builder()
+            .type(OFF)
+            .build())
         .build();
 
     private ServiceManagerContext context;

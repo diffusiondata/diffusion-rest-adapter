@@ -1,5 +1,6 @@
 package com.pushtechnology.adapters.rest.model.store;
 
+import static com.pushtechnology.adapters.rest.model.latest.MetricsConfig.Type.OFF;
 import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -15,6 +16,7 @@ import org.mockito.Mock;
 
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
+import com.pushtechnology.adapters.rest.model.latest.MetricsConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 
@@ -56,6 +58,10 @@ public final class AbstractModelStoreTest {
     private final Model model = Model
         .builder()
         .diffusion(diffusionConfig)
+        .metrics(MetricsConfig
+            .builder()
+            .type(OFF)
+            .build())
         .services(singletonList(serviceConfig))
         .build();
 

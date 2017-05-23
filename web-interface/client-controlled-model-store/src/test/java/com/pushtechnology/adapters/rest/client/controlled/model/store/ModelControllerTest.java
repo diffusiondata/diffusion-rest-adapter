@@ -15,6 +15,7 @@
 
 package com.pushtechnology.adapters.rest.client.controlled.model.store;
 
+import static com.pushtechnology.adapters.rest.model.latest.MetricsConfig.Type.OFF;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
@@ -43,6 +44,7 @@ import org.mockito.Mock;
 import com.pushtechnology.adapters.rest.model.latest.BasicAuthenticationConfig;
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
+import com.pushtechnology.adapters.rest.model.latest.MetricsConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.SecurityConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
@@ -92,6 +94,10 @@ public final class ModelControllerTest {
                 .password("password")
                 .build())
             .services(emptyList())
+            .metrics(MetricsConfig
+                .builder()
+                .type(OFF)
+                .build())
             .build());
         verify(executor).execute(runnableCaptor.capture());
         runnableCaptor.getValue().run();
@@ -637,6 +643,10 @@ public final class ModelControllerTest {
                             .build()))
                     .build()
             ))
+            .metrics(MetricsConfig
+                .builder()
+                .type(OFF)
+                .build())
             .build());
         final ModelController controller = new ModelController(modelStore);
 

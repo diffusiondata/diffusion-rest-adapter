@@ -1,6 +1,7 @@
 package com.pushtechnology.adapters.rest.model.conversion;
 
-import static com.pushtechnology.adapters.rest.model.conversion.V12Converter.INSTANCE;
+import static com.pushtechnology.adapters.rest.model.conversion.V13Converter.INSTANCE;
+import static com.pushtechnology.adapters.rest.model.latest.MetricsConfig.Type.OFF;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -10,54 +11,57 @@ import java.util.List;
 
 import org.junit.Test;
 
-import com.pushtechnology.adapters.rest.model.v13.BasicAuthenticationConfig;
-import com.pushtechnology.adapters.rest.model.v13.DiffusionConfig;
-import com.pushtechnology.adapters.rest.model.v13.EndpointConfig;
-import com.pushtechnology.adapters.rest.model.v13.Model;
-import com.pushtechnology.adapters.rest.model.v13.ServiceConfig;
-import com.pushtechnology.diffusion.client.session.SessionAttributes;
+import com.pushtechnology.adapters.rest.model.latest.BasicAuthenticationConfig;
+import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
+import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
+import com.pushtechnology.adapters.rest.model.latest.Model;
+import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 
 /**
- * Unit tests for {@link V12Converter}.
+ * Unit tests for {@link V13Converter}.
  *
  * @author Push Technology Limited
  */
-public final class V12ConverterTest {
+public final class V13ConverterTest {
     @Test
     public void testConvert() {
         final Model model = INSTANCE.convert(
-            com.pushtechnology.adapters.rest.model.v12.Model
+            com.pushtechnology.adapters.rest.model.v13.Model
                 .builder()
                 .services(Collections.singletonList(
-                    com.pushtechnology.adapters.rest.model.v12.ServiceConfig
+                    com.pushtechnology.adapters.rest.model.v13.ServiceConfig
                         .builder()
+                        .name("service")
                         .host("localhost")
                         .port(80)
-                        .endpoints(Collections.singletonList(com.pushtechnology.adapters.rest.model.v12.EndpointConfig
+                        .endpoints(Collections.singletonList(com.pushtechnology.adapters.rest.model.v13.EndpointConfig
                             .builder()
                             .name("endpoint")
-                            .topic("topic")
+                            .topicPath("topic")
                             .url("/url")
                             .produces("binary")
                             .build()))
                         .pollPeriod(5000)
-                        .topicRoot("a")
-                        .security(com.pushtechnology.adapters.rest.model.v12.SecurityConfig
+                        .topicPathRoot("a")
+                        .security(com.pushtechnology.adapters.rest.model.v13.SecurityConfig
                             .builder()
-                            .basic(com.pushtechnology.adapters.rest.model.v12.BasicAuthenticationConfig
+                            .basic(com.pushtechnology.adapters.rest.model.v13.BasicAuthenticationConfig
                                 .builder()
-                                .principal("control")
-                                .credential("password")
+                                .userid("control")
+                                .password("password")
                                 .build())
                             .build())
                         .build()
                 ))
-                .diffusion(com.pushtechnology.adapters.rest.model.v12.DiffusionConfig
+                .diffusion(com.pushtechnology.adapters.rest.model.v13.DiffusionConfig
                     .builder()
                     .host("localhost")
                     .port(8080)
                     .principal("control")
                     .password("password")
+                    .connectionTimeout(500)
+                    .reconnectionTimeout(5000)
+                    .maximumMessageSize(64000)
                     .build())
                 .build());
 
@@ -68,7 +72,7 @@ public final class V12ConverterTest {
         final BasicAuthenticationConfig basic = service.getSecurity().getBasic();
 
         assertTrue(model.isActive());
-        assertEquals("localhost:80:false", service.getName());
+        assertEquals("service", service.getName());
         assertEquals("localhost", service.getHost());
         assertEquals(80, service.getPort());
         assertEquals(1, endpoints.size());
@@ -79,12 +83,9 @@ public final class V12ConverterTest {
         assertEquals(8080, diffusion.getPort());
         assertEquals("control", diffusion.getPrincipal());
         assertEquals("password", diffusion.getPassword());
-        assertEquals(SessionAttributes.DEFAULT_CONNECTION_TIMEOUT, diffusion.getConnectionTimeout());
-        assertEquals(SessionAttributes.DEFAULT_RECONNECTION_TIMEOUT, diffusion.getReconnectionTimeout());
-        assertEquals(SessionAttributes.DEFAULT_MAXIMUM_MESSAGE_SIZE, diffusion.getMaximumMessageSize());
-        assertEquals(SessionAttributes.DEFAULT_INPUT_BUFFER_SIZE, diffusion.getInputBufferSize());
-        assertEquals(SessionAttributes.DEFAULT_OUTPUT_BUFFER_SIZE, diffusion.getOutputBufferSize());
-        assertEquals(SessionAttributes.DEFAULT_RECOVERY_BUFFER_SIZE, diffusion.getRecoveryBufferSize());
+        assertEquals(500, diffusion.getConnectionTimeout());
+        assertEquals(5000, diffusion.getReconnectionTimeout());
+        assertEquals(64000, diffusion.getMaximumMessageSize());
 
         assertEquals("endpoint", endpoints.get(0).getName());
         assertEquals("topic", endpoints.get(0).getTopicPath());
@@ -93,6 +94,8 @@ public final class V12ConverterTest {
         assertNotNull(basic);
         assertEquals("control", basic.getUserid());
         assertEquals("password", basic.getPassword());
+
+        assertEquals(OFF, model.getMetrics().getType());
     }
 
     @Test(expected = IllegalArgumentException.class)

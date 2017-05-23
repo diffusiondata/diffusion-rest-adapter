@@ -1,5 +1,6 @@
 package com.pushtechnology.adapters.rest.model.store;
 
+import static com.pushtechnology.adapters.rest.model.latest.MetricsConfig.Type.OFF;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -21,6 +22,7 @@ import org.mockito.Mock;
 
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
+import com.pushtechnology.adapters.rest.model.latest.MetricsConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.model.store.AsyncMutableModelStore.CreateResult;
@@ -135,36 +137,60 @@ public final class AsyncMutableModelStoreTest {
         .builder()
         .diffusion(diffusionConfig)
         .services(singletonList(serviceConfig0))
+        .metrics(MetricsConfig
+            .builder()
+            .type(OFF)
+            .build())
         .build();
 
     private final Model modelWithTwoServices = Model
         .builder()
         .diffusion(diffusionConfig)
         .services(asList(serviceConfig0, serviceConfig4))
+        .metrics(MetricsConfig
+            .builder()
+            .type(OFF)
+            .build())
         .build();
 
     private final Model modelWithTwoServicesAndTwoEndpoints = Model
         .builder()
         .diffusion(diffusionConfig)
         .services(asList(serviceConfig0, serviceConfig5))
+        .metrics(MetricsConfig
+            .builder()
+            .type(OFF)
+            .build())
         .build();
 
     private final Model modelWithTwoEndpoints = Model
         .builder()
         .diffusion(diffusionConfig)
         .services(singletonList(serviceConfig1))
+        .metrics(MetricsConfig
+            .builder()
+            .type(OFF)
+            .build())
         .build();
 
     private final Model emptyModel = Model
         .builder()
         .diffusion(diffusionConfig)
         .services(emptyList())
+        .metrics(MetricsConfig
+            .builder()
+            .type(OFF)
+            .build())
         .build();
 
     private final Model modelWithDiffusion = Model
         .builder()
         .diffusion(diffusionConfig)
         .services(emptyList())
+        .metrics(MetricsConfig
+            .builder()
+            .type(OFF)
+            .build())
         .build();
 
     private AsyncMutableModelStore modelStore;

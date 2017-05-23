@@ -25,7 +25,7 @@ import lombok.NonNull;
 import lombok.Value;
 
 /**
- * Configuration model. Version 13.
+ * Configuration model. Version 14.
  *
  * @author Push Technology Limited
  */
@@ -36,7 +36,7 @@ public class Model implements AnyModel {
     /**
      * The version of the model.
      */
-    public static final int VERSION = 13;
+    public static final int VERSION = 14;
 
     /**
      * If the client should run.
@@ -54,6 +54,12 @@ public class Model implements AnyModel {
      */
     @NonNull
     List<ServiceConfig> services;
+
+    /**
+     * The metrics to gather.
+     */
+    @NonNull
+    private MetricsConfig metrics;
 
     /**
      * The location of the trust store.

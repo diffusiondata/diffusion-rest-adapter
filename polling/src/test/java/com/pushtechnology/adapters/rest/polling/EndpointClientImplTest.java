@@ -1,5 +1,6 @@
 package com.pushtechnology.adapters.rest.polling;
 
+import static com.pushtechnology.adapters.rest.model.latest.MetricsConfig.Type.OFF;
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -32,6 +33,7 @@ import com.pushtechnology.adapters.rest.metrics.PollListener;
 import com.pushtechnology.adapters.rest.metrics.PollListener.PollCompletionListener;
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
+import com.pushtechnology.adapters.rest.model.latest.MetricsConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 
@@ -86,6 +88,10 @@ public final class EndpointClientImplTest {
             .host("example.com")
             .build())
         .services(singletonList(serviceConfig))
+        .metrics(MetricsConfig
+            .builder()
+            .type(OFF)
+            .build())
         .build();
 
     private EndpointClientImpl endpointClient;

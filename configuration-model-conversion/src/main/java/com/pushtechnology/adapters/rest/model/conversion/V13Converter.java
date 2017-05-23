@@ -15,37 +15,38 @@
 
 package com.pushtechnology.adapters.rest.model.conversion;
 
+import static com.pushtechnology.adapters.rest.model.latest.MetricsConfig.Type.OFF;
 import static java.util.stream.Collectors.toList;
 
-import com.pushtechnology.adapters.rest.model.v13.BasicAuthenticationConfig;
-import com.pushtechnology.adapters.rest.model.v13.DiffusionConfig;
-import com.pushtechnology.adapters.rest.model.v13.EndpointConfig;
-import com.pushtechnology.adapters.rest.model.v13.Model;
-import com.pushtechnology.adapters.rest.model.v13.SecurityConfig;
-import com.pushtechnology.adapters.rest.model.v13.ServiceConfig;
-import com.pushtechnology.diffusion.client.session.SessionAttributes;
+import com.pushtechnology.adapters.rest.model.latest.BasicAuthenticationConfig;
+import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
+import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
+import com.pushtechnology.adapters.rest.model.latest.MetricsConfig;
+import com.pushtechnology.adapters.rest.model.latest.Model;
+import com.pushtechnology.adapters.rest.model.latest.SecurityConfig;
+import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 
 import net.jcip.annotations.Immutable;
 
 /**
- * Converter between different version 12 of the model and version 13.
+ * Converter between different version 13 of the model and version 14.
  *
  * @author Push Technology Limited
  */
 @Immutable
-public final class V12Converter
-        extends AbstractModelConverter<com.pushtechnology.adapters.rest.model.v12.Model, Model> {
+public final class V13Converter
+        extends AbstractModelConverter<com.pushtechnology.adapters.rest.model.v13.Model, Model> {
     /**
      * The converter.
      */
-    public static final V12Converter INSTANCE = new V12Converter();
+    public static final V13Converter INSTANCE = new V13Converter();
 
-    private V12Converter() {
-        super(com.pushtechnology.adapters.rest.model.v12.Model.class);
+    private V13Converter() {
+        super(com.pushtechnology.adapters.rest.model.v13.Model.class);
     }
 
     @Override
-    protected Model convertFrom(com.pushtechnology.adapters.rest.model.v12.Model model) {
+    protected Model convertFrom(com.pushtechnology.adapters.rest.model.v13.Model model) {
         return Model
             .builder()
             .active(true)
@@ -54,7 +55,7 @@ public final class V12Converter
                 .stream()
                 .map(oldService -> ServiceConfig
                     .builder()
-                    .name(oldService.getHost() + ":" + oldService.getPort() + ":" + oldService.isSecure())
+                    .name(oldService.getName())
                     .host(oldService.getHost())
                     .port(oldService.getPort())
                     .secure(oldService.isSecure())
@@ -65,20 +66,20 @@ public final class V12Converter
                             .builder()
                             .name(oldEndpoint.getName())
                             .url(oldEndpoint.getUrl())
-                            .topicPath(oldEndpoint.getTopic())
+                            .topicPath(oldEndpoint.getTopicPath())
                             .produces(oldEndpoint.getProduces())
                             .build())
                         .collect(toList()))
                     .pollPeriod(oldService.getPollPeriod())
-                    .topicPathRoot(oldService.getTopicRoot())
+                    .topicPathRoot(oldService.getTopicPathRoot())
                     .security(SecurityConfig
                         .builder()
                         .basic(oldService.getSecurity().getBasic() == null ?
                             null :
                             BasicAuthenticationConfig
                                 .builder()
-                                .userid(oldService.getSecurity().getBasic().getPrincipal())
-                                .password(oldService.getSecurity().getBasic().getCredential())
+                                .userid(oldService.getSecurity().getBasic().getUserid())
+                                .password(oldService.getSecurity().getBasic().getPassword())
                                 .build())
                         .build())
                     .build())
@@ -90,12 +91,16 @@ public final class V12Converter
                 .principal(model.getDiffusion().getPrincipal())
                 .password(model.getDiffusion().getPassword())
                 .secure(model.getDiffusion().isSecure())
-                .connectionTimeout(SessionAttributes.DEFAULT_CONNECTION_TIMEOUT)
-                .reconnectionTimeout(SessionAttributes.DEFAULT_RECONNECTION_TIMEOUT)
-                .maximumMessageSize(SessionAttributes.DEFAULT_MAXIMUM_MESSAGE_SIZE)
-                .inputBufferSize(SessionAttributes.DEFAULT_INPUT_BUFFER_SIZE)
-                .outputBufferSize(SessionAttributes.DEFAULT_OUTPUT_BUFFER_SIZE)
-                .recoveryBufferSize(SessionAttributes.DEFAULT_RECOVERY_BUFFER_SIZE)
+                .connectionTimeout(model.getDiffusion().getConnectionTimeout())
+                .reconnectionTimeout(model.getDiffusion().getReconnectionTimeout())
+                .maximumMessageSize(model.getDiffusion().getMaximumMessageSize())
+                .inputBufferSize(model.getDiffusion().getInputBufferSize())
+                .outputBufferSize(model.getDiffusion().getOutputBufferSize())
+                .recoveryBufferSize(model.getDiffusion().getRecoveryBufferSize())
+                .build())
+            .metrics(MetricsConfig
+                .builder()
+                .type(OFF)
                 .build())
             .truststore(model.getTruststore())
             .build();

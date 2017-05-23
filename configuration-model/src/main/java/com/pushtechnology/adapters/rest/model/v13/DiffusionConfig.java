@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Push Technology Ltd.
+ * Copyright (C) 2017 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,19 +13,16 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.model.latest;
-
-import com.pushtechnology.diffusion.client.session.SessionAttributes;
+package com.pushtechnology.adapters.rest.model.v13;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Builder.Default;
 import lombok.NonNull;
 import lombok.ToString;
 import lombok.Value;
 
 /**
- * Diffusion configuration. Version 14.
+ * Diffusion configuration. Version 13.
  * <p>
  * Description of a Diffusion server to publish to.
  *
@@ -61,31 +58,25 @@ public class DiffusionConfig {
     /**
      * The Diffusion session connection timeout.
      */
-    @Default
-    int connectionTimeout = SessionAttributes.DEFAULT_CONNECTION_TIMEOUT;
+    int connectionTimeout;
     /**
      * The Diffusion session reconnection timeout.
      */
-    @Default
-    int reconnectionTimeout = SessionAttributes.DEFAULT_RECONNECTION_TIMEOUT;
+    int reconnectionTimeout;
     /**
      * The Diffusion session maximum message size.
      */
-    @Default
-    int maximumMessageSize = SessionAttributes.DEFAULT_MAXIMUM_MESSAGE_SIZE;
+    int maximumMessageSize;
     /**
      * The Diffusion session input buffer size.
      */
-    @Default
-    int inputBufferSize = SessionAttributes.DEFAULT_INPUT_BUFFER_SIZE;
+    int inputBufferSize;
     /**
      * The Diffusion session output buffer size.
      */
-    @Default
-    int outputBufferSize = SessionAttributes.DEFAULT_OUTPUT_BUFFER_SIZE;
+    int outputBufferSize;
     /**
      * The Diffusion session recovery buffer size.
      */
-    @Default
-    int recoveryBufferSize = SessionAttributes.DEFAULT_RECOVERY_BUFFER_SIZE;
+    int recoveryBufferSize;
 }

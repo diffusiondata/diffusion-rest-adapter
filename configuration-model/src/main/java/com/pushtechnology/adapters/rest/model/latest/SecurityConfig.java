@@ -20,7 +20,7 @@ import lombok.Builder;
 import lombok.Value;
 
 /**
- * Security configuration. Version 13.
+ * Security configuration. Version 14.
  * <p>
  * Description of the security used by a REST service.
  *

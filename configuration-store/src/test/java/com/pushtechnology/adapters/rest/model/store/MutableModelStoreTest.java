@@ -15,6 +15,7 @@
 
 package com.pushtechnology.adapters.rest.model.store;
 
+import static com.pushtechnology.adapters.rest.model.latest.MetricsConfig.Type.OFF;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
@@ -31,6 +32,7 @@ import org.mockito.Mock;
 
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
+import com.pushtechnology.adapters.rest.model.latest.MetricsConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 
@@ -74,12 +76,20 @@ public final class MutableModelStoreTest {
         .builder()
         .diffusion(diffusionConfig)
         .services(singletonList(serviceConfig))
+        .metrics(MetricsConfig
+            .builder()
+            .type(OFF)
+            .build())
         .build();
 
     private final Model emptyModel = Model
         .builder()
         .diffusion(diffusionConfig)
         .services(emptyList())
+        .metrics(MetricsConfig
+            .builder()
+            .type(OFF)
+            .build())
         .build();
 
     private MutableModelStore modelStore;

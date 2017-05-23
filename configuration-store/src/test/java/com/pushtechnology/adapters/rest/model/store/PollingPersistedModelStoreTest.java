@@ -15,6 +15,7 @@
 
 package com.pushtechnology.adapters.rest.model.store;
 
+import static com.pushtechnology.adapters.rest.model.latest.MetricsConfig.Type.OFF;
 import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.isA;
@@ -42,6 +43,7 @@ import org.mockito.stubbing.Answer;
 
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
+import com.pushtechnology.adapters.rest.model.latest.MetricsConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.persistence.Persistence;
@@ -93,6 +95,10 @@ public final class PollingPersistedModelStoreTest {
         .builder()
         .diffusion(diffusionConfig)
         .services(singletonList(serviceConfig))
+        .metrics(MetricsConfig
+            .builder()
+            .type(OFF)
+            .build())
         .build();
 
     private PollingPersistedModelStore modelStore;
