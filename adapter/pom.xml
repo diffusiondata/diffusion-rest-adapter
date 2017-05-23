@@ -46,6 +46,11 @@
         </dependency>
 
         <dependency>
+            <groupId>com.pushtechnology.adapters.rest</groupId>
+            <artifactId>metrics-event-listeners</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
         </dependency>

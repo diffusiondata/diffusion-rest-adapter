@@ -29,13 +29,13 @@ import com.pushtechnology.diffusion.datatype.Bytes;
  *
  * @author Matt Champion 17/05/2017
  */
-/*package*/ final class PublicationEventDispatcher implements PublicationListener {
+public final class PublicationEventDispatcher implements PublicationListener {
     private final PublicationEventListener publicationEventListener;
 
     /**
      * Constructor.
      */
-    /*package*/ PublicationEventDispatcher(PublicationEventListener publicationEventListener) {
+    public PublicationEventDispatcher(PublicationEventListener publicationEventListener) {
         this.publicationEventListener = publicationEventListener;
     }
 

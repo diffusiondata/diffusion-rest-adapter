@@ -31,10 +31,13 @@ import com.pushtechnology.diffusion.datatype.Bytes;
  *
  * @author Matt Champion 17/05/2017
  */
-/*package*/ final class TopicCreationEventDispatcher implements TopicCreationListener {
+public final class TopicCreationEventDispatcher implements TopicCreationListener {
     private final TopicCreationEventListener listener;
 
-    /*package*/ TopicCreationEventDispatcher(TopicCreationEventListener listener) {
+    /**
+     * Constructor.
+     */
+    public TopicCreationEventDispatcher(TopicCreationEventListener listener) {
         this.listener = listener;
     }
 
