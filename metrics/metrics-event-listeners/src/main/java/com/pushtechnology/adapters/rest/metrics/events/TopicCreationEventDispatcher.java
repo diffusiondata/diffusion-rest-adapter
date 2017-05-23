@@ -16,9 +16,9 @@
 package com.pushtechnology.adapters.rest.metrics.events;
 
 import com.pushtechnology.adapters.rest.endpoints.EndpointType;
-import com.pushtechnology.adapters.rest.metrics.ITopicCreationFailedEvent;
-import com.pushtechnology.adapters.rest.metrics.ITopicCreationRequestEvent;
-import com.pushtechnology.adapters.rest.metrics.ITopicCreationSuccessEvent;
+import com.pushtechnology.adapters.rest.metrics.TopicCreationFailedEvent;
+import com.pushtechnology.adapters.rest.metrics.TopicCreationRequestEvent;
+import com.pushtechnology.adapters.rest.metrics.TopicCreationSuccessEvent;
 import com.pushtechnology.adapters.rest.metrics.TopicCreationListener;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
@@ -43,7 +43,7 @@ import com.pushtechnology.diffusion.datatype.Bytes;
             ServiceConfig serviceConfig,
             EndpointConfig endpointConfig) {
 
-        final ITopicCreationRequestEvent requestEvent = ITopicCreationRequestEvent.Factory.create(
+        final TopicCreationRequestEvent requestEvent = TopicCreationRequestEvent.Factory.create(
             serviceConfig.getTopicPathRoot() + "/" + endpointConfig.getTopicPath(),
             EndpointType.from(endpointConfig.getProduces()).getTopicType(),
             0);
@@ -59,7 +59,7 @@ import com.pushtechnology.diffusion.datatype.Bytes;
             EndpointConfig endpointConfig,
             Bytes value) {
 
-        final ITopicCreationRequestEvent requestEvent = ITopicCreationRequestEvent.Factory.create(
+        final TopicCreationRequestEvent requestEvent = TopicCreationRequestEvent.Factory.create(
             serviceConfig.getTopicPathRoot() + "/" + endpointConfig.getTopicPath(),
             EndpointType.from(endpointConfig.getProduces()).getTopicType(),
             value.length());
@@ -75,24 +75,24 @@ import com.pushtechnology.diffusion.datatype.Bytes;
      */
     private static final class CompletionListener implements TopicCreationCompletionListener {
         private final TopicCreationEventListener listener;
-        private final ITopicCreationRequestEvent requestEvent;
+        private final TopicCreationRequestEvent requestEvent;
 
         /**
          * Constructor.
          */
-        public CompletionListener(TopicCreationEventListener listener, ITopicCreationRequestEvent requestEvent) {
+        public CompletionListener(TopicCreationEventListener listener, TopicCreationRequestEvent requestEvent) {
             this.listener = listener;
             this.requestEvent = requestEvent;
         }
 
         @Override
         public void onTopicCreated() {
-            listener.onTopicCreationSuccess(ITopicCreationSuccessEvent.Factory.create(requestEvent));
+            listener.onTopicCreationSuccess(TopicCreationSuccessEvent.Factory.create(requestEvent));
         }
 
         @Override
         public void onTopicCreationFailed(TopicAddFailReason reason) {
-            listener.onTopicCreationFailed(ITopicCreationFailedEvent.Factory.create(requestEvent, reason));
+            listener.onTopicCreationFailed(TopicCreationFailedEvent.Factory.create(requestEvent, reason));
         }
     }
 }

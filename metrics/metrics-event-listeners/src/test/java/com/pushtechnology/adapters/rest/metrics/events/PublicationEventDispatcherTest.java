@@ -16,9 +16,9 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
-import com.pushtechnology.adapters.rest.metrics.IPublicationFailedEvent;
-import com.pushtechnology.adapters.rest.metrics.IPublicationRequestEvent;
-import com.pushtechnology.adapters.rest.metrics.IPublicationSuccessEvent;
+import com.pushtechnology.adapters.rest.metrics.PublicationFailedEvent;
+import com.pushtechnology.adapters.rest.metrics.PublicationRequestEvent;
+import com.pushtechnology.adapters.rest.metrics.PublicationSuccessEvent;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.diffusion.datatype.Bytes;
@@ -34,11 +34,11 @@ public final class PublicationEventDispatcherTest {
     @Mock
     private Bytes bytes;
     @Captor
-    private ArgumentCaptor<IPublicationRequestEvent> requestCaptor;
+    private ArgumentCaptor<PublicationRequestEvent> requestCaptor;
     @Captor
-    private ArgumentCaptor<IPublicationSuccessEvent> successCaptor;
+    private ArgumentCaptor<PublicationSuccessEvent> successCaptor;
     @Captor
-    private ArgumentCaptor<IPublicationFailedEvent> failedCaptor;
+    private ArgumentCaptor<PublicationFailedEvent> failedCaptor;
 
     @Rule
     public MockitoRule mockitoRule = MockitoJUnit.rule();
@@ -86,8 +86,8 @@ public final class PublicationEventDispatcherTest {
 
         dispatcher.onPublicationRequest(serviceConfig, endpointConfig, bytes).onPublication(bytes);
 
-        final IPublicationRequestEvent requestEvent =
-            IPublicationRequestEvent.Factory.create("service/endpoint", 10);
+        final PublicationRequestEvent requestEvent =
+            PublicationRequestEvent.Factory.create("service/endpoint", 10);
         verify(publicationEventListener).onPublicationRequest(requestCaptor.capture());
         verify(publicationEventListener).onPublicationSuccess(successCaptor.capture());
         verify(bytes).length();
@@ -99,8 +99,8 @@ public final class PublicationEventDispatcherTest {
 
         dispatcher.onPublicationRequest(serviceConfig, endpointConfig, bytes).onPublicationFailed(bytes, ACCESS_DENIED);
 
-        final IPublicationRequestEvent requestEvent =
-            IPublicationRequestEvent.Factory.create("service/endpoint", 10);
+        final PublicationRequestEvent requestEvent =
+            PublicationRequestEvent.Factory.create("service/endpoint", 10);
         verify(publicationEventListener).onPublicationRequest(requestCaptor.capture());
         verify(publicationEventListener).onPublicationFailed(failedCaptor.capture());
         verify(bytes).length();

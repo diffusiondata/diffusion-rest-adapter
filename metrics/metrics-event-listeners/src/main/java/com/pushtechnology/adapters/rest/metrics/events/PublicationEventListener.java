@@ -15,9 +15,9 @@
 
 package com.pushtechnology.adapters.rest.metrics.events;
 
-import com.pushtechnology.adapters.rest.metrics.IPublicationFailedEvent;
-import com.pushtechnology.adapters.rest.metrics.IPublicationRequestEvent;
-import com.pushtechnology.adapters.rest.metrics.IPublicationSuccessEvent;
+import com.pushtechnology.adapters.rest.metrics.PublicationFailedEvent;
+import com.pushtechnology.adapters.rest.metrics.PublicationRequestEvent;
+import com.pushtechnology.adapters.rest.metrics.PublicationSuccessEvent;
 
 /**
  * Listener for events about publication.
@@ -30,19 +30,19 @@ public interface PublicationEventListener {
      *
      * @param event the event
      */
-    void onPublicationRequest(IPublicationRequestEvent event);
+    void onPublicationRequest(PublicationRequestEvent event);
 
     /**
      * Notified when a publication completes.
      *
      * @param event the event
      */
-    void onPublicationSuccess(IPublicationSuccessEvent event);
+    void onPublicationSuccess(PublicationSuccessEvent event);
 
     /**
      * Notified when a publication fails.
      *
      * @param event the event
      */
-    void onPublicationFailed(IPublicationFailedEvent event);
+    void onPublicationFailed(PublicationFailedEvent event);
 }

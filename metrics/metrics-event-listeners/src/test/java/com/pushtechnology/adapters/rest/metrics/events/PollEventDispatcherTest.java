@@ -19,9 +19,9 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
-import com.pushtechnology.adapters.rest.metrics.IPollFailedEvent;
-import com.pushtechnology.adapters.rest.metrics.IPollRequestEvent;
-import com.pushtechnology.adapters.rest.metrics.IPollSuccessEvent;
+import com.pushtechnology.adapters.rest.metrics.PollFailedEvent;
+import com.pushtechnology.adapters.rest.metrics.PollRequestEvent;
+import com.pushtechnology.adapters.rest.metrics.PollSuccessEvent;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 
@@ -40,11 +40,11 @@ public final class PollEventDispatcherTest {
     @Mock
     private HttpEntity entity;
     @Captor
-    private ArgumentCaptor<IPollRequestEvent> requestCaptor;
+    private ArgumentCaptor<PollRequestEvent> requestCaptor;
     @Captor
-    private ArgumentCaptor<IPollSuccessEvent> successCaptor;
+    private ArgumentCaptor<PollSuccessEvent> successCaptor;
     @Captor
-    private ArgumentCaptor<IPollFailedEvent> failedCaptor;
+    private ArgumentCaptor<PollFailedEvent> failedCaptor;
 
     @Rule
     public MockitoRule mockitoRule = MockitoJUnit.rule();
@@ -86,7 +86,7 @@ public final class PollEventDispatcherTest {
         dispatcher.onPollRequest(serviceConfig, endpointConfig);
 
         verify(pollEventListener).onPollRequest(requestCaptor.capture());
-        final IPollRequestEvent value = requestCaptor.getValue();
+        final PollRequestEvent value = requestCaptor.getValue();
         assertEquals("http://localhost:80endpoint", value.getUri());
     }
 
@@ -102,7 +102,7 @@ public final class PollEventDispatcherTest {
         verify(httpResponse).getStatusLine();
         verify(statusLine).getStatusCode();
         verify(entity).getContentLength();
-        final IPollSuccessEvent value = successCaptor.getValue();
+        final PollSuccessEvent value = successCaptor.getValue();
         assertEquals(200, value.getStatusCode());
         assertEquals(10, value.getResponseLength());
     }
@@ -116,7 +116,7 @@ public final class PollEventDispatcherTest {
 
         verify(pollEventListener).onPollRequest(requestCaptor.capture());
         verify(pollEventListener).onPollFailed(failedCaptor.capture());
-        final IPollFailedEvent value = failedCaptor.getValue();
+        final PollFailedEvent value = failedCaptor.getValue();
         assertEquals(exception, value.getException());
     }
 }

@@ -15,9 +15,9 @@
 
 package com.pushtechnology.adapters.rest.metrics.events;
 
-import com.pushtechnology.adapters.rest.metrics.IPublicationFailedEvent;
-import com.pushtechnology.adapters.rest.metrics.IPublicationRequestEvent;
-import com.pushtechnology.adapters.rest.metrics.IPublicationSuccessEvent;
+import com.pushtechnology.adapters.rest.metrics.PublicationFailedEvent;
+import com.pushtechnology.adapters.rest.metrics.PublicationRequestEvent;
+import com.pushtechnology.adapters.rest.metrics.PublicationSuccessEvent;
 import com.pushtechnology.adapters.rest.metrics.PublicationListener;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
@@ -44,7 +44,7 @@ import com.pushtechnology.diffusion.datatype.Bytes;
             ServiceConfig serviceConfig,
             EndpointConfig endpointConfig,
             Bytes value) {
-        final IPublicationRequestEvent publicationRequestEvent = IPublicationRequestEvent.Factory.create(
+        final PublicationRequestEvent publicationRequestEvent = PublicationRequestEvent.Factory.create(
             serviceConfig.getTopicPathRoot() + "/" + endpointConfig.getTopicPath(),
             value.length());
 
@@ -58,12 +58,12 @@ import com.pushtechnology.diffusion.datatype.Bytes;
      * {@link PublicationEventListener} of events.
      */
     private static final class CompletionListener implements PublicationCompletionListener {
-        private final IPublicationRequestEvent publicationRequestEvent;
+        private final PublicationRequestEvent publicationRequestEvent;
         private final PublicationEventListener publicationEventListener;
 
         private CompletionListener(
-                IPublicationRequestEvent publicationRequestEvent,
-                PublicationEventListener publicationEventListener) {
+            PublicationRequestEvent publicationRequestEvent,
+            PublicationEventListener publicationEventListener) {
             this.publicationRequestEvent = publicationRequestEvent;
             this.publicationEventListener = publicationEventListener;
         }
@@ -71,13 +71,13 @@ import com.pushtechnology.diffusion.datatype.Bytes;
         @Override
         public void onPublication(Bytes value) {
             publicationEventListener
-                .onPublicationSuccess(IPublicationSuccessEvent.Factory.create(publicationRequestEvent));
+                .onPublicationSuccess(PublicationSuccessEvent.Factory.create(publicationRequestEvent));
         }
 
         @Override
         public void onPublicationFailed(Bytes value, ErrorReason reason) {
             publicationEventListener
-                .onPublicationFailed(IPublicationFailedEvent.Factory.create(publicationRequestEvent, reason));
+                .onPublicationFailed(PublicationFailedEvent.Factory.create(publicationRequestEvent, reason));
         }
     }
 }

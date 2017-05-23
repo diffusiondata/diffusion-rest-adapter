@@ -15,9 +15,9 @@
 
 package com.pushtechnology.adapters.rest.metrics.events;
 
-import com.pushtechnology.adapters.rest.metrics.IPollFailedEvent;
-import com.pushtechnology.adapters.rest.metrics.IPollRequestEvent;
-import com.pushtechnology.adapters.rest.metrics.IPollSuccessEvent;
+import com.pushtechnology.adapters.rest.metrics.PollFailedEvent;
+import com.pushtechnology.adapters.rest.metrics.PollRequestEvent;
+import com.pushtechnology.adapters.rest.metrics.PollSuccessEvent;
 
 /**
  * Listener for events about polling.
@@ -30,19 +30,19 @@ public interface PollEventListener {
      *
      * @param event the event
      */
-    void onPollRequest(IPollRequestEvent event);
+    void onPollRequest(PollRequestEvent event);
 
     /**
      * Notified when a poll completes.
      *
      * @param event the event
      */
-    void onPollSuccess(IPollSuccessEvent event);
+    void onPollSuccess(PollSuccessEvent event);
 
     /**
      * Notified when a poll fails.
      *
      * @param event the event
      */
-    void onPollFailed(IPollFailedEvent event);
+    void onPollFailed(PollFailedEvent event);
 }

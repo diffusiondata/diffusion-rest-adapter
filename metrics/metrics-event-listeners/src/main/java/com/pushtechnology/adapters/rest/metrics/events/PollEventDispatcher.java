@@ -17,9 +17,9 @@ package com.pushtechnology.adapters.rest.metrics.events;
 
 import org.apache.http.HttpResponse;
 
-import com.pushtechnology.adapters.rest.metrics.IPollFailedEvent;
-import com.pushtechnology.adapters.rest.metrics.IPollRequestEvent;
-import com.pushtechnology.adapters.rest.metrics.IPollSuccessEvent;
+import com.pushtechnology.adapters.rest.metrics.PollFailedEvent;
+import com.pushtechnology.adapters.rest.metrics.PollRequestEvent;
+import com.pushtechnology.adapters.rest.metrics.PollSuccessEvent;
 import com.pushtechnology.adapters.rest.metrics.PollListener;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
@@ -41,7 +41,7 @@ import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 
     @Override
     public PollCompletionListener onPollRequest(ServiceConfig serviceConfig, EndpointConfig endpointConfig) {
-        final IPollRequestEvent pollRequestEvent = IPollRequestEvent.Factory.create(
+        final PollRequestEvent pollRequestEvent = PollRequestEvent.Factory.create(
             (serviceConfig.isSecure() ? "https://" : "http://") +
                 serviceConfig.getHost() +
                 ":" +
@@ -58,17 +58,17 @@ import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
      * {@link PollEventListener} of events.
      */
     private static final class CompletionListener implements PollListener.PollCompletionListener {
-        private final IPollRequestEvent pollRequestEvent;
+        private final PollRequestEvent pollRequestEvent;
         private final PollEventListener pollEventListener;
 
-        private CompletionListener(IPollRequestEvent pollRequestEvent, PollEventListener pollEventListener) {
+        private CompletionListener(PollRequestEvent pollRequestEvent, PollEventListener pollEventListener) {
             this.pollRequestEvent = pollRequestEvent;
             this.pollEventListener = pollEventListener;
         }
 
         @Override
         public void onPollResponse(HttpResponse response) {
-            pollEventListener.onPollSuccess(IPollSuccessEvent.Factory.create(
+            pollEventListener.onPollSuccess(PollSuccessEvent.Factory.create(
                 pollRequestEvent,
                 response.getStatusLine().getStatusCode(),
                 response.getEntity().getContentLength()));
@@ -76,7 +76,7 @@ import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 
         @Override
         public void onPollFailure(Exception exception) {
-            pollEventListener.onPollFailed(IPollFailedEvent.Factory.create(pollRequestEvent, exception));
+            pollEventListener.onPollFailed(PollFailedEvent.Factory.create(pollRequestEvent, exception));
         }
     }
 }

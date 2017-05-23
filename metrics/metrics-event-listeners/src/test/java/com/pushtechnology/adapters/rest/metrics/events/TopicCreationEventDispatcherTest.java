@@ -19,9 +19,9 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
-import com.pushtechnology.adapters.rest.metrics.ITopicCreationFailedEvent;
-import com.pushtechnology.adapters.rest.metrics.ITopicCreationRequestEvent;
-import com.pushtechnology.adapters.rest.metrics.ITopicCreationSuccessEvent;
+import com.pushtechnology.adapters.rest.metrics.TopicCreationFailedEvent;
+import com.pushtechnology.adapters.rest.metrics.TopicCreationRequestEvent;
+import com.pushtechnology.adapters.rest.metrics.TopicCreationSuccessEvent;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.diffusion.datatype.Bytes;
@@ -37,11 +37,11 @@ public final class TopicCreationEventDispatcherTest {
     @Mock
     private Bytes bytes;
     @Captor
-    private ArgumentCaptor<ITopicCreationRequestEvent> requestCaptor;
+    private ArgumentCaptor<TopicCreationRequestEvent> requestCaptor;
     @Captor
-    private ArgumentCaptor<ITopicCreationSuccessEvent> successCaptor;
+    private ArgumentCaptor<TopicCreationSuccessEvent> successCaptor;
     @Captor
-    private ArgumentCaptor<ITopicCreationFailedEvent> failedCaptor;
+    private ArgumentCaptor<TopicCreationFailedEvent> failedCaptor;
 
     @Rule
     public MockitoRule mockitoRule = MockitoJUnit.rule();
@@ -80,7 +80,7 @@ public final class TopicCreationEventDispatcherTest {
         dispatcher.onTopicCreationRequest(serviceConfig, endpointConfig);
 
         verify(topicCreationEventListener).onTopicCreationRequest(requestCaptor.capture());
-        final ITopicCreationRequestEvent value = requestCaptor.getValue();
+        final TopicCreationRequestEvent value = requestCaptor.getValue();
         assertEquals("service/endpoint", value.getPath());
         assertEquals(BINARY, value.getTopicType());
         assertEquals(0, value.getInitialValueLength());
@@ -93,7 +93,7 @@ public final class TopicCreationEventDispatcherTest {
         dispatcher.onTopicCreationRequest(serviceConfig, endpointConfig, bytes);
 
         verify(topicCreationEventListener).onTopicCreationRequest(requestCaptor.capture());
-        final ITopicCreationRequestEvent value = requestCaptor.getValue();
+        final TopicCreationRequestEvent value = requestCaptor.getValue();
         assertEquals("service/endpoint", value.getPath());
         assertEquals(BINARY, value.getTopicType());
         assertEquals(10, value.getInitialValueLength());
@@ -106,9 +106,9 @@ public final class TopicCreationEventDispatcherTest {
 
         dispatcher.onTopicCreationRequest(serviceConfig, endpointConfig).onTopicCreated();
 
-        verify(topicCreationEventListener).onTopicCreationRequest(isA(ITopicCreationRequestEvent.class));
+        verify(topicCreationEventListener).onTopicCreationRequest(isA(TopicCreationRequestEvent.class));
         verify(topicCreationEventListener).onTopicCreationSuccess(successCaptor.capture());
-        final ITopicCreationSuccessEvent value = successCaptor.getValue();
+        final TopicCreationSuccessEvent value = successCaptor.getValue();
         assertEquals("service/endpoint", value.getRequestEvent().getPath());
         assertEquals(BINARY, value.getRequestEvent().getTopicType());
         assertEquals(0, value.getRequestEvent().getInitialValueLength());
@@ -120,9 +120,9 @@ public final class TopicCreationEventDispatcherTest {
 
         dispatcher.onTopicCreationRequest(serviceConfig, endpointConfig).onTopicCreationFailed(USER_CODE_ERROR);
 
-        verify(topicCreationEventListener).onTopicCreationRequest(isA(ITopicCreationRequestEvent.class));
+        verify(topicCreationEventListener).onTopicCreationRequest(isA(TopicCreationRequestEvent.class));
         verify(topicCreationEventListener).onTopicCreationFailed(failedCaptor.capture());
-        final ITopicCreationFailedEvent value = failedCaptor.getValue();
+        final TopicCreationFailedEvent value = failedCaptor.getValue();
         assertEquals("service/endpoint", value.getRequestEvent().getPath());
         assertEquals(BINARY, value.getRequestEvent().getTopicType());
         assertEquals(0, value.getRequestEvent().getInitialValueLength());

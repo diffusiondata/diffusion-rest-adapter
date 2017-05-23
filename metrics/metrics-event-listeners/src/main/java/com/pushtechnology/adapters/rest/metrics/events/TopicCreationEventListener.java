@@ -15,9 +15,9 @@
 
 package com.pushtechnology.adapters.rest.metrics.events;
 
-import com.pushtechnology.adapters.rest.metrics.ITopicCreationFailedEvent;
-import com.pushtechnology.adapters.rest.metrics.ITopicCreationRequestEvent;
-import com.pushtechnology.adapters.rest.metrics.ITopicCreationSuccessEvent;
+import com.pushtechnology.adapters.rest.metrics.TopicCreationFailedEvent;
+import com.pushtechnology.adapters.rest.metrics.TopicCreationRequestEvent;
+import com.pushtechnology.adapters.rest.metrics.TopicCreationSuccessEvent;
 
 /**
  * Listener for events about topic creation.
@@ -30,19 +30,19 @@ public interface TopicCreationEventListener {
      *
      * @param event the event
      */
-    void onTopicCreationRequest(ITopicCreationRequestEvent event);
+    void onTopicCreationRequest(TopicCreationRequestEvent event);
 
     /**
      * Notified when a Diffusion topic is created.
      *
      * @param event the event
      */
-    void onTopicCreationSuccess(ITopicCreationSuccessEvent event);
+    void onTopicCreationSuccess(TopicCreationSuccessEvent event);
 
     /**
      * Notified when a Diffusion topic cannot be created.
      *
      * @param event the event
      */
-    void onTopicCreationFailed(ITopicCreationFailedEvent event);
+    void onTopicCreationFailed(TopicCreationFailedEvent event);
 }
