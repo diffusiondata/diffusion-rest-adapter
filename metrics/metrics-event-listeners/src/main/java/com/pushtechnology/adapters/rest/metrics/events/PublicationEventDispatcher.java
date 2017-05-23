@@ -16,9 +16,9 @@
 package com.pushtechnology.adapters.rest.metrics.events;
 
 import com.pushtechnology.adapters.rest.metrics.PublicationFailedEvent;
+import com.pushtechnology.adapters.rest.metrics.PublicationListener;
 import com.pushtechnology.adapters.rest.metrics.PublicationRequestEvent;
 import com.pushtechnology.adapters.rest.metrics.PublicationSuccessEvent;
-import com.pushtechnology.adapters.rest.metrics.PublicationListener;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.diffusion.client.callbacks.ErrorReason;
@@ -69,13 +69,13 @@ public final class PublicationEventDispatcher implements PublicationListener {
         }
 
         @Override
-        public void onPublication(Bytes value) {
+        public void onPublication() {
             publicationEventListener
                 .onPublicationSuccess(PublicationSuccessEvent.Factory.create(publicationRequestEvent));
         }
 
         @Override
-        public void onPublicationFailed(Bytes value, ErrorReason reason) {
+        public void onPublicationFailed(ErrorReason reason) {
             publicationEventListener
                 .onPublicationFailed(PublicationFailedEvent.Factory.create(publicationRequestEvent, reason));
         }

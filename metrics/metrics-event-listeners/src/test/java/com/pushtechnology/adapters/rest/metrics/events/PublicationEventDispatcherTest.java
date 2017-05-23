@@ -84,7 +84,7 @@ public final class PublicationEventDispatcherTest {
     public void onPublication() throws Exception {
         final PublicationEventDispatcher dispatcher = new PublicationEventDispatcher(publicationEventListener);
 
-        dispatcher.onPublicationRequest(serviceConfig, endpointConfig, bytes).onPublication(bytes);
+        dispatcher.onPublicationRequest(serviceConfig, endpointConfig, bytes).onPublication();
 
         final PublicationRequestEvent requestEvent =
             PublicationRequestEvent.Factory.create("service/endpoint", 10);
@@ -97,7 +97,7 @@ public final class PublicationEventDispatcherTest {
     public void onPublicationFailed() throws Exception {
         final PublicationEventDispatcher dispatcher = new PublicationEventDispatcher(publicationEventListener);
 
-        dispatcher.onPublicationRequest(serviceConfig, endpointConfig, bytes).onPublicationFailed(bytes, ACCESS_DENIED);
+        dispatcher.onPublicationRequest(serviceConfig, endpointConfig, bytes).onPublicationFailed(ACCESS_DENIED);
 
         final PublicationRequestEvent requestEvent =
             PublicationRequestEvent.Factory.create("service/endpoint", 10);

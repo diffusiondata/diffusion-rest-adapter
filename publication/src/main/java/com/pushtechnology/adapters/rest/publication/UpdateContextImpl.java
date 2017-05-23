@@ -59,7 +59,7 @@ import com.pushtechnology.diffusion.datatype.Bytes;
                     topicPath,
                     cachedRequest.value,
                     topicPath,
-                    new UpdateTopicCallback(cachedRequest.completionListener, cachedRequest.value));
+                    new UpdateTopicCallback(cachedRequest.completionListener));
             }
         }
     }
@@ -78,7 +78,7 @@ import com.pushtechnology.diffusion.datatype.Bytes;
         }
 
         final PublicationCompletionListener completionListener = listenerNotifier.notifyPublicationRequest(value);
-        updater.update(topicPath, value, topicPath, new UpdateTopicCallback(completionListener, value));
+        updater.update(topicPath, value, topicPath, new UpdateTopicCallback(completionListener));
     }
 
     private static final class CachedRequest<T> {

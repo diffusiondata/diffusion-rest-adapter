@@ -21,7 +21,6 @@ import org.slf4j.LoggerFactory;
 import com.pushtechnology.adapters.rest.metrics.PublicationListener.PublicationCompletionListener;
 import com.pushtechnology.diffusion.client.callbacks.ErrorReason;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater.UpdateContextCallback;
-import com.pushtechnology.diffusion.datatype.Bytes;
 
 import net.jcip.annotations.Immutable;
 
@@ -34,25 +33,23 @@ import net.jcip.annotations.Immutable;
 public class UpdateTopicCallback implements UpdateContextCallback<String> {
     private static final Logger LOG = LoggerFactory.getLogger(UpdateTopicCallback.class);
     private final PublicationCompletionListener completionListener;
-    private final Bytes bytes;
 
     /**
      * Constructor.
      */
-    /*package*/ UpdateTopicCallback(PublicationCompletionListener completionListener, Bytes bytes) {
+    /*package*/ UpdateTopicCallback(PublicationCompletionListener completionListener) {
         this.completionListener = completionListener;
-        this.bytes = bytes;
     }
 
     @Override
     public void onSuccess(String topicPath) {
         LOG.trace("Updated topic {}", topicPath);
-        completionListener.onPublication(bytes);
+        completionListener.onPublication();
     }
 
     @Override
     public void onError(String topicPath, ErrorReason errorReason) {
         LOG.warn("Failed to update topic {} {}", topicPath, errorReason);
-        completionListener.onPublicationFailed(bytes, errorReason);
+        completionListener.onPublicationFailed(errorReason);
     }
 }

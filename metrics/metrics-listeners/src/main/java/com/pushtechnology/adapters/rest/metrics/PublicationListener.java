@@ -31,7 +31,7 @@ public interface PublicationListener {
      *
      * @param serviceConfig the service
      * @param endpointConfig the endpoint
-     * @param value the initial value
+     * @param value the value to publish
      * @return a listener for the completion of the publication request
      */
     PublicationCompletionListener onPublicationRequest(
@@ -44,30 +44,27 @@ public interface PublicationListener {
      */
     interface PublicationCompletionListener {
         /**
-         * Notified when a Diffusion topic is updated.
-         *
-         * @param value the initial value
+         * Notified when a value is published to a Diffusion topic.
          */
-        void onPublication(Bytes value);
+        void onPublication();
 
         /**
-         * Notified when a Diffusion topic cannot be updated.
+         * Notified when the publication of a value to a Diffusion topic fails.
          *
-         * @param value the initial value
          * @param reason the cause of failure
          */
-        void onPublicationFailed(Bytes value, ErrorReason reason);
+        void onPublicationFailed(ErrorReason reason);
 
         /**
          * Implementation of {@link PublicationCompletionListener} that ignores notifications.
          */
         PublicationCompletionListener NULL_LISTENER = new PublicationCompletionListener() {
             @Override
-            public void onPublication(Bytes value) {
+            public void onPublication() {
             }
 
             @Override
-            public void onPublicationFailed(Bytes value, ErrorReason reason) {
+            public void onPublicationFailed(ErrorReason reason) {
             }
         };
     }
