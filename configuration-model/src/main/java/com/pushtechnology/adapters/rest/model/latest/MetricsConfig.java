@@ -28,6 +28,7 @@ public final class MetricsConfig {
      */
     public enum Type {
         OFF,
-        COUNTING
+        COUNTING,
+        SUMMARY
     }
 }
