@@ -39,6 +39,13 @@ interface TopicCreationRequestEvent {
         fun create(path: String, topicType: TopicType, initialValueLength: Int): TopicCreationRequestEvent {
             return TopicCreationRequestEventImpl(path, topicType, initialValueLength, System.currentTimeMillis())
         }
+
+        /**
+         * @return a new instance of {@link TopicCreationRequestEvent}
+         */
+        fun create(path: String, topicType: TopicType, initialValueLength: Int, timestamp: Long): TopicCreationRequestEvent {
+            return TopicCreationRequestEventImpl(path, topicType, initialValueLength, timestamp)
+        }
     }
 }
 
@@ -81,6 +88,13 @@ interface TopicCreationSuccessEvent {
          */
         fun create(requestEvent: TopicCreationRequestEvent): TopicCreationSuccessEvent {
             return TopicCreationSuccessEventImpl(requestEvent, System.currentTimeMillis())
+        }
+
+        /**
+         * @return a new instance of {@link TopicCreationSuccessEvent}
+         */
+        fun create(requestEvent: TopicCreationRequestEvent, timestamp: Long): TopicCreationSuccessEvent {
+            return TopicCreationSuccessEventImpl(requestEvent, timestamp)
         }
     }
 }
@@ -131,6 +145,13 @@ interface TopicCreationFailedEvent {
         fun create(requestEvent: TopicCreationRequestEvent, failReason: TopicAddFailReason): TopicCreationFailedEvent {
             return TopicCreationFailedEventImpl(requestEvent, failReason, System.currentTimeMillis())
         }
+
+        /**
+         * @return a new instance of {@link TopicCreationFailedEvent}
+         */
+        fun create(requestEvent: TopicCreationRequestEvent, failReason: TopicAddFailReason, timestamp: Long): TopicCreationFailedEvent {
+            return TopicCreationFailedEventImpl(requestEvent, failReason, timestamp)
+        }
     }
 }
 
@@ -172,6 +193,13 @@ interface PollRequestEvent {
          */
         fun create(uri: String): PollRequestEvent {
             return PollRequestEventImpl(uri, System.currentTimeMillis())
+        }
+
+        /**
+         * @return a new instance of {@link PollRequestEvent}
+         */
+        fun create(uri: String, timestamp: Long): PollRequestEvent {
+            return PollRequestEventImpl(uri, timestamp)
         }
     }
 }
@@ -221,6 +249,13 @@ interface PollSuccessEvent {
          */
         fun create(requestEvent: PollRequestEvent, statusCode: Int, responseLength: Long): PollSuccessEvent {
             return PollSuccessEventImpl(requestEvent, statusCode, responseLength, System.currentTimeMillis())
+        }
+
+        /**
+         * @return a new instance of {@link PollSuccessEvent}
+         */
+        fun create(requestEvent: PollRequestEvent, statusCode: Int, responseLength: Long, timestamp: Long): PollSuccessEvent {
+            return PollSuccessEventImpl(requestEvent, statusCode, responseLength, timestamp)
         }
     }
 }
@@ -274,6 +309,13 @@ interface PollFailedEvent {
         fun create(requestEvent: PollRequestEvent, exception: Exception): PollFailedEvent {
             return PollFailedEventImpl(requestEvent, exception, System.currentTimeMillis())
         }
+
+        /**
+         * @return a new instance of {@link PollFailedEvent}
+         */
+        fun create(requestEvent: PollRequestEvent, exception: Exception, timestamp: Long): PollFailedEvent {
+            return PollFailedEventImpl(requestEvent, exception, timestamp)
+        }
     }
 }
 
@@ -319,6 +361,13 @@ interface PublicationRequestEvent {
          */
         fun create(path: String, valueLength: Int): PublicationRequestEvent {
             return PublicationRequestEventImpl(path, valueLength, System.currentTimeMillis())
+        }
+
+        /**
+         * @return a new instance of {@link PublicationRequestEvent}
+         */
+        fun create(path: String, valueLength: Int, timestamp: Long): PublicationRequestEvent {
+            return PublicationRequestEventImpl(path, valueLength, timestamp)
         }
     }
 }
@@ -371,6 +420,13 @@ interface PublicationSuccessEvent {
         fun create(requestEvent: PublicationRequestEvent): PublicationSuccessEvent {
             return PublicationSuccessEventImpl(requestEvent, System.currentTimeMillis())
         }
+
+        /**
+         * @return a new instance of {@link PublicationSuccessEvent}
+         */
+        fun create(requestEvent: PublicationRequestEvent, timestamp: Long): PublicationSuccessEvent {
+            return PublicationSuccessEventImpl(requestEvent, timestamp)
+        }
     }
 }
 
@@ -420,6 +476,13 @@ interface PublicationFailedEvent {
          */
         fun create(requestEvent: PublicationRequestEvent, errorReason: ErrorReason): PublicationFailedEvent {
             return PublicationFailedEventImpl(requestEvent, errorReason, System.currentTimeMillis())
+        }
+
+        /**
+         * @return a new instance of {@link PublicationFailedEvent}
+         */
+        fun create(requestEvent: PublicationRequestEvent, errorReason: ErrorReason, timestamp: Long): PublicationFailedEvent {
+            return PublicationFailedEventImpl(requestEvent, errorReason, timestamp)
         }
     }
 }
