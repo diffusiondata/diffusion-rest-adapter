@@ -23,7 +23,7 @@ the `DIFFUSION_HOME` environmental variable.
 There are two categories for the integration tests, Embedded service tests and live service tests.
 The embedded service tests host their own REST services embedded within the JVM process.
 The live service tests use REST services generally available on the internet.
-The only the embedded service tests are run by default.
+Only the embedded service tests are run by default.
 To run only the live service tests enable the profile `live-services-test`.
 To run both the embedded services tests and the live service tests enable the profile `all-tests`.
 
