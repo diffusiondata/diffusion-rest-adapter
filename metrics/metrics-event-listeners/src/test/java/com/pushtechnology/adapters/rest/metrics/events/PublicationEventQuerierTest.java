@@ -62,7 +62,7 @@ public final class PublicationEventQuerierTest {
 
     @Test
     public void getPublicationRequestThroughput() {
-        final BigDecimal requestThroughput = publicationEventQuerier.getPublicationRequestThroughput(200);
+        final BigDecimal requestThroughput = publicationEventQuerier.getRequestThroughput(200);
 
         assertEquals(BigDecimal.valueOf(30000, 3), requestThroughput);
     }
@@ -79,7 +79,7 @@ public final class PublicationEventQuerierTest {
 
     @Test
     public void getPublicationFailureThroughput() {
-        final BigDecimal failureThroughput = publicationEventQuerier.getPublicationFailureThroughput(2500);
+        final BigDecimal failureThroughput = publicationEventQuerier.getFailureThroughput(2500);
 
         assertEquals(BigDecimal.valueOf(4000, 3), failureThroughput);
     }

@@ -15,14 +15,10 @@
 
 package com.pushtechnology.adapters.rest.metrics.events;
 
-import static java.math.RoundingMode.HALF_UP;
 import static java.util.function.Function.identity;
 
-import java.math.BigDecimal;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.OptionalLong;
 import java.util.stream.Collectors;
 
 import com.pushtechnology.adapters.rest.metrics.PollFailedEvent;
@@ -37,90 +33,23 @@ import net.jcip.annotations.ThreadSafe;
  * @author Matt Champion 24/05/2017
  */
 @ThreadSafe
-public final class PollEventQuerier {
-    private final BoundedPollEventCollector pollEventCollector;
+public final class PollEventQuerier extends CommonEventQuerier<PollRequestEvent, PollSuccessEvent, PollFailedEvent> {
 
     /**
      * Constructor.
      */
     public PollEventQuerier(BoundedPollEventCollector pollEventCollector) {
-        this.pollEventCollector = pollEventCollector;
-    }
-
-    /**
-     * @return the throughput of poll requests in events per second
-     */
-    public BigDecimal getPollRequestThroughput() {
-        return getPollRequestThroughput(System.currentTimeMillis());
-    }
-
-    /*package*/ BigDecimal getPollRequestThroughput(long currentTimestamp) {
-        final List<PollRequestEvent> requestEvents = pollEventCollector.getRequestEvents();
-
-        final int numberOfEvents = requestEvents.size();
-        final OptionalLong maybeMin = requestEvents.stream().mapToLong(PollRequestEvent::getRequestTimestamp).min();
-        if (maybeMin.isPresent()) {
-            final long min = maybeMin.getAsLong();
-            final long period = currentTimestamp - min;
-
-            return BigDecimal.valueOf(numberOfEvents * 1000, 3).divide(BigDecimal.valueOf(period, 3), 3, HALF_UP);
-        }
-        return BigDecimal.ZERO;
-    }
-
-    /**
-     * @return the maximum successful request time in milliseconds
-     */
-    public OptionalLong getMaximumSuccessfulRequestTime() {
-        final List<PollSuccessEvent> successEvents = pollEventCollector.getSuccessEvents();
-
-        return successEvents
-            .stream()
-            .mapToLong(PollSuccessEvent::getRequestTime)
-            .max();
-    }
-
-    /**
-     * @return the minimum successful request time in milliseconds
-     */
-    public OptionalLong getMinimumSuccessfulRequestTime() {
-        final List<PollSuccessEvent> successEvents = pollEventCollector.getSuccessEvents();
-
-        return successEvents
-            .stream()
-            .mapToLong(PollSuccessEvent::getRequestTime)
-            .min();
+        super(pollEventCollector);
     }
 
     /**
      * @return the count of status codes received
      */
     public Map<Integer, Integer> getStatusCodes() {
-        return pollEventCollector
+        return getEventCollector()
             .getSuccessEvents()
             .stream()
             .map(PollSuccessEvent::getStatusCode)
             .collect(Collectors.toMap(identity(), code -> 1, (l, r) -> l + r, HashMap::new));
-    }
-
-    /**
-     * @return the throughput of poll failures in events per second
-     */
-    public BigDecimal getPollFailureThroughput() {
-        return getPollFailureThroughput(System.currentTimeMillis());
-    }
-
-    /*package*/ BigDecimal getPollFailureThroughput(long currentTimestamp) {
-        final List<PollFailedEvent> failedEvents = pollEventCollector.getFailedEvents();
-
-        final int numberOfEvents = failedEvents.size();
-        final OptionalLong maybeMin = failedEvents.stream().mapToLong(PollFailedEvent::getFailedTimestamp).min();
-        if (maybeMin.isPresent()) {
-            final long min = maybeMin.getAsLong();
-            final long period = currentTimestamp - min;
-
-            return BigDecimal.valueOf(numberOfEvents * 1000, 3).divide(BigDecimal.valueOf(period, 3), 3, HALF_UP);
-        }
-        return BigDecimal.ZERO;
     }
 }

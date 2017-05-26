@@ -62,7 +62,7 @@ public final class PollEventQuerierTest {
 
     @Test
     public void getPollRequestThroughput() {
-        final BigDecimal requestThroughput = pollEventQuerier.getPollRequestThroughput(200);
+        final BigDecimal requestThroughput = pollEventQuerier.getRequestThroughput(200);
 
         assertEquals(BigDecimal.valueOf(30000, 3), requestThroughput);
     }
@@ -86,7 +86,7 @@ public final class PollEventQuerierTest {
 
     @Test
     public void getPollFailureThroughput() {
-        final BigDecimal failureThroughput = pollEventQuerier.getPollFailureThroughput(2500);
+        final BigDecimal failureThroughput = pollEventQuerier.getFailureThroughput(2500);
 
         assertEquals(BigDecimal.valueOf(4000, 3), failureThroughput);
     }

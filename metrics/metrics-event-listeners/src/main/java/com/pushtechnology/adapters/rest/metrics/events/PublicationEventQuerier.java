@@ -15,12 +15,6 @@
 
 package com.pushtechnology.adapters.rest.metrics.events;
 
-import static java.math.RoundingMode.HALF_UP;
-
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.OptionalLong;
-
 import com.pushtechnology.adapters.rest.metrics.PublicationFailedEvent;
 import com.pushtechnology.adapters.rest.metrics.PublicationRequestEvent;
 import com.pushtechnology.adapters.rest.metrics.PublicationSuccessEvent;
@@ -33,79 +27,13 @@ import net.jcip.annotations.ThreadSafe;
  * @author Matt Champion 26/05/2017
  */
 @ThreadSafe
-public final class PublicationEventQuerier {
-    private final BoundedPublicationEventCollector publicationEventCollector;
+public final class PublicationEventQuerier
+        extends CommonEventQuerier<PublicationRequestEvent, PublicationSuccessEvent, PublicationFailedEvent> {
 
     /**
      * Constructor.
      */
     public PublicationEventQuerier(BoundedPublicationEventCollector publicationEventCollector) {
-        this.publicationEventCollector = publicationEventCollector;
-    }
-
-    /**
-     * @return the throughput of publication requests in events per second
-     */
-    public BigDecimal getPublicationRequestThroughput() {
-        return getPublicationRequestThroughput(System.currentTimeMillis());
-    }
-
-    /*package*/ BigDecimal getPublicationRequestThroughput(long currentTimestamp) {
-        final List<PublicationRequestEvent> requestEvents = publicationEventCollector.getPublicationRequestEvents();
-
-        final int numberOfEvents = requestEvents.size();
-        final OptionalLong maybeMin = requestEvents.stream().mapToLong(PublicationRequestEvent::getRequestTimestamp).min();
-        if (maybeMin.isPresent()) {
-            final long min = maybeMin.getAsLong();
-            final long period = currentTimestamp - min;
-
-            return BigDecimal.valueOf(numberOfEvents * 1000, 3).divide(BigDecimal.valueOf(period, 3), 3, HALF_UP);
-        }
-        return BigDecimal.ZERO;
-    }
-
-    /**
-     * @return the maximum successful request time in milliseconds
-     */
-    public OptionalLong getMaximumSuccessfulRequestTime() {
-        final List<PublicationSuccessEvent> successEvents = publicationEventCollector.getPublicationSuccessEvents();
-
-        return successEvents
-            .stream()
-            .mapToLong(PublicationSuccessEvent::getRequestTime)
-            .max();
-    }
-
-    /**
-     * @return the minimum successful request time in milliseconds
-     */
-    public OptionalLong getMinimumSuccessfulRequestTime() {
-        final List<PublicationSuccessEvent> successEvents = publicationEventCollector.getPublicationSuccessEvents();
-
-        return successEvents
-            .stream()
-            .mapToLong(PublicationSuccessEvent::getRequestTime)
-            .min();
-    }
-
-    /**
-     * @return the throughput of publication failures in events per second
-     */
-    public BigDecimal getPublicationFailureThroughput() {
-        return getPublicationFailureThroughput(System.currentTimeMillis());
-    }
-
-    /*package*/ BigDecimal getPublicationFailureThroughput(long currentTimestamp) {
-        final List<PublicationFailedEvent> failedEvents = publicationEventCollector.getPublicationFailedEvents();
-
-        final int numberOfEvents = failedEvents.size();
-        final OptionalLong maybeMin = failedEvents.stream().mapToLong(PublicationFailedEvent::getFailedTimestamp).min();
-        if (maybeMin.isPresent()) {
-            final long min = maybeMin.getAsLong();
-            final long period = currentTimestamp - min;
-
-            return BigDecimal.valueOf(numberOfEvents * 1000, 3).divide(BigDecimal.valueOf(period, 3), 3, HALF_UP);
-        }
-        return BigDecimal.ZERO;
+        super(publicationEventCollector);
     }
 }

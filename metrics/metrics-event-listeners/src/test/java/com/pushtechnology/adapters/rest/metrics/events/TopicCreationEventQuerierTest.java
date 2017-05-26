@@ -63,7 +63,7 @@ public final class TopicCreationEventQuerierTest {
 
     @Test
     public void getTopicCreationRequestThroughput() {
-        final BigDecimal requestThroughput = eventQuerier.getTopicCreationRequestThroughput(200);
+        final BigDecimal requestThroughput = eventQuerier.getRequestThroughput(200);
 
         assertEquals(BigDecimal.valueOf(30000, 3), requestThroughput);
     }
@@ -80,7 +80,7 @@ public final class TopicCreationEventQuerierTest {
 
     @Test
     public void getTopicCreationFailureThroughput() {
-        final BigDecimal failureThroughput = eventQuerier.getTopicCreationFailureThroughput(2500);
+        final BigDecimal failureThroughput = eventQuerier.getFailureThroughput(2500);
 
         assertEquals(BigDecimal.valueOf(4000, 3), failureThroughput);
     }

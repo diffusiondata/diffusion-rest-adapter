@@ -15,12 +15,6 @@
 
 package com.pushtechnology.adapters.rest.metrics.events;
 
-import static java.math.RoundingMode.HALF_UP;
-
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.OptionalLong;
-
 import com.pushtechnology.adapters.rest.metrics.TopicCreationFailedEvent;
 import com.pushtechnology.adapters.rest.metrics.TopicCreationRequestEvent;
 import com.pushtechnology.adapters.rest.metrics.TopicCreationSuccessEvent;
@@ -33,79 +27,13 @@ import net.jcip.annotations.ThreadSafe;
  * @author Matt Champion 26/05/2017
  */
 @ThreadSafe
-public final class TopicCreationEventQuerier {
-    private final BoundedTopicCreationEventCollector eventCollector;
+public final class TopicCreationEventQuerier
+        extends CommonEventQuerier<TopicCreationRequestEvent, TopicCreationSuccessEvent, TopicCreationFailedEvent> {
 
     /**
      * Constructor.
      */
     public TopicCreationEventQuerier(BoundedTopicCreationEventCollector eventCollector) {
-        this.eventCollector = eventCollector;
-    }
-
-    /**
-     * @return the throughput of topic creation requests in events per second
-     */
-    public BigDecimal getTopicCreationRequestThroughput() {
-        return getTopicCreationRequestThroughput(System.currentTimeMillis());
-    }
-
-    /*package*/ BigDecimal getTopicCreationRequestThroughput(long currentTimestamp) {
-        final List<TopicCreationRequestEvent> requestEvents = eventCollector.getRequestEvents();
-
-        final int numberOfEvents = requestEvents.size();
-        final OptionalLong maybeMin = requestEvents.stream().mapToLong(TopicCreationRequestEvent::getRequestTimestamp).min();
-        if (maybeMin.isPresent()) {
-            final long min = maybeMin.getAsLong();
-            final long period = currentTimestamp - min;
-
-            return BigDecimal.valueOf(numberOfEvents * 1000, 3).divide(BigDecimal.valueOf(period, 3), 3, HALF_UP);
-        }
-        return BigDecimal.ZERO;
-    }
-
-    /**
-     * @return the maximum successful request time in milliseconds
-     */
-    public OptionalLong getMaximumSuccessfulRequestTime() {
-        final List<TopicCreationSuccessEvent> successEvents = eventCollector.getSuccessEvents();
-
-        return successEvents
-            .stream()
-            .mapToLong(TopicCreationSuccessEvent::getRequestTime)
-            .max();
-    }
-
-    /**
-     * @return the minimum successful request time in milliseconds
-     */
-    public OptionalLong getMinimumSuccessfulRequestTime() {
-        final List<TopicCreationSuccessEvent> successEvents = eventCollector.getSuccessEvents();
-
-        return successEvents
-            .stream()
-            .mapToLong(TopicCreationSuccessEvent::getRequestTime)
-            .min();
-    }
-
-    /**
-     * @return the throughput of topic creation failures in events per second
-     */
-    public BigDecimal getTopicCreationFailureThroughput() {
-        return getTopicCreationFailureThroughput(System.currentTimeMillis());
-    }
-
-    /*package*/ BigDecimal getTopicCreationFailureThroughput(long currentTimestamp) {
-        final List<TopicCreationFailedEvent> failedEvents = eventCollector.getFailedEvents();
-
-        final int numberOfEvents = failedEvents.size();
-        final OptionalLong maybeMin = failedEvents.stream().mapToLong(TopicCreationFailedEvent::getFailedTimestamp).min();
-        if (maybeMin.isPresent()) {
-            final long min = maybeMin.getAsLong();
-            final long period = currentTimestamp - min;
-
-            return BigDecimal.valueOf(numberOfEvents * 1000, 3).divide(BigDecimal.valueOf(period, 3), 3, HALF_UP);
-        }
-        return BigDecimal.ZERO;
+        super(eventCollector);
     }
 }

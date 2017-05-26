@@ -100,10 +100,10 @@ public final class EventReporter implements AutoCloseable {
     }
 
     private void reportPollEvents() {
-        final BigDecimal requestThroughput = pollEventQuerier.getPollRequestThroughput();
+        final BigDecimal requestThroughput = pollEventQuerier.getRequestThroughput();
         final OptionalLong minimumSuccessfulRequestTime = pollEventQuerier.getMinimumSuccessfulRequestTime();
         final OptionalLong maximumSuccessfulRequestTime = pollEventQuerier.getMaximumSuccessfulRequestTime();
-        final BigDecimal pollFailureThroughput = pollEventQuerier.getPollFailureThroughput();
+        final BigDecimal pollFailureThroughput = pollEventQuerier.getFailureThroughput();
         LOG.info(
             "Poll request throughput: {} /s",
             FORMAT.format(requestThroughput));
@@ -119,10 +119,10 @@ public final class EventReporter implements AutoCloseable {
     }
 
     private void reportPublicationEvents() {
-        final BigDecimal requestThroughput = publicationEventQuerier.getPublicationRequestThroughput();
+        final BigDecimal requestThroughput = publicationEventQuerier.getRequestThroughput();
         final OptionalLong minimumSuccessfulRequestTime = publicationEventQuerier.getMinimumSuccessfulRequestTime();
         final OptionalLong maximumSuccessfulRequestTime = publicationEventQuerier.getMaximumSuccessfulRequestTime();
-        final BigDecimal pollFailureThroughput = publicationEventQuerier.getPublicationFailureThroughput();
+        final BigDecimal pollFailureThroughput = publicationEventQuerier.getFailureThroughput();
         LOG.info(
             "Publication request throughput: {} /s",
             FORMAT.format(requestThroughput));
@@ -138,10 +138,10 @@ public final class EventReporter implements AutoCloseable {
     }
 
     private void reportTopicCreationEvents() {
-        final BigDecimal requestThroughput = topicCreationEventQuerier.getTopicCreationRequestThroughput();
+        final BigDecimal requestThroughput = topicCreationEventQuerier.getRequestThroughput();
         final OptionalLong minimumSuccessfulRequestTime = topicCreationEventQuerier.getMinimumSuccessfulRequestTime();
         final OptionalLong maximumSuccessfulRequestTime = topicCreationEventQuerier.getMaximumSuccessfulRequestTime();
-        final BigDecimal pollFailureThroughput = topicCreationEventQuerier.getTopicCreationFailureThroughput();
+        final BigDecimal pollFailureThroughput = topicCreationEventQuerier.getFailureThroughput();
         LOG.info(
             "Topic creation request throughput: {} /s",
             FORMAT.format(requestThroughput));
