@@ -21,11 +21,55 @@ import com.pushtechnology.diffusion.client.topics.details.TopicType
 import java.lang.Exception
 
 /**
+ * Event describing a requested action.
+ *
+ * @author Matt Champion 26/05/2017
+ */
+interface RequestEvent {
+    /**
+     * @return the request timestamp
+     */
+    val requestTimestamp: Long
+}
+
+/**
+ * Event describing the success of an action.
+ *
+ * @author Matt Champion 26/05/2017
+ */
+interface SuccessEvent {
+    /**
+     * @return the success timestamp
+     */
+    val successTimestamp: Long
+    /**
+     * @return the time taken for the request to succeed
+     */
+    val requestTime: Long
+}
+
+/**
+ * Event describing the failure of an action.
+ *
+ * @author Matt Champion 26/05/2017
+ */
+interface FailureEvent {
+    /**
+     * @return the failed timestamp
+     */
+    val failedTimestamp: Long
+    /**
+     * @return the time taken for the request to fail
+     */
+    val requestTime: Long
+}
+
+/**
  * Event describing a topic creation request.
  *
  * @author Matt Champion 17/05/2017
  */
-interface TopicCreationRequestEvent {
+interface TopicCreationRequestEvent : RequestEvent {
     /**
      * @return the topic path
      */
@@ -38,10 +82,6 @@ interface TopicCreationRequestEvent {
      * @return the length of any initial value
      */
     val initialValueLength: Int
-    /**
-     * @return the request timestamp
-     */
-    val requestTimestamp: Long
 
     /**
      * Factory for {@link TopicCreationRequestEvent}.
@@ -79,19 +119,11 @@ private data class TopicCreationRequestEventImpl(
  *
  * @author Matt Champion 17/05/2017
  */
-interface TopicCreationSuccessEvent {
+interface TopicCreationSuccessEvent : SuccessEvent {
     /**
      * @return the topic creation request event
      */
     val requestEvent: TopicCreationRequestEvent
-    /**
-     * @return the success timestamp
-     */
-    val successTimestamp: Long
-    /**
-     * @return the request timestamp
-     */
-    val requestTime: Long
 
     /**
      * Factory for {@link TopicCreationSuccessEvent}.
@@ -131,7 +163,7 @@ private data class TopicCreationSuccessEventImpl(
  *
  * @author Matt Champion 17/05/2017
  */
-interface TopicCreationFailedEvent {
+interface TopicCreationFailedEvent : FailureEvent {
     /**
      * @return the topic creation request event
      */
@@ -140,14 +172,6 @@ interface TopicCreationFailedEvent {
      * @return the failure reason
      */
     val failReason: TopicAddFailReason
-    /**
-     * @return the failure timestamp
-     */
-    val failedTimestamp: Long
-    /**
-     * @return the time to failure
-     */
-    val requestTime: Long
 
     /**
      * Factory for {@link TopicCreationFailedEvent}.
@@ -188,15 +212,11 @@ private data class TopicCreationFailedEventImpl(
  *
  * @author Matt Champion 17/05/2017
  */
-interface PollRequestEvent {
+interface PollRequestEvent : RequestEvent {
     /**
      * @return the URI
      */
     val uri: String
-    /**
-     * @return the request timestamp
-     */
-    val requestTimestamp: Long
 
     /**
      * Factory for {@link PollRequestEvent}.
@@ -232,7 +252,7 @@ private data class PollRequestEventImpl(
  *
  * @author Matt Champion 17/05/2017
  */
-interface PollSuccessEvent {
+interface PollSuccessEvent : SuccessEvent {
     /**
      * @return the poll request event
      */
@@ -245,14 +265,6 @@ interface PollSuccessEvent {
      * @return the length of the response
      */
     val responseLength: Long
-    /**
-     * @return the success timestamp
-     */
-    val successTimestamp: Long
-    /**
-     * @return the request timestamp
-     */
-    val requestTime: Long
 
     /**
      * Factory for {@link PollSuccessEvent}.
@@ -294,7 +306,7 @@ private data class PollSuccessEventImpl(
  *
  * @author Matt Champion 17/05/2017
  */
-interface PollFailedEvent {
+interface PollFailedEvent : FailureEvent {
     /**
      * @return the poll request event
      */
@@ -303,15 +315,6 @@ interface PollFailedEvent {
      * @return the exception
      */
     val exception: Exception
-    /**
-     * @return the failure timestamp
-     */
-    val failedTimestamp: Long
-    /**
-     * @return the time to failure
-     */
-    val requestTime: Long
-        get() = failedTimestamp - requestEvent.requestTimestamp
 
     /**
      * Factory for {@link PollFailedEvent}.
@@ -352,7 +355,7 @@ private data class PollFailedEventImpl(
  *
  * @author Matt Champion 17/05/2017
  */
-interface PublicationRequestEvent {
+interface PublicationRequestEvent : RequestEvent {
     /**
      * @return the topic path
      */
@@ -361,10 +364,6 @@ interface PublicationRequestEvent {
      * @return the length of the value
      */
     val valueLength: Int
-    /**
-     * @return the request timestamp
-     */
-    val requestTimestamp: Long
 
     /**
      * Factory for {@link PublicationRequestEvent}.
@@ -410,19 +409,11 @@ private data class PublicationRequestEventImpl(
  *
  * @author Matt Champion 17/05/2017
  */
-interface PublicationSuccessEvent {
+interface PublicationSuccessEvent : SuccessEvent {
     /**
      * @return the publication request event
      */
     val requestEvent: PublicationRequestEvent
-    /**
-     * @return the success timestamp
-     */
-    val successTimestamp: Long
-    /**
-     * @return the request timestamp
-     */
-    val requestTime: Long
 
     /**
      * Factory for {@link PublicationSuccessEvent}.
@@ -462,7 +453,7 @@ private data class PublicationSuccessEventImpl(
  *
  * @author Matt Champion 17/05/2017
  */
-interface PublicationFailedEvent {
+interface PublicationFailedEvent : FailureEvent {
     /**
      * @return the publication request event
      */
@@ -471,15 +462,6 @@ interface PublicationFailedEvent {
      * @return the error reason
      */
     val errorReason: ErrorReason
-    /**
-     * @return the failure timestamp
-     */
-    val failedTimestamp: Long
-    /**
-     * @return the time to failure
-     */
-    val requestTime: Long
-        get() = failedTimestamp - requestEvent.requestTimestamp
 
     /**
      * Factory for {@link PublicationFailedEvent}.
