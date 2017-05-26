@@ -15,14 +15,10 @@
 
 package com.pushtechnology.adapters.rest.metrics.events;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.pushtechnology.adapters.rest.metrics.PollFailedEvent;
 import com.pushtechnology.adapters.rest.metrics.PollRequestEvent;
 import com.pushtechnology.adapters.rest.metrics.PollSuccessEvent;
 
-import net.jcip.annotations.GuardedBy;
 import net.jcip.annotations.ThreadSafe;
 
 /**
@@ -31,15 +27,9 @@ import net.jcip.annotations.ThreadSafe;
  * @author Matt Champion 24/05/2017
  */
 @ThreadSafe
-public final class BoundedPollEventCollector implements PollEventListener {
-
-    @GuardedBy("this")
-    private final List<PollRequestEvent> pollRequestEvents = new ArrayList<>();
-    @GuardedBy("this")
-    private final List<PollSuccessEvent> pollSuccessEvents = new ArrayList<>();
-    @GuardedBy("this")
-    private final List<PollFailedEvent> pollFailedEvents = new ArrayList<>();
-    private final int eventLimit;
+public final class BoundedPollEventCollector
+        extends AbstractBoundedEventCollector<PollRequestEvent, PollSuccessEvent, PollFailedEvent>
+        implements PollEventListener {
 
     /**
      * Constructor.
@@ -52,45 +42,21 @@ public final class BoundedPollEventCollector implements PollEventListener {
      * Constructor.
      */
     /*package*/ BoundedPollEventCollector(int eventLimit) {
-        this.eventLimit = eventLimit;
+        super(eventLimit);
     }
 
     @Override
-    public synchronized void onPollRequest(PollRequestEvent event) {
-        pollRequestEvents.add(event);
-
-        while (pollRequestEvents.size() > eventLimit) {
-            pollRequestEvents.remove(0);
-        }
+    public void onPollRequest(PollRequestEvent event) {
+        onRequest(event);
     }
 
     @Override
-    public synchronized void onPollSuccess(PollSuccessEvent event) {
-        pollSuccessEvents.add(event);
-
-        while (pollSuccessEvents.size() > eventLimit) {
-            pollSuccessEvents.remove(0);
-        }
+    public void onPollSuccess(PollSuccessEvent event) {
+        onSuccess(event);
     }
 
     @Override
-    public synchronized void onPollFailed(PollFailedEvent event) {
-        pollFailedEvents.add(event);
-
-        while (pollFailedEvents.size() > eventLimit) {
-            pollFailedEvents.remove(0);
-        }
-    }
-
-    /*package*/ synchronized List<PollRequestEvent> getPollRequestEvents() {
-        return new ArrayList<>(pollRequestEvents);
-    }
-
-    /*package*/ synchronized List<PollSuccessEvent> getPollSuccessEvents() {
-        return new ArrayList<>(pollSuccessEvents);
-    }
-
-    /*package*/ synchronized List<PollFailedEvent> getPollFailedEvents() {
-        return new ArrayList<>(pollFailedEvents);
+    public void onPollFailed(PollFailedEvent event) {
+        onFailed(event);
     }
 }

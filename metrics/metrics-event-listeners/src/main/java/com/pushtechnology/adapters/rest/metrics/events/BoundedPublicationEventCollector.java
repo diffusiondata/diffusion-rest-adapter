@@ -15,14 +15,10 @@
 
 package com.pushtechnology.adapters.rest.metrics.events;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.pushtechnology.adapters.rest.metrics.PublicationFailedEvent;
 import com.pushtechnology.adapters.rest.metrics.PublicationRequestEvent;
 import com.pushtechnology.adapters.rest.metrics.PublicationSuccessEvent;
 
-import net.jcip.annotations.GuardedBy;
 import net.jcip.annotations.ThreadSafe;
 
 /**
@@ -31,15 +27,9 @@ import net.jcip.annotations.ThreadSafe;
  * @author Matt Champion 24/05/2017
  */
 @ThreadSafe
-public final class BoundedPublicationEventCollector implements PublicationEventListener {
-
-    @GuardedBy("this")
-    private final List<PublicationRequestEvent> publicationRequestEvents = new ArrayList<>();
-    @GuardedBy("this")
-    private final List<PublicationSuccessEvent> publicationSuccessEvents = new ArrayList<>();
-    @GuardedBy("this")
-    private final List<PublicationFailedEvent> publicationFailedEvents = new ArrayList<>();
-    private final int eventLimit;
+public final class BoundedPublicationEventCollector
+        extends AbstractBoundedEventCollector<PublicationRequestEvent, PublicationSuccessEvent, PublicationFailedEvent>
+        implements PublicationEventListener {
 
     /**
      * Constructor.
@@ -52,45 +42,21 @@ public final class BoundedPublicationEventCollector implements PublicationEventL
      * Constructor.
      */
     /*package*/ BoundedPublicationEventCollector(int eventLimit) {
-        this.eventLimit = eventLimit;
+        super(eventLimit);
     }
 
     @Override
     public void onPublicationRequest(PublicationRequestEvent event) {
-        publicationRequestEvents.add(event);
-
-        while (publicationRequestEvents.size() > eventLimit) {
-            publicationRequestEvents.remove(0);
-        }
+        onRequest(event);
     }
 
     @Override
     public void onPublicationSuccess(PublicationSuccessEvent event) {
-        publicationSuccessEvents.add(event);
-
-        while (publicationSuccessEvents.size() > eventLimit) {
-            publicationSuccessEvents.remove(0);
-        }
+        onSuccess(event);
     }
 
     @Override
     public void onPublicationFailed(PublicationFailedEvent event) {
-        publicationFailedEvents.add(event);
-
-        while (publicationFailedEvents.size() > eventLimit) {
-            publicationFailedEvents.remove(0);
-        }
-    }
-
-    /*package*/ synchronized List<PublicationRequestEvent> getPublicationRequestEvents() {
-        return new ArrayList<>(publicationRequestEvents);
-    }
-
-    /*package*/ synchronized List<PublicationSuccessEvent> getPublicationSuccessEvents() {
-        return new ArrayList<>(publicationSuccessEvents);
-    }
-
-    /*package*/ synchronized List<PublicationFailedEvent> getPublicationFailedEvents() {
-        return new ArrayList<>(publicationFailedEvents);
+        onFailed(event);
     }
 }

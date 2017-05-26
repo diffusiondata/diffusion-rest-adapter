@@ -52,21 +52,21 @@ public final class BoundedTopicCreationEventCollectorTest {
     public void onTopicCreationRequest() throws Exception {
         eventCollector.onTopicCreationRequest(publicationRequestEvent);
 
-        assertThat(eventCollector.getTopicCreationRequestEvents(), contains(publicationRequestEvent));
+        assertThat(eventCollector.getRequestEvents(), contains(publicationRequestEvent));
     }
 
     @Test
     public void onTopicCreationSuccess() throws Exception {
         eventCollector.onTopicCreationSuccess(publicationSuccessEvent);
 
-        assertThat(eventCollector.getTopicCreationSuccessEvents(), contains(publicationSuccessEvent));
+        assertThat(eventCollector.getSuccessEvents(), contains(publicationSuccessEvent));
     }
 
     @Test
     public void onTopicCreationFailed() throws Exception {
         eventCollector.onTopicCreationFailed(publicationFailedEvent);
 
-        assertThat(eventCollector.getTopicCreationFailedEvents(), contains(publicationFailedEvent));
+        assertThat(eventCollector.getFailedEvents(), contains(publicationFailedEvent));
     }
 
     @Test
@@ -75,7 +75,7 @@ public final class BoundedTopicCreationEventCollectorTest {
             eventCollector.onTopicCreationRequest(publicationRequestEvent);
         }
 
-        assertEquals(EVENT_LIMIT, eventCollector.getTopicCreationRequestEvents().size());
+        assertEquals(EVENT_LIMIT, eventCollector.getRequestEvents().size());
     }
 
     @Test
@@ -84,7 +84,7 @@ public final class BoundedTopicCreationEventCollectorTest {
             eventCollector.onTopicCreationSuccess(publicationSuccessEvent);
         }
 
-        assertEquals(EVENT_LIMIT, eventCollector.getTopicCreationSuccessEvents().size());
+        assertEquals(EVENT_LIMIT, eventCollector.getSuccessEvents().size());
     }
 
     @Test
@@ -93,6 +93,6 @@ public final class BoundedTopicCreationEventCollectorTest {
             eventCollector.onTopicCreationFailed(publicationFailedEvent);
         }
 
-        assertEquals(EVENT_LIMIT, eventCollector.getTopicCreationFailedEvents().size());
+        assertEquals(EVENT_LIMIT, eventCollector.getFailedEvents().size());
     }
 }

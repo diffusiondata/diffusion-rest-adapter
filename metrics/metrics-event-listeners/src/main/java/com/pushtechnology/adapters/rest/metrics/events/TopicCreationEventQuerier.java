@@ -51,7 +51,7 @@ public final class TopicCreationEventQuerier {
     }
 
     /*package*/ BigDecimal getTopicCreationRequestThroughput(long currentTimestamp) {
-        final List<TopicCreationRequestEvent> requestEvents = eventCollector.getTopicCreationRequestEvents();
+        final List<TopicCreationRequestEvent> requestEvents = eventCollector.getRequestEvents();
 
         final int numberOfEvents = requestEvents.size();
         final OptionalLong maybeMin = requestEvents.stream().mapToLong(TopicCreationRequestEvent::getRequestTimestamp).min();
@@ -68,7 +68,7 @@ public final class TopicCreationEventQuerier {
      * @return the maximum successful request time in milliseconds
      */
     public OptionalLong getMaximumSuccessfulRequestTime() {
-        final List<TopicCreationSuccessEvent> successEvents = eventCollector.getTopicCreationSuccessEvents();
+        final List<TopicCreationSuccessEvent> successEvents = eventCollector.getSuccessEvents();
 
         return successEvents
             .stream()
@@ -80,7 +80,7 @@ public final class TopicCreationEventQuerier {
      * @return the minimum successful request time in milliseconds
      */
     public OptionalLong getMinimumSuccessfulRequestTime() {
-        final List<TopicCreationSuccessEvent> successEvents = eventCollector.getTopicCreationSuccessEvents();
+        final List<TopicCreationSuccessEvent> successEvents = eventCollector.getSuccessEvents();
 
         return successEvents
             .stream()
@@ -96,7 +96,7 @@ public final class TopicCreationEventQuerier {
     }
 
     /*package*/ BigDecimal getTopicCreationFailureThroughput(long currentTimestamp) {
-        final List<TopicCreationFailedEvent> failedEvents = eventCollector.getTopicCreationFailedEvents();
+        final List<TopicCreationFailedEvent> failedEvents = eventCollector.getFailedEvents();
 
         final int numberOfEvents = failedEvents.size();
         final OptionalLong maybeMin = failedEvents.stream().mapToLong(TopicCreationFailedEvent::getFailedTimestamp).min();

@@ -50,21 +50,21 @@ public final class BoundedPollEventCollectorTest {
     public void onPollRequest() throws Exception {
         eventCollector.onPollRequest(pollRequestEvent);
 
-        assertThat(eventCollector.getPollRequestEvents(), contains(pollRequestEvent));
+        assertThat(eventCollector.getRequestEvents(), contains(pollRequestEvent));
     }
 
     @Test
     public void onPollSuccess() throws Exception {
         eventCollector.onPollSuccess(pollSuccessEvent);
 
-        assertThat(eventCollector.getPollSuccessEvents(), contains(pollSuccessEvent));
+        assertThat(eventCollector.getSuccessEvents(), contains(pollSuccessEvent));
     }
 
     @Test
     public void onPollFailed() throws Exception {
         eventCollector.onPollFailed(pollFailedEvent);
 
-        assertThat(eventCollector.getPollFailedEvents(), contains(pollFailedEvent));
+        assertThat(eventCollector.getFailedEvents(), contains(pollFailedEvent));
     }
 
     @Test
@@ -73,7 +73,7 @@ public final class BoundedPollEventCollectorTest {
             eventCollector.onPollRequest(pollRequestEvent);
         }
 
-        assertEquals(EVENT_LIMIT, eventCollector.getPollRequestEvents().size());
+        assertEquals(EVENT_LIMIT, eventCollector.getRequestEvents().size());
     }
 
     @Test
@@ -82,7 +82,7 @@ public final class BoundedPollEventCollectorTest {
             eventCollector.onPollSuccess(pollSuccessEvent);
         }
 
-        assertEquals(EVENT_LIMIT, eventCollector.getPollSuccessEvents().size());
+        assertEquals(EVENT_LIMIT, eventCollector.getSuccessEvents().size());
     }
 
     @Test
@@ -91,6 +91,6 @@ public final class BoundedPollEventCollectorTest {
             eventCollector.onPollFailed(pollFailedEvent);
         }
 
-        assertEquals(EVENT_LIMIT, eventCollector.getPollFailedEvents().size());
+        assertEquals(EVENT_LIMIT, eventCollector.getFailedEvents().size());
     }
 }

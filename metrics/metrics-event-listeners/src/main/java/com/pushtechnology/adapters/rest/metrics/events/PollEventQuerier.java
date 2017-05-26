@@ -55,7 +55,7 @@ public final class PollEventQuerier {
     }
 
     /*package*/ BigDecimal getPollRequestThroughput(long currentTimestamp) {
-        final List<PollRequestEvent> requestEvents = pollEventCollector.getPollRequestEvents();
+        final List<PollRequestEvent> requestEvents = pollEventCollector.getRequestEvents();
 
         final int numberOfEvents = requestEvents.size();
         final OptionalLong maybeMin = requestEvents.stream().mapToLong(PollRequestEvent::getRequestTimestamp).min();
@@ -72,7 +72,7 @@ public final class PollEventQuerier {
      * @return the maximum successful request time in milliseconds
      */
     public OptionalLong getMaximumSuccessfulRequestTime() {
-        final List<PollSuccessEvent> successEvents = pollEventCollector.getPollSuccessEvents();
+        final List<PollSuccessEvent> successEvents = pollEventCollector.getSuccessEvents();
 
         return successEvents
             .stream()
@@ -84,7 +84,7 @@ public final class PollEventQuerier {
      * @return the minimum successful request time in milliseconds
      */
     public OptionalLong getMinimumSuccessfulRequestTime() {
-        final List<PollSuccessEvent> successEvents = pollEventCollector.getPollSuccessEvents();
+        final List<PollSuccessEvent> successEvents = pollEventCollector.getSuccessEvents();
 
         return successEvents
             .stream()
@@ -97,7 +97,7 @@ public final class PollEventQuerier {
      */
     public Map<Integer, Integer> getStatusCodes() {
         return pollEventCollector
-            .getPollSuccessEvents()
+            .getSuccessEvents()
             .stream()
             .map(PollSuccessEvent::getStatusCode)
             .collect(Collectors.toMap(identity(), code -> 1, (l, r) -> l + r, HashMap::new));
@@ -111,7 +111,7 @@ public final class PollEventQuerier {
     }
 
     /*package*/ BigDecimal getPollFailureThroughput(long currentTimestamp) {
-        final List<PollFailedEvent> failedEvents = pollEventCollector.getPollFailedEvents();
+        final List<PollFailedEvent> failedEvents = pollEventCollector.getFailedEvents();
 
         final int numberOfEvents = failedEvents.size();
         final OptionalLong maybeMin = failedEvents.stream().mapToLong(PollFailedEvent::getFailedTimestamp).min();

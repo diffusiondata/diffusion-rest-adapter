@@ -15,14 +15,10 @@
 
 package com.pushtechnology.adapters.rest.metrics.events;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.pushtechnology.adapters.rest.metrics.TopicCreationFailedEvent;
 import com.pushtechnology.adapters.rest.metrics.TopicCreationRequestEvent;
 import com.pushtechnology.adapters.rest.metrics.TopicCreationSuccessEvent;
 
-import net.jcip.annotations.GuardedBy;
 import net.jcip.annotations.ThreadSafe;
 
 /**
@@ -31,15 +27,12 @@ import net.jcip.annotations.ThreadSafe;
  * @author Matt Champion 24/05/2017
  */
 @ThreadSafe
-public final class BoundedTopicCreationEventCollector implements TopicCreationEventListener {
-
-    @GuardedBy("this")
-    private final List<TopicCreationRequestEvent> topicCreationRequestEvents = new ArrayList<>();
-    @GuardedBy("this")
-    private final List<TopicCreationSuccessEvent> topicCreationSuccessEvents = new ArrayList<>();
-    @GuardedBy("this")
-    private final List<TopicCreationFailedEvent> topicCreationFailedEvents = new ArrayList<>();
-    private final int eventLimit;
+public final class BoundedTopicCreationEventCollector
+        extends AbstractBoundedEventCollector<
+            TopicCreationRequestEvent,
+            TopicCreationSuccessEvent,
+            TopicCreationFailedEvent>
+        implements TopicCreationEventListener {
 
     /**
      * Constructor.
@@ -52,45 +45,21 @@ public final class BoundedTopicCreationEventCollector implements TopicCreationEv
      * Constructor.
      */
     /*package*/ BoundedTopicCreationEventCollector(int eventLimit) {
-        this.eventLimit = eventLimit;
+        super(100);
     }
 
     @Override
     public void onTopicCreationRequest(TopicCreationRequestEvent event) {
-        topicCreationRequestEvents.add(event);
-
-        while (topicCreationRequestEvents.size() > eventLimit) {
-            topicCreationRequestEvents.remove(0);
-        }
+        onRequest(event);
     }
 
     @Override
     public void onTopicCreationSuccess(TopicCreationSuccessEvent event) {
-        topicCreationSuccessEvents.add(event);
-
-        while (topicCreationSuccessEvents.size() > eventLimit) {
-            topicCreationSuccessEvents.remove(0);
-        }
+        onSuccess(event);
     }
 
     @Override
     public void onTopicCreationFailed(TopicCreationFailedEvent event) {
-        topicCreationFailedEvents.add(event);
-
-        while (topicCreationFailedEvents.size() > eventLimit) {
-            topicCreationFailedEvents.remove(0);
-        }
-    }
-
-    /*package*/ synchronized List<TopicCreationRequestEvent> getTopicCreationRequestEvents() {
-        return new ArrayList<>(topicCreationRequestEvents);
-    }
-
-    /*package*/ synchronized List<TopicCreationSuccessEvent> getTopicCreationSuccessEvents() {
-        return new ArrayList<>(topicCreationSuccessEvents);
-    }
-
-    /*package*/ synchronized List<TopicCreationFailedEvent> getTopicCreationFailedEvents() {
-        return new ArrayList<>(topicCreationFailedEvents);
+        onFailed(event);
     }
 }

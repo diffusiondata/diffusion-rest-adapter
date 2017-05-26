@@ -51,21 +51,21 @@ public final class BoundedPublicationEventCollectorTest {
     public void onPublicationRequest() throws Exception {
         eventCollector.onPublicationRequest(publicationRequestEvent);
 
-        assertThat(eventCollector.getPublicationRequestEvents(), contains(publicationRequestEvent));
+        assertThat(eventCollector.getRequestEvents(), contains(publicationRequestEvent));
     }
 
     @Test
     public void onPublicationSuccess() throws Exception {
         eventCollector.onPublicationSuccess(publicationSuccessEvent);
 
-        assertThat(eventCollector.getPublicationSuccessEvents(), contains(publicationSuccessEvent));
+        assertThat(eventCollector.getSuccessEvents(), contains(publicationSuccessEvent));
     }
 
     @Test
     public void onPublicationFailed() throws Exception {
         eventCollector.onPublicationFailed(publicationFailedEvent);
 
-        assertThat(eventCollector.getPublicationFailedEvents(), contains(publicationFailedEvent));
+        assertThat(eventCollector.getFailedEvents(), contains(publicationFailedEvent));
     }
 
     @Test
@@ -74,7 +74,7 @@ public final class BoundedPublicationEventCollectorTest {
             eventCollector.onPublicationRequest(publicationRequestEvent);
         }
 
-        assertEquals(EVENT_LIMIT, eventCollector.getPublicationRequestEvents().size());
+        assertEquals(EVENT_LIMIT, eventCollector.getRequestEvents().size());
     }
 
     @Test
@@ -83,7 +83,7 @@ public final class BoundedPublicationEventCollectorTest {
             eventCollector.onPublicationSuccess(publicationSuccessEvent);
         }
 
-        assertEquals(EVENT_LIMIT, eventCollector.getPublicationSuccessEvents().size());
+        assertEquals(EVENT_LIMIT, eventCollector.getSuccessEvents().size());
     }
 
     @Test
@@ -92,6 +92,6 @@ public final class BoundedPublicationEventCollectorTest {
             eventCollector.onPublicationFailed(publicationFailedEvent);
         }
 
-        assertEquals(EVENT_LIMIT, eventCollector.getPublicationFailedEvents().size());
+        assertEquals(EVENT_LIMIT, eventCollector.getFailedEvents().size());
     }
 }
