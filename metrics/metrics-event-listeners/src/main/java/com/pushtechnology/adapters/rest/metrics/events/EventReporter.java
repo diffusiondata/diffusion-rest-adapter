@@ -44,6 +44,8 @@ public final class EventReporter implements AutoCloseable {
     private static final NumberFormat FORMAT;
     private final ScheduledExecutorService executor;
     private final PollEventQuerier pollEventQuerier;
+    private final PublicationEventQuerier publicationEventQuerier;
+    private final TopicCreationEventQuerier topicCreationEventQuerier;
     @GuardedBy("this")
     private Future<?> loggingTask;
 
@@ -59,9 +61,13 @@ public final class EventReporter implements AutoCloseable {
      */
     public EventReporter(
             ScheduledExecutorService executor,
-            PollEventQuerier pollEventQuerier) {
+            PollEventQuerier pollEventQuerier,
+            PublicationEventQuerier publicationEventQuerier,
+            TopicCreationEventQuerier topicCreationEventQuerier) {
         this.executor = executor;
         this.pollEventQuerier = pollEventQuerier;
+        this.publicationEventQuerier = publicationEventQuerier;
+        this.topicCreationEventQuerier = topicCreationEventQuerier;
     }
 
     /**
@@ -74,7 +80,11 @@ public final class EventReporter implements AutoCloseable {
         }
 
         loggingTask = executor.scheduleAtFixedRate(
-            this::reportPollEvents,
+            () -> {
+                reportPollEvents();
+                reportPublicationEvents();
+                reportTopicCreationEvents();
+            },
             1,
             1,
             MINUTES);
@@ -105,6 +115,44 @@ public final class EventReporter implements AutoCloseable {
             maximumSuccessfulRequestTime.orElse(-1));
         LOG.info(
             "Poll failure throughput {} /s",
+            FORMAT.format(pollFailureThroughput));
+    }
+
+    private void reportPublicationEvents() {
+        final BigDecimal requestThroughput = publicationEventQuerier.getPublicationRequestThroughput();
+        final OptionalLong minimumSuccessfulRequestTime = publicationEventQuerier.getMinimumSuccessfulRequestTime();
+        final OptionalLong maximumSuccessfulRequestTime = publicationEventQuerier.getMaximumSuccessfulRequestTime();
+        final BigDecimal pollFailureThroughput = publicationEventQuerier.getPublicationFailureThroughput();
+        LOG.info(
+            "Publication request throughput: {} /s",
+            FORMAT.format(requestThroughput));
+        LOG.info(
+            "Min publication time: {} ms",
+            minimumSuccessfulRequestTime.orElse(-1));
+        LOG.info(
+            "Max publication time: {} ms",
+            maximumSuccessfulRequestTime.orElse(-1));
+        LOG.info(
+            "Publication failure throughput {} /s",
+            FORMAT.format(pollFailureThroughput));
+    }
+
+    private void reportTopicCreationEvents() {
+        final BigDecimal requestThroughput = topicCreationEventQuerier.getTopicCreationRequestThroughput();
+        final OptionalLong minimumSuccessfulRequestTime = topicCreationEventQuerier.getMinimumSuccessfulRequestTime();
+        final OptionalLong maximumSuccessfulRequestTime = topicCreationEventQuerier.getMaximumSuccessfulRequestTime();
+        final BigDecimal pollFailureThroughput = topicCreationEventQuerier.getTopicCreationFailureThroughput();
+        LOG.info(
+            "Topic creation request throughput: {} /s",
+            FORMAT.format(requestThroughput));
+        LOG.info(
+            "Min topic creation time: {} ms",
+            minimumSuccessfulRequestTime.orElse(-1));
+        LOG.info(
+            "Max topic creation time: {} ms",
+            maximumSuccessfulRequestTime.orElse(-1));
+        LOG.info(
+            "Topic creation failure throughput {} /s",
             FORMAT.format(pollFailureThroughput));
     }
 }

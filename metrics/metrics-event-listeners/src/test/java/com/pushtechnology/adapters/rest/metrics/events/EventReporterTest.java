@@ -40,7 +40,9 @@ public final class EventReporterTest {
 
         reporter = new EventReporter(
             executor,
-            new PollEventQuerier(new BoundedPollEventCollector(100)));
+            new PollEventQuerier(new BoundedPollEventCollector(100)),
+            new PublicationEventQuerier(new BoundedPublicationEventCollector(100)),
+            new TopicCreationEventQuerier(new BoundedTopicCreationEventCollector(100)));
     }
 
     @After
