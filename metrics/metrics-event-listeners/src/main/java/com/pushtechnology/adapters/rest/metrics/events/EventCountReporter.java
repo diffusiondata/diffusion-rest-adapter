@@ -34,9 +34,9 @@ import org.slf4j.LoggerFactory;
  * @author Matt Champion 14/05/2017
  */
 @ThreadSafe
-public final class SimpleCountingEventCollector implements AutoCloseable {
+public final class EventCountReporter implements AutoCloseable {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SimpleCountingEventCollector.class);
+    private static final Logger LOG = LoggerFactory.getLogger(EventCountReporter.class);
 
     private final PollEventCounter pollEventCounter = new PollEventCounter();
     private final PublicationEventCounter publicationEventCounter = new PublicationEventCounter();
@@ -49,7 +49,7 @@ public final class SimpleCountingEventCollector implements AutoCloseable {
     /**
      * Constructor.
      */
-    public SimpleCountingEventCollector(ScheduledExecutorService executor) {
+    public EventCountReporter(ScheduledExecutorService executor) {
         this.executor = executor;
     }
 

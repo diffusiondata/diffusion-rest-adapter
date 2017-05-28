@@ -33,17 +33,17 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 
 /**
- * Unit tests for {@link SimpleCountingEventCollector}.
+ * Unit tests for {@link EventCountReporter}.
  *
  * @author Matt Champion 14/05/2017
  */
-public final class SimpleCountingEventCollectorTest {
+public final class EventCountReporterTest {
     @Mock
     private ScheduledExecutorService executor;
     @Mock
     private ScheduledFuture loggingTask;
 
-    private SimpleCountingEventCollector collector;
+    private EventCountReporter collector;
 
     @SuppressWarnings("unchecked")
     @Before
@@ -53,7 +53,7 @@ public final class SimpleCountingEventCollectorTest {
         when(executor.scheduleAtFixedRate(isA(Runnable.class), isA(Long.class), isA(Long.class), isA(TimeUnit.class)))
             .thenReturn(loggingTask);
 
-        collector = new SimpleCountingEventCollector(executor);
+        collector = new EventCountReporter(executor);
     }
 
     @After
