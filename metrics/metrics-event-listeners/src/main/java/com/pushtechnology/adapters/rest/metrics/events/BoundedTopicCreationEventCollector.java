@@ -45,7 +45,7 @@ public final class BoundedTopicCreationEventCollector
      * Constructor.
      */
     /*package*/ BoundedTopicCreationEventCollector(int eventLimit) {
-        super(100);
+        super(eventLimit);
     }
 
     @Override
