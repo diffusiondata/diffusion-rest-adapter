@@ -16,7 +16,6 @@
 package com.pushtechnology.adapters.rest.metrics.events;
 
 import static java.util.concurrent.TimeUnit.MINUTES;
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.verify;
@@ -88,68 +87,5 @@ public final class SimpleCountingEventCollectorTest {
     @Test
     public void closeBeforeStart() throws Exception {
         collector.close();
-    }
-
-    @Test
-    public void onPollRequest() throws Exception {
-        collector.onPollRequest(null);
-
-        assertEquals(1, collector.getPollRequests());
-    }
-
-    @Test
-    public void onTopicCreationRequest() throws Exception {
-        collector.onTopicCreationRequest(null);
-
-        assertEquals(1, collector.getTopicCreationRequests());
-    }
-
-    @Test
-    public void onPublicationRequest() throws Exception {
-        collector.onPublicationRequest(null);
-
-        assertEquals(1, collector.getPublicationRequests());
-    }
-
-    @Test
-    public void onPollSuccess() throws Exception {
-        collector.onPollSuccess(null);
-
-        assertEquals(1, collector.getPollSuccesses());
-    }
-
-    @Test
-    public void onPollFailed() throws Exception {
-        collector.onPollFailed(null);
-
-        assertEquals(1, collector.getPollFailures());
-    }
-
-    @Test
-    public void onPublicationSuccess() throws Exception {
-        collector.onPublicationSuccess(null);
-
-        assertEquals(1, collector.getPublicationSuccesses());
-    }
-
-    @Test
-    public void onPublicationFailed() throws Exception {
-        collector.onPublicationFailed(null);
-
-        assertEquals(1, collector.getPublicationFailures());
-    }
-
-    @Test
-    public void onTopicCreationSuccess() throws Exception {
-        collector.onTopicCreationSuccess(null);
-
-        assertEquals(1, collector.getTopicCreationSuccesses());
-    }
-
-    @Test
-    public void onTopicCreationFailed() throws Exception {
-        collector.onTopicCreationFailed(null);
-
-        assertEquals(1, collector.getTopicCreationFailures());
     }
 }
