@@ -18,17 +18,17 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 
 /**
- * Unit tests for {@link EventReporter}.
+ * Unit tests for {@link EventSummaryReporter}.
  *
  * @author Matt Champion 24/05/2017
  */
-public final class EventReporterTest {
+public final class EventSummaryReporterTest {
     @Mock
     private ScheduledExecutorService executor;
     @Mock
     private ScheduledFuture loggingTask;
 
-    private EventReporter reporter;
+    private EventSummaryReporter reporter;
 
     @SuppressWarnings("unchecked")
     @Before
@@ -38,7 +38,7 @@ public final class EventReporterTest {
         when(executor.scheduleAtFixedRate(isA(Runnable.class), isA(Long.class), isA(Long.class), isA(TimeUnit.class)))
             .thenReturn(loggingTask);
 
-        reporter = new EventReporter(
+        reporter = new EventSummaryReporter(
             executor,
             new PollEventQuerier(new BoundedPollEventCollector(100)),
             new PublicationEventQuerier(new BoundedPublicationEventCollector(100)),

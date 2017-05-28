@@ -38,9 +38,9 @@ import org.slf4j.LoggerFactory;
  * @author Matt Champion 14/05/2017
  */
 @ThreadSafe
-public final class EventReporter implements AutoCloseable {
+public final class EventSummaryReporter implements AutoCloseable {
 
-    private static final Logger LOG = LoggerFactory.getLogger(EventReporter.class);
+    private static final Logger LOG = LoggerFactory.getLogger(EventSummaryReporter.class);
     private static final NumberFormat FORMAT;
     private final ScheduledExecutorService executor;
     private final PollEventQuerier pollEventQuerier;
@@ -59,7 +59,7 @@ public final class EventReporter implements AutoCloseable {
     /**
      * Constructor.
      */
-    public EventReporter(
+    public EventSummaryReporter(
             ScheduledExecutorService executor,
             PollEventQuerier pollEventQuerier,
             PublicationEventQuerier publicationEventQuerier,
