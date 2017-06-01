@@ -23,7 +23,7 @@ import java.lang.Exception
 /**
  * Event describing a requested action.
  *
- * @author Matt Champion 26/05/2017
+ * @author Push Technology Limited
  */
 interface RequestEvent {
     /**
@@ -35,7 +35,7 @@ interface RequestEvent {
 /**
  * Event describing the success of an action.
  *
- * @author Matt Champion 26/05/2017
+ * @author Push Technology Limited
  */
 interface SuccessEvent {
     /**
@@ -51,7 +51,7 @@ interface SuccessEvent {
 /**
  * Event describing the failure of an action.
  *
- * @author Matt Champion 26/05/2017
+ * @author Push Technology Limited
  */
 interface FailureEvent {
     /**
@@ -67,7 +67,7 @@ interface FailureEvent {
 /**
  * Event describing a topic creation request.
  *
- * @author Matt Champion 17/05/2017
+ * @author Push Technology Limited
  */
 interface TopicCreationRequestEvent : RequestEvent {
     /**
@@ -106,7 +106,7 @@ interface TopicCreationRequestEvent : RequestEvent {
 /**
  * Implementation of {@link TopicCreationRequestEvent}.
  *
- * @author Matt Champion 17/05/2017
+ * @author Push Technology Limited
  */
 private data class TopicCreationRequestEventImpl(
     override val path: String,
@@ -117,7 +117,7 @@ private data class TopicCreationRequestEventImpl(
 /**
  * Event describing a successful topic creation.
  *
- * @author Matt Champion 17/05/2017
+ * @author Push Technology Limited
  */
 interface TopicCreationSuccessEvent : SuccessEvent {
     /**
@@ -148,7 +148,7 @@ interface TopicCreationSuccessEvent : SuccessEvent {
 /**
  * Event describing a successful topic creation.
  *
- * @author Matt Champion 17/05/2017
+ * @author Push Technology Limited
  */
 private data class TopicCreationSuccessEventImpl(
         override val requestEvent: TopicCreationRequestEvent,
@@ -161,7 +161,7 @@ private data class TopicCreationSuccessEventImpl(
 /**
  * Event describing a failed topic creation.
  *
- * @author Matt Champion 17/05/2017
+ * @author Push Technology Limited
  */
 interface TopicCreationFailedEvent : FailureEvent {
     /**
@@ -196,7 +196,7 @@ interface TopicCreationFailedEvent : FailureEvent {
 /**
  * Event describing a failed topic creation.
  *
- * @author Matt Champion 17/05/2017
+ * @author Push Technology Limited
  */
 private data class TopicCreationFailedEventImpl(
         override val requestEvent: TopicCreationRequestEvent,
@@ -210,7 +210,7 @@ private data class TopicCreationFailedEventImpl(
 /**
  * Event describing a poll request.
  *
- * @author Matt Champion 17/05/2017
+ * @author Push Technology Limited
  */
 interface PollRequestEvent : RequestEvent {
     /**
@@ -241,7 +241,7 @@ interface PollRequestEvent : RequestEvent {
 /**
  * Event describing a poll request.
  *
- * @author Matt Champion 17/05/2017
+ * @author Push Technology Limited
  */
 private data class PollRequestEventImpl(
     override val uri: String,
@@ -250,7 +250,7 @@ private data class PollRequestEventImpl(
 /**
  * Event describing a successful poll request.
  *
- * @author Matt Champion 17/05/2017
+ * @author Push Technology Limited
  */
 interface PollSuccessEvent : SuccessEvent {
     /**
@@ -289,7 +289,7 @@ interface PollSuccessEvent : SuccessEvent {
 /**
  * Event describing a successful poll request.
  *
- * @author Matt Champion 17/05/2017
+ * @author Push Technology Limited
  */
 private data class PollSuccessEventImpl(
         override val requestEvent: PollRequestEvent,
@@ -304,7 +304,7 @@ private data class PollSuccessEventImpl(
 /**
  * Event describing a failed poll.
  *
- * @author Matt Champion 17/05/2017
+ * @author Push Technology Limited
  */
 interface PollFailedEvent : FailureEvent {
     /**
@@ -339,7 +339,7 @@ interface PollFailedEvent : FailureEvent {
 /**
  * Event describing a failed poll.
  *
- * @author Matt Champion 17/05/2017
+ * @author Push Technology Limited
  */
 private data class PollFailedEventImpl(
         override val requestEvent: PollRequestEvent,
@@ -353,7 +353,7 @@ private data class PollFailedEventImpl(
 /**
  * Event describing a publication request.
  *
- * @author Matt Champion 17/05/2017
+ * @author Push Technology Limited
  */
 interface PublicationRequestEvent : RequestEvent {
     /**
@@ -388,7 +388,7 @@ interface PublicationRequestEvent : RequestEvent {
 /**
  * Event describing a publication request.
  *
- * @author Matt Champion 17/05/2017
+ * @author Push Technology Limited
  */
 private data class PublicationRequestEventImpl(
     /**
@@ -407,7 +407,7 @@ private data class PublicationRequestEventImpl(
 /**
  * Event describing a successful publication.
  *
- * @author Matt Champion 17/05/2017
+ * @author Push Technology Limited
  */
 interface PublicationSuccessEvent : SuccessEvent {
     /**
@@ -438,7 +438,7 @@ interface PublicationSuccessEvent : SuccessEvent {
 /**
  * Event describing a successful publication.
  *
- * @author Matt Champion 17/05/2017
+ * @author Push Technology Limited
  */
 private data class PublicationSuccessEventImpl(
         override val requestEvent: PublicationRequestEvent,
@@ -451,7 +451,7 @@ private data class PublicationSuccessEventImpl(
 /**
  * Event describing a failed publication.
  *
- * @author Matt Champion 17/05/2017
+ * @author Push Technology Limited
  */
 interface PublicationFailedEvent : FailureEvent {
     /**
@@ -486,7 +486,7 @@ interface PublicationFailedEvent : FailureEvent {
 /**
  * Event describing a failed publication.
  *
- * @author Matt Champion 17/05/2017
+ * @author Push Technology Limited
  */
 private data class PublicationFailedEventImpl(
         override val requestEvent: PublicationRequestEvent,

@@ -29,7 +29,7 @@ import com.pushtechnology.diffusion.datatype.Bytes;
  * Implementation of {@link TopicCreationListener} that notifies a
  * {@link TopicCreationEventListener} of events.
  *
- * @author Matt Champion 17/05/2017
+ * @author Push Technology Limited
  */
 public final class TopicCreationEventDispatcher implements TopicCreationListener {
     private final TopicCreationEventListener listener;

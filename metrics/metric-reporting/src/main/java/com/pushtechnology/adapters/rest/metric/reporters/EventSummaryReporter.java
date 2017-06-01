@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Event reporter.
  *
- * @author Matt Champion 14/05/2017
+ * @author Push Technology Limited
  */
 @ThreadSafe
 public final class EventSummaryReporter implements AutoCloseable {

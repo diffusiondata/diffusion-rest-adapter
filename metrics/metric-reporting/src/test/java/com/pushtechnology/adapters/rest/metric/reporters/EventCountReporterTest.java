@@ -35,7 +35,7 @@ import org.mockito.Mockito;
 /**
  * Unit tests for {@link EventCountReporter}.
  *
- * @author Matt Champion 14/05/2017
+ * @author Push Technology Limited
  */
 public final class EventCountReporterTest {
     @Mock

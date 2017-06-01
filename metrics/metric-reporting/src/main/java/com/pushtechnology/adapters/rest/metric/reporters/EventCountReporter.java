@@ -35,7 +35,7 @@ import com.pushtechnology.adapters.rest.metrics.listeners.TopicCreationEventCoun
 /**
  * Simple metrics collector that counts all events and logs a summary.
  *
- * @author Matt Champion 14/05/2017
+ * @author Push Technology Limited
  */
 @ThreadSafe
 public final class EventCountReporter implements AutoCloseable {

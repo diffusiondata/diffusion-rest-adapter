@@ -23,7 +23,7 @@ import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 /**
  * Implementation of {@link EventCounter} for poll events.
  *
- * @author Matt Champion 28/05/2017
+ * @author Push Technology Limited
  */
 public final class PollEventCounter extends AbstractEventCounter implements PollListener {
     private final PollCompletionListener completionListener = new PollCompletionListener() {

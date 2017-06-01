@@ -21,7 +21,7 @@ import com.pushtechnology.diffusion.datatype.Bytes;
 /**
  * Notifier for {@link com.pushtechnology.adapters.rest.metrics.listeners.PublicationListener}.
  *
- * @author Matt Champion 13/05/2017
+ * @author Push Technology Limited
  */
 /*package*/ interface ListenerNotifier {
     /**

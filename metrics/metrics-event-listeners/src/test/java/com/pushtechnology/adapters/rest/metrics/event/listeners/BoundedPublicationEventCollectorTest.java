@@ -30,7 +30,7 @@ import com.pushtechnology.adapters.rest.metrics.PublicationSuccessEvent;
 /**
  * Unit tests for {@link BoundedPublicationEventCollector}.
  *
- * @author Matt Champion 24/05/2017
+ * @author Push Technology Limited
  */
 public final class BoundedPublicationEventCollectorTest {
 

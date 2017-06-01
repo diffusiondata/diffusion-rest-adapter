@@ -27,7 +27,7 @@ import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 /**
  * Listener for events about polling.
  *
- * @author Matt Champion 17/05/2017
+ * @author Push Technology Limited
  */
 public final class PollEventDispatcher implements PollListener {
     private final PollEventListener pollEventListener;

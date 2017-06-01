@@ -23,7 +23,7 @@ import com.pushtechnology.diffusion.datatype.Bytes;
 /**
  * Implementation of {@link EventCounter} for topic creation events.
  *
- * @author Matt Champion 28/05/2017
+ * @author Push Technology Limited
  */
 public final class TopicCreationEventCounter extends AbstractEventCounter implements TopicCreationListener {
     private final TopicCreationCompletionListener completionListener = new TopicCreationCompletionListener() {

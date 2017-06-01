@@ -24,7 +24,7 @@ import com.pushtechnology.adapters.rest.metrics.event.listeners.BoundedTopicCrea
 /**
  * Unit tests for {@link EventSummaryReporter}.
  *
- * @author Matt Champion 24/05/2017
+ * @author Push Technology Limited
  */
 public final class EventSummaryReporterTest {
     @Mock

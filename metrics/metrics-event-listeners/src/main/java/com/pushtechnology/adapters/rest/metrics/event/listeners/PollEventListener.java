@@ -22,7 +22,7 @@ import com.pushtechnology.adapters.rest.metrics.PollSuccessEvent;
 /**
  * Listener for events about polling.
  *
- * @author Matt Champion 17/05/2017
+ * @author Push Technology Limited
  */
 public interface PollEventListener {
     /**

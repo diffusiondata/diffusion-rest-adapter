@@ -19,7 +19,7 @@ import com.pushtechnology.diffusion.datatype.Bytes;
 /**
  * Unit tests for {@link ListenerNotifierImpl}.
  *
- * @author Matt Champion 13/05/2017
+ * @author Push Technology Limited
  */
 public final class ListenerNotifierTest {
     @Mock

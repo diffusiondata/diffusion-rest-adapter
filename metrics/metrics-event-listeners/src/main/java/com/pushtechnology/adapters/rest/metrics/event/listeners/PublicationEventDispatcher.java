@@ -27,7 +27,7 @@ import com.pushtechnology.diffusion.datatype.Bytes;
 /**
  * Listener for events about publication.
  *
- * @author Matt Champion 17/05/2017
+ * @author Push Technology Limited
  */
 public final class PublicationEventDispatcher implements PublicationListener {
     private final PublicationEventListener publicationEventListener;

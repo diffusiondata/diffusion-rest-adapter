@@ -25,7 +25,7 @@ import net.jcip.annotations.ThreadSafe;
 /**
  * A querier for publication events.
  *
- * @author Matt Champion 26/05/2017
+ * @author Push Technology Limited
  */
 @ThreadSafe
 public final class PublicationEventQuerier

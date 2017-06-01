@@ -21,7 +21,7 @@ package com.pushtechnology.adapters.rest.metrics.listeners;
  * Counts three different types of events, action
  * requests, action successes and action failures.
  *
- * @author Matt Champion 28/05/2017
+ * @author Push Technology Limited
  */
 public interface EventCounter {
     /**

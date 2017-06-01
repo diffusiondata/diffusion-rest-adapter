@@ -31,7 +31,7 @@ import com.pushtechnology.adapters.rest.metrics.TopicCreationSuccessEvent;
 /**
  * Unit tests for {@link BoundedTopicCreationEventCollector}.
  *
- * @author Matt Champion 24/05/2017
+ * @author Push Technology Limited
  */
 public final class BoundedTopicCreationEventCollectorTest {
 

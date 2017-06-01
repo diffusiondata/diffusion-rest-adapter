@@ -20,7 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Abstract implementation of {@link EventCounter}.
  *
- * @author Matt Champion 28/05/2017
+ * @author Push Technology Limited
  */
 /*package*/ abstract class AbstractEventCounter implements EventCounter {
     private final AtomicInteger requests = new AtomicInteger(0);

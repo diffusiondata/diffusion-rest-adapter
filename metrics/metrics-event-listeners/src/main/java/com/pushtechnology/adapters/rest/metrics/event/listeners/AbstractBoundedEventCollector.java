@@ -27,7 +27,7 @@ import net.jcip.annotations.ThreadSafe;
  * @param <R> the type of request events
  * @param <S> the type of success events
  * @param <F> the type of failure events
- * @author Matt Champion 26/05/2017
+ * @author Push Technology Limited
  */
 @ThreadSafe
 public abstract class AbstractBoundedEventCollector<R, S, F>

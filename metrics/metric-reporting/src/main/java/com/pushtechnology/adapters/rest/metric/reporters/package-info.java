@@ -16,6 +16,6 @@
 /**
  * Package for reporting on metrics.
  *
- * @author Matt Champion 01/06/2017
+ * @author Push Technology Limited
  */
 package com.pushtechnology.adapters.rest.metric.reporters;

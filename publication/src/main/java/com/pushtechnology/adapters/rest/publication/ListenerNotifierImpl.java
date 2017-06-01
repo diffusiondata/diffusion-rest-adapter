@@ -24,7 +24,7 @@ import com.pushtechnology.diffusion.datatype.Bytes;
 /**
  * Implementation of {@link ListenerNotifier}.
  *
- * @author Matt Champion 13/05/2017
+ * @author Push Technology Limited
  */
 /*package*/ final class ListenerNotifierImpl implements ListenerNotifier {
     private final PublicationListener publicationListener;

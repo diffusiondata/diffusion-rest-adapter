@@ -31,7 +31,7 @@ import com.pushtechnology.adapters.rest.metrics.event.listeners.BoundedPublicati
 /**
  * Unit tests for {@link PublicationEventQuerier}.
  *
- * @author Matt Champion 26/05/2017
+ * @author Push Technology Limited
  */
 public final class PublicationEventQuerierTest {
 

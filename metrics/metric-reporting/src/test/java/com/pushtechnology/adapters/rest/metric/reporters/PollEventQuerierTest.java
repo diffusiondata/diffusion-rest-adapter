@@ -31,7 +31,7 @@ import com.pushtechnology.adapters.rest.metrics.event.listeners.BoundedPollEvent
 /**
  * Unit tests for {@link PollEventQuerier}.
  *
- * @author Matt Champion 24/05/2017
+ * @author Push Technology Limited
  */
 public final class PollEventQuerierTest {
 

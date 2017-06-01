@@ -22,7 +22,7 @@ import com.pushtechnology.adapters.rest.metrics.TopicCreationSuccessEvent;
 /**
  * Listener for events about topic creation.
  *
- * @author Matt Champion 17/05/2017
+ * @author Push Technology Limited
  */
 public interface TopicCreationEventListener {
     /**

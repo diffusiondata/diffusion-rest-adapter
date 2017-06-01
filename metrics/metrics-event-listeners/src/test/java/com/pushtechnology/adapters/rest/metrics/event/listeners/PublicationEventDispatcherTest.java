@@ -26,7 +26,7 @@ import com.pushtechnology.diffusion.datatype.Bytes;
 /**
  * Unit tests for {@link PublicationEventDispatcher}.
  *
- * @author Matt Champion 20/05/2017
+ * @author Push Technology Limited
  */
 public final class PublicationEventDispatcherTest {
     @Mock

@@ -29,7 +29,7 @@ import com.pushtechnology.adapters.rest.metrics.PollSuccessEvent;
 /**
  * Unit tests for {@link BoundedPollEventCollector}.
  *
- * @author Matt Champion 24/05/2017
+ * @author Push Technology Limited
  */
 public final class BoundedPollEventCollectorTest {
 

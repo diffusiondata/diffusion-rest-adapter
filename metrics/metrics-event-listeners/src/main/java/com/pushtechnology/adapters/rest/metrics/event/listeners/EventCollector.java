@@ -26,7 +26,7 @@ import java.util.List;
  * @param <R> the type of request events
  * @param <S> the type of success events
  * @param <F> the type of failure events
- * @author Matt Champion 26/05/2017
+ * @author Push Technology Limited
  */
 public interface EventCollector<R, S, F> {
     /**

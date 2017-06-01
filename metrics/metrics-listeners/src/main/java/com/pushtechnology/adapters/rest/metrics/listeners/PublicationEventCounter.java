@@ -23,7 +23,7 @@ import com.pushtechnology.diffusion.datatype.Bytes;
 /**
  * Implementation of {@link EventCounter} for publication events.
  *
- * @author Matt Champion 28/05/2017
+ * @author Push Technology Limited
  */
 public final class PublicationEventCounter extends AbstractEventCounter implements PublicationListener {
     private final PublicationCompletionListener completionListener = new PublicationCompletionListener() {

@@ -28,7 +28,7 @@ import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 /**
  * Unit tests for {@link PollEventDispatcher}.
  *
- * @author Matt Champion 20/05/2017
+ * @author Push Technology Limited
  */
 public final class PollEventDispatcherTest {
     @Mock

@@ -24,7 +24,7 @@ import net.jcip.annotations.ThreadSafe;
 /**
  * A bounded event collector for publication events.
  *
- * @author Matt Champion 24/05/2017
+ * @author Push Technology Limited
  */
 @ThreadSafe
 public final class BoundedPublicationEventCollector

@@ -32,7 +32,7 @@ import com.pushtechnology.adapters.rest.metrics.event.listeners.BoundedTopicCrea
 /**
  * Unit tests for {@link TopicCreationEventQuerier}.
  *
- * @author Matt Champion 26/05/2017
+ * @author Push Technology Limited
  */
 public final class TopicCreationEventQuerierTest {
 

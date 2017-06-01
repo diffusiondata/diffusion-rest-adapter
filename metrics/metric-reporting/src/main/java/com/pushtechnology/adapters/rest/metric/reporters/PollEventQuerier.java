@@ -31,7 +31,7 @@ import net.jcip.annotations.ThreadSafe;
 /**
  * A querier for poll events.
  *
- * @author Matt Champion 24/05/2017
+ * @author Push Technology Limited
  */
 @ThreadSafe
 public final class PollEventQuerier extends CommonEventQuerier<PollRequestEvent, PollSuccessEvent, PollFailedEvent> {

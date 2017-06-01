@@ -22,7 +22,7 @@ import org.junit.Test;
 /**
  * Unit tests for {@link PollEventCounter}.
  *
- * @author Matt Champion 28/05/2017
+ * @author Push Technology Limited
  */
 public final class PollEventCounterTest {
     @Test
