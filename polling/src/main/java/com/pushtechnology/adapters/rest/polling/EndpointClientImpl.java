@@ -31,8 +31,8 @@ import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.pushtechnology.adapters.rest.metrics.PollListener;
-import com.pushtechnology.adapters.rest.metrics.PollListener.PollCompletionListener;
+import com.pushtechnology.adapters.rest.metrics.listeners.PollListener;
+import com.pushtechnology.adapters.rest.metrics.listeners.PollListener.PollCompletionListener;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;

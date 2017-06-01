@@ -29,8 +29,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 
-import com.pushtechnology.adapters.rest.metrics.PollListener;
-import com.pushtechnology.adapters.rest.metrics.PollListener.PollCompletionListener;
+import com.pushtechnology.adapters.rest.metrics.listeners.PollListener;
+import com.pushtechnology.adapters.rest.metrics.listeners.PollListener.PollCompletionListener;
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.MetricsConfig;

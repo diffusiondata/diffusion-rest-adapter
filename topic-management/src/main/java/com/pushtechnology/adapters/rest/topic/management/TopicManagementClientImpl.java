@@ -19,8 +19,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.pushtechnology.adapters.rest.endpoints.EndpointType;
-import com.pushtechnology.adapters.rest.metrics.TopicCreationListener;
-import com.pushtechnology.adapters.rest.metrics.TopicCreationListener.TopicCreationCompletionListener;
+import com.pushtechnology.adapters.rest.metrics.listeners.TopicCreationListener;
+import com.pushtechnology.adapters.rest.metrics.listeners.TopicCreationListener.TopicCreationCompletionListener;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.diffusion.client.callbacks.Registration;

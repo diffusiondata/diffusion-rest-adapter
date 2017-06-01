@@ -15,7 +15,7 @@
 
 package com.pushtechnology.adapters.rest.topic.management;
 
-import com.pushtechnology.adapters.rest.metrics.TopicCreationListener.TopicCreationCompletionListener;
+import com.pushtechnology.adapters.rest.metrics.listeners.TopicCreationListener.TopicCreationCompletionListener;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicAddFailReason;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 

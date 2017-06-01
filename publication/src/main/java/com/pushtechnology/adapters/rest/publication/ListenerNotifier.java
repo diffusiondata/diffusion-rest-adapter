@@ -15,17 +15,17 @@
 
 package com.pushtechnology.adapters.rest.publication;
 
-import com.pushtechnology.adapters.rest.metrics.PublicationListener.PublicationCompletionListener;
+import com.pushtechnology.adapters.rest.metrics.listeners.PublicationListener.PublicationCompletionListener;
 import com.pushtechnology.diffusion.datatype.Bytes;
 
 /**
- * Notifier for {@link com.pushtechnology.adapters.rest.metrics.PublicationListener}.
+ * Notifier for {@link com.pushtechnology.adapters.rest.metrics.listeners.PublicationListener}.
  *
  * @author Matt Champion 13/05/2017
  */
 /*package*/ interface ListenerNotifier {
     /**
-     * Notify a {@link com.pushtechnology.adapters.rest.metrics.PublicationListener} of a publication attempt.
+     * Notify a {@link com.pushtechnology.adapters.rest.metrics.listeners.PublicationListener} of a publication attempt.
      */
     PublicationCompletionListener notifyPublicationRequest(Bytes bytes);
 }

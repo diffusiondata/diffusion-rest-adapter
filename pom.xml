@@ -135,6 +135,12 @@
 
             <dependency>
                 <groupId>com.pushtechnology.adapters.rest</groupId>
+                <artifactId>metric-reporting</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.pushtechnology.adapters.rest</groupId>
                 <artifactId>metrics-events</artifactId>
                 <version>${project.version}</version>
             </dependency>

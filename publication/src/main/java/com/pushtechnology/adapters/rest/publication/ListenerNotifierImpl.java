@@ -15,8 +15,8 @@
 
 package com.pushtechnology.adapters.rest.publication;
 
-import com.pushtechnology.adapters.rest.metrics.PublicationListener;
-import com.pushtechnology.adapters.rest.metrics.PublicationListener.PublicationCompletionListener;
+import com.pushtechnology.adapters.rest.metrics.listeners.PublicationListener;
+import com.pushtechnology.adapters.rest.metrics.listeners.PublicationListener.PublicationCompletionListener;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.diffusion.datatype.Bytes;

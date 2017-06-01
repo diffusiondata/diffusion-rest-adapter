@@ -16,5 +16,6 @@
         <module>metrics-events</module>
         <module>metrics-listeners</module>
         <module>metrics-event-listeners</module>
+        <module>metric-reporting</module>
     </modules>
 </project>

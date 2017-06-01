@@ -27,9 +27,9 @@ import javax.net.ssl.SSLContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.pushtechnology.adapters.rest.metrics.PollListener;
-import com.pushtechnology.adapters.rest.metrics.PublicationListener;
-import com.pushtechnology.adapters.rest.metrics.TopicCreationListener;
+import com.pushtechnology.adapters.rest.metrics.listeners.PollListener;
+import com.pushtechnology.adapters.rest.metrics.listeners.PublicationListener;
+import com.pushtechnology.adapters.rest.metrics.listeners.TopicCreationListener;
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
