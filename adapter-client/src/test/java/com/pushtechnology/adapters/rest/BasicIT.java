@@ -15,7 +15,6 @@
 
 package com.pushtechnology.adapters.rest;
 
-import static com.pushtechnology.adapters.rest.model.latest.MetricsConfig.Type.OFF;
 import static com.pushtechnology.diffusion.client.features.Topics.UnsubscribeReason.REMOVAL;
 import static com.pushtechnology.diffusion.client.session.Session.State.CLOSED_BY_CLIENT;
 import static com.pushtechnology.diffusion.client.session.Session.State.CONNECTED_ACTIVE;
@@ -674,7 +673,6 @@ public final class BasicIT {
             .services(asList(services))
             .metrics(MetricsConfig
                 .builder()
-                .type(OFF)
                 .build())
             .truststore("testKeystore.jks")
             .build();

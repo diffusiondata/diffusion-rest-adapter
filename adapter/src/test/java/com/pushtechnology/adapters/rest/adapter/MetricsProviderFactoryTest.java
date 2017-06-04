@@ -1,7 +1,5 @@
 package com.pushtechnology.adapters.rest.adapter;
 
-import static com.pushtechnology.adapters.rest.model.latest.MetricsConfig.Type.COUNTING;
-import static com.pushtechnology.adapters.rest.model.latest.MetricsConfig.Type.SUMMARY;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
@@ -16,6 +14,7 @@ import org.mockito.junit.MockitoRule;
 
 import com.pushtechnology.adapters.rest.model.latest.MetricsConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
+import com.pushtechnology.adapters.rest.model.latest.SummaryConfig;
 
 /**
  * Unit tests for {@link MetricsProviderFactory}.
@@ -55,7 +54,7 @@ public final class MetricsProviderFactoryTest {
             .builder()
             .metrics(MetricsConfig
                 .builder()
-                .type(COUNTING)
+                .counting(true)
                 .build())
             .build();
 
@@ -72,7 +71,7 @@ public final class MetricsProviderFactoryTest {
             .builder()
             .metrics(MetricsConfig
                 .builder()
-                .type(SUMMARY)
+                .summary(SummaryConfig.builder().eventBound(10).build())
                 .build())
             .build();
 

@@ -20,22 +20,17 @@ import lombok.Builder;
 import lombok.Value;
 
 /**
- * Metrics configuration. Version 14.
- * <p>
- * Description of the metrics to gather and report.
+ * Summary metrics reporting configuration. Version 14.
  *
  * @author Push Technology Limited
  */
 @Value
 @Builder
 @AllArgsConstructor
-public final class MetricsConfig {
+public final class SummaryConfig {
     /**
-     * If metrics are reported as a simple count of events.
+     * The maximum number of events that be collected.
      */
-    boolean counting;
-    /**
-     * How metrics are reported as a summary of events.
-     */
-    SummaryConfig summary;
+    @Builder.Default
+    int eventBound = 100;
 }

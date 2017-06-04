@@ -15,7 +15,6 @@
 
 package com.pushtechnology.adapters.rest.model.store;
 
-import static com.pushtechnology.adapters.rest.model.latest.MetricsConfig.Type.OFF;
 import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.isA;
@@ -97,7 +96,6 @@ public final class PollingPersistedModelStoreTest {
         .services(singletonList(serviceConfig))
         .metrics(MetricsConfig
             .builder()
-            .type(OFF)
             .build())
         .build();
 

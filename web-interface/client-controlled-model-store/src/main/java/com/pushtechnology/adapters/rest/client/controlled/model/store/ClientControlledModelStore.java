@@ -15,7 +15,6 @@
 
 package com.pushtechnology.adapters.rest.client.controlled.model.store;
 
-import static com.pushtechnology.adapters.rest.model.latest.MetricsConfig.Type.OFF;
 import static java.util.Collections.emptyList;
 
 import java.util.concurrent.ScheduledExecutorService;
@@ -67,7 +66,6 @@ public final class ClientControlledModelStore implements ModelStore {
             .truststore(truststore)
             .metrics(MetricsConfig
                 .builder()
-                .type(OFF)
                 .build())
             .build());
     }

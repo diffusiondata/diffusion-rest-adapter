@@ -15,9 +15,6 @@
 
 package com.pushtechnology.adapters.rest.adapter;
 
-import static com.pushtechnology.adapters.rest.model.latest.MetricsConfig.Type.COUNTING;
-import static com.pushtechnology.adapters.rest.model.latest.MetricsConfig.Type.SUMMARY;
-
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.picocontainer.MutablePicoContainer;
@@ -41,8 +38,8 @@ import com.pushtechnology.adapters.rest.metrics.listeners.PublicationEventCounte
 import com.pushtechnology.adapters.rest.metrics.listeners.PublicationListener;
 import com.pushtechnology.adapters.rest.metrics.listeners.TopicCreationEventCounter;
 import com.pushtechnology.adapters.rest.metrics.listeners.TopicCreationListener;
-import com.pushtechnology.adapters.rest.model.latest.MetricsConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
+import com.pushtechnology.adapters.rest.model.latest.SummaryConfig;
 
 /**
  * Factory for {@link MetricsProvider}.
@@ -63,10 +60,10 @@ public final class MetricsProviderFactory extends ProviderAdapter {
             .build()
             .addComponent(executorService);
 
-        final MetricsConfig.Type type = model.getMetrics().getType();
+        final SummaryConfig summaryConfig = model.getMetrics().getSummary();
         final Runnable startTask;
         final Runnable stopTask;
-        if (COUNTING.equals(type)) {
+        if (model.getMetrics().isCounting()) {
             factoryContainer
                 .addComponent(PollEventCounter.class)
                 .addComponent(PublicationEventCounter.class)
@@ -75,14 +72,14 @@ public final class MetricsProviderFactory extends ProviderAdapter {
             startTask = factoryContainer.getComponent(EventCountReporter.class)::start;
             stopTask = factoryContainer.getComponent(EventCountReporter.class)::close;
         }
-        else if (SUMMARY.equals(type)) {
+        else if (summaryConfig != null) {
             factoryContainer
                 .addComponent(PollEventDispatcher.class)
                 .addComponent(PublicationEventDispatcher.class)
                 .addComponent(TopicCreationEventDispatcher.class)
-                .addComponent(new BoundedPollEventCollector(100))
-                .addComponent(new BoundedPublicationEventCollector(100))
-                .addComponent(new BoundedTopicCreationEventCollector(100))
+                .addComponent(new BoundedPollEventCollector(summaryConfig.getEventBound()))
+                .addComponent(new BoundedPublicationEventCollector(summaryConfig.getEventBound()))
+                .addComponent(new BoundedTopicCreationEventCollector(summaryConfig.getEventBound()))
                 .addComponent(PollEventQuerier.class)
                 .addComponent(PublicationEventQuerier.class)
                 .addComponent(TopicCreationEventQuerier.class)

@@ -15,7 +15,6 @@
 
 package com.pushtechnology.adapters.rest.model.store;
 
-import static com.pushtechnology.adapters.rest.model.latest.MetricsConfig.Type.OFF;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
@@ -78,7 +77,6 @@ public final class MutableModelStoreTest {
         .services(singletonList(serviceConfig))
         .metrics(MetricsConfig
             .builder()
-            .type(OFF)
             .build())
         .build();
 
@@ -88,7 +86,6 @@ public final class MutableModelStoreTest {
         .services(emptyList())
         .metrics(MetricsConfig
             .builder()
-            .type(OFF)
             .build())
         .build();
 

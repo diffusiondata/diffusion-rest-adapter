@@ -15,7 +15,6 @@
 
 package com.pushtechnology.adapters.rest.client.controlled.model.store;
 
-import static com.pushtechnology.adapters.rest.model.latest.MetricsConfig.Type.OFF;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
@@ -96,7 +95,6 @@ public final class ModelControllerTest {
             .services(emptyList())
             .metrics(MetricsConfig
                 .builder()
-                .type(OFF)
                 .build())
             .build());
         verify(executor).execute(runnableCaptor.capture());
@@ -645,7 +643,6 @@ public final class ModelControllerTest {
             ))
             .metrics(MetricsConfig
                 .builder()
-                .type(OFF)
                 .build())
             .build());
         final ModelController controller = new ModelController(modelStore);

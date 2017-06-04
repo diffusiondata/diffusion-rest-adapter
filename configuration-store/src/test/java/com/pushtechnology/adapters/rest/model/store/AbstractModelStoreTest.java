@@ -1,6 +1,5 @@
 package com.pushtechnology.adapters.rest.model.store;
 
-import static com.pushtechnology.adapters.rest.model.latest.MetricsConfig.Type.OFF;
 import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -60,7 +59,6 @@ public final class AbstractModelStoreTest {
         .diffusion(diffusionConfig)
         .metrics(MetricsConfig
             .builder()
-            .type(OFF)
             .build())
         .services(singletonList(serviceConfig))
         .build();

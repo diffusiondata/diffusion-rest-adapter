@@ -15,7 +15,6 @@
 
 package com.pushtechnology.adapters.rest;
 
-import static com.pushtechnology.adapters.rest.model.latest.MetricsConfig.Type.OFF;
 import static com.pushtechnology.diffusion.client.session.Session.State.CLOSED_BY_CLIENT;
 import static com.pushtechnology.diffusion.client.session.Session.State.CONNECTED_ACTIVE;
 import static com.pushtechnology.diffusion.client.session.Session.State.CONNECTING;
@@ -146,7 +145,6 @@ public final class LiveIT {
             .services(asList(bitcoinaverage, icndb))
             .metrics(MetricsConfig
                 .builder()
-                .type(OFF)
                 .build())
             .build());
         final RESTAdapterClient client = startClient();

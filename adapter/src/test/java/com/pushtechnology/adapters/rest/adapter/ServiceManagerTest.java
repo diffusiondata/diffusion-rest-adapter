@@ -15,7 +15,6 @@
 
 package com.pushtechnology.adapters.rest.adapter;
 
-import static com.pushtechnology.adapters.rest.model.latest.MetricsConfig.Type.OFF;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.times;
@@ -69,7 +68,6 @@ public final class ServiceManagerTest {
         .services(singletonList(serviceConfig))
         .metrics(MetricsConfig
             .builder()
-            .type(OFF)
             .build())
         .build();
 

@@ -15,7 +15,6 @@
 
 package com.pushtechnology.adapters.rest.model.store;
 
-import static com.pushtechnology.adapters.rest.model.latest.MetricsConfig.Type.OFF;
 import static java.util.stream.Collectors.toList;
 
 import java.util.Collection;
@@ -146,7 +145,6 @@ public final class AsyncMutableModelStore implements ModelStore {
                 .services(serviceConfigs)
                 .metrics(MetricsConfig
                     .builder()
-                    .type(OFF)
                     .build())
                 .truststore(model.getTruststore())
                 .build());
@@ -246,7 +244,6 @@ public final class AsyncMutableModelStore implements ModelStore {
                 .services(serviceConfigs)
                 .metrics(MetricsConfig
                     .builder()
-                    .type(OFF)
                     .build())
                 .truststore(model.getTruststore())
                 .build());

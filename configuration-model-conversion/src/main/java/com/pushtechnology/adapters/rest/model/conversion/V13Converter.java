@@ -15,7 +15,6 @@
 
 package com.pushtechnology.adapters.rest.model.conversion;
 
-import static com.pushtechnology.adapters.rest.model.latest.MetricsConfig.Type.OFF;
 import static java.util.stream.Collectors.toList;
 
 import com.pushtechnology.adapters.rest.model.latest.BasicAuthenticationConfig;
@@ -100,7 +99,6 @@ public final class V13Converter
                 .build())
             .metrics(MetricsConfig
                 .builder()
-                .type(OFF)
                 .build())
             .truststore(model.getTruststore())
             .build();

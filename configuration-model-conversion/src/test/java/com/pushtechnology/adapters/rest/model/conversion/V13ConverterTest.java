@@ -1,9 +1,10 @@
 package com.pushtechnology.adapters.rest.model.conversion;
 
 import static com.pushtechnology.adapters.rest.model.conversion.V13Converter.INSTANCE;
-import static com.pushtechnology.adapters.rest.model.latest.MetricsConfig.Type.OFF;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Collections;
@@ -95,7 +96,8 @@ public final class V13ConverterTest {
         assertEquals("control", basic.getUserid());
         assertEquals("password", basic.getPassword());
 
-        assertEquals(OFF, model.getMetrics().getType());
+        assertNull(model.getMetrics().getSummary());
+        assertFalse(model.getMetrics().isCounting());
     }
 
     @Test(expected = IllegalArgumentException.class)

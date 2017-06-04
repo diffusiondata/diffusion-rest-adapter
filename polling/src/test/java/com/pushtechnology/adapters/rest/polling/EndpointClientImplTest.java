@@ -1,6 +1,5 @@
 package com.pushtechnology.adapters.rest.polling;
 
-import static com.pushtechnology.adapters.rest.model.latest.MetricsConfig.Type.OFF;
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -90,7 +89,6 @@ public final class EndpointClientImplTest {
         .services(singletonList(serviceConfig))
         .metrics(MetricsConfig
             .builder()
-            .type(OFF)
             .build())
         .build();
 

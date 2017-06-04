@@ -15,7 +15,6 @@
 
 package com.pushtechnology.adapters.rest.session.management;
 
-import static com.pushtechnology.adapters.rest.model.latest.MetricsConfig.Type.OFF;
 import static java.util.Collections.emptyList;
 import static org.junit.Assert.assertNull;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -26,7 +25,6 @@ import org.junit.Test;
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.MetricsConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
-import com.pushtechnology.adapters.rest.session.management.SSLContextFactory;
 
 /**
  * Unit tests for {@link SSLContextFactory}.
@@ -44,7 +42,6 @@ public final class SSLContextFactoryTest {
         .services(emptyList())
         .metrics(MetricsConfig
             .builder()
-            .type(OFF)
             .build())
         .build();
 
