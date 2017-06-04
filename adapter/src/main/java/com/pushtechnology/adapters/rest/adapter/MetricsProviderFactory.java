@@ -15,11 +15,15 @@
 
 package com.pushtechnology.adapters.rest.adapter;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.picocontainer.MutablePicoContainer;
 import org.picocontainer.PicoBuilder;
-import org.picocontainer.injectors.ProviderAdapter;
+import org.picocontainer.injectors.Provider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.adapters.rest.metric.reporters.EventCountReporter;
 import com.pushtechnology.adapters.rest.metric.reporters.EventSummaryReporter;
@@ -32,6 +36,9 @@ import com.pushtechnology.adapters.rest.metrics.event.listeners.BoundedTopicCrea
 import com.pushtechnology.adapters.rest.metrics.event.listeners.PollEventDispatcher;
 import com.pushtechnology.adapters.rest.metrics.event.listeners.PublicationEventDispatcher;
 import com.pushtechnology.adapters.rest.metrics.event.listeners.TopicCreationEventDispatcher;
+import com.pushtechnology.adapters.rest.metrics.listeners.DelegatingPollListener;
+import com.pushtechnology.adapters.rest.metrics.listeners.DelegatingPublicationListener;
+import com.pushtechnology.adapters.rest.metrics.listeners.DelegatingTopicCreationListener;
 import com.pushtechnology.adapters.rest.metrics.listeners.PollEventCounter;
 import com.pushtechnology.adapters.rest.metrics.listeners.PollListener;
 import com.pushtechnology.adapters.rest.metrics.listeners.PublicationEventCounter;
@@ -46,61 +53,77 @@ import com.pushtechnology.adapters.rest.model.latest.SummaryConfig;
  *
  * @author Push Technology Limited
  */
-public final class MetricsProviderFactory extends ProviderAdapter {
+public final class MetricsProviderFactory implements Provider {
+    private static final Logger LOG = LoggerFactory.getLogger(MetricsProviderFactory.class);
 
     /**
      * @return a new metrics provider
      */
     public MetricsProvider provide(Model model, ScheduledExecutorService executorService) {
-        final MutablePicoContainer factoryContainer = new PicoBuilder()
-            .withCaching()
-            .withConstructorInjection()
-            .withJavaEE5Lifecycle()
-            .withLocking()
-            .build()
-            .addComponent(executorService);
-
         final SummaryConfig summaryConfig = model.getMetrics().getSummary();
-        final Runnable startTask;
-        final Runnable stopTask;
+
+        final List<Runnable> startTasks = new ArrayList<>();
+        final List<Runnable> stopTasks = new ArrayList<>();
+        final List<PollListener> delegatePollListeners = new ArrayList<>();
+        final List<PublicationListener> delegatePublicationListeners = new ArrayList<>();
+        final List<TopicCreationListener> delegateTopicCreationListeners = new ArrayList<>();
+
         if (model.getMetrics().isCounting()) {
-            factoryContainer
+            LOG.info("Enabling counting metrics reporting.");
+
+            final MutablePicoContainer factoryContainer = new PicoBuilder()
+                .withCaching()
+                .withConstructorInjection()
+                .withJavaEE5Lifecycle()
+                .withLocking()
+                .build()
+                .addComponent(executorService)
                 .addComponent(PollEventCounter.class)
                 .addComponent(PublicationEventCounter.class)
                 .addComponent(TopicCreationEventCounter.class)
                 .addComponent(EventCountReporter.class);
-            startTask = factoryContainer.getComponent(EventCountReporter.class)::start;
-            stopTask = factoryContainer.getComponent(EventCountReporter.class)::close;
+
+            startTasks.add(factoryContainer.getComponent(EventCountReporter.class)::start);
+            stopTasks.add(factoryContainer.getComponent(EventCountReporter.class)::close);
+            delegatePollListeners.add(factoryContainer.getComponent(PollListener.class));
+            delegatePublicationListeners.add(factoryContainer.getComponent(PublicationListener.class));
+            delegateTopicCreationListeners.add(factoryContainer.getComponent(TopicCreationListener.class));
         }
-        else if (summaryConfig != null) {
-            factoryContainer
+
+        if (summaryConfig != null) {
+            final int eventBound = summaryConfig.getEventBound();
+            LOG.info("Enabling summary metrics reporting. {} event bound", eventBound);
+
+            final MutablePicoContainer factoryContainer = new PicoBuilder()
+                .withCaching()
+                .withConstructorInjection()
+                .withJavaEE5Lifecycle()
+                .withLocking()
+                .build()
+                .addComponent(executorService)
                 .addComponent(PollEventDispatcher.class)
                 .addComponent(PublicationEventDispatcher.class)
                 .addComponent(TopicCreationEventDispatcher.class)
-                .addComponent(new BoundedPollEventCollector(summaryConfig.getEventBound()))
-                .addComponent(new BoundedPublicationEventCollector(summaryConfig.getEventBound()))
-                .addComponent(new BoundedTopicCreationEventCollector(summaryConfig.getEventBound()))
+                .addComponent(new BoundedPollEventCollector(eventBound))
+                .addComponent(new BoundedPublicationEventCollector(eventBound))
+                .addComponent(new BoundedTopicCreationEventCollector(eventBound))
                 .addComponent(PollEventQuerier.class)
                 .addComponent(PublicationEventQuerier.class)
                 .addComponent(TopicCreationEventQuerier.class)
                 .addComponent(EventSummaryReporter.class);
-            startTask = factoryContainer.getComponent(EventSummaryReporter.class)::start;
-            stopTask = factoryContainer.getComponent(EventSummaryReporter.class)::close;
-        }
-        else {
-            factoryContainer
-                .addComponent(PollListener.NULL_LISTENER)
-                .addComponent(PublicationListener.NULL_LISTENER)
-                .addComponent(TopicCreationListener.NULL_LISTENER);
-            startTask = () -> { };
-            stopTask = () -> { };
+
+            startTasks.add(factoryContainer.getComponent(EventSummaryReporter.class)::start);
+            stopTasks.add(factoryContainer.getComponent(EventSummaryReporter.class)::close);
+            delegatePollListeners.add(factoryContainer.getComponent(PollListener.class));
+            delegatePublicationListeners.add(factoryContainer.getComponent(PublicationListener.class));
+            delegateTopicCreationListeners.add(factoryContainer.getComponent(TopicCreationListener.class));
         }
 
         return new MetricsProvider(
-            startTask,
-            stopTask,
-            factoryContainer.getComponent(PollListener.class),
-            factoryContainer.getComponent(PublicationListener.class),
-            factoryContainer.getComponent(TopicCreationListener.class));
+            () -> startTasks.forEach(Runnable::run),
+            () -> stopTasks.forEach(Runnable::run),
+            new DelegatingPollListener(delegatePollListeners),
+            new DelegatingPublicationListener(delegatePublicationListeners),
+            new DelegatingTopicCreationListener(delegateTopicCreationListeners));
     }
 }
