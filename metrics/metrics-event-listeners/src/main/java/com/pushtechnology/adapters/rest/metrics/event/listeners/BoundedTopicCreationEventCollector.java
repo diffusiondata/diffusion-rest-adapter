@@ -37,13 +37,6 @@ public final class BoundedTopicCreationEventCollector
     /**
      * Constructor.
      */
-    public BoundedTopicCreationEventCollector() {
-        this(100);
-    }
-
-    /**
-     * Constructor.
-     */
     public BoundedTopicCreationEventCollector(int eventLimit) {
         super(eventLimit);
     }

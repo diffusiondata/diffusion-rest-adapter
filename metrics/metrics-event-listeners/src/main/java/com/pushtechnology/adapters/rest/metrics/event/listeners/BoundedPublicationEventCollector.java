@@ -34,13 +34,6 @@ public final class BoundedPublicationEventCollector
     /**
      * Constructor.
      */
-    public BoundedPublicationEventCollector() {
-        this(100);
-    }
-
-    /**
-     * Constructor.
-     */
     public BoundedPublicationEventCollector(int eventLimit) {
         super(eventLimit);
     }

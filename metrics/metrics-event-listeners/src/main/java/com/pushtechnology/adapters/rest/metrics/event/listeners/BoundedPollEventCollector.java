@@ -34,13 +34,6 @@ public final class BoundedPollEventCollector
     /**
      * Constructor.
      */
-    public BoundedPollEventCollector() {
-        this(100);
-    }
-
-    /**
-     * Constructor.
-     */
     public BoundedPollEventCollector(int eventLimit) {
         super(eventLimit);
     }
