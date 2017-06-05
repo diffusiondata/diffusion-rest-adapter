@@ -32,6 +32,10 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
+import com.pushtechnology.adapters.rest.metrics.listeners.PollEventCounter;
+import com.pushtechnology.adapters.rest.metrics.listeners.PublicationEventCounter;
+import com.pushtechnology.adapters.rest.metrics.listeners.TopicCreationEventCounter;
+
 /**
  * Unit tests for {@link EventCountReporter}.
  *
@@ -53,7 +57,11 @@ public final class EventCountReporterTest {
         when(executor.scheduleAtFixedRate(isA(Runnable.class), isA(Long.class), isA(Long.class), isA(TimeUnit.class)))
             .thenReturn(loggingTask);
 
-        collector = new EventCountReporter(executor);
+        collector = new EventCountReporter(
+            new PollEventCounter(),
+            new PublicationEventCounter(),
+            new TopicCreationEventCounter(),
+            executor);
     }
 
     @After

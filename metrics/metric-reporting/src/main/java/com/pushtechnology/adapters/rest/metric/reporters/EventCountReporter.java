@@ -42,9 +42,9 @@ public final class EventCountReporter implements AutoCloseable {
 
     private static final Logger LOG = LoggerFactory.getLogger(EventCountReporter.class);
 
-    private final PollEventCounter pollEventCounter = new PollEventCounter();
-    private final PublicationEventCounter publicationEventCounter = new PublicationEventCounter();
-    private final TopicCreationEventCounter topicCreationEventCounter = new TopicCreationEventCounter();
+    private final PollEventCounter pollEventCounter;
+    private final PublicationEventCounter publicationEventCounter;
+    private final TopicCreationEventCounter topicCreationEventCounter;
 
     private final ScheduledExecutorService executor;
     @GuardedBy("this")
@@ -53,7 +53,14 @@ public final class EventCountReporter implements AutoCloseable {
     /**
      * Constructor.
      */
-    public EventCountReporter(ScheduledExecutorService executor) {
+    public EventCountReporter(
+            PollEventCounter pollEventCounter,
+            PublicationEventCounter publicationEventCounter,
+            TopicCreationEventCounter topicCreationEventCounter,
+            ScheduledExecutorService executor) {
+        this.pollEventCounter = pollEventCounter;
+        this.publicationEventCounter = publicationEventCounter;
+        this.topicCreationEventCounter = topicCreationEventCounter;
         this.executor = executor;
     }
 
