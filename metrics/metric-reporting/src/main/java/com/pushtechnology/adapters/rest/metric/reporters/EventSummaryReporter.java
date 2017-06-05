@@ -103,6 +103,8 @@ public final class EventSummaryReporter implements AutoCloseable {
         final BigDecimal requestThroughput = pollEventQuerier.getRequestThroughput();
         final OptionalLong minimumSuccessfulRequestTime = pollEventQuerier.getMinimumSuccessfulRequestTime();
         final OptionalLong maximumSuccessfulRequestTime = pollEventQuerier.getMaximumSuccessfulRequestTime();
+        final OptionalLong ninetiethPercentileSuccessfulRequestTime =
+            pollEventQuerier.get90thPercentileSuccessfulRequestTime();
         final BigDecimal pollFailureThroughput = pollEventQuerier.getFailureThroughput();
         LOG.info(
             "Poll request throughput: {} /s",
@@ -114,6 +116,9 @@ public final class EventSummaryReporter implements AutoCloseable {
             "Max poll time: {} ms",
             maximumSuccessfulRequestTime.orElse(-1));
         LOG.info(
+            "90th percentile poll time: {} ms",
+            ninetiethPercentileSuccessfulRequestTime.orElse(-1));
+        LOG.info(
             "Poll failure throughput {} /s",
             FORMAT.format(pollFailureThroughput));
     }
@@ -122,6 +127,8 @@ public final class EventSummaryReporter implements AutoCloseable {
         final BigDecimal requestThroughput = publicationEventQuerier.getRequestThroughput();
         final OptionalLong minimumSuccessfulRequestTime = publicationEventQuerier.getMinimumSuccessfulRequestTime();
         final OptionalLong maximumSuccessfulRequestTime = publicationEventQuerier.getMaximumSuccessfulRequestTime();
+        final OptionalLong ninetiethPercentileSuccessfulRequestTime =
+            publicationEventQuerier.get90thPercentileSuccessfulRequestTime();
         final BigDecimal pollFailureThroughput = publicationEventQuerier.getFailureThroughput();
         LOG.info(
             "Publication request throughput: {} /s",
@@ -133,6 +140,9 @@ public final class EventSummaryReporter implements AutoCloseable {
             "Max publication time: {} ms",
             maximumSuccessfulRequestTime.orElse(-1));
         LOG.info(
+            "90th percentile publication time: {} ms",
+            ninetiethPercentileSuccessfulRequestTime.orElse(-1));
+        LOG.info(
             "Publication failure throughput {} /s",
             FORMAT.format(pollFailureThroughput));
     }
@@ -141,6 +151,8 @@ public final class EventSummaryReporter implements AutoCloseable {
         final BigDecimal requestThroughput = topicCreationEventQuerier.getRequestThroughput();
         final OptionalLong minimumSuccessfulRequestTime = topicCreationEventQuerier.getMinimumSuccessfulRequestTime();
         final OptionalLong maximumSuccessfulRequestTime = topicCreationEventQuerier.getMaximumSuccessfulRequestTime();
+        final OptionalLong ninetiethPercentileSuccessfulRequestTime =
+            topicCreationEventQuerier.get90thPercentileSuccessfulRequestTime();
         final BigDecimal pollFailureThroughput = topicCreationEventQuerier.getFailureThroughput();
         LOG.info(
             "Topic creation request throughput: {} /s",
@@ -151,6 +163,9 @@ public final class EventSummaryReporter implements AutoCloseable {
         LOG.info(
             "Max topic creation time: {} ms",
             maximumSuccessfulRequestTime.orElse(-1));
+        LOG.info(
+            "90th percentile topic creation time: {} ms",
+            ninetiethPercentileSuccessfulRequestTime.orElse(-1));
         LOG.info(
             "Topic creation failure throughput {} /s",
             FORMAT.format(pollFailureThroughput));

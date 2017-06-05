@@ -15,7 +15,9 @@
 
 package com.pushtechnology.adapters.rest.metric.reporters;
 
+import static java.lang.Math.ceil;
 import static java.math.RoundingMode.HALF_UP;
+import static java.util.Comparator.comparingLong;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -97,6 +99,19 @@ public abstract class CommonEventQuerier<R extends RequestEvent, S extends Succe
             .stream()
             .mapToLong(SuccessEvent::getRequestTime)
             .min();
+    }
+
+    /**
+     * @return the minimum successful request time in milliseconds
+     */
+    public OptionalLong get90thPercentileSuccessfulRequestTime() {
+        final List<S> successEvents = eventCollector.getSuccessEvents();
+
+        if (successEvents.size() > 0) {
+            successEvents.sort(comparingLong(SuccessEvent::getRequestTime));
+            return OptionalLong.of(successEvents.get((int) ceil(successEvents.size() * 0.9)).getRequestTime());
+        }
+        return OptionalLong.empty();
     }
 
     /**
