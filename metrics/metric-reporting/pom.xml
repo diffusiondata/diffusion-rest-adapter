@@ -18,6 +18,11 @@
         </dependency>
 
         <dependency>
+            <groupId>com.pushtechnology.diffusion</groupId>
+            <artifactId>diffusion-client</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
         </dependency>

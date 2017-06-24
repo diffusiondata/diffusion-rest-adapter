@@ -15,6 +15,9 @@
 
 package com.pushtechnology.adapters.rest.model.latest;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Value;
@@ -33,4 +36,10 @@ public final class SummaryConfig {
      */
     @Builder.Default
     int eventBound = 100;
+
+    /**
+     * List of class names to load as reporters.
+     */
+    @Builder.Default
+    List<String> reporterClassNames = new ArrayList<>();
 }

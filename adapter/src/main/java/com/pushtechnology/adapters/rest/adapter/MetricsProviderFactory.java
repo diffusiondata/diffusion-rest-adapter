@@ -15,9 +15,13 @@
 
 package com.pushtechnology.adapters.rest.adapter;
 
+import static java.util.stream.Stream.empty;
+import static java.util.stream.Stream.of;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.stream.Stream;
 
 import org.picocontainer.MutablePicoContainer;
 import org.picocontainer.PicoBuilder;
@@ -112,6 +116,12 @@ public final class MetricsProviderFactory implements Provider {
                 .addComponent(TopicCreationEventQuerier.class)
                 .addComponent(EventSummaryReporter.class);
 
+            summaryConfig
+                .getReporterClassNames()
+                .stream()
+                .flatMap(this::tryLoadClass)
+                .forEach(factoryContainer::addComponent);
+
             startTasks.add(factoryContainer.getComponent(EventSummaryReporter.class)::start);
             stopTasks.add(factoryContainer.getComponent(EventSummaryReporter.class)::close);
             delegatePollListeners.add(factoryContainer.getComponent(PollListener.class));
@@ -125,5 +135,14 @@ public final class MetricsProviderFactory implements Provider {
             new DelegatingPollListener(delegatePollListeners),
             new DelegatingPublicationListener(delegatePublicationListeners),
             new DelegatingTopicCreationListener(delegateTopicCreationListeners));
+    }
+
+    private Stream<Class<?>> tryLoadClass(String className) {
+        try {
+            return of(Thread.currentThread().getContextClassLoader().loadClass(className));
+        }
+        catch (ClassNotFoundException e) {
+            return empty();
+        }
     }
 }
