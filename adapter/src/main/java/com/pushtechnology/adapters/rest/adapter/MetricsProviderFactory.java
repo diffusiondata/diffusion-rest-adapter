@@ -18,6 +18,9 @@ package com.pushtechnology.adapters.rest.adapter;
 import static java.util.stream.Stream.empty;
 import static java.util.stream.Stream.of;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
@@ -122,8 +125,17 @@ public final class MetricsProviderFactory implements Provider {
                 .flatMap(this::tryLoadClass)
                 .forEach(factoryContainer::addComponent);
 
-            startTasks.add(factoryContainer.getComponent(EventSummaryReporter.class)::start);
-            stopTasks.add(factoryContainer.getComponent(EventSummaryReporter.class)::close);
+            factoryContainer
+                .getComponents()
+                .stream()
+                .flatMap(object -> tryGetMethod(object, "start"))
+                .forEach(startTasks::add);
+            factoryContainer
+                .getComponents()
+                .stream()
+                .flatMap(object -> tryGetMethod(object, "close"))
+                .forEach(startTasks::add);
+
             delegatePollListeners.add(factoryContainer.getComponent(PollListener.class));
             delegatePublicationListeners.add(factoryContainer.getComponent(PublicationListener.class));
             delegateTopicCreationListeners.add(factoryContainer.getComponent(TopicCreationListener.class));
@@ -135,6 +147,29 @@ public final class MetricsProviderFactory implements Provider {
             new DelegatingPollListener(delegatePollListeners),
             new DelegatingPublicationListener(delegatePublicationListeners),
             new DelegatingTopicCreationListener(delegateTopicCreationListeners));
+    }
+
+    @SuppressWarnings({"PMD.EmptyCatchBlock", "PMD.AvoidThrowingRawExceptionTypes"})
+    private Stream<Runnable> tryGetMethod(Object object, String methodName) {
+        try {
+            final Method startMethod = object.getClass().getMethod(methodName);
+            if ((startMethod.getModifiers() & Modifier.PUBLIC) != 0) {
+                return of(() -> {
+                    try {
+                        startMethod.invoke(object);
+                    }
+                    catch (IllegalAccessException | InvocationTargetException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+            }
+        }
+        // CHECKSTYLE.OFF: EmptyCatch
+        catch (NoSuchMethodException e) {
+            // The object may not have a callable method
+        }
+        // CHECKSTYLE.ON: EmptyCatch
+        return empty();
     }
 
     private Stream<Class<?>> tryLoadClass(String className) {
