@@ -19,7 +19,8 @@ import { StackService } from './stack.service';
 import { ErrorService } from './error.service';
 import { SessionEstablishmentGuard } from './session-establishment.guard';
 import { EndpointTypePipe } from './endpoint-type.pipe';
-import {DisplayErrorComponent} from "./display-error.component";
+import { DisplayErrorComponent } from "./display-error.component";
+import { MetricsComponent } from "./metrics.component";
 
 import { routing } from './app.routing';
 import * as diffusion from 'diffusion';
@@ -47,7 +48,8 @@ const diffusionConfig: diffusion.Options = require('diffusionConfig');
         LoginComponent,
         DisplayErrorComponent,
         RootComponent,
-        EndpointTypePipe
+        EndpointTypePipe,
+        MetricsComponent
     ],
     bootstrap: [ RootComponent ]
 })

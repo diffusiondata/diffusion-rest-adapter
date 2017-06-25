@@ -5,6 +5,7 @@ import { CreateServiceComponent } from './create-service.component';
 import { ServiceDetailComponent } from './service-detail.component';
 import { UnselectedComponent } from './unselected.component';
 import { LoginComponent } from './login.component';
+import { MetricsComponent } from "./metrics.component";
 
 import { SessionEstablishmentGuard } from './session-establishment.guard';
 
@@ -30,6 +31,11 @@ const appRoutes: Routes = [
     {
         path: 'service/:name',
         component: ServiceDetailComponent,
+        canActivate: [SessionEstablishmentGuard]
+    },
+    {
+        path: 'metrics',
+        component: MetricsComponent,
         canActivate: [SessionEstablishmentGuard]
     }
 ];

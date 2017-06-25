@@ -16,6 +16,9 @@ import { ErrorService } from "./error.service";
             <li *ngFor="let service of model.services" (click)="onSelect(service)" class="list-group-item"><span class="list-group-item-text">{{service.name}}</span></li>
             <li routerLink="/createService" class="list-group-item"><span class="list-group-item-text">Create new service</span></li>
         </ul>
+        <ul class="list-group">
+            <li routerLink="/metrics" class="list-group-item"><span class="list-group-item-text">Metrics</span></li>
+        </ul>
     </div>
 </div>`
 })
