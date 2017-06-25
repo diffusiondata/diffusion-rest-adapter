@@ -53,7 +53,7 @@ public final class RESTAdapterClient {
     private final ModelStore modelStore;
     private final Runnable shutdownHandler;
 
-    private RESTAdapterClient(
+    /*pacakage*/ RESTAdapterClient(
             ModelStore modelStore,
             ScheduledExecutorService executor,
             Runnable shutdownHandler,
