@@ -183,6 +183,12 @@
 
             <dependency>
                 <groupId>com.pushtechnology.adapters.rest</groupId>
+                <artifactId>topic-based-metrics-reporting</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.pushtechnology.adapters.rest</groupId>
                 <artifactId>topic-management</artifactId>
                 <version>${project.version}</version>
             </dependency>
