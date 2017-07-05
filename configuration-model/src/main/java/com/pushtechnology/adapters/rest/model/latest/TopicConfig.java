@@ -29,17 +29,15 @@ import lombok.Value;
 @Value
 @Builder
 @AllArgsConstructor
-public final class MetricsConfig {
+public final class TopicConfig {
     /**
-     * If metrics are reported as a simple count of events.
+     * The maximum number of events that be collected.
      */
-    boolean counting;
+    @Builder.Default
+    int eventBound = 100;
     /**
-     * How metrics are reported as a summary of events.
+     * The topic to report metrics on
      */
-    SummaryConfig summary;
-    /**
-     * How metrics are reported through topics.
-     */
-    TopicConfig topic;
+    @Builder.Default
+    String metricsTopic = "adapter/rest/metrics";
 }
