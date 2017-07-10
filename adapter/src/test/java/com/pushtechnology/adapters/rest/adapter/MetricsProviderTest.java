@@ -56,12 +56,15 @@ public final class MetricsProviderTest {
 
     @Test
     public void start() throws Exception {
+        final MetricsDispatcher metricsDispatcher = new MetricsDispatcher();
+        metricsDispatcher.addPollListener(pollListener);
+        metricsDispatcher.addPublicationListener(publicationListener);
+        metricsDispatcher.addTopicCreationListener(topicCreationListener);
+
         final MetricsProvider metricsProvider = new MetricsProvider(
             startTask,
             stopTask,
-            pollListener,
-            publicationListener,
-            topicCreationListener);
+            metricsDispatcher);
 
         metricsProvider.start();
 
@@ -70,12 +73,15 @@ public final class MetricsProviderTest {
 
     @Test
     public void close() throws Exception {
+        final MetricsDispatcher metricsDispatcher = new MetricsDispatcher();
+        metricsDispatcher.addPollListener(pollListener);
+        metricsDispatcher.addPublicationListener(publicationListener);
+        metricsDispatcher.addTopicCreationListener(topicCreationListener);
+
         final MetricsProvider metricsProvider = new MetricsProvider(
             startTask,
             stopTask,
-            pollListener,
-            publicationListener,
-            topicCreationListener);
+            metricsDispatcher);
 
         metricsProvider.close();
 
@@ -84,12 +90,15 @@ public final class MetricsProviderTest {
 
     @Test
     public void onPollRequest() throws Exception {
+        final MetricsDispatcher metricsDispatcher = new MetricsDispatcher();
+        metricsDispatcher.addPollListener(pollListener);
+        metricsDispatcher.addPublicationListener(publicationListener);
+        metricsDispatcher.addTopicCreationListener(topicCreationListener);
+
         final MetricsProvider metricsProvider = new MetricsProvider(
             startTask,
             stopTask,
-            pollListener,
-            publicationListener,
-            topicCreationListener);
+            metricsDispatcher);
 
         metricsProvider.onPollRequest(null, null);
 
@@ -98,12 +107,15 @@ public final class MetricsProviderTest {
 
     @Test
     public void onTopicCreationRequest() throws Exception {
+        final MetricsDispatcher metricsDispatcher = new MetricsDispatcher();
+        metricsDispatcher.addPollListener(pollListener);
+        metricsDispatcher.addPublicationListener(publicationListener);
+        metricsDispatcher.addTopicCreationListener(topicCreationListener);
+
         final MetricsProvider metricsProvider = new MetricsProvider(
             startTask,
             stopTask,
-            pollListener,
-            publicationListener,
-            topicCreationListener);
+            metricsDispatcher);
 
         metricsProvider.onTopicCreationRequest(null, null);
 
@@ -112,12 +124,15 @@ public final class MetricsProviderTest {
 
     @Test
     public void onTopicCreationRequestWithInitialValue() throws Exception {
+        final MetricsDispatcher metricsDispatcher = new MetricsDispatcher();
+        metricsDispatcher.addPollListener(pollListener);
+        metricsDispatcher.addPublicationListener(publicationListener);
+        metricsDispatcher.addTopicCreationListener(topicCreationListener);
+
         final MetricsProvider metricsProvider = new MetricsProvider(
             startTask,
             stopTask,
-            pollListener,
-            publicationListener,
-            topicCreationListener);
+            metricsDispatcher);
 
         metricsProvider.onTopicCreationRequest(null, null, null);
 
@@ -126,12 +141,15 @@ public final class MetricsProviderTest {
 
     @Test
     public void onPublicationRequest() throws Exception {
+        final MetricsDispatcher metricsDispatcher = new MetricsDispatcher();
+        metricsDispatcher.addPollListener(pollListener);
+        metricsDispatcher.addPublicationListener(publicationListener);
+        metricsDispatcher.addTopicCreationListener(topicCreationListener);
+
         final MetricsProvider metricsProvider = new MetricsProvider(
             startTask,
             stopTask,
-            pollListener,
-            publicationListener,
-            topicCreationListener);
+            metricsDispatcher);
 
         metricsProvider.onPublicationRequest(null, null, null);
 

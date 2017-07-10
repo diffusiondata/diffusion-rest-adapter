@@ -43,9 +43,6 @@ import com.pushtechnology.adapters.rest.metrics.event.listeners.BoundedTopicCrea
 import com.pushtechnology.adapters.rest.metrics.event.listeners.PollEventDispatcher;
 import com.pushtechnology.adapters.rest.metrics.event.listeners.PublicationEventDispatcher;
 import com.pushtechnology.adapters.rest.metrics.event.listeners.TopicCreationEventDispatcher;
-import com.pushtechnology.adapters.rest.metrics.listeners.DelegatingPollListener;
-import com.pushtechnology.adapters.rest.metrics.listeners.DelegatingPublicationListener;
-import com.pushtechnology.adapters.rest.metrics.listeners.DelegatingTopicCreationListener;
 import com.pushtechnology.adapters.rest.metrics.listeners.PollEventCounter;
 import com.pushtechnology.adapters.rest.metrics.listeners.PollListener;
 import com.pushtechnology.adapters.rest.metrics.listeners.PublicationEventCounter;
@@ -66,14 +63,14 @@ public final class MetricsProviderFactory implements Provider {
     /**
      * @return a new metrics provider
      */
-    public MetricsProvider provide(Model model, ScheduledExecutorService executorService) {
+    public MetricsProvider provide(
+            Model model,
+            ScheduledExecutorService executorService,
+            MetricsDispatcher metricsDispatcher) {
         final SummaryConfig summaryConfig = model.getMetrics().getSummary();
 
         final List<Runnable> startTasks = new ArrayList<>();
         final List<Runnable> stopTasks = new ArrayList<>();
-        final List<PollListener> delegatePollListeners = new ArrayList<>();
-        final List<PublicationListener> delegatePublicationListeners = new ArrayList<>();
-        final List<TopicCreationListener> delegateTopicCreationListeners = new ArrayList<>();
 
         if (model.getMetrics().isCounting()) {
             LOG.info("Enabling counting metrics reporting.");
@@ -92,9 +89,9 @@ public final class MetricsProviderFactory implements Provider {
 
             startTasks.add(factoryContainer.getComponent(EventCountReporter.class)::start);
             stopTasks.add(factoryContainer.getComponent(EventCountReporter.class)::close);
-            delegatePollListeners.add(factoryContainer.getComponent(PollListener.class));
-            delegatePublicationListeners.add(factoryContainer.getComponent(PublicationListener.class));
-            delegateTopicCreationListeners.add(factoryContainer.getComponent(TopicCreationListener.class));
+            metricsDispatcher.addPollListener(factoryContainer.getComponent(PollListener.class));
+            metricsDispatcher.addPublicationListener(factoryContainer.getComponent(PublicationListener.class));
+            metricsDispatcher.addTopicCreationListener(factoryContainer.getComponent(TopicCreationListener.class));
         }
 
         if (summaryConfig != null) {
@@ -136,17 +133,15 @@ public final class MetricsProviderFactory implements Provider {
                 .flatMap(object -> tryGetMethod(object, "close"))
                 .forEach(startTasks::add);
 
-            delegatePollListeners.add(factoryContainer.getComponent(PollListener.class));
-            delegatePublicationListeners.add(factoryContainer.getComponent(PublicationListener.class));
-            delegateTopicCreationListeners.add(factoryContainer.getComponent(TopicCreationListener.class));
+            metricsDispatcher.addPollListener(factoryContainer.getComponent(PollListener.class));
+            metricsDispatcher.addPublicationListener(factoryContainer.getComponent(PublicationListener.class));
+            metricsDispatcher.addTopicCreationListener(factoryContainer.getComponent(TopicCreationListener.class));
         }
 
         return new MetricsProvider(
             () -> startTasks.forEach(Runnable::run),
             () -> stopTasks.forEach(Runnable::run),
-            new DelegatingPollListener(delegatePollListeners),
-            new DelegatingPublicationListener(delegatePublicationListeners),
-            new DelegatingTopicCreationListener(delegateTopicCreationListeners));
+            metricsDispatcher);
     }
 
     @SuppressWarnings({"PMD.EmptyCatchBlock", "PMD.AvoidThrowingRawExceptionTypes"})

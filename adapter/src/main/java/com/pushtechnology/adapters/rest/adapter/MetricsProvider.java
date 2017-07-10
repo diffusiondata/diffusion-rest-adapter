@@ -42,9 +42,7 @@ public final class MetricsProvider implements
 
     private final Runnable startTask;
     private final Runnable stopTask;
-    private final PollListener pollListener;
-    private final PublicationListener publicationListener;
-    private final TopicCreationListener topicCreationListener;
+    private final MetricsDispatcher metricsDispatcher;
 
     /**
      * Constructor.
@@ -52,14 +50,10 @@ public final class MetricsProvider implements
     public MetricsProvider(
             Runnable startTask,
             Runnable stopTask,
-            PollListener pollListener,
-            PublicationListener publicationListener,
-            TopicCreationListener topicCreationListener) {
+            MetricsDispatcher metricsDispatcher) {
         this.startTask = startTask;
         this.stopTask = stopTask;
-        this.pollListener = pollListener;
-        this.publicationListener = publicationListener;
-        this.topicCreationListener = topicCreationListener;
+        this.metricsDispatcher = metricsDispatcher;
     }
 
     /**
@@ -78,14 +72,14 @@ public final class MetricsProvider implements
 
     @Override
     public PollCompletionListener onPollRequest(ServiceConfig serviceConfig, EndpointConfig endpointConfig) {
-        return pollListener.onPollRequest(serviceConfig, endpointConfig);
+        return metricsDispatcher.onPollRequest(serviceConfig, endpointConfig);
     }
 
     @Override
     public TopicCreationCompletionListener onTopicCreationRequest(
             ServiceConfig serviceConfig,
             EndpointConfig endpointConfig) {
-        return topicCreationListener.onTopicCreationRequest(serviceConfig, endpointConfig);
+        return metricsDispatcher.onTopicCreationRequest(serviceConfig, endpointConfig);
     }
 
     @Override
@@ -93,7 +87,7 @@ public final class MetricsProvider implements
             ServiceConfig serviceConfig,
             EndpointConfig endpointConfig,
             Bytes value) {
-        return topicCreationListener.onTopicCreationRequest(serviceConfig, endpointConfig, value);
+        return metricsDispatcher.onTopicCreationRequest(serviceConfig, endpointConfig, value);
     }
 
     @Override
@@ -101,6 +95,6 @@ public final class MetricsProvider implements
             ServiceConfig serviceConfig,
             EndpointConfig endpointConfig,
             Bytes value) {
-        return publicationListener.onPublicationRequest(serviceConfig, endpointConfig, value);
+        return metricsDispatcher.onPublicationRequest(serviceConfig, endpointConfig, value);
     }
 }
