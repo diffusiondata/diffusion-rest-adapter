@@ -67,7 +67,8 @@ import net.jcip.annotations.ThreadSafe;
             .addComponent(executor)
             .addComponent(serviceListener)
             .addComponent(HttpClientFactoryImpl.class)
-            .addComponent(ServiceManager.class);
+            .addComponent(ServiceManager.class)
+            .addComponent(EventedSessionListener.class);
     }
 
     @GuardedBy("this")
@@ -116,7 +117,6 @@ import net.jcip.annotations.ThreadSafe;
             .addComponent(model)
             .addComponent(shutdownTask)
             .addComponent(SessionLostListener.class)
-            .addComponent(EventedSessionListener.class)
             .addComponent(SessionWrapper.class);
         parent.addChildContainer(newContainer);
 
