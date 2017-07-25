@@ -60,6 +60,8 @@ public final class RESTAdapter implements AutoCloseable {
     private final ServiceManager serviceManager;
 
     @GuardedBy("this")
+    private MutablePicoContainer tlsContainer;
+    @GuardedBy("this")
     private MutablePicoContainer httpContainer;
     @GuardedBy("this")
     private MutablePicoContainer diffusionContainer;
@@ -131,6 +133,7 @@ public final class RESTAdapter implements AutoCloseable {
         LOG.info("Setting up components");
 
         if (!isModelInactive(model)) {
+            tlsContainer = newTLSContainer(model);
             httpContainer = newHttpContainer(model);
             diffusionContainer = newDiffusionContainer(model);
             servicesContainer = newServicesContainer(model);
@@ -147,8 +150,9 @@ public final class RESTAdapter implements AutoCloseable {
     private void switchToInactiveComponents() {
         LOG.info("Putting adapter to sleep");
 
-        if (httpContainer != null) {
-            httpContainer.dispose();
+        if (tlsContainer != null) {
+            tlsContainer.dispose();
+            tlsContainer = null;
             httpContainer = null;
             diffusionContainer = null;
             servicesContainer = null;
@@ -159,10 +163,12 @@ public final class RESTAdapter implements AutoCloseable {
     private void reconfigureAll(Model model) {
         LOG.info("Replacing all components");
 
-        if (httpContainer != null) {
-            httpContainer.dispose();
+        if (tlsContainer != null) {
+            tlsContainer.dispose();
+            topLevelContainer.removeChildContainer(tlsContainer);
         }
 
+        tlsContainer = newTLSContainer(model);
         httpContainer = newHttpContainer(model);
         diffusionContainer = newDiffusionContainer(model);
         servicesContainer = newServicesContainer(model);
@@ -178,11 +184,12 @@ public final class RESTAdapter implements AutoCloseable {
     private void reconfigureSecurity(Model model) {
         LOG.info("Updating security, REST and Diffusion sessions");
 
-        if (httpContainer != null) {
-            httpContainer.dispose();
-            topLevelContainer.removeChildContainer(httpContainer);
+        if (tlsContainer != null) {
+            tlsContainer.dispose();
+            topLevelContainer.removeChildContainer(tlsContainer);
         }
 
+        tlsContainer = newTLSContainer(model);
         httpContainer = newHttpContainer(model);
         diffusionContainer = newDiffusionContainer(model);
         servicesContainer = newServicesContainer(model);
@@ -247,7 +254,7 @@ public final class RESTAdapter implements AutoCloseable {
     }
 
     @GuardedBy("this")
-    private MutablePicoContainer newHttpContainer(Model model) {
+    private MutablePicoContainer newTLSContainer(Model model) {
         final MutablePicoContainer newContainer = new PicoBuilder(topLevelContainer)
             .withCaching()
             .withConstructorInjection()
@@ -256,9 +263,24 @@ public final class RESTAdapter implements AutoCloseable {
             .withLocking()
             .build()
             .addAdapter(new SSLContextFactory())
+            .addComponent(model);
+        topLevelContainer.addChildContainer(newContainer);
+
+        return newContainer;
+    }
+
+    @GuardedBy("this")
+    private MutablePicoContainer newHttpContainer(Model model) {
+        final MutablePicoContainer newContainer = new PicoBuilder(tlsContainer)
+            .withCaching()
+            .withConstructorInjection()
+            // .withConsoleMonitor() // enable debug
+            .withJavaEE5Lifecycle()
+            .withLocking()
+            .build()
             .addComponent(model)
             .addComponent(EndpointClientImpl.class);
-        topLevelContainer.addChildContainer(newContainer);
+        tlsContainer.addChildContainer(newContainer);
 
         return newContainer;
     }
@@ -322,9 +344,7 @@ public final class RESTAdapter implements AutoCloseable {
 
     @GuardedBy("this")
     private boolean wasInactive() {
-        return httpContainer == null ||
-            diffusionContainer == null ||
-            servicesContainer == null;
+        return tlsContainer == null;
     }
 
     @GuardedBy("this")
