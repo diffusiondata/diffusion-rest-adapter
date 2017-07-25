@@ -113,7 +113,7 @@ public final class RESTAdapter implements AutoCloseable {
         else if (wasInactive()) {
             reconfigureAll(model);
         }
-        else if (hasTruststoreChanged(model) || hasSecurityChanged(model)) {
+        else if (hasTruststoreChanged(model) || hasServiceSecurityChanged(model)) {
             reconfigureSecurity(model);
         }
         else if (hasDiffusionChanged(model)) {
@@ -333,7 +333,7 @@ public final class RESTAdapter implements AutoCloseable {
             currentModel.getTruststore() != null && !currentModel.getTruststore().equals(newModel.getTruststore());
     }
 
-    private boolean hasSecurityChanged(Model newModel) {
+    private boolean hasServiceSecurityChanged(Model newModel) {
         return !currentModel
             .getServices()
             .stream()
