@@ -106,7 +106,7 @@ public final class LiveIT {
         final ServiceConfig bitcoinaverage = ServiceConfig
             .builder()
             .name("bitcoin")
-            .host("api.bitcoinaverage.com")
+            .host("apiv2.bitcoinaverage.com")
             .port(443)
             .secure(true)
             .pollPeriod(20000)
@@ -115,7 +115,7 @@ public final class LiveIT {
                 .name("GBP")
                 .produces("application/json")
                 .topicPath("GBP")
-                .url("/ticker/global/GBP").build()))
+                .url("/indices/global/ticker/BTCGBP").build()))
             .topicPathRoot("bitcoin")
             .build();
 
