@@ -115,7 +115,10 @@ public final class RESTAdapter implements AutoCloseable {
         else if (wasInactive()) {
             reconfigureAll(model);
         }
-        else if (hasTruststoreChanged(model) || hasServiceSecurityChanged(model)) {
+        else if (hasTruststoreChanged(model)) {
+            reconfigureTLS(model);
+        }
+        else if (hasServiceSecurityChanged(model)) {
             reconfigureSecurity(model);
         }
         else if (hasDiffusionChanged(model)) {
@@ -181,8 +184,8 @@ public final class RESTAdapter implements AutoCloseable {
     }
 
     @GuardedBy("this")
-    private void reconfigureSecurity(Model model) {
-        LOG.info("Updating security, REST and Diffusion sessions");
+    private void reconfigureTLS(Model model) {
+        LOG.info("Updating TLS, REST and Diffusion sessions");
 
         if (tlsContainer != null) {
             tlsContainer.dispose();
@@ -190,6 +193,26 @@ public final class RESTAdapter implements AutoCloseable {
         }
 
         tlsContainer = newTLSContainer(model);
+        httpContainer = newHttpContainer(model);
+        diffusionContainer = newDiffusionContainer(model);
+        servicesContainer = newServicesContainer(model);
+
+        final ServiceManagerContext managerContext = servicesContainer.getComponent(ServiceManagerContext.class);
+
+        httpContainer.start();
+
+        serviceManager.reconfigure(managerContext, model);
+    }
+
+    @GuardedBy("this")
+    private void reconfigureSecurity(Model model) {
+        LOG.info("Updating security, REST and Diffusion sessions");
+
+        if (httpContainer != null) {
+            httpContainer.dispose();
+            tlsContainer.removeChildContainer(httpContainer);
+        }
+
         httpContainer = newHttpContainer(model);
         diffusionContainer = newDiffusionContainer(model);
         servicesContainer = newServicesContainer(model);
