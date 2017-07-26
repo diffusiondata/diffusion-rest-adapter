@@ -62,9 +62,9 @@ public final class RESTAdapter implements AutoCloseable {
     @GuardedBy("this")
     private MutablePicoContainer tlsContainer;
     @GuardedBy("this")
-    private MutablePicoContainer httpContainer;
-    @GuardedBy("this")
     private MutablePicoContainer diffusionContainer;
+    @GuardedBy("this")
+    private MutablePicoContainer httpContainer;
     @GuardedBy("this")
     private MutablePicoContainer servicesContainer;
     @GuardedBy("this")
@@ -118,11 +118,11 @@ public final class RESTAdapter implements AutoCloseable {
         else if (hasTruststoreChanged(model)) {
             reconfigureTLS(model);
         }
-        else if (hasServiceSecurityChanged(model)) {
-            reconfigureSecurity(model);
-        }
         else if (hasDiffusionChanged(model)) {
             reconfigurePollingAndPublishing(model);
+        }
+        else if (hasServiceSecurityChanged(model)) {
+            reconfigureSecurity(model);
         }
         else if (haveServicesChanged(model)) {
             reconfigureServices(model);
@@ -137,13 +137,13 @@ public final class RESTAdapter implements AutoCloseable {
 
         if (!isModelInactive(model)) {
             tlsContainer = newTLSContainer(model);
-            httpContainer = newHttpContainer(model);
             diffusionContainer = newDiffusionContainer(model);
+            httpContainer = newHttpContainer(model);
             servicesContainer = newServicesContainer(model);
 
             final ServiceManagerContext managerContext = servicesContainer.getComponent(ServiceManagerContext.class);
 
-            httpContainer.start();
+            tlsContainer.start();
 
             serviceManager.reconfigure(managerContext, model);
         }
@@ -156,8 +156,8 @@ public final class RESTAdapter implements AutoCloseable {
         if (tlsContainer != null) {
             tlsContainer.dispose();
             tlsContainer = null;
-            httpContainer = null;
             diffusionContainer = null;
+            httpContainer = null;
             servicesContainer = null;
         }
     }
@@ -172,13 +172,13 @@ public final class RESTAdapter implements AutoCloseable {
         }
 
         tlsContainer = newTLSContainer(model);
-        httpContainer = newHttpContainer(model);
         diffusionContainer = newDiffusionContainer(model);
+        httpContainer = newHttpContainer(model);
         servicesContainer = newServicesContainer(model);
 
         final ServiceManagerContext managerContext = servicesContainer.getComponent(ServiceManagerContext.class);
 
-        httpContainer.start();
+        tlsContainer.start();
 
         serviceManager.reconfigure(managerContext, model);
     }
@@ -193,13 +193,13 @@ public final class RESTAdapter implements AutoCloseable {
         }
 
         tlsContainer = newTLSContainer(model);
-        httpContainer = newHttpContainer(model);
         diffusionContainer = newDiffusionContainer(model);
+        httpContainer = newHttpContainer(model);
         servicesContainer = newServicesContainer(model);
 
         final ServiceManagerContext managerContext = servicesContainer.getComponent(ServiceManagerContext.class);
 
-        httpContainer.start();
+        tlsContainer.start();
 
         serviceManager.reconfigure(managerContext, model);
     }
@@ -210,11 +210,10 @@ public final class RESTAdapter implements AutoCloseable {
 
         if (httpContainer != null) {
             httpContainer.dispose();
-            tlsContainer.removeChildContainer(httpContainer);
+            diffusionContainer.removeChildContainer(httpContainer);
         }
 
         httpContainer = newHttpContainer(model);
-        diffusionContainer = newDiffusionContainer(model);
         servicesContainer = newServicesContainer(model);
 
         final ServiceManagerContext managerContext = servicesContainer.getComponent(ServiceManagerContext.class);
@@ -230,10 +229,11 @@ public final class RESTAdapter implements AutoCloseable {
 
         if (diffusionContainer != null) {
             diffusionContainer.dispose();
-            httpContainer.removeChildContainer(diffusionContainer);
+            tlsContainer.removeChildContainer(diffusionContainer);
         }
 
         diffusionContainer = newDiffusionContainer(model);
+        httpContainer = newHttpContainer(model);
         servicesContainer = newServicesContainer(model);
 
         final ServiceManagerContext managerContext = servicesContainer.getComponent(ServiceManagerContext.class);
@@ -249,7 +249,7 @@ public final class RESTAdapter implements AutoCloseable {
 
         if (servicesContainer != null) {
             servicesContainer.dispose();
-            diffusionContainer.removeChildContainer(servicesContainer);
+            httpContainer.removeChildContainer(servicesContainer);
         }
 
         servicesContainer = newServicesContainer(model);
@@ -294,7 +294,7 @@ public final class RESTAdapter implements AutoCloseable {
 
     @GuardedBy("this")
     private MutablePicoContainer newHttpContainer(Model model) {
-        final MutablePicoContainer newContainer = new PicoBuilder(tlsContainer)
+        final MutablePicoContainer newContainer = new PicoBuilder(diffusionContainer)
             .withCaching()
             .withConstructorInjection()
             // .withConsoleMonitor() // enable debug
@@ -303,14 +303,14 @@ public final class RESTAdapter implements AutoCloseable {
             .build()
             .addComponent(model)
             .addComponent(EndpointClientImpl.class);
-        tlsContainer.addChildContainer(newContainer);
+        diffusionContainer.addChildContainer(newContainer);
 
         return newContainer;
     }
 
     @GuardedBy("this")
     private MutablePicoContainer newDiffusionContainer(Model model) {
-        final MutablePicoContainer newContainer = new PicoBuilder(httpContainer)
+        final MutablePicoContainer newContainer = new PicoBuilder(tlsContainer)
             .withCaching()
             .withConstructorInjection()
              // .withConsoleMonitor() // enable debug
@@ -324,14 +324,14 @@ public final class RESTAdapter implements AutoCloseable {
             .addComponent(SessionLostListener.class)
             .addComponent(EventedSessionListener.class)
             .addComponent(SessionWrapper.class);
-        httpContainer.addChildContainer(newContainer);
+        tlsContainer.addChildContainer(newContainer);
 
         return newContainer;
     }
 
     @GuardedBy("this")
     private MutablePicoContainer newServicesContainer(Model model) {
-        final MutablePicoContainer newContainer = new PicoBuilder(diffusionContainer)
+        final MutablePicoContainer newContainer = new PicoBuilder(httpContainer)
             .withCaching()
             .withConstructorInjection()
             // .withConsoleMonitor() // enable debug
@@ -344,7 +344,7 @@ public final class RESTAdapter implements AutoCloseable {
             .addComponent(ServiceSessionFactoryImpl.class)
             .addComponent(ServiceManagerContext.class)
             .addComponent(EndpointPollHandlerFactoryImpl.class);
-        diffusionContainer.addChildContainer(newContainer);
+        httpContainer.addChildContainer(newContainer);
 
         return newContainer;
     }
@@ -412,7 +412,7 @@ public final class RESTAdapter implements AutoCloseable {
     public synchronized void close() {
         LOG.debug("Closing adapter");
         if (!wasInactive()) {
-            httpContainer.dispose();
+            tlsContainer.dispose();
         }
         serviceManager.close();
         currentModel = null;
