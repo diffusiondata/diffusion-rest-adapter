@@ -31,7 +31,7 @@ import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
  *
  * @author Matt Champion 27/07/2017
  */
-public final class Components {
+/*package*/ final class Components {
     private static final Logger LOG = LoggerFactory.getLogger(Components.class);
     private final MutablePicoContainer topLevelContainer;
     private final MutablePicoContainer tlsContainer;
