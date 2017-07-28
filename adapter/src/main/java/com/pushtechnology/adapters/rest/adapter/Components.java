@@ -15,8 +15,6 @@
 
 package com.pushtechnology.adapters.rest.adapter;
 
-import static java.util.stream.Collectors.counting;
-
 import java.util.Collection;
 import java.util.List;
 
@@ -245,6 +243,6 @@ public final class Components {
         return diffusionConfig == null ||
             services == null ||
             services.size() == 0 ||
-            services.stream().map(ServiceConfig::getEndpoints).flatMap(Collection::stream).collect(counting()) == 0L;
+            services.stream().map(ServiceConfig::getEndpoints).mapToInt(Collection::size).sum() == 0;
     }
 }

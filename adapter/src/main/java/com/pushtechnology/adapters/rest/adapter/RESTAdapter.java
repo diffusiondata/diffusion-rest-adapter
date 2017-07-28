@@ -15,11 +15,11 @@
 
 package com.pushtechnology.adapters.rest.adapter;
 
-import static java.util.stream.Collectors.counting;
 import static java.util.stream.Collectors.toList;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.slf4j.Logger;
@@ -118,7 +118,7 @@ public final class RESTAdapter implements AutoCloseable {
         return diffusionConfig == null ||
             services == null ||
             services.size() == 0 ||
-            services.stream().map(ServiceConfig::getEndpoints).flatMap(Collection::stream).collect(counting()) == 0L;
+            services.stream().map(ServiceConfig::getEndpoints).mapToInt(Collection::size).sum() == 0;
     }
 
     @GuardedBy("this")
@@ -137,14 +137,14 @@ public final class RESTAdapter implements AutoCloseable {
             .getServices()
             .stream()
             .map(ServiceConfig::getSecurity)
-            .filter(securityConfig -> securityConfig != null)
+            .filter(Objects::nonNull)
             .filter(securityConfig -> securityConfig.getBasic() != null)
             .collect(toList())
             .equals(newModel
                 .getServices()
                 .stream()
                 .map(ServiceConfig::getSecurity)
-                .filter(securityConfig -> securityConfig != null)
+                .filter(Objects::nonNull)
                 .filter(securityConfig -> securityConfig.getBasic() != null)
                 .collect(toList()));
     }
