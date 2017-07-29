@@ -25,10 +25,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
-import com.pushtechnology.adapters.rest.metrics.listeners.PollListener;
-import com.pushtechnology.adapters.rest.metrics.listeners.PublicationListener;
-import com.pushtechnology.adapters.rest.metrics.listeners.TopicCreationListener;
-
 /**
  * Unit tests for {@link MetricsProvider}.
  *
@@ -39,32 +35,20 @@ public final class MetricsProviderTest {
     private Runnable startTask;
     @Mock
     private Runnable stopTask;
-    @Mock
-    private PollListener pollListener;
-    @Mock
-    private PublicationListener publicationListener;
-    @Mock
-    private TopicCreationListener topicCreationListener;
 
     @Rule
     public MockitoRule mockitoRule = MockitoJUnit.rule();
 
     @After
     public void postConditions() {
-        verifyNoMoreInteractions(startTask, stopTask, pollListener, publicationListener, topicCreationListener);
+        verifyNoMoreInteractions(startTask, stopTask);
     }
 
     @Test
     public void start() throws Exception {
-        final MetricsDispatcher metricsDispatcher = new MetricsDispatcher();
-        metricsDispatcher.addPollListener(pollListener);
-        metricsDispatcher.addPublicationListener(publicationListener);
-        metricsDispatcher.addTopicCreationListener(topicCreationListener);
-
         final MetricsProvider metricsProvider = new MetricsProvider(
             startTask,
-            stopTask,
-            metricsDispatcher);
+            stopTask);
 
         metricsProvider.start();
 
@@ -73,87 +57,12 @@ public final class MetricsProviderTest {
 
     @Test
     public void close() throws Exception {
-        final MetricsDispatcher metricsDispatcher = new MetricsDispatcher();
-        metricsDispatcher.addPollListener(pollListener);
-        metricsDispatcher.addPublicationListener(publicationListener);
-        metricsDispatcher.addTopicCreationListener(topicCreationListener);
-
         final MetricsProvider metricsProvider = new MetricsProvider(
             startTask,
-            stopTask,
-            metricsDispatcher);
+            stopTask);
 
         metricsProvider.close();
 
         verify(stopTask).run();
     }
-
-    @Test
-    public void onPollRequest() throws Exception {
-        final MetricsDispatcher metricsDispatcher = new MetricsDispatcher();
-        metricsDispatcher.addPollListener(pollListener);
-        metricsDispatcher.addPublicationListener(publicationListener);
-        metricsDispatcher.addTopicCreationListener(topicCreationListener);
-
-        final MetricsProvider metricsProvider = new MetricsProvider(
-            startTask,
-            stopTask,
-            metricsDispatcher);
-
-        metricsProvider.onPollRequest(null, null);
-
-        verify(pollListener).onPollRequest(null, null);
-    }
-
-    @Test
-    public void onTopicCreationRequest() throws Exception {
-        final MetricsDispatcher metricsDispatcher = new MetricsDispatcher();
-        metricsDispatcher.addPollListener(pollListener);
-        metricsDispatcher.addPublicationListener(publicationListener);
-        metricsDispatcher.addTopicCreationListener(topicCreationListener);
-
-        final MetricsProvider metricsProvider = new MetricsProvider(
-            startTask,
-            stopTask,
-            metricsDispatcher);
-
-        metricsProvider.onTopicCreationRequest(null, null);
-
-        verify(topicCreationListener).onTopicCreationRequest(null, null);
-    }
-
-    @Test
-    public void onTopicCreationRequestWithInitialValue() throws Exception {
-        final MetricsDispatcher metricsDispatcher = new MetricsDispatcher();
-        metricsDispatcher.addPollListener(pollListener);
-        metricsDispatcher.addPublicationListener(publicationListener);
-        metricsDispatcher.addTopicCreationListener(topicCreationListener);
-
-        final MetricsProvider metricsProvider = new MetricsProvider(
-            startTask,
-            stopTask,
-            metricsDispatcher);
-
-        metricsProvider.onTopicCreationRequest(null, null, null);
-
-        verify(topicCreationListener).onTopicCreationRequest(null, null, null);
-    }
-
-    @Test
-    public void onPublicationRequest() throws Exception {
-        final MetricsDispatcher metricsDispatcher = new MetricsDispatcher();
-        metricsDispatcher.addPollListener(pollListener);
-        metricsDispatcher.addPublicationListener(publicationListener);
-        metricsDispatcher.addTopicCreationListener(topicCreationListener);
-
-        final MetricsProvider metricsProvider = new MetricsProvider(
-            startTask,
-            stopTask,
-            metricsDispatcher);
-
-        metricsProvider.onPublicationRequest(null, null, null);
-
-        verify(publicationListener).onPublicationRequest(null, null, null);
-    }
-
 }

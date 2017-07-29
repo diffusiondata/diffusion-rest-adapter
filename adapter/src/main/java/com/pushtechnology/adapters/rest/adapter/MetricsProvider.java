@@ -18,42 +18,24 @@ package com.pushtechnology.adapters.rest.adapter;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
-import com.pushtechnology.adapters.rest.metrics.listeners.PollListener;
-import com.pushtechnology.adapters.rest.metrics.listeners.PublicationListener;
-import com.pushtechnology.adapters.rest.metrics.listeners.TopicCreationListener;
-import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
-import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.diffusion.datatype.Bytes;
-
 /**
  * The metrics manager.
- * <p>
- * Provides the interface required by other components to
- * report metrics. It delegates the behaviour to other
- * components.
  *
  * @author Push Technology Limited
  */
-public final class MetricsProvider implements
-        PollListener,
-        PublicationListener,
-        TopicCreationListener,
-        AutoCloseable {
+public final class MetricsProvider implements AutoCloseable {
 
     private final Runnable startTask;
     private final Runnable stopTask;
-    private final MetricsDispatcher metricsDispatcher;
 
     /**
      * Constructor.
      */
     public MetricsProvider(
             Runnable startTask,
-            Runnable stopTask,
-            MetricsDispatcher metricsDispatcher) {
+            Runnable stopTask) {
         this.startTask = startTask;
         this.stopTask = stopTask;
-        this.metricsDispatcher = metricsDispatcher;
     }
 
     /**
@@ -68,33 +50,5 @@ public final class MetricsProvider implements
     @Override
     public void close() {
         stopTask.run();
-    }
-
-    @Override
-    public PollCompletionListener onPollRequest(ServiceConfig serviceConfig, EndpointConfig endpointConfig) {
-        return metricsDispatcher.onPollRequest(serviceConfig, endpointConfig);
-    }
-
-    @Override
-    public TopicCreationCompletionListener onTopicCreationRequest(
-            ServiceConfig serviceConfig,
-            EndpointConfig endpointConfig) {
-        return metricsDispatcher.onTopicCreationRequest(serviceConfig, endpointConfig);
-    }
-
-    @Override
-    public TopicCreationCompletionListener onTopicCreationRequest(
-            ServiceConfig serviceConfig,
-            EndpointConfig endpointConfig,
-            Bytes value) {
-        return metricsDispatcher.onTopicCreationRequest(serviceConfig, endpointConfig, value);
-    }
-
-    @Override
-    public PublicationCompletionListener onPublicationRequest(
-            ServiceConfig serviceConfig,
-            EndpointConfig endpointConfig,
-            Bytes value) {
-        return metricsDispatcher.onPublicationRequest(serviceConfig, endpointConfig, value);
     }
 }

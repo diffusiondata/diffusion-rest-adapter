@@ -140,8 +140,7 @@ public final class MetricsProviderFactory implements Provider {
 
         return new MetricsProvider(
             () -> startTasks.forEach(Runnable::run),
-            () -> stopTasks.forEach(Runnable::run),
-            metricsDispatcher);
+            () -> stopTasks.forEach(Runnable::run));
     }
 
     @SuppressWarnings({"PMD.EmptyCatchBlock", "PMD.AvoidThrowingRawExceptionTypes"})
