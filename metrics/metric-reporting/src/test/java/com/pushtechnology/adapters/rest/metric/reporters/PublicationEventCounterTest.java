@@ -13,7 +13,7 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.metrics.listeners;
+package com.pushtechnology.adapters.rest.metric.reporters;
 
 import static org.junit.Assert.assertEquals;
 

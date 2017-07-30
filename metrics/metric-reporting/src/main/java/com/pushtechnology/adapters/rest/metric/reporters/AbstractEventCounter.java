@@ -13,9 +13,11 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.metrics.listeners;
+package com.pushtechnology.adapters.rest.metric.reporters;
 
 import java.util.concurrent.atomic.AtomicInteger;
+
+import com.pushtechnology.adapters.rest.metrics.listeners.EventCounter;
 
 /**
  * Abstract implementation of {@link EventCounter}.

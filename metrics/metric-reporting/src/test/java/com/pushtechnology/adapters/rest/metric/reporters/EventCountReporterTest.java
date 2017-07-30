@@ -32,10 +32,6 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
-import com.pushtechnology.adapters.rest.metrics.listeners.PollEventCounter;
-import com.pushtechnology.adapters.rest.metrics.listeners.PublicationEventCounter;
-import com.pushtechnology.adapters.rest.metrics.listeners.TopicCreationEventCounter;
-
 /**
  * Unit tests for {@link EventCountReporter}.
  *

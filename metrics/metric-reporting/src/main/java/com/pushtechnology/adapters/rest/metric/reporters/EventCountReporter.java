@@ -28,10 +28,6 @@ import org.apache.http.annotation.ThreadSafe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.pushtechnology.adapters.rest.metrics.listeners.PollEventCounter;
-import com.pushtechnology.adapters.rest.metrics.listeners.PublicationEventCounter;
-import com.pushtechnology.adapters.rest.metrics.listeners.TopicCreationEventCounter;
-
 /**
  * Simple metrics collector that counts all events and logs a summary.
  *

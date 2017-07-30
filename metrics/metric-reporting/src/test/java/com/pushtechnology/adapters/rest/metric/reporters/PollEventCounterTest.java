@@ -13,34 +13,23 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.metrics.listeners;
+package com.pushtechnology.adapters.rest.metric.reporters;
 
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
 /**
- * Unit tests for {@link TopicCreationEventCounter}.
+ * Unit tests for {@link PollEventCounter}.
  *
  * @author Push Technology Limited
  */
-public final class TopicCreationEventCounterTest {
+public final class PollEventCounterTest {
     @Test
     public void onRequest() throws Exception {
-        final TopicCreationEventCounter counter = new TopicCreationEventCounter();
+        final PollEventCounter counter = new PollEventCounter();
 
-        counter.onTopicCreationRequest(null, null);
-
-        assertEquals(1, counter.getRequests());
-        assertEquals(0, counter.getSuccesses());
-        assertEquals(0, counter.getFailures());
-    }
-
-    @Test
-    public void onRequestWithInitialData() throws Exception {
-        final TopicCreationEventCounter counter = new TopicCreationEventCounter();
-
-        counter.onTopicCreationRequest(null, null, null);
+        counter.onPollRequest(null, null);
 
         assertEquals(1, counter.getRequests());
         assertEquals(0, counter.getSuccesses());
@@ -49,9 +38,9 @@ public final class TopicCreationEventCounterTest {
 
     @Test
     public void onSuccess() throws Exception {
-        final TopicCreationEventCounter counter = new TopicCreationEventCounter();
+        final PollEventCounter counter = new PollEventCounter();
 
-        counter.onTopicCreationRequest(null, null).onTopicCreated();
+        counter.onPollRequest(null, null).onPollResponse(null);
 
         assertEquals(1, counter.getRequests());
         assertEquals(1, counter.getSuccesses());
@@ -60,9 +49,9 @@ public final class TopicCreationEventCounterTest {
 
     @Test
     public void onFailure() throws Exception {
-        final TopicCreationEventCounter counter = new TopicCreationEventCounter();
+        final PollEventCounter counter = new PollEventCounter();
 
-        counter.onTopicCreationRequest(null, null).onTopicCreationFailed(null);
+        counter.onPollRequest(null, null).onPollFailure(null);
 
         assertEquals(1, counter.getRequests());
         assertEquals(0, counter.getSuccesses());

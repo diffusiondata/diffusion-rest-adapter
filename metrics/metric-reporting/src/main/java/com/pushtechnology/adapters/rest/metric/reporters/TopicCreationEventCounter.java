@@ -13,8 +13,10 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.metrics.listeners;
+package com.pushtechnology.adapters.rest.metric.reporters;
 
+import com.pushtechnology.adapters.rest.metrics.listeners.EventCounter;
+import com.pushtechnology.adapters.rest.metrics.listeners.TopicCreationListener;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicAddFailReason;
