@@ -15,34 +15,29 @@
 
 package com.pushtechnology.adapters.rest.metric.reporters;
 
-import org.apache.http.HttpResponse;
-
-import com.pushtechnology.adapters.rest.metrics.listeners.EventCounter;
-import com.pushtechnology.adapters.rest.metrics.listeners.PollListener;
-import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
-import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
+import com.pushtechnology.adapters.rest.metrics.PollFailedEvent;
+import com.pushtechnology.adapters.rest.metrics.PollRequestEvent;
+import com.pushtechnology.adapters.rest.metrics.PollSuccessEvent;
+import com.pushtechnology.adapters.rest.metrics.event.listeners.PollEventListener;
 
 /**
- * Implementation of {@link EventCounter} for poll events.
+ * Implementation of {@link com.pushtechnology.adapters.rest.metrics.listeners.EventCounter} for poll events.
  *
  * @author Push Technology Limited
  */
-public final class PollEventCounter extends AbstractEventCounter implements PollListener {
-    private final PollCompletionListener completionListener = new PollCompletionListener() {
-        @Override
-        public void onPollResponse(HttpResponse response) {
-            onSuccess();
-        }
-
-        @Override
-        public void onPollFailure(Exception exception) {
-            onFailure();
-        }
-    };
+public final class PollEventCounter extends AbstractEventCounter implements PollEventListener {
+    @Override
+    public void onPollRequest(PollRequestEvent event) {
+        onRequest();
+    }
 
     @Override
-    public PollCompletionListener onPollRequest(ServiceConfig serviceConfig, EndpointConfig endpointConfig) {
-        onRequest();
-        return completionListener;
+    public void onPollSuccess(PollSuccessEvent event) {
+        onSuccess();
+    }
+
+    @Override
+    public void onPollFailed(PollFailedEvent event) {
+        onFailure();
     }
 }

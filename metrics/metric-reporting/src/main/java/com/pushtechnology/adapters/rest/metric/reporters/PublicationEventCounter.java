@@ -15,38 +15,29 @@
 
 package com.pushtechnology.adapters.rest.metric.reporters;
 
-import com.pushtechnology.adapters.rest.metrics.listeners.EventCounter;
-import com.pushtechnology.adapters.rest.metrics.listeners.PublicationListener;
-import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
-import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.diffusion.client.callbacks.ErrorReason;
-import com.pushtechnology.diffusion.datatype.Bytes;
+import com.pushtechnology.adapters.rest.metrics.PublicationFailedEvent;
+import com.pushtechnology.adapters.rest.metrics.PublicationRequestEvent;
+import com.pushtechnology.adapters.rest.metrics.PublicationSuccessEvent;
+import com.pushtechnology.adapters.rest.metrics.event.listeners.PublicationEventListener;
 
 /**
- * Implementation of {@link EventCounter} for publication events.
+ * Implementation of {@link com.pushtechnology.adapters.rest.metrics.listeners.EventCounter} for publication events.
  *
  * @author Push Technology Limited
  */
-public final class PublicationEventCounter extends AbstractEventCounter implements PublicationListener {
-    private final PublicationCompletionListener completionListener = new PublicationCompletionListener() {
-        @Override
-        public void onPublication() {
-            onSuccess();
-        }
-
-        @Override
-        public void onPublicationFailed(ErrorReason reason) {
-            onFailure();
-        }
-    };
+public final class PublicationEventCounter extends AbstractEventCounter implements PublicationEventListener {
+    @Override
+    public void onPublicationRequest(PublicationRequestEvent event) {
+        onRequest();
+    }
 
     @Override
-    public PublicationCompletionListener onPublicationRequest(
-            ServiceConfig serviceConfig,
-            EndpointConfig endpointConfig,
-            Bytes value) {
+    public void onPublicationSuccess(PublicationSuccessEvent event) {
+        onSuccess();
+    }
 
-        onRequest();
-        return completionListener;
+    @Override
+    public void onPublicationFailed(PublicationFailedEvent event) {
+        onFailure();
     }
 }

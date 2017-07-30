@@ -29,7 +29,7 @@ public final class PollEventCounterTest {
     public void onRequest() throws Exception {
         final PollEventCounter counter = new PollEventCounter();
 
-        counter.onPollRequest(null, null);
+        counter.onPollRequest(null);
 
         assertEquals(1, counter.getRequests());
         assertEquals(0, counter.getSuccesses());
@@ -40,7 +40,8 @@ public final class PollEventCounterTest {
     public void onSuccess() throws Exception {
         final PollEventCounter counter = new PollEventCounter();
 
-        counter.onPollRequest(null, null).onPollResponse(null);
+        counter.onPollRequest(null);
+        counter.onPollSuccess(null);
 
         assertEquals(1, counter.getRequests());
         assertEquals(1, counter.getSuccesses());
@@ -51,7 +52,8 @@ public final class PollEventCounterTest {
     public void onFailure() throws Exception {
         final PollEventCounter counter = new PollEventCounter();
 
-        counter.onPollRequest(null, null).onPollFailure(null);
+        counter.onPollRequest(null);
+        counter.onPollFailed(null);
 
         assertEquals(1, counter.getRequests());
         assertEquals(0, counter.getSuccesses());

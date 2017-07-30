@@ -29,7 +29,7 @@ public final class PublicationEventCounterTest {
     public void onRequest() throws Exception {
         final PublicationEventCounter counter = new PublicationEventCounter();
 
-        counter.onPublicationRequest(null, null, null);
+        counter.onPublicationRequest(null);
 
         assertEquals(1, counter.getRequests());
         assertEquals(0, counter.getSuccesses());
@@ -40,7 +40,8 @@ public final class PublicationEventCounterTest {
     public void onSuccess() throws Exception {
         final PublicationEventCounter counter = new PublicationEventCounter();
 
-        counter.onPublicationRequest(null, null, null).onPublication();
+        counter.onPublicationRequest(null);
+        counter.onPublicationSuccess(null);
 
         assertEquals(1, counter.getRequests());
         assertEquals(1, counter.getSuccesses());
@@ -51,7 +52,8 @@ public final class PublicationEventCounterTest {
     public void onFailure() throws Exception {
         final PublicationEventCounter counter = new PublicationEventCounter();
 
-        counter.onPublicationRequest(null, null, null).onPublicationFailed(null);
+        counter.onPublicationRequest(null);
+        counter.onPublicationFailed(null);
 
         assertEquals(1, counter.getRequests());
         assertEquals(0, counter.getSuccesses());

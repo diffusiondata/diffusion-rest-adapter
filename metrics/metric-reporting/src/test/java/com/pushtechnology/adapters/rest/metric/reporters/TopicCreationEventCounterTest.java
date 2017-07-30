@@ -29,18 +29,7 @@ public final class TopicCreationEventCounterTest {
     public void onRequest() throws Exception {
         final TopicCreationEventCounter counter = new TopicCreationEventCounter();
 
-        counter.onTopicCreationRequest(null, null);
-
-        assertEquals(1, counter.getRequests());
-        assertEquals(0, counter.getSuccesses());
-        assertEquals(0, counter.getFailures());
-    }
-
-    @Test
-    public void onRequestWithInitialData() throws Exception {
-        final TopicCreationEventCounter counter = new TopicCreationEventCounter();
-
-        counter.onTopicCreationRequest(null, null, null);
+        counter.onTopicCreationRequest(null);
 
         assertEquals(1, counter.getRequests());
         assertEquals(0, counter.getSuccesses());
@@ -51,7 +40,8 @@ public final class TopicCreationEventCounterTest {
     public void onSuccess() throws Exception {
         final TopicCreationEventCounter counter = new TopicCreationEventCounter();
 
-        counter.onTopicCreationRequest(null, null).onTopicCreated();
+        counter.onTopicCreationRequest(null);
+        counter.onTopicCreationSuccess(null);
 
         assertEquals(1, counter.getRequests());
         assertEquals(1, counter.getSuccesses());
@@ -62,7 +52,8 @@ public final class TopicCreationEventCounterTest {
     public void onFailure() throws Exception {
         final TopicCreationEventCounter counter = new TopicCreationEventCounter();
 
-        counter.onTopicCreationRequest(null, null).onTopicCreationFailed(null);
+        counter.onTopicCreationRequest(null);
+        counter.onTopicCreationFailed(null);
 
         assertEquals(1, counter.getRequests());
         assertEquals(0, counter.getSuccesses());

@@ -15,45 +15,29 @@
 
 package com.pushtechnology.adapters.rest.metric.reporters;
 
-import com.pushtechnology.adapters.rest.metrics.listeners.EventCounter;
-import com.pushtechnology.adapters.rest.metrics.listeners.TopicCreationListener;
-import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
-import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicAddFailReason;
-import com.pushtechnology.diffusion.datatype.Bytes;
+import com.pushtechnology.adapters.rest.metrics.TopicCreationFailedEvent;
+import com.pushtechnology.adapters.rest.metrics.TopicCreationRequestEvent;
+import com.pushtechnology.adapters.rest.metrics.TopicCreationSuccessEvent;
+import com.pushtechnology.adapters.rest.metrics.event.listeners.TopicCreationEventListener;
 
 /**
- * Implementation of {@link EventCounter} for topic creation events.
+ * Implementation of {@link com.pushtechnology.adapters.rest.metrics.listeners.EventCounter} for topic creation events.
  *
  * @author Push Technology Limited
  */
-public final class TopicCreationEventCounter extends AbstractEventCounter implements TopicCreationListener {
-    private final TopicCreationCompletionListener completionListener = new TopicCreationCompletionListener() {
-        @Override
-        public void onTopicCreated() {
-            onSuccess();
-        }
-
-        @Override
-        public void onTopicCreationFailed(TopicAddFailReason reason) {
-            onFailure();
-        }
-    };
-
+public final class TopicCreationEventCounter extends AbstractEventCounter implements TopicCreationEventListener {
     @Override
-    public TopicCreationCompletionListener onTopicCreationRequest(
-            ServiceConfig serviceConfig,
-            EndpointConfig endpointConfig) {
+    public void onTopicCreationRequest(TopicCreationRequestEvent event) {
         onRequest();
-        return completionListener;
     }
 
     @Override
-    public TopicCreationCompletionListener onTopicCreationRequest(
-            ServiceConfig serviceConfig,
-            EndpointConfig endpointConfig,
-            Bytes value) {
-        onRequest();
-        return completionListener;
+    public void onTopicCreationSuccess(TopicCreationSuccessEvent event) {
+        onSuccess();
+    }
+
+    @Override
+    public void onTopicCreationFailed(TopicCreationFailedEvent event) {
+        onFailure();
     }
 }
