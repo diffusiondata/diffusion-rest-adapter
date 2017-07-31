@@ -66,12 +66,6 @@ public final class CloudFoundryRESTAdapter {
             .secure(true)
             .principal(diffusionCloudCredentials.getPrincipal())
             .password(diffusionCloudCredentials.getCredentials())
-            .connectionTimeout(SessionAttributes.DEFAULT_CONNECTION_TIMEOUT)
-            .reconnectionTimeout(SessionAttributes.DEFAULT_RECONNECTION_TIMEOUT)
-            .maximumMessageSize(SessionAttributes.DEFAULT_MAXIMUM_MESSAGE_SIZE)
-            .inputBufferSize(SessionAttributes.DEFAULT_INPUT_BUFFER_SIZE)
-            .outputBufferSize(SessionAttributes.DEFAULT_OUTPUT_BUFFER_SIZE)
-            .recoveryBufferSize(SessionAttributes.DEFAULT_RECOVERY_BUFFER_SIZE)
             .build();
 
         final ClientControlledModelStore modelStore = ClientControlledModelStore

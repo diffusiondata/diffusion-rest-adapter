@@ -14,6 +14,11 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>com.pushtechnology.diffusion</groupId>
+            <artifactId>diffusion-client</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

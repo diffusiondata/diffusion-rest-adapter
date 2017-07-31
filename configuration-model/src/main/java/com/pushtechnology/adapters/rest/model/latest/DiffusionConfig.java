@@ -15,8 +15,11 @@
 
 package com.pushtechnology.adapters.rest.model.latest;
 
+import com.pushtechnology.diffusion.client.session.SessionAttributes;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Builder.Default;
 import lombok.NonNull;
 import lombok.ToString;
 import lombok.Value;
@@ -58,25 +61,31 @@ public class DiffusionConfig {
     /**
      * The Diffusion session connection timeout.
      */
-    int connectionTimeout;
+    @Default
+    int connectionTimeout = SessionAttributes.DEFAULT_CONNECTION_TIMEOUT;
     /**
      * The Diffusion session reconnection timeout.
      */
-    int reconnectionTimeout;
+    @Default
+    int reconnectionTimeout = SessionAttributes.DEFAULT_RECONNECTION_TIMEOUT;
     /**
      * The Diffusion session maximum message size.
      */
-    int maximumMessageSize;
+    @Default
+    int maximumMessageSize = SessionAttributes.DEFAULT_MAXIMUM_MESSAGE_SIZE;
     /**
      * The Diffusion session input buffer size.
      */
-    int inputBufferSize;
+    @Default
+    int inputBufferSize = SessionAttributes.DEFAULT_INPUT_BUFFER_SIZE;
     /**
      * The Diffusion session output buffer size.
      */
-    int outputBufferSize;
+    @Default
+    int outputBufferSize = SessionAttributes.DEFAULT_OUTPUT_BUFFER_SIZE;
     /**
      * The Diffusion session recovery buffer size.
      */
-    int recoveryBufferSize;
+    @Default
+    int recoveryBufferSize = SessionAttributes.DEFAULT_RECOVERY_BUFFER_SIZE;
 }
