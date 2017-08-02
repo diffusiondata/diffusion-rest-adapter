@@ -30,7 +30,6 @@ import com.pushtechnology.adapters.rest.cloud.foundry.vcap.DiffusionCloudCredent
 import com.pushtechnology.adapters.rest.cloud.foundry.vcap.VCAP;
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.session.management.SSLContextFactory;
-import com.pushtechnology.diffusion.client.session.SessionAttributes;
 
 /**
  * Entry point for Diffusion Cloud Foundry REST Adapter.
