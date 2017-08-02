@@ -132,6 +132,11 @@ public final class ClientControlledModelStore implements ModelStore, AutoCloseab
         delegateModelStore.onModelChange(listener);
     }
 
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + " " + diffusionConfig;
+    }
+
     /**
      * @return a new model store
      */
