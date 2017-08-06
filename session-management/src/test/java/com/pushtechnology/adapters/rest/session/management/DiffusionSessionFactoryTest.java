@@ -1,7 +1,21 @@
+/*******************************************************************************
+ * Copyright (C) 2017 Push Technology Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
+
 package com.pushtechnology.adapters.rest.session.management;
 
 import static com.pushtechnology.diffusion.client.session.SessionAttributes.Transport.WEBSOCKET;
-import static java.util.Collections.emptyList;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.isA;
 import static org.mockito.Mockito.verify;
@@ -9,15 +23,12 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-import java.util.Collections;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
-import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.session.SessionFactory;
 
@@ -35,38 +46,30 @@ public final class DiffusionSessionFactoryTest {
 
     private final SessionLostListener lostListener = new SessionLostListener(null);
     private final EventedSessionListener listener = new EventedSessionListener();
-    private final Model noAuthModel = Model
+    private final DiffusionConfig noAuthModel = DiffusionConfig
         .builder()
-        .diffusion(DiffusionConfig
-            .builder()
-            .host("localhost")
-            .port(8080)
-            .connectionTimeout(10000)
-            .reconnectionTimeout(10000)
-            .maximumMessageSize(32000)
-            .inputBufferSize(32000)
-            .outputBufferSize(32000)
-            .recoveryBufferSize(256)
-            .build())
-        .services(emptyList())
+        .host("localhost")
+        .port(8080)
+        .connectionTimeout(10000)
+        .reconnectionTimeout(10000)
+        .maximumMessageSize(32000)
+        .inputBufferSize(32000)
+        .outputBufferSize(32000)
+        .recoveryBufferSize(256)
         .build();
 
-    private final Model authModel = Model
+    private final DiffusionConfig authModel = DiffusionConfig
         .builder()
-        .diffusion(DiffusionConfig
-            .builder()
-            .host("localhost")
-            .port(8080)
-            .principal("control")
-            .password("password")
-            .connectionTimeout(10000)
-            .reconnectionTimeout(10000)
-            .maximumMessageSize(32000)
-            .inputBufferSize(32000)
-            .outputBufferSize(32000)
-            .recoveryBufferSize(256)
-            .build())
-        .services(emptyList())
+        .host("localhost")
+        .port(8080)
+        .principal("control")
+        .password("password")
+        .connectionTimeout(10000)
+        .reconnectionTimeout(10000)
+        .maximumMessageSize(32000)
+        .inputBufferSize(32000)
+        .outputBufferSize(32000)
+        .recoveryBufferSize(256)
         .build();
 
     @Before
@@ -100,7 +103,7 @@ public final class DiffusionSessionFactoryTest {
 
         verify(sessionFactory).transports(WEBSOCKET);
 
-        assertEquals(session, diffusionSessionFactory.provide(noAuthModel, lostListener, listener, null));
+        assertEquals(session, diffusionSessionFactory.openSession(noAuthModel, lostListener, listener, null));
 
         verify(sessionFactory).listener(isA(Session.Listener.class));
         verify(sessionFactory).serverHost("localhost");
@@ -121,7 +124,7 @@ public final class DiffusionSessionFactoryTest {
 
         verify(sessionFactory).transports(WEBSOCKET);
 
-        assertEquals(session, diffusionSessionFactory.provide(authModel, lostListener, listener, null));
+        assertEquals(session, diffusionSessionFactory.openSession(authModel, lostListener, listener, null));
 
         verify(sessionFactory).listener(isA(Session.Listener.class));
         verify(sessionFactory).serverHost("localhost");

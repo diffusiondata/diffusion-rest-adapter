@@ -20,10 +20,8 @@ import static com.pushtechnology.diffusion.client.session.SessionAttributes.Tran
 import javax.net.ssl.SSLContext;
 
 import org.picocontainer.annotations.Nullable;
-import org.picocontainer.injectors.ProviderAdapter;
 
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
-import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.session.SessionFactory;
@@ -33,7 +31,7 @@ import com.pushtechnology.diffusion.client.session.SessionFactory;
  *
  * @author Push Technology Limited
  */
-public final class DiffusionSessionFactory extends ProviderAdapter {
+public final class DiffusionSessionFactory {
     private final SessionFactory baseSessionFactory;
 
     /**
@@ -41,18 +39,6 @@ public final class DiffusionSessionFactory extends ProviderAdapter {
      */
     public DiffusionSessionFactory(SessionFactory baseSessionFactory) {
         this.baseSessionFactory = baseSessionFactory.transports(WEBSOCKET);
-    }
-
-    /**
-     * @return an open session
-     */
-    public Session provide(
-            Model model,
-            SessionLostListener sessionLostListener,
-            EventedSessionListener listener,
-            @Nullable SSLContext sslContext) {
-
-        return openSession(model.getDiffusion(), sessionLostListener, listener, sslContext);
     }
 
     /**

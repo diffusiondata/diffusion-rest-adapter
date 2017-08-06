@@ -31,6 +31,7 @@ import com.pushtechnology.adapters.rest.session.management.SSLContextFactory;
 import com.pushtechnology.adapters.rest.session.management.SessionLostListener;
 import com.pushtechnology.adapters.rest.session.management.SessionWrapper;
 import com.pushtechnology.adapters.rest.topic.management.TopicManagementClientImpl;
+import com.pushtechnology.diffusion.client.Diffusion;
 
 import net.jcip.annotations.GuardedBy;
 import net.jcip.annotations.ThreadSafe;
@@ -112,12 +113,14 @@ import net.jcip.annotations.ThreadSafe;
             .withJavaEE5Lifecycle()
             .withLocking()
             .build()
-            .addAdapter(DiffusionSessionFactory.create())
+            .addAdapter(new DiffusionSessionProvider())
             .addComponent(TopicManagementClientImpl.class)
             .addComponent(model)
             .addComponent(shutdownTask)
             .addComponent(SessionLostListener.class)
-            .addComponent(SessionWrapper.class);
+            .addComponent(SessionWrapper.class)
+            .addComponent(Diffusion.sessions())
+            .addComponent(DiffusionSessionFactory.class);
         parent.addChildContainer(newContainer);
 
         return newContainer;
