@@ -28,6 +28,7 @@ import com.pushtechnology.adapters.rest.publication.PublishingClientImpl;
 import com.pushtechnology.adapters.rest.session.management.DiffusionSessionFactory;
 import com.pushtechnology.adapters.rest.session.management.EventedSessionListener;
 import com.pushtechnology.adapters.rest.session.management.SSLContextFactory;
+import com.pushtechnology.adapters.rest.session.management.SessionLossHandler;
 import com.pushtechnology.adapters.rest.session.management.SessionLostListener;
 import com.pushtechnology.adapters.rest.session.management.SessionWrapper;
 import com.pushtechnology.adapters.rest.topic.management.TopicManagementClientImpl;
@@ -45,15 +46,18 @@ import net.jcip.annotations.ThreadSafe;
 /*package*/ final class ContainerFactory {
     private final ScheduledExecutorService executor;
     private final ServiceListener serviceListener;
-    private final Runnable shutdownTask;
+    private final SessionLossHandler sessionLossHandler;
 
     /**
      * Constructor.
      */
-    public ContainerFactory(ScheduledExecutorService executor, Runnable shutdownTask, ServiceListener serviceListener) {
+    public ContainerFactory(
+            ScheduledExecutorService executor,
+            SessionLossHandler sessionLossHandler,
+            ServiceListener serviceListener) {
         this.executor = executor;
         this.serviceListener = serviceListener;
-        this.shutdownTask = shutdownTask;
+        this.sessionLossHandler = sessionLossHandler;
     }
 
     @GuardedBy("this")
@@ -116,7 +120,7 @@ import net.jcip.annotations.ThreadSafe;
             .addAdapter(new DiffusionSessionProvider())
             .addComponent(TopicManagementClientImpl.class)
             .addComponent(model)
-            .addComponent(shutdownTask)
+            .addComponent(sessionLossHandler)
             .addComponent(SessionLostListener.class)
             .addComponent(SessionWrapper.class)
             .addComponent(Diffusion.sessions())

@@ -30,7 +30,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 
-import com.pushtechnology.adapters.rest.session.management.SessionLostListener;
 import com.pushtechnology.diffusion.client.session.Session;
 
 /**
@@ -42,7 +41,7 @@ public final class SessionLostListenerTest {
     @Mock
     private Session session;
     @Mock
-    private Runnable shutdownTask;
+    private SessionLossHandler sessionLossHandler;
 
     private SessionLostListener sessionLostListener;
 
@@ -50,12 +49,12 @@ public final class SessionLostListenerTest {
     public void setUp() {
         initMocks(this);
 
-        sessionLostListener = new SessionLostListener(shutdownTask);
+        sessionLostListener = new SessionLostListener(sessionLossHandler);
     }
 
     @After
     public void postConditions() {
-        verifyNoMoreInteractions(session, shutdownTask);
+        verifyNoMoreInteractions(session, sessionLossHandler);
     }
 
     @Test
@@ -77,13 +76,13 @@ public final class SessionLostListenerTest {
     public void onFailure() {
         sessionLostListener.onSessionStateChanged(session, CONNECTED_ACTIVE, CLOSED_FAILED);
 
-        verify(shutdownTask).run();
+        verify(sessionLossHandler).onLoss();
     }
 
     @Test
     public void onKickedOff() {
         sessionLostListener.onSessionStateChanged(session, CONNECTED_ACTIVE, CLOSED_BY_SERVER);
 
-        verify(shutdownTask).run();
+        verify(sessionLossHandler).onLoss();
     }
 }

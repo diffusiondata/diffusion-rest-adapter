@@ -24,27 +24,28 @@ import org.slf4j.LoggerFactory;
 import com.pushtechnology.diffusion.client.session.Session;
 
 /**
- * Listener for loss of the session. Invokes the shutdown task passed into it when the session closes unexpectedly.
+ * Listener for loss of the session. Invokes the {@link SessionLossHandler} passed into it when the session closes
+ * unexpectedly.
  *
  * @author Push Technology Limited
  */
 public final class SessionLostListener implements Session.Listener {
     private static final Logger LOG = LoggerFactory.getLogger(SessionLostListener.class);
 
-    private final Runnable shutdownTask;
+    private final SessionLossHandler sessionLossHandler;
 
     /**
      * Constructor.
      */
-    public SessionLostListener(Runnable shutdownTask) {
-        this.shutdownTask = shutdownTask;
+    public SessionLostListener(SessionLossHandler sessionLossHandler) {
+        this.sessionLossHandler = sessionLossHandler;
     }
 
     @Override
     public void onSessionStateChanged(Session session, Session.State oldState, Session.State newState) {
         if (CLOSED_FAILED.equals(newState) || CLOSED_BY_SERVER.equals(newState)) {
             LOG.warn("Session {} has been lost", session);
-            shutdownTask.run();
+            sessionLossHandler.onLoss();
         }
     }
 }

@@ -67,7 +67,7 @@ public final class RESTAdapter implements AutoCloseable {
                 shutdownHandler.run();
             }
         };
-        containerFactory = new ContainerFactory(executor, shutdownTask, serviceListener);
+        containerFactory = new ContainerFactory(executor, () -> shutdownTask.run(), serviceListener);
     }
 
     /**
