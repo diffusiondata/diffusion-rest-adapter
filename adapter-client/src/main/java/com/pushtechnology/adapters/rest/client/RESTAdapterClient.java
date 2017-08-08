@@ -33,6 +33,7 @@ import com.pushtechnology.adapters.rest.model.store.ModelStore;
 import com.pushtechnology.adapters.rest.model.store.PollingPersistedModelStore;
 import com.pushtechnology.adapters.rest.persistence.FileSystemPersistence;
 import com.pushtechnology.adapters.rest.persistence.Persistence;
+import com.pushtechnology.adapters.rest.session.management.SessionLossHandler;
 
 import net.jcip.annotations.ThreadSafe;
 
@@ -63,6 +64,24 @@ public final class RESTAdapterClient {
                 isRunning.set(false);
                 shutdownHandler.run();
             },
+            serviceListener);
+    }
+
+    private RESTAdapterClient(
+        ModelStore modelStore,
+        ScheduledExecutorService executor,
+        Runnable shutdownHandler,
+        SessionLossHandler lossHandler,
+        ServiceListener serviceListener) {
+        this.modelStore = modelStore;
+        this.shutdownHandler = shutdownHandler;
+        restAdapter = new RESTAdapter(
+            executor,
+            () -> {
+                isRunning.set(false);
+                shutdownHandler.run();
+            },
+            lossHandler,
             serviceListener);
     }
 
@@ -121,6 +140,22 @@ public final class RESTAdapterClient {
             ServiceListener serviceListener) {
         LOG.debug("Creating REST adapter client with model store: {}", modelStore);
         return new RESTAdapterClient(modelStore, executor, shutdownHandler, serviceListener);
+    }
+
+    /**
+     * Factory method for {@link RESTAdapterClient}.
+     * @param modelStore the configuration store to use
+     * @param executor executor to use to schedule poll requests
+     * @return a new {@link RESTAdapterClient}
+     */
+    public static RESTAdapterClient create(
+        ModelStore modelStore,
+        ScheduledExecutorService executor,
+        Runnable shutdownHandler,
+        SessionLossHandler lossHandler,
+        ServiceListener serviceListener) {
+        LOG.debug("Creating REST adapter client with model store: {}", modelStore);
+        return new RESTAdapterClient(modelStore, executor, shutdownHandler, lossHandler, serviceListener);
     }
 
     /**
