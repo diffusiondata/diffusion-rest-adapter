@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
+import com.pushtechnology.adapters.rest.session.management.SessionLossHandler;
 
 import net.jcip.annotations.GuardedBy;
 import net.jcip.annotations.ThreadSafe;
@@ -53,21 +54,29 @@ public final class RESTAdapter implements AutoCloseable {
      * Constructor.
      */
     public RESTAdapter(ScheduledExecutorService executor, Runnable shutdownHandler, ServiceListener serviceListener) {
-        shutdownTask = new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    close();
-                }
-                // CHECKSTYLE.OFF: IllegalCatch // Bulkhead
-                catch (Exception e) {
-                    LOG.warn("Exception during shutdown", e);
-                }
-                // CHECKSTYLE.ON: IllegalCatch
-                shutdownHandler.run();
+        this(executor, shutdownHandler, shutdownHandler::run, serviceListener);
+    }
+
+    /**
+     * Constructor.
+     */
+    public RESTAdapter(
+            ScheduledExecutorService executor,
+            Runnable shutdownHandler,
+            SessionLossHandler lossHandler,
+            ServiceListener serviceListener) {
+        shutdownTask = () -> {
+            try {
+                close();
             }
+            // CHECKSTYLE.OFF: IllegalCatch // Bulkhead
+            catch (Exception e) {
+                LOG.warn("Exception during shutdown", e);
+            }
+            // CHECKSTYLE.ON: IllegalCatch
+            shutdownHandler.run();
         };
-        containerFactory = new ContainerFactory(executor, () -> shutdownTask.run(), serviceListener);
+        containerFactory = new ContainerFactory(executor, lossHandler, serviceListener);
     }
 
     /**
