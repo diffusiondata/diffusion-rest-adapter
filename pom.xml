@@ -184,7 +184,7 @@
             <dependency>
                 <groupId>com.pushtechnology.diffusion</groupId>
                 <artifactId>diffusion-client</artifactId>
-                <version>5.9.9</version>
+                <version>6.0.0</version>
             </dependency>
 
             <dependency>
@@ -233,6 +233,12 @@
                 <groupId>com.pushtechnology.diffusion.transform</groupId>
                 <artifactId>transformers</artifactId>
                 <version>1.1.0</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.pushtechnology.diffusion</groupId>
+                        <artifactId>diffusion-api</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <dependency>
