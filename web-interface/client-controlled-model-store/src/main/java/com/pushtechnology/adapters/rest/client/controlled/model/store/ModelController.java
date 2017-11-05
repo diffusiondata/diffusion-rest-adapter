@@ -32,6 +32,7 @@ import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.SecurityConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.model.store.AsyncMutableModelStore;
+import com.pushtechnology.diffusion.client.features.control.topics.MessagingControl.RequestHandler.Responder;
 
 import net.jcip.annotations.ThreadSafe;
 
@@ -53,11 +54,14 @@ import net.jcip.annotations.ThreadSafe;
     }
 
     @Override
-    public void onRequest(Map<String, Object> request, RequestManager.Responder responder) {
+    public void onRequest(Map<String, Object> request, Responder<Map<String, Object>> responder) {
         final Object type = request.get("type");
 
         if ("list-services".equals(type)) {
-            responder.respond(modelStore.get().getServices());
+            final List<ServiceConfig> services = modelStore.get().getServices();
+            final Map<String, Object> response = new HashMap<>();
+            response.put("services", services);
+            responder.respond(response);
             return;
         }
 
@@ -85,18 +89,18 @@ import net.jcip.annotations.ThreadSafe;
         responder.respond(error("Unknown request type"));
     }
 
-    private void onDeleteEndpoint(Map<String, Object> request, RequestManager.Responder responder) {
+    private void onDeleteEndpoint(Map<String, Object> request, Responder<Map<String, Object>> responder) {
         final Object serviceObject = request.get("serviceName");
         if (serviceObject == null || !(serviceObject instanceof String)) {
             LOG.error("No or invalid service name message component");
-            responder.error("No service name provided");
+            responder.reject("No service name provided");
             return;
         }
 
         final Object endpointObject = request.get("endpointName");
         if (endpointObject == null || !(endpointObject instanceof String)) {
             LOG.error("No or invalid endpoint name message component");
-            responder.error("No endpoint name provided");
+            responder.reject("No endpoint name provided");
             return;
         }
 
@@ -141,11 +145,11 @@ import net.jcip.annotations.ThreadSafe;
         responder.respond(emptyMap());
     }
 
-    private void onDeleteService(Map<String, Object> request, RequestManager.Responder responder) {
+    private void onDeleteService(Map<String, Object> request, Responder<Map<String, Object>> responder) {
         final Object serviceObject = request.get("serviceName");
         if (serviceObject == null || !(serviceObject instanceof String)) {
             LOG.error("No or invalid service name message component");
-            responder.error("No service name provided");
+            responder.reject("No service name provided");
             return;
         }
 
@@ -168,18 +172,18 @@ import net.jcip.annotations.ThreadSafe;
     }
 
     @SuppressWarnings("unchecked")
-    private void onCreateEndpoint(Map<String, Object> request, RequestManager.Responder responder) {
+    private void onCreateEndpoint(Map<String, Object> request, Responder<Map<String, Object>> responder) {
         final Object serviceObject = request.get("serviceName");
         if (serviceObject == null || !(serviceObject instanceof String)) {
             LOG.error("No or invalid service name message component");
-            responder.error("No service name provided");
+            responder.reject("No service name provided");
             return;
         }
 
         final Object endpointObject = request.get("endpoint");
         if (endpointObject == null || !(endpointObject instanceof Map)) {
             LOG.error("No or invalid endpoint message component");
-            responder.error("No endpoint provided");
+            responder.reject("No endpoint provided");
             return;
         }
 
@@ -197,13 +201,13 @@ import net.jcip.annotations.ThreadSafe;
                 responder.respond(emptyMap());
                 return;
             case PARENT_MISSING:
-                responder.error("service missing");
+                responder.reject("service missing");
                 return;
             case UNIQUE_VALUE_USED:
-                responder.error("endpoint topic conflict");
+                responder.reject("endpoint topic conflict");
                 return;
             default:
-                responder.error("endpoint name conflict");
+                responder.reject("endpoint name conflict");
         }
 
     }
@@ -215,12 +219,12 @@ import net.jcip.annotations.ThreadSafe;
     }
 
     @SuppressWarnings("unchecked")
-    private void onCreateService(Map<String, Object> request, RequestManager.Responder responder) {
+    private void onCreateService(Map<String, Object> request, Responder<Map<String, Object>> responder) {
         final Object serviceObject = request.get("service");
 
         if (serviceObject == null || !(serviceObject instanceof Map)) {
             LOG.error("No or invalid service message component");
-            responder.error("no service provided");
+            responder.reject("no service provided");
             return;
         }
 
@@ -258,10 +262,10 @@ import net.jcip.annotations.ThreadSafe;
                 responder.respond(emptyMap());
                 return;
             case UNIQUE_VALUE_USED:
-                responder.error("service root topic conflict");
+                responder.reject("service root topic conflict");
                 return;
             default:
-                responder.error("service name conflict");
+                responder.reject("service name conflict");
         }
     }
 }

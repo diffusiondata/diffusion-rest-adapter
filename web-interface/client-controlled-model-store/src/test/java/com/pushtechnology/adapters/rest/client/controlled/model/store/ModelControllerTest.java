@@ -47,6 +47,8 @@ import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.SecurityConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.model.store.AsyncMutableModelStore;
+import com.pushtechnology.diffusion.client.features.control.topics.MessagingControl;
+import com.pushtechnology.diffusion.client.features.control.topics.MessagingControl.RequestHandler.Responder;
 import com.pushtechnology.diffusion.client.session.SessionId;
 import com.pushtechnology.diffusion.client.types.ReceiveContext;
 
@@ -67,7 +69,7 @@ public final class ModelControllerTest {
     private ReceiveContext context;
 
     @Mock
-    private RequestManager.Responder responder;
+    private Responder<Map<String, Object>> responder;
 
     @Captor
     private ArgumentCaptor<Runnable> runnableCaptor;
@@ -282,7 +284,7 @@ public final class ModelControllerTest {
         controller.onRequest(message, responder);
 
         verify(executor, times(1)).execute(runnableCaptor.capture());
-        verify(responder).error("No service name provided");
+        verify(responder).reject("No service name provided");
     }
 
     @Test
@@ -369,7 +371,7 @@ public final class ModelControllerTest {
         message.put("type", "create-service");
 
         controller.onRequest(message, responder);
-        verify(responder).error("no service provided");
+        verify(responder).reject("no service provided");
     }
 
     @Test
@@ -390,7 +392,7 @@ public final class ModelControllerTest {
         controller.onRequest(message, responder);
 
         verify(executor).execute(runnableCaptor.capture());
-        verify(responder).error("service missing");
+        verify(responder).reject("service missing");
     }
 
     @Test
@@ -541,7 +543,10 @@ public final class ModelControllerTest {
         controller.onRequest(message, responder);
 
         verify(executor).execute(runnableCaptor.capture());
-        verify(responder).respond(emptyList());
+        final List<Object> services = emptyList();
+        final Map<String, Object> response = new HashMap<>();
+        response.put("services", services);
+        verify(responder).respond(response);
     }
 
     @Test
@@ -554,7 +559,7 @@ public final class ModelControllerTest {
         controller.onRequest(message, responder);
 
         verify(executor, times(1)).execute(runnableCaptor.capture());
-        verify(responder).error("No service name provided");
+        verify(responder).reject("No service name provided");
     }
 
     @Test
@@ -568,7 +573,7 @@ public final class ModelControllerTest {
         controller.onRequest(message, responder);
 
         verify(executor, times(1)).execute(runnableCaptor.capture());
-        verify(responder).error("No endpoint name provided");
+        verify(responder).reject("No endpoint name provided");
     }
 
     @Test

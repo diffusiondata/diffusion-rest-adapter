@@ -10,7 +10,7 @@ var jsonDataType = diffusion.datatypes.json();
 describe('Model service', function() {
     var diffusionService;
     var session;
-    var onMessage;
+    var onRequest;
     var modelService;
 
     beforeEach(function() {
@@ -19,38 +19,25 @@ describe('Model service', function() {
         onConnectFailure = when.captor();
 
         session = {
-            messages : jasmine.createSpyObj('messages', ['listen', 'send'])
+            messages : jasmine.createSpyObj('messages', ['sendRequest'])
         };
-        onMessage = when.captor();
+        onRequest = when.captor();
 
-        when(session.messages.listen).isCalledWith('adapter/rest/model/store', onMessage);
         when(diffusionService.get).isCalled.thenReturn(Promise.resolve(session));
 
         modelService = new ms.ModelService(diffusionService);
     });
 
     function respondWithSuccesfulModelLookup() {
-        when(session.messages.send).isCalled.then(function() {
-            onMessage.latest({
-                content: jsonDataType.writeValue({
-                    id: 0,
-                    response: [{
-                        name: 'service0'
-                    }]
-                })
-            });
-        });
+        when(session.messages.sendRequest)
+            .isCalled
+            .thenReturn(Promise.resolve(jsonDataType.from({ 'services': [{ name: 'service0' }]})));
     }
 
     function respondWithSuccess() {
-        when(session.messages.send).isCalled.then(function() {
-            onMessage.latest({
-                content: jsonDataType.writeValue({
-                    id: 0,
-                    response: {}
-                })
-            });
-        });
+        when(session.messages.sendRequest)
+            .isCalled
+            .thenReturn(Promise.resolve(jsonDataType.from({})));
     }
 
     it('can be created', function() {
@@ -65,7 +52,7 @@ describe('Model service', function() {
         expect(modelPromise).toBeDefined();
 
         modelPromise.then(function(model) {
-            expect(session.messages.send).toHaveBeenCalledWith('adapter/rest/model/store', jasmine.anything());
+            expect(session.messages.sendRequest).toHaveBeenCalledWith('adapter/rest/model/store', jasmine.anything(), jasmine.anything(), jasmine.anything());
             expect(model.services[0].name).toBe('service0');
             done();
         }, done.fail);
@@ -79,7 +66,7 @@ describe('Model service', function() {
         expect(servicePromise).toBeDefined();
 
         servicePromise.then(function(service) {
-            expect(session.messages.send).toHaveBeenCalledWith('adapter/rest/model/store', jasmine.anything());
+            expect(session.messages.sendRequest).toHaveBeenCalledWith('adapter/rest/model/store', jasmine.anything(), jasmine.anything(), jasmine.anything());
             expect(service.name).toBe('service0');
             done();
         }, done.fail);
@@ -95,7 +82,7 @@ describe('Model service', function() {
         expect(createPromise).toBeDefined();
 
         createPromise.then(function() {
-            expect(session.messages.send).toHaveBeenCalledWith('adapter/rest/model/store', jasmine.anything());
+            expect(session.messages.sendRequest).toHaveBeenCalledWith('adapter/rest/model/store', jasmine.anything(), jasmine.anything(), jasmine.anything());
             expect(modelService.model.services[0].name).toBe('service0');
             done();
         }, done.fail);
@@ -115,7 +102,7 @@ describe('Model service', function() {
         expect(createPromise).toBeDefined();
 
         createPromise.then(function() {
-            expect(session.messages.send).toHaveBeenCalledWith('adapter/rest/model/store', jasmine.anything());
+            expect(session.messages.sendRequest).toHaveBeenCalledWith('adapter/rest/model/store', jasmine.anything(), jasmine.anything(), jasmine.anything());
             expect(modelService.model.services[0].name).toBe('service0');
             done();
         }, done.fail);
@@ -133,7 +120,7 @@ describe('Model service', function() {
         expect(deletePromise).toBeDefined();
 
         deletePromise.then(function() {
-            expect(session.messages.send).toHaveBeenCalledWith('adapter/rest/model/store', jasmine.anything());
+            expect(session.messages.sendRequest).toHaveBeenCalledWith('adapter/rest/model/store', jasmine.anything(), jasmine.anything(), jasmine.anything());
             expect(modelService.model.services.length).toBe(0);
             done();
         }, done.fail);
@@ -153,7 +140,7 @@ describe('Model service', function() {
         expect(deletePromise).toBeDefined();
 
         deletePromise.then(function() {
-            expect(session.messages.send).toHaveBeenCalledWith('adapter/rest/model/store', jasmine.anything());
+            expect(session.messages.sendRequest).toHaveBeenCalledWith('adapter/rest/model/store', jasmine.anything(), jasmine.anything(), jasmine.anything());
             expect(modelService.model.services[0].endpoints.length).toBe(0);
             done();
         }, done.fail);

@@ -15,22 +15,18 @@
 
 package com.pushtechnology.adapters.rest.client.controlled.model.store;
 
-import static com.pushtechnology.diffusion.client.Diffusion.content;
-import static com.pushtechnology.diffusion.client.Diffusion.dataTypes;
 import static com.pushtechnology.diffusion.transform.transformer.Transformers.fromMap;
 import static com.pushtechnology.diffusion.transform.transformer.Transformers.toMapOf;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.pushtechnology.diffusion.client.content.Content;
+import com.pushtechnology.diffusion.client.callbacks.ErrorReason;
 import com.pushtechnology.diffusion.client.features.control.topics.MessagingControl;
-import com.pushtechnology.diffusion.client.session.SessionId;
-import com.pushtechnology.diffusion.client.types.ReceiveContext;
-import com.pushtechnology.diffusion.datatype.Bytes;
+import com.pushtechnology.diffusion.client.features.control.topics.MessagingControl.RequestHandler.Responder;
+import com.pushtechnology.diffusion.datatype.json.JSON;
 import com.pushtechnology.diffusion.transform.transformer.Transformers;
 import com.pushtechnology.diffusion.transform.transformer.UnsafeTransformer;
 
@@ -44,17 +40,13 @@ import net.jcip.annotations.ThreadSafe;
 @ThreadSafe
 public final class RequestManager {
     private static final Logger LOG = LoggerFactory.getLogger(RequestManager.class);
-    private static final UnsafeTransformer<Content, Map<String, Object>> DESERIALISER = Transformers
-        .builder(Content.class)
-        .transform(Content::toBytes)
-        .transform(dataTypes().json()::readValue)
+    private static final UnsafeTransformer<JSON, Map<String, Object>> DESERIALISER = Transformers
+        .builder(JSON.class)
         .unsafeTransform(toMapOf(Object.class))
         .buildUnsafe();
-    private static final UnsafeTransformer<Map<String, Object>, Content> SERIALISER = Transformers
+    private static final UnsafeTransformer<Map<String, Object>, JSON> SERIALISER = Transformers
         .<Map<String, Object>>builder()
         .unsafeTransform(fromMap())
-        .unsafeTransform(Bytes::toByteArray)
-        .unsafeTransform(content()::newContent)
         .buildUnsafe();
     private final MessagingControl messagingControl;
 
@@ -69,22 +61,7 @@ public final class RequestManager {
      * Add a handler.
      */
     public void addHandler(String path, RequestHandler handler) {
-        messagingControl.addMessageHandler(path, new Handler(path, handler));
-    }
-
-    /**
-     * Responder for requests.
-     */
-    public interface Responder {
-        /**
-         * Respond to a request with an error.
-         */
-        void error(String message);
-
-        /**
-         * Respond to a request with a result.
-         */
-        void respond(Object response);
+        messagingControl.addRequestHandler(path, JSON.class, JSON.class, new Handler(path, handler));
     }
 
     /**
@@ -94,11 +71,11 @@ public final class RequestManager {
         /**
          * Called when a request is received.
          */
-        void onRequest(Map<String, Object> request, Responder responder);
+        void onRequest(Map<String, Object> request, Responder<Map<String, Object>> responder);
     }
 
     @Immutable
-    private final class Handler extends MessagingControl.MessageHandler.Default {
+    private static final class Handler implements MessagingControl.RequestHandler<JSON, JSON> {
         private final String path;
         private final RequestHandler handler;
 
@@ -108,7 +85,13 @@ public final class RequestManager {
         }
 
         @Override
-        public void onMessage(SessionId sessionId, String requestPath, Content content, ReceiveContext receiveContext) {
+        public void onRequest(
+            JSON json,
+            RequestContext requestContext,
+            Responder responder) {
+
+            final String requestPath = requestContext.getPath();
+
             if (!path.equals(requestPath)) {
                 LOG.error("Received a message on the wrong path");
                 return;
@@ -116,47 +99,21 @@ public final class RequestManager {
 
             final Map<String, Object> request;
             try {
-                request = DESERIALISER.transform(content);
+                request = DESERIALISER.transform(json);
             }
             // CHECKSTYLE.OFF: IllegalCatch
             catch (Exception e) {
-                LOG.error("Did not receive a valid JSON value: {}", content);
+                LOG.error("Did not receive a valid JSON value: {}", json);
                 return;
             }
             // CHECKSTYLE.ON: IllegalCatch
 
-            final Object id = request.get("id");
-            if (id == null) {
-                LOG.error("Request did not include an ID: {}", request);
-                return;
-            }
-
-            handler.onRequest(request, new Responder() {
-                @Override
-                public void error(String message) {
-                    final Map<String, Object> responseObject = new HashMap<>();
-                    responseObject.put("error", message);
-                    responseObject.put("id", id);
-
-                    sendResponse(responseObject);
-                }
+            handler.onRequest(request, new Responder<Map<String, Object>>() {
 
                 @Override
-                public void respond(Object response) {
-                    final Map<String, Object> responseObject = new HashMap<>();
-                    responseObject.put("response", response);
-                    responseObject.put("id", id);
-
-                    sendResponse(responseObject);
-                }
-
-                private void sendResponse(Map<String, Object> responseObject) {
+                public void respond(Map<String, Object> response) {
                     try {
-                        messagingControl.send(
-                            sessionId,
-                            path,
-                            SERIALISER.transform(responseObject),
-                            new MessagingControl.SendCallback.Default());
+                        responder.respond(SERIALISER.transform(response));
                     }
                     // CHECKSTYLE.OFF: IllegalCatch
                     catch (Exception e) {
@@ -164,7 +121,21 @@ public final class RequestManager {
                     }
                     // CHECKSTYLE.ON: IllegalCatch
                 }
+
+                @Override
+                public void reject(String message) {
+                    responder.reject(message);
+                }
             });
+        }
+
+        @Override
+        public void onClose() {
+        }
+
+        @Override
+        public void onError(ErrorReason errorReason) {
+            LOG.error("Error with request handler {}", errorReason);
         }
     }
 }

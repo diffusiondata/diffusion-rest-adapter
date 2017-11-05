@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Push Technology Ltd.
+ * Copyright (C) 2017 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.isA;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.Map;
@@ -33,10 +34,12 @@ import org.mockito.Mock;
 
 import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.content.Content;
+import com.pushtechnology.diffusion.client.features.Messaging;
 import com.pushtechnology.diffusion.client.features.control.topics.MessagingControl;
+import com.pushtechnology.diffusion.client.features.control.topics.MessagingControl.RequestHandler.RequestContext;
+import com.pushtechnology.diffusion.client.features.control.topics.MessagingControl.RequestHandler.Responder;
 import com.pushtechnology.diffusion.client.session.SessionId;
-import com.pushtechnology.diffusion.client.types.ReceiveContext;
-import com.pushtechnology.diffusion.content.ContentImpl;
+import com.pushtechnology.diffusion.datatype.json.JSON;
 
 /**
  * Unit tests for {@link RequestManager}.
@@ -52,38 +55,38 @@ public final class RequestManagerTest {
     private SessionId sessionId;
 
     @Mock
-    private ReceiveContext context;
+    private RequestContext context;
 
     @Mock
     private RequestManager.RequestHandler requestHandler;
 
-    @Captor
-    private ArgumentCaptor<Runnable> runnableCaptor;
+    @Mock
+    private Responder<JSON> responder;
 
     @Captor
-    private ArgumentCaptor<MessagingControl.MessageHandler> handlerCaptor;
+    private ArgumentCaptor<MessagingControl.RequestHandler<JSON, JSON>> handlerCaptor;
 
     @Captor
-    private ArgumentCaptor<RequestManager.Responder> responderCaptor;
+    private ArgumentCaptor<Responder<Map<String, Object>>> responderCaptor;
 
-    private Content emptyMessage;
-    private Content createServiceMessage;
-
+    private JSON emptyMessage;
+    private JSON createServiceMessage;
 
     @Before
     public void setUp() {
         initMocks(this);
 
-        emptyMessage = new ContentImpl(Diffusion
+        emptyMessage = Diffusion
             .dataTypes()
             .json()
-            .fromJsonString("{}")
-            .toByteArray());
-        createServiceMessage = new ContentImpl(Diffusion
+            .fromJsonString("{}");
+        createServiceMessage = Diffusion
             .dataTypes()
             .json()
-            .fromJsonString("{\"type\":\"create-service\",\"id\":1,\"service\":{\"name\":\"\",\"host\":\"\",\"port\":80,\"secure\":\"false\",\"pollPeriod\":5000,\"topicPathRoot\":\"\"}}")
-            .toByteArray());
+            .fromJsonString("{\"type\":\"create-service\",\"id\":1,\"service\":{\"name\":\"\",\"host\":\"\",\"port\":80,\"secure\":\"false\",\"pollPeriod\":5000,\"topicPathRoot\":\"\"}}");
+
+        when(context.getPath()).thenReturn(ClientControlledModelStore.CONTROL_PATH);
+        when(context.getSessionId()).thenReturn(sessionId);
     }
 
     @After
@@ -91,44 +94,61 @@ public final class RequestManagerTest {
         verifyNoMoreInteractions(sessionId, context, messagingControl, requestHandler);
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void wrongPath() {
         final RequestManager requestManager = new RequestManager(messagingControl);
         requestManager.addHandler(ClientControlledModelStore.CONTROL_PATH, requestHandler);
 
-        verify(messagingControl).addMessageHandler(eq(ClientControlledModelStore.CONTROL_PATH), handlerCaptor.capture());
+        verify(messagingControl).addRequestHandler(eq(ClientControlledModelStore.CONTROL_PATH), eq(JSON.class), eq(JSON.class), handlerCaptor.capture());
 
-        final MessagingControl.MessageHandler messageHandler = handlerCaptor.getValue();
-        messageHandler.onMessage(
-            sessionId,
-            ClientControlledModelStore.CONTROL_PATH + "/child",
+        final MessagingControl.RequestHandler<JSON, JSON> messageHandler = handlerCaptor.getValue();
+        messageHandler.onRequest(
             createServiceMessage,
-            context);
+            context,
+            responder);
+
+        verify(context).getPath();
+        verify(requestHandler).onRequest(isA(Map.class), isA(Responder.class));
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void onEmptyMessage() {
         final RequestManager requestManager = new RequestManager(messagingControl);
         requestManager.addHandler(ClientControlledModelStore.CONTROL_PATH, requestHandler);
 
-        verify(messagingControl).addMessageHandler(eq(ClientControlledModelStore.CONTROL_PATH), handlerCaptor.capture());
+        verify(messagingControl).addRequestHandler(eq(ClientControlledModelStore.CONTROL_PATH), eq(JSON.class), eq(JSON.class), handlerCaptor.capture());
 
-        final MessagingControl.MessageHandler messageHandler = handlerCaptor.getValue();
+        final MessagingControl.RequestHandler<JSON, JSON> messageHandler = handlerCaptor.getValue();
 
-        messageHandler.onMessage(sessionId, ClientControlledModelStore.CONTROL_PATH, new ContentImpl(new byte[0]), context);
+        messageHandler.onRequest(
+            emptyMessage,
+            context,
+            responder);
 
+
+        verify(requestHandler).onRequest(isA(Map.class), isA(Responder.class));
+        verify(context).getPath();
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void onEmptyObjectMessage() {
         final RequestManager requestManager = new RequestManager(messagingControl);
         requestManager.addHandler(ClientControlledModelStore.CONTROL_PATH, requestHandler);
 
-        verify(messagingControl).addMessageHandler(eq(ClientControlledModelStore.CONTROL_PATH), handlerCaptor.capture());
+        verify(messagingControl).addRequestHandler(eq(ClientControlledModelStore.CONTROL_PATH), eq(JSON.class), eq(JSON.class), handlerCaptor.capture());
 
-        final MessagingControl.MessageHandler messageHandler = handlerCaptor.getValue();
+        final MessagingControl.RequestHandler<JSON, JSON> messageHandler = handlerCaptor.getValue();
 
-        messageHandler.onMessage(sessionId, ClientControlledModelStore.CONTROL_PATH, emptyMessage, context);
+        messageHandler.onRequest(
+            emptyMessage,
+            context,
+            responder);
+
+        verify(requestHandler).onRequest(isA(Map.class), isA(Responder.class));
+        verify(context).getPath();
     }
 
     @SuppressWarnings("unchecked")
@@ -137,18 +157,23 @@ public final class RequestManagerTest {
         final RequestManager requestManager = new RequestManager(messagingControl);
         requestManager.addHandler(ClientControlledModelStore.CONTROL_PATH, requestHandler);
 
-        verify(messagingControl).addMessageHandler(eq(ClientControlledModelStore.CONTROL_PATH), handlerCaptor.capture());
+        verify(messagingControl).addRequestHandler(eq(ClientControlledModelStore.CONTROL_PATH), eq(JSON.class), eq(JSON.class), handlerCaptor.capture());
 
-        final MessagingControl.MessageHandler messageHandler = handlerCaptor.getValue();
+        final MessagingControl.RequestHandler<JSON, JSON> messageHandler = handlerCaptor.getValue();
 
-        messageHandler.onMessage(sessionId, ClientControlledModelStore.CONTROL_PATH, createServiceMessage, context);
+        messageHandler.onRequest(
+            createServiceMessage,
+            context,
+            responder);
 
+        verify(requestHandler).onRequest(isA(Map.class), isA(Responder.class));
+        verify(context).getPath();
         verify(requestHandler).onRequest(isA(Map.class), responderCaptor.capture());
 
-        final RequestManager.Responder value = responderCaptor.getValue();
+        final Responder<Map<String, Object>> value = responderCaptor.getValue();
 
         value.respond(emptyMap());
 
-        verify(messagingControl).send(eq(sessionId), eq(ClientControlledModelStore.CONTROL_PATH), isA(Content.class), isA(MessagingControl.SendCallback.class));
+        verify(responder).respond(isA(JSON.class));
     }
 }

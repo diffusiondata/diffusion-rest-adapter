@@ -39,6 +39,7 @@ import com.pushtechnology.diffusion.client.features.control.topics.MessagingCont
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.session.SessionFactory;
+import com.pushtechnology.diffusion.datatype.json.JSON;
 
 /**
  * Unit tests for {@link ClientControlledModelStore}.
@@ -62,7 +63,7 @@ public final class ClientControlledModelStoreTest {
     private ScheduledExecutorService executor;
 
     @Captor
-    private ArgumentCaptor<MessagingControl.MessageHandler> messageHandlerCaptor;
+    private ArgumentCaptor<MessagingControl.RequestHandler<JSON, JSON>> requestHandlerCaptor;
 
     @Captor
     private ArgumentCaptor<Runnable> runnableCaptor;
@@ -122,7 +123,11 @@ public final class ClientControlledModelStoreTest {
 
         verify(sessionFactory).open();
         verify(session).feature(MessagingControl.class);
-        verify(messagingControl).addMessageHandler(eq("adapter/rest/model/store"), messageHandlerCaptor.capture());
+        verify(messagingControl).addRequestHandler(
+            eq("adapter/rest/model/store"),
+            eq(JSON.class),
+            eq(JSON.class),
+            requestHandlerCaptor.capture());
 
         modelStore.close();
 

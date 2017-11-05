@@ -1,12 +1,13 @@
 import { Injectable, Inject } from '@angular/core';
 import { Model, Service, Endpoint } from './model';
 import { DiffusionService } from './diffusion.service';
-import { RequestContext } from './request-context';
+import * as diffusion from 'diffusion';
+
+const jsonDataType = diffusion.datatypes.json();
 
 @Injectable()
 export class ModelService {
     private session;
-    private context: RequestContext;
     model: Model = {
         services: []
     };
@@ -18,7 +19,6 @@ export class ModelService {
         return this.diffusionService.get().then((session) => {
             if (this.session != session) {
                 this.session = session;
-                this.context = new RequestContext(session, 'adapter/rest/model/store');
             }
             return session;
         });
@@ -26,11 +26,13 @@ export class ModelService {
 
     getModel(): Promise<Model> {
         return this.init()
-            .then(() => this.context.request({
-                type: 'list-services'
-            }))
+            .then(() => this.session
+                .messages
+                .sendRequest('adapter/rest/model/store', jsonDataType.from({
+                    type: 'list-services'
+                }), jsonDataType, jsonDataType))
             .then((response) => {
-                this.model.services = response as Service[];
+                this.model.services = response.get().services as Service[];
                 return this.model;
             });
     }
@@ -43,10 +45,13 @@ export class ModelService {
 
     createService(service: Service): Promise<void> {
         return this.init()
-            .then(() => this.context.request({
-                type: 'create-service',
-                service: service
-            }))
+            .then(() =>
+                this.session
+                    .messages
+                    .sendRequest('adapter/rest/model/store', jsonDataType.from({
+                        type: 'create-service',
+                        service: service
+                    }), jsonDataType, jsonDataType))
             .then(() => {
                 var serviceIdx = this
                     .model
@@ -65,11 +70,13 @@ export class ModelService {
 
     createEndpoint(serviceName: string, endpoint: Endpoint): Promise<void> {
         return this.init()
-            .then(() => this.context.request({
-                type: 'create-endpoint',
-                serviceName: serviceName,
-                endpoint: endpoint
-            }))
+            .then(() => this.session
+                .messages
+                .sendRequest('adapter/rest/model/store', jsonDataType.from({
+                    type: 'create-endpoint',
+                    serviceName: serviceName,
+                    endpoint: endpoint
+                }), jsonDataType, jsonDataType))
             .then(() => {
                 var service = this
                     .model
@@ -90,10 +97,12 @@ export class ModelService {
 
     deleteService(serviceName: string): Promise<void> {
         return this.init()
-            .then(() => this.context.request({
-                type: 'delete-service',
-                serviceName: serviceName
-            }))
+            .then(() => this.session
+                .messages
+                .sendRequest('adapter/rest/model/store', jsonDataType.from({
+                    type: 'delete-service',
+                    serviceName: serviceName
+                }), jsonDataType, jsonDataType))
             .then(() => {
                 let serviceIndex = this
                     .model
@@ -108,11 +117,13 @@ export class ModelService {
 
     deleteEndpoint(serviceName: string, endpointName: string): Promise<void> {
         return this.init()
-            .then(() => this.context.request({
-                type: 'delete-endpoint',
-                serviceName: serviceName,
-                endpointName: endpointName
-            }))
+            .then(() => this.session
+                .messages
+                .sendRequest('adapter/rest/model/store', jsonDataType.from({
+                    type: 'delete-endpoint',
+                    serviceName: serviceName,
+                    endpointName: endpointName
+                }), jsonDataType, jsonDataType))
             .then(() => {
                 let service = this
                     .model
