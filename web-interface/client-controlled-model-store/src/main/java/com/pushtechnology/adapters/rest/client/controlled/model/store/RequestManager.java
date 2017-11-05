@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Push Technology Ltd.
+ * Copyright (C) 2017 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,9 +31,8 @@ import com.pushtechnology.diffusion.client.features.control.topics.MessagingCont
 import com.pushtechnology.diffusion.client.session.SessionId;
 import com.pushtechnology.diffusion.client.types.ReceiveContext;
 import com.pushtechnology.diffusion.datatype.Bytes;
-import com.pushtechnology.diffusion.transform.transformer.TransformationException;
-import com.pushtechnology.diffusion.transform.transformer.Transformer;
 import com.pushtechnology.diffusion.transform.transformer.Transformers;
+import com.pushtechnology.diffusion.transform.transformer.UnsafeTransformer;
 
 import net.jcip.annotations.Immutable;
 import net.jcip.annotations.ThreadSafe;
@@ -45,18 +44,18 @@ import net.jcip.annotations.ThreadSafe;
 @ThreadSafe
 public final class RequestManager {
     private static final Logger LOG = LoggerFactory.getLogger(RequestManager.class);
-    private static final Transformer<Content, Map<String, Object>> DESERIALISER = Transformers
+    private static final UnsafeTransformer<Content, Map<String, Object>> DESERIALISER = Transformers
         .builder(Content.class)
         .transform(Content::toBytes)
         .transform(dataTypes().json()::readValue)
-        .transform(toMapOf(Object.class))
-        .build();
-    private static final Transformer<Map<String, Object>, Content> SERIALISER = Transformers
+        .unsafeTransform(toMapOf(Object.class))
+        .buildUnsafe();
+    private static final UnsafeTransformer<Map<String, Object>, Content> SERIALISER = Transformers
         .<Map<String, Object>>builder()
-        .transform(fromMap())
-        .transform(Bytes::toByteArray)
-        .transform(content()::newContent)
-        .build();
+        .unsafeTransform(fromMap())
+        .unsafeTransform(Bytes::toByteArray)
+        .unsafeTransform(content()::newContent)
+        .buildUnsafe();
     private final MessagingControl messagingControl;
 
     /**
@@ -119,10 +118,12 @@ public final class RequestManager {
             try {
                 request = DESERIALISER.transform(content);
             }
-            catch (TransformationException e) {
+            // CHECKSTYLE.OFF: IllegalCatch
+            catch (Exception e) {
                 LOG.error("Did not receive a valid JSON value: {}", content);
                 return;
             }
+            // CHECKSTYLE.ON: IllegalCatch
 
             final Object id = request.get("id");
             if (id == null) {
@@ -157,9 +158,11 @@ public final class RequestManager {
                             SERIALISER.transform(responseObject),
                             new MessagingControl.SendCallback.Default());
                     }
-                    catch (TransformationException e) {
+                    // CHECKSTYLE.OFF: IllegalCatch
+                    catch (Exception e) {
                         throw new IllegalStateException("Failed to create response", e);
                     }
+                    // CHECKSTYLE.ON: IllegalCatch
                 }
             });
         }

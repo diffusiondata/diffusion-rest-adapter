@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Push Technology Ltd.
+ * Copyright (C) 2017 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,7 @@ package com.pushtechnology.adapters.rest.adapter;
 
 import org.apache.http.concurrent.FutureCallback;
 
-import com.pushtechnology.diffusion.transform.transformer.TransformationException;
-import com.pushtechnology.diffusion.transform.transformer.Transformer;
+import com.pushtechnology.diffusion.transform.transformer.UnsafeTransformer;
 
 /**
  * A {@link FutureCallback} that applies a transformer and delegates to another {@link FutureCallback}.
@@ -28,13 +27,13 @@ import com.pushtechnology.diffusion.transform.transformer.Transformer;
  * @author Push Technology Limited
  */
 /*package*/ final class TransformingHandler<S, T> implements FutureCallback<S> {
-    private final Transformer<S, T> transformer;
+    private final UnsafeTransformer<S, T> transformer;
     private final FutureCallback<T> delegate;
 
     /**
      * Constructor.
      */
-    public TransformingHandler(Transformer<S, T> transformer, FutureCallback<T> delegate) {
+    public TransformingHandler(UnsafeTransformer<S, T> transformer, FutureCallback<T> delegate) {
         this.transformer = transformer;
         this.delegate = delegate;
     }
@@ -45,9 +44,11 @@ import com.pushtechnology.diffusion.transform.transformer.Transformer;
             final T transformedResult = transformer.transform(result);
             delegate.completed(transformedResult);
         }
-        catch (TransformationException e) {
+        // CHECKSTYLE.OFF: IllegalCatch
+        catch (Exception e) {
             delegate.failed(e);
         }
+        // CHECKSTYLE.ON: IllegalCatch
     }
 
     @Override

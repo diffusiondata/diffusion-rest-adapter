@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Push Technology Ltd.
+ * Copyright (C) 2017 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 package com.pushtechnology.adapters.rest.endpoints;
 
 import static com.pushtechnology.diffusion.transform.transformer.Transformers.byteArrayToBinary;
-import static com.pushtechnology.diffusion.transform.transformer.Transformers.stringToBinary;
 import static com.pushtechnology.diffusion.transform.transformer.Transformers.toSuperClass;
 import static java.util.Arrays.asList;
 
@@ -24,12 +23,13 @@ import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import com.pushtechnology.adapters.rest.polling.EndpointResponse;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
 import com.pushtechnology.diffusion.datatype.Bytes;
-import com.pushtechnology.diffusion.transform.transformer.Transformer;
 import com.pushtechnology.diffusion.transform.transformer.Transformers;
+import com.pushtechnology.diffusion.transform.transformer.UnsafeTransformer;
 
 /**
  * The supported endpoint types that can be processed by the adapter.
@@ -45,10 +45,10 @@ public enum EndpointType {
         TopicType.JSON,
         Transformers
             .builder(EndpointResponse.class)
-            .transformWith(EndpointResponseToStringTransformer.INSTANCE)
-            .transform(Transformers.parseJSON())
+            .unsafeTransform(EndpointResponseToStringTransformer.INSTANCE)
+            .unsafeTransform(Transformers.parseJSON())
             .<Bytes>transform(toSuperClass())
-            .build()) {
+            .buildUnsafe()) {
 
         @Override
         public boolean canHandle(String contentType) {
@@ -64,10 +64,11 @@ public enum EndpointType {
         TopicType.BINARY,
         Transformers
             .builder(EndpointResponse.class)
-            .transformWith(EndpointResponseToStringTransformer.INSTANCE)
-            .transform(stringToBinary(Charset.forName("UTF-8")))
+            .unsafeTransform(EndpointResponseToStringTransformer.INSTANCE)
+            .transform(value -> value.getBytes(Charset.forName("UTF-8")))
+            .transform(Transformers.byteArrayToBinary())
             .<Bytes>transform(toSuperClass())
-            .build()) {
+            .buildUnsafe()) {
 
         @Override
         public boolean canHandle(String contentType) {
@@ -82,10 +83,10 @@ public enum EndpointType {
         TopicType.BINARY,
         Transformers
             .builder(EndpointResponse.class)
-            .transformWith(EndpointResponse::getResponse)
+            .unsafeTransform(EndpointResponse::getResponse)
             .transform(byteArrayToBinary())
             .<Bytes>transform(toSuperClass())
-            .build()) {
+            .buildUnsafe()) {
 
         @Override
         public boolean canHandle(String contentType) {
@@ -100,7 +101,7 @@ public enum EndpointType {
             type.identifiers
                 .stream()
                 .map(identifier -> IDENTIFIER_LOOKUP.putIfAbsent(identifier, type))
-                .filter(current -> current != null)
+                .filter(Objects::nonNull)
                 .forEach(result -> {
                     throw new IllegalStateException(
                         "The EndpointType " + type + " has already been registered for an identifier");
@@ -110,7 +111,7 @@ public enum EndpointType {
 
     private final Collection<String> identifiers;
     private final TopicType topicType;
-    private final Transformer<EndpointResponse, Bytes> parser;
+    private final UnsafeTransformer<EndpointResponse, Bytes> parser;
 
     /**
      * Constructor.
@@ -118,7 +119,7 @@ public enum EndpointType {
     EndpointType(
             Collection<String> identifiers,
             TopicType topicType,
-            Transformer<EndpointResponse, Bytes> parser) {
+            UnsafeTransformer<EndpointResponse, Bytes> parser) {
 
         this.identifiers = identifiers;
         this.topicType = topicType;
@@ -142,7 +143,7 @@ public enum EndpointType {
     /**
      * @return parser for endpoints
      */
-    public Transformer<EndpointResponse, Bytes> getParser() {
+    public UnsafeTransformer<EndpointResponse, Bytes> getParser() {
         return parser;
     }
 

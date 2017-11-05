@@ -24,8 +24,6 @@ import org.junit.Test;
 import org.mockito.Mock;
 
 import com.pushtechnology.diffusion.transform.transformer.TransformationException;
-import com.pushtechnology.diffusion.transform.transformer.Transformer;
-import com.pushtechnology.diffusion.transform.transformer.Transformers;
 
 /**
  * Unit tests for {@link TransformingHandler}.
@@ -42,7 +40,7 @@ public final class TransformingHandlerTest {
     public void setUp() {
         initMocks(this);
 
-        handler = new TransformingHandler<>(Transformers.identity(), delegate);
+        handler = new TransformingHandler<>(value -> value, delegate);
     }
 
     @Test
@@ -73,7 +71,7 @@ public final class TransformingHandlerTest {
         final TransformationException e = new TransformationException("Intentionally created for test");
 
         handler = new TransformingHandler<>(
-            (Transformer<String, String>) value -> {
+            value -> {
                 throw e;
             },
             delegate);
