@@ -175,9 +175,15 @@ public final class EventedUpdateSourceImpl implements EventedUpdateSource {
         @Override
         public void onError(String topicPath, ErrorReason errorReason) {
             synchronized (mutex) {
-                state = State.ERRORED;
-                currentErrorReason = errorReason;
-                onErrorEventHandlers.forEach(handler -> handler.accept(errorReason));
+                if (errorReason == ErrorReason.SESSION_CLOSED) {
+                    state = State.CLOSED;
+                    onCloseEventHandlers.forEach(Runnable::run);
+                }
+                else {
+                    state = State.ERRORED;
+                    currentErrorReason = errorReason;
+                    onErrorEventHandlers.forEach(handler -> handler.accept(errorReason));
+                }
             }
         }
     }

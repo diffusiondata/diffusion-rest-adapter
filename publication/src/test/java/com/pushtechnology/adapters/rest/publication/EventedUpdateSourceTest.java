@@ -245,6 +245,23 @@ public final class EventedUpdateSourceTest {
     }
 
     @Test
+    public void onSessionClosedError() {
+        final EventedUpdateSource source = new EventedUpdateSourceImpl("a/cromulent/topic")
+            .onActive(activeEventHandler)
+            .onStandby(standbyEventHandler)
+            .onClose(closeEventHandler)
+            .onError(errorEventHandler)
+            .register(updateControl);
+
+        verify(updateControl).registerUpdateSource(eq("a/cromulent/topic"), updateSourceCaptor.capture());
+        updateSourceCaptor.getValue().onRegistered("a/cromulent/topic", registration);
+
+        updateSourceCaptor.getValue().onError("a/cromulent/topic", ErrorReason.SESSION_CLOSED);
+
+        verify(closeEventHandler).run();
+    }
+
+    @Test
     public void onErrorSetHandler() {
         final EventedUpdateSource source = new EventedUpdateSourceImpl("a/cromulent/topic")
             .onActive(activeEventHandler)
