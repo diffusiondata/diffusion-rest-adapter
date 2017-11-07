@@ -17,6 +17,8 @@ package com.pushtechnology.adapters.rest.session.management;
 
 import static com.pushtechnology.diffusion.client.session.SessionAttributes.Transport.WEBSOCKET;
 
+import java.util.concurrent.CompletableFuture;
+
 import javax.net.ssl.SSLContext;
 
 import org.picocontainer.annotations.Nullable;
@@ -78,6 +80,45 @@ public final class DiffusionSessionFactory {
         }
 
         return sessionFactory.open();
+    }
+
+    /**
+     * @return an open session
+     */
+    public CompletableFuture<Session> openSessionAsync(
+        DiffusionConfig diffusionConfig,
+        SessionLostListener sessionLostListener,
+        EventedSessionListener listener,
+        @Nullable SSLContext sslContext) {
+
+        SessionFactory sessionFactory = baseSessionFactory
+            .serverHost(diffusionConfig.getHost())
+            .serverPort(diffusionConfig.getPort())
+            .secureTransport(diffusionConfig.isSecure())
+            .connectionTimeout(diffusionConfig.getConnectionTimeout())
+            .reconnectionTimeout(diffusionConfig.getReconnectionTimeout())
+            .maximumMessageSize(diffusionConfig.getMaximumMessageSize())
+            .inputBufferSize(diffusionConfig.getInputBufferSize())
+            .outputBufferSize(diffusionConfig.getInputBufferSize())
+            .recoveryBufferSize(diffusionConfig.getRecoveryBufferSize());
+
+        sessionFactory = listener
+            .onSessionStateChange(sessionLostListener)
+            .addTo(sessionFactory);
+
+        if (sslContext != null) {
+            sessionFactory = sessionFactory.sslContext(sslContext);
+        }
+
+        if (diffusionConfig.getPrincipal() != null) {
+            sessionFactory = sessionFactory.principal(diffusionConfig.getPrincipal());
+
+            if (diffusionConfig.getPassword() != null) {
+                sessionFactory = sessionFactory.password(diffusionConfig.getPassword());
+            }
+        }
+
+        return sessionFactory.openAsync();
     }
 
     /**

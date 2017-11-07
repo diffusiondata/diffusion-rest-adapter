@@ -23,6 +23,9 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -90,6 +93,7 @@ public final class DiffusionSessionFactoryTest {
         when(sessionFactory.outputBufferSize(32000)).thenReturn(sessionFactory);
         when(sessionFactory.recoveryBufferSize(256)).thenReturn(sessionFactory);
         when(sessionFactory.open()).thenReturn(session);
+        when(sessionFactory.openAsync()).thenReturn(CompletableFuture.completedFuture(session));
     }
 
     @After
@@ -139,5 +143,49 @@ public final class DiffusionSessionFactoryTest {
         verify(sessionFactory).outputBufferSize(32000);
         verify(sessionFactory).recoveryBufferSize(256);
         verify(sessionFactory).open();
+    }
+
+    @Test
+    public void provideNoAuthAsync() throws ExecutionException, InterruptedException {
+        final DiffusionSessionFactory diffusionSessionFactory = new DiffusionSessionFactory(sessionFactory);
+
+        verify(sessionFactory).transports(WEBSOCKET);
+
+        assertEquals(session, diffusionSessionFactory.openSessionAsync(noAuthModel, lostListener, listener, null).get());
+
+        verify(sessionFactory).listener(isA(Session.Listener.class));
+        verify(sessionFactory).serverHost("localhost");
+        verify(sessionFactory).serverPort(8080);
+        verify(sessionFactory).secureTransport(false);
+        verify(sessionFactory).connectionTimeout(10000);
+        verify(sessionFactory).reconnectionTimeout(10000);
+        verify(sessionFactory).maximumMessageSize(32000);
+        verify(sessionFactory).inputBufferSize(32000);
+        verify(sessionFactory).outputBufferSize(32000);
+        verify(sessionFactory).recoveryBufferSize(256);
+        verify(sessionFactory).openAsync();
+    }
+
+    @Test
+    public void provideAuthAsync() throws ExecutionException, InterruptedException {
+        final DiffusionSessionFactory diffusionSessionFactory = new DiffusionSessionFactory(sessionFactory);
+
+        verify(sessionFactory).transports(WEBSOCKET);
+
+        assertEquals(session, diffusionSessionFactory.openSessionAsync(authModel, lostListener, listener, null).get());
+
+        verify(sessionFactory).listener(isA(Session.Listener.class));
+        verify(sessionFactory).serverHost("localhost");
+        verify(sessionFactory).serverPort(8080);
+        verify(sessionFactory).secureTransport(false);
+        verify(sessionFactory).principal("control");
+        verify(sessionFactory).password("password");
+        verify(sessionFactory).connectionTimeout(10000);
+        verify(sessionFactory).reconnectionTimeout(10000);
+        verify(sessionFactory).maximumMessageSize(32000);
+        verify(sessionFactory).inputBufferSize(32000);
+        verify(sessionFactory).outputBufferSize(32000);
+        verify(sessionFactory).recoveryBufferSize(256);
+        verify(sessionFactory).openAsync();
     }
 }
