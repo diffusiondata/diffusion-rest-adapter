@@ -15,7 +15,6 @@
 
 package com.pushtechnology.adapters.rest.polling;
 
-import java.io.IOException;
 import java.util.concurrent.Future;
 
 import javax.annotation.PostConstruct;
@@ -53,5 +52,5 @@ public interface EndpointClient extends AutoCloseable {
 
     @PreDestroy
     @Override
-    void close() throws IOException;
+    void close();
 }

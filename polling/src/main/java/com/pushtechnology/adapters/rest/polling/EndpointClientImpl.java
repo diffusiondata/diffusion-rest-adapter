@@ -109,9 +109,15 @@ public final class EndpointClientImpl implements EndpointClient {
 
     @PreDestroy
     @Override
-    public void close() throws IOException {
+    public void close() {
         LOG.debug("Closing endpoint client");
-        client.close();
+        try {
+            client.close();
+        }
+        catch (IOException e) {
+            // The implementation does not throw an IOException
+            throw new IllegalStateException(e);
+        }
         LOG.debug("Closed endpoint client");
     }
 }
