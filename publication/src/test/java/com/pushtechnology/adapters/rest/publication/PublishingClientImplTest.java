@@ -119,7 +119,7 @@ public final class PublishingClientImplTest {
         final SessionFactory factory = mock(SessionFactory.class);
         eventedListener.addTo(factory);
 
-        final ArgumentCaptor<Session.Listener> captor = new ArgumentCaptor<>();
+        final ArgumentCaptor<Session.Listener> captor = ArgumentCaptor.forClass(Session.Listener.class);
         verify(factory).listener(captor.capture());
         sessionListener = captor.getValue();
 
