@@ -20,8 +20,9 @@ import static java.util.stream.Collectors.toList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ScheduledExecutorService;
 
-import net.jcip.annotations.GuardedBy;
+import javax.net.ssl.SSLContext;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +30,20 @@ import org.slf4j.LoggerFactory;
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
+import com.pushtechnology.adapters.rest.polling.EndpointClientImpl;
+import com.pushtechnology.adapters.rest.polling.HttpClientFactory;
+import com.pushtechnology.adapters.rest.polling.ServiceSessionFactoryImpl;
+import com.pushtechnology.adapters.rest.publication.PublishingClientImpl;
+import com.pushtechnology.adapters.rest.session.management.DiffusionSessionFactory;
+import com.pushtechnology.adapters.rest.session.management.EventedSessionListener;
+import com.pushtechnology.adapters.rest.session.management.SSLContextFactory;
+import com.pushtechnology.adapters.rest.session.management.SessionLossHandler;
+import com.pushtechnology.adapters.rest.session.management.SessionLostListener;
+import com.pushtechnology.adapters.rest.topic.management.TopicManagementClientImpl;
 import com.pushtechnology.diffusion.client.session.Session;
+import com.pushtechnology.diffusion.client.session.SessionFactory;
+
+import net.jcip.annotations.GuardedBy;
 
 /**
  * The REST Adapter.
@@ -38,19 +52,51 @@ import com.pushtechnology.diffusion.client.session.Session;
  */
 public final class InternalRESTAdapter implements RESTAdapterListener {
     private static final Logger LOG = LoggerFactory.getLogger(InternalRESTAdapter.class);
+    private final ScheduledExecutorService executor;
+    private final SessionLossHandler sessionLossHandler;
+    private final ServiceListener serviceListener;
 
-    private final ContainerFactory containerFactory;
-
-    @GuardedBy("this")
-    private Components components;
+    private final EventedSessionListener eventedSessionListener = new EventedSessionListener();
+    private final HttpClientFactory httpClientFactory;
+    private final ServiceManager serviceManager = new ServiceManager();
+    private final SSLContextFactory sslContextFactory = new SSLContextFactory();
+    private final DiffusionSessionFactory sessionFactory;
     @GuardedBy("this")
     private Model currentModel;
+    @GuardedBy("this")
+    private EndpointClientImpl endpointClient;
+    @GuardedBy("this")
+    private SSLContext sslContext;
+    @GuardedBy("this")
+    private TopicManagementClientImpl topicManagementClient;
+    @GuardedBy("this")
+    private PublishingClientImpl publishingClient;
+    @GuardedBy("this")
+    private ServiceSessionStarterImpl serviceSessionStarter;
+    @GuardedBy("this")
+    private ServiceSessionFactoryImpl serviceSessionFactory;
+    @GuardedBy("this")
+    private ServiceManagerContext serviceManagerContext;
+    @GuardedBy("this")
+    private boolean isPolling;
+    @GuardedBy("this")
+    private Session diffusionSession;
 
     /**
      * Constructor.
      */
-    public InternalRESTAdapter(ContainerFactory containerFactory) {
-        this.containerFactory = containerFactory;
+    public InternalRESTAdapter(
+        ScheduledExecutorService executor,
+        SessionLossHandler sessionLossHandler,
+        ServiceListener serviceListener,
+        SessionFactory sessions,
+        HttpClientFactory httpClientFactory) {
+
+        this.executor = executor;
+        this.sessionLossHandler = sessionLossHandler;
+        this.serviceListener = serviceListener;
+        this.httpClientFactory = httpClientFactory;
+        sessionFactory = new DiffusionSessionFactory(sessions);
     }
 
     @Override
@@ -62,40 +108,78 @@ public final class InternalRESTAdapter implements RESTAdapterListener {
             return;
         }
 
-        if (isFirstConfiguration()) {
-            components = Components.create(containerFactory, model);
+        if (isNotPolling(model)) {
             currentModel = model;
-            return;
+            serviceManager.close();
+            endpointClient.close();
+            diffusionSession.close();
+            isPolling = false;
         }
+        else if (wasNotPolling() || hasTruststoreChanged(model) || hasDiffusionChanged(model)) {
+            currentModel = model;
+            sslContext = sslContextFactory.provide(model);
+            sessionFactory
+                .openSessionAsync(
+                    model.getDiffusion(),
+                    new SessionLostListener(sessionLossHandler),
+                    eventedSessionListener,
+                    sslContext)
+                .thenAccept(this::onSessionOpen);
+            isPolling = true;
+        }
+        else if (hasServiceSecurityChanged(model) || haveServicesChanged(model)) {
+            currentModel = model;
+            endpointClient = new EndpointClientImpl(model, sslContext, httpClientFactory);
+            serviceSessionStarter = new ServiceSessionStarterImpl(
+                topicManagementClient,
+                endpointClient,
+                publishingClient,
+                serviceListener);
+            serviceSessionFactory = new ServiceSessionFactoryImpl(
+                executor,
+                endpointClient,
+                new EndpointPollHandlerFactoryImpl(publishingClient));
+            serviceManagerContext = new ServiceManagerContext(
+                publishingClient,
+                serviceSessionFactory,
+                serviceSessionStarter);
 
-        currentModel = model;
-
-        if (isModelInactive(model)) {
-            components = components.switchToInactiveComponents();
-        }
-        else if (wasInactive() || hasTruststoreChanged(model)) {
-            components = components.reconfigureAll(containerFactory, model);
-        }
-        else if (hasDiffusionChanged(model)) {
-            components = components.reconfigureDiffusionSession(containerFactory, model);
-        }
-        else if (hasServiceSecurityChanged(model)) {
-            components = components.reconfigureHTTPClient(containerFactory, model);
-        }
-        else if (haveServicesChanged(model)) {
-            components = components.reconfigureServices(containerFactory, model);
+            isPolling = true;
+            endpointClient.start();
+            serviceManager.reconfigure(serviceManagerContext, model);
         }
     }
 
     @Override
     public void onSessionOpen(Session session) {
-        components = components.reconfigureHTTPClient(containerFactory, currentModel);
-        components = components.reconfigureServices(containerFactory, currentModel);
+        diffusionSession = session;
+        endpointClient = new EndpointClientImpl(currentModel, sslContext, httpClientFactory);
+        topicManagementClient = new TopicManagementClientImpl(diffusionSession);
+        publishingClient = new PublishingClientImpl(diffusionSession, eventedSessionListener);
+        endpointClient = new EndpointClientImpl(currentModel, sslContext, httpClientFactory);
+        serviceSessionStarter = new ServiceSessionStarterImpl(
+            topicManagementClient,
+            endpointClient,
+            publishingClient,
+            serviceListener);
+        serviceSessionFactory = new ServiceSessionFactoryImpl(
+            executor,
+            endpointClient,
+            new EndpointPollHandlerFactoryImpl(publishingClient));
+        serviceManagerContext = new ServiceManagerContext(
+            publishingClient,
+            serviceSessionFactory,
+            serviceSessionStarter);
+
+        endpointClient.start();
+        serviceManager.reconfigure(serviceManagerContext, currentModel);
     }
 
     @Override
     public void onSessionLost(Session session) {
-        components = components.switchToInactiveComponents();
+        serviceManager.close();
+        endpointClient.close();
+        diffusionSession.close();
     }
 
     @Override
@@ -103,12 +187,7 @@ public final class InternalRESTAdapter implements RESTAdapterListener {
     }
 
     @GuardedBy("this")
-    private boolean isFirstConfiguration() {
-        return currentModel == null;
-    }
-
-    @GuardedBy("this")
-    private boolean isModelInactive(Model model) {
+    private boolean isNotPolling(Model model) {
         final DiffusionConfig diffusionConfig = model.getDiffusion();
         final List<ServiceConfig> services = model.getServices();
 
@@ -119,8 +198,8 @@ public final class InternalRESTAdapter implements RESTAdapterListener {
     }
 
     @GuardedBy("this")
-    private boolean wasInactive() {
-        return !components.isActive();
+    private boolean wasNotPolling() {
+        return !isPolling;
     }
 
     @GuardedBy("this")
@@ -138,12 +217,12 @@ public final class InternalRESTAdapter implements RESTAdapterListener {
             .filter(securityConfig -> securityConfig.getBasic() != null)
             .collect(toList())
             .equals(newModel
-                        .getServices()
-                        .stream()
-                        .map(ServiceConfig::getSecurity)
-                        .filter(Objects::nonNull)
-                        .filter(securityConfig -> securityConfig.getBasic() != null)
-                        .collect(toList()));
+                .getServices()
+                .stream()
+                .map(ServiceConfig::getSecurity)
+                .filter(Objects::nonNull)
+                .filter(securityConfig -> securityConfig.getBasic() != null)
+                .collect(toList()));
     }
 
     @GuardedBy("this")
