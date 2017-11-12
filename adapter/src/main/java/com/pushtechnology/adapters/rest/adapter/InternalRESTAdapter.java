@@ -78,7 +78,7 @@ public final class InternalRESTAdapter implements RESTAdapterListener {
     @GuardedBy("this")
     private ServiceManagerContext serviceManagerContext;
     @GuardedBy("this")
-    private boolean isPolling;
+    private State state = State.STANDBY;
     @GuardedBy("this")
     private Session diffusionSession;
 
@@ -100,22 +100,28 @@ public final class InternalRESTAdapter implements RESTAdapterListener {
     }
 
     @Override
-    public void onReconfiguration(Model model) {
+    public synchronized void onReconfiguration(Model model) {
         LOG.warn("Model {}", model);
 
         if (!model.isActive()) {
+            shutdownSession();
+
+            state = State.STOPPED;
+
             // TODO
             return;
         }
 
         if (isNotPolling(model)) {
             currentModel = model;
-            serviceManager.close();
+            serviceManager.reconfigure(serviceManagerContext, currentModel);
             endpointClient.close();
-            diffusionSession.close();
-            isPolling = false;
+
+            state = State.STANDBY;
         }
-        else if (wasNotPolling() || hasTruststoreChanged(model) || hasDiffusionChanged(model)) {
+        else if (state == State.STANDBY || hasTruststoreChanged(model) || hasDiffusionChanged(model)) {
+            shutdownSession();
+
             currentModel = model;
             sslContext = sslContextFactory.provide(model);
             sessionFactory
@@ -125,9 +131,10 @@ public final class InternalRESTAdapter implements RESTAdapterListener {
                     eventedSessionListener,
                     sslContext)
                 .thenAccept(this::onSessionOpen);
-            isPolling = true;
+
+            state = State.CONNECTING_TO_DIFFUSION;
         }
-        else if (hasServiceSecurityChanged(model) || haveServicesChanged(model)) {
+        else if (state == State.ACTIVE && (hasServiceSecurityChanged(model) || haveServicesChanged(model))) {
             currentModel = model;
             endpointClient = new EndpointClientImpl(model, sslContext, httpClientFactory);
             serviceSessionStarter = new ServiceSessionStarterImpl(
@@ -144,14 +151,21 @@ public final class InternalRESTAdapter implements RESTAdapterListener {
                 serviceSessionFactory,
                 serviceSessionStarter);
 
-            isPolling = true;
             endpointClient.start();
             serviceManager.reconfigure(serviceManagerContext, model);
         }
     }
 
+    private void shutdownSession() {
+        if (state == State.ACTIVE) {
+            serviceManager.close();
+            endpointClient.close();
+            diffusionSession.close();
+        }
+    }
+
     @Override
-    public void onSessionOpen(Session session) {
+    public synchronized void onSessionOpen(Session session) {
         diffusionSession = session;
         endpointClient = new EndpointClientImpl(currentModel, sslContext, httpClientFactory);
         topicManagementClient = new TopicManagementClientImpl(diffusionSession);
@@ -173,21 +187,23 @@ public final class InternalRESTAdapter implements RESTAdapterListener {
 
         endpointClient.start();
         serviceManager.reconfigure(serviceManagerContext, currentModel);
+        state = State.ACTIVE;
     }
 
     @Override
-    public void onSessionLost(Session session) {
-        serviceManager.close();
-        endpointClient.close();
-        diffusionSession.close();
+    public synchronized void onSessionLost(Session session) {
+        shutdownSession();
+        state = State.RECOVERING;
     }
 
     @Override
-    public void onSessionClosed(Session session) {
+    public synchronized void onSessionClosed(Session session) {
+        diffusionSession = null;
+        state = State.RECOVERING;
     }
 
     @GuardedBy("this")
-    private boolean isNotPolling(Model model) {
+    private synchronized boolean isNotPolling(Model model) {
         final DiffusionConfig diffusionConfig = model.getDiffusion();
         final List<ServiceConfig> services = model.getServices();
 
@@ -195,11 +211,6 @@ public final class InternalRESTAdapter implements RESTAdapterListener {
             services == null ||
             services.size() == 0 ||
             services.stream().map(ServiceConfig::getEndpoints).mapToInt(Collection::size).sum() == 0;
-    }
-
-    @GuardedBy("this")
-    private boolean wasNotPolling() {
-        return !isPolling;
     }
 
     @GuardedBy("this")
@@ -237,5 +248,13 @@ public final class InternalRESTAdapter implements RESTAdapterListener {
         final List<ServiceConfig> oldServices = currentModel.getServices();
 
         return !oldServices.equals(newServices);
+    }
+
+    private enum State {
+        STANDBY,
+        CONNECTING_TO_DIFFUSION,
+        ACTIVE,
+        RECOVERING,
+        STOPPED
     }
 }
