@@ -106,9 +106,14 @@ public final class InternalRESTAdapter implements RESTAdapterListener {
         if (!model.isActive()) {
             shutdownSession();
 
-            state = State.STOPPED;
+            if (state == State.CONNECTING_TO_DIFFUSION) {
+                state = State.STOPPING;
+            }
+            else {
+                state = State.STOPPED;
+            }
 
-            // TODO
+            // TODO: Stop
             return;
         }
 
@@ -136,23 +141,8 @@ public final class InternalRESTAdapter implements RESTAdapterListener {
         }
         else if (state == State.ACTIVE && (hasServiceSecurityChanged(model) || haveServicesChanged(model))) {
             currentModel = model;
-            endpointClient = new EndpointClientImpl(model, sslContext, httpClientFactory);
-            serviceSessionStarter = new ServiceSessionStarterImpl(
-                topicManagementClient,
-                endpointClient,
-                publishingClient,
-                serviceListener);
-            serviceSessionFactory = new ServiceSessionFactoryImpl(
-                executor,
-                endpointClient,
-                new EndpointPollHandlerFactoryImpl(publishingClient));
-            serviceManagerContext = new ServiceManagerContext(
-                publishingClient,
-                serviceSessionFactory,
-                serviceSessionStarter);
 
-            endpointClient.start();
-            serviceManager.reconfigure(serviceManagerContext, model);
+            reconfigureServiceManager();
         }
     }
 
@@ -166,10 +156,20 @@ public final class InternalRESTAdapter implements RESTAdapterListener {
 
     @Override
     public synchronized void onSessionOpen(Session session) {
+        if (state == State.STOPPING) {
+            state = State.STOPPED;
+            // TODO: Stop
+            return;
+        }
+
         diffusionSession = session;
-        endpointClient = new EndpointClientImpl(currentModel, sslContext, httpClientFactory);
         topicManagementClient = new TopicManagementClientImpl(diffusionSession);
         publishingClient = new PublishingClientImpl(diffusionSession, eventedSessionListener);
+        reconfigureServiceManager();
+        state = State.ACTIVE;
+    }
+
+    private void reconfigureServiceManager() {
         endpointClient = new EndpointClientImpl(currentModel, sslContext, httpClientFactory);
         serviceSessionStarter = new ServiceSessionStarterImpl(
             topicManagementClient,
@@ -187,7 +187,6 @@ public final class InternalRESTAdapter implements RESTAdapterListener {
 
         endpointClient.start();
         serviceManager.reconfigure(serviceManagerContext, currentModel);
-        state = State.ACTIVE;
     }
 
     @Override
@@ -255,6 +254,7 @@ public final class InternalRESTAdapter implements RESTAdapterListener {
         CONNECTING_TO_DIFFUSION,
         ACTIVE,
         RECOVERING,
+        STOPPING,
         STOPPED
     }
 }
