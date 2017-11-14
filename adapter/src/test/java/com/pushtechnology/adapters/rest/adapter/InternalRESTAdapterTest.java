@@ -27,6 +27,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
@@ -197,5 +198,34 @@ public final class InternalRESTAdapterTest {
 
         verify(session).close();
         verify(httpClient).close();
+    }
+
+    @Test
+    public void startAndStop() throws Exception {
+        final CompletableFuture<Session> sessionFuture = new CompletableFuture<>();
+        when(sessionFactory.openAsync()).thenReturn(sessionFuture);
+
+        restAdapter.onReconfiguration(model);
+
+        verify(sessionFactory).serverHost("localhost");
+        verify(sessionFactory).serverPort(8080);
+        verify(sessionFactory).transports(WEBSOCKET);
+        verify(sessionFactory).secureTransport(false);
+        verify(sessionFactory).connectionTimeout(10000);
+        verify(sessionFactory).reconnectionTimeout(10000);
+        verify(sessionFactory).maximumMessageSize(32000);
+        verify(sessionFactory).inputBufferSize(32000);
+        verify(sessionFactory).outputBufferSize(32000);
+        verify(sessionFactory).recoveryBufferSize(256);
+        verify(sessionFactory).listener(isNotNull());
+        verify(sessionFactory).principal("control");
+        verify(sessionFactory).password("password");
+        verify(sessionFactory).openAsync();
+
+        restAdapter.onReconfiguration(inactiveModel);
+
+        sessionFuture.complete(session);
+
+        verify(session).close();
     }
 }

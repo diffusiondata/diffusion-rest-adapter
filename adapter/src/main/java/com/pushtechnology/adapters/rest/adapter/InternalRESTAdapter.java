@@ -159,6 +159,8 @@ public final class InternalRESTAdapter implements RESTAdapterListener {
     public synchronized void onSessionOpen(Session session) {
         if (state == State.STOPPING) {
             state = State.STOPPED;
+
+            session.close();
             // TODO: Stop
             return;
         }
