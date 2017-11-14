@@ -129,6 +129,9 @@ public final class InternalRESTAdapter implements RESTAdapterListener {
 
             currentModel = model;
             sslContext = sslContextFactory.provide(model);
+
+            state = State.CONNECTING_TO_DIFFUSION;
+
             sessionFactory
                 .openSessionAsync(
                     model.getDiffusion(),
@@ -136,8 +139,6 @@ public final class InternalRESTAdapter implements RESTAdapterListener {
                     eventedSessionListener,
                     sslContext)
                 .thenAccept(this::onSessionOpen);
-
-            state = State.CONNECTING_TO_DIFFUSION;
         }
         else if (state == State.ACTIVE && (hasServiceSecurityChanged(model) || haveServicesChanged(model))) {
             currentModel = model;

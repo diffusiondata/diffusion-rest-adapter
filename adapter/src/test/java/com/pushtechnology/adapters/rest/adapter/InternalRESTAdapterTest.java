@@ -76,41 +76,47 @@ public final class InternalRESTAdapterTest {
     @Mock
     private TopicUpdateControl updateControl;
 
+    private final DiffusionConfig diffusionConfig = DiffusionConfig
+        .builder()
+        .host("localhost")
+        .port(8080)
+        .principal("control")
+        .password("password")
+        .connectionTimeout(10000)
+        .reconnectionTimeout(10000)
+        .maximumMessageSize(32000)
+        .inputBufferSize(32000)
+        .outputBufferSize(32000)
+        .recoveryBufferSize(256)
+        .build();
+    private final ServiceConfig serviceConfig = ServiceConfig
+        .builder()
+        .name("service-0")
+        .host("localhost")
+        .secure(false)
+        .endpoints(singletonList(
+            EndpointConfig
+                .builder()
+                .name("increment")
+                .topicPath("increment")
+                .url("/rest/increment")
+                .produces("json")
+                .build()))
+        .topicPathRoot("root")
+        .pollPeriod(5000)
+        .build();
     private final Model model = Model
         .builder()
         .active(true)
-        .diffusion(
-            DiffusionConfig
-                .builder()
-                .host("localhost")
-                .port(8080)
-                .principal("control")
-                .password("password")
-                .connectionTimeout(10000)
-                .reconnectionTimeout(10000)
-                .maximumMessageSize(32000)
-                .inputBufferSize(32000)
-                .outputBufferSize(32000)
-                .recoveryBufferSize(256)
-                .build())
-        .services(singletonList(
-            ServiceConfig
-                .builder()
-                .name("service-0")
-                .host("localhost")
-                .secure(false)
-                .endpoints(singletonList(
-                    EndpointConfig
-                        .builder()
-                        .name("increment")
-                        .topicPath("increment")
-                        .url("/rest/increment")
-                        .produces("json")
-                        .build()))
-                .topicPathRoot("root")
-                .pollPeriod(5000)
-                .build()))
-            .build();
+        .diffusion(diffusionConfig)
+        .services(singletonList(serviceConfig))
+        .build();
+    private final Model inactiveModel = Model
+        .builder()
+        .active(false)
+        .diffusion(diffusionConfig)
+        .services(singletonList(serviceConfig))
+        .build();
 
     private InternalRESTAdapter restAdapter;
 
@@ -161,7 +167,7 @@ public final class InternalRESTAdapterTest {
     }
 
     @Test
-    public void start() throws Exception {
+    public void startConnectAndStop() throws Exception {
         restAdapter.onReconfiguration(model);
 
         verify(sessionFactory).serverHost("localhost");
@@ -186,5 +192,10 @@ public final class InternalRESTAdapterTest {
         verify(session).feature(TopicUpdateControl.class);
         verify(topicControl).removeTopicsWithSession(eq("root"), isNotNull());
         verify(updateControl).registerUpdateSource(eq("root"), isNotNull());
+
+        restAdapter.onReconfiguration(inactiveModel);
+
+        verify(session).close();
+        verify(httpClient).close();
     }
 }
