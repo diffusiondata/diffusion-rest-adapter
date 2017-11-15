@@ -145,6 +145,9 @@ public final class InternalRESTAdapter implements RESTAdapterListener {
 
             reconfigureServiceManager();
         }
+        else {
+            currentModel = model;
+        }
     }
 
     private void shutdownSession() {
