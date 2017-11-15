@@ -119,8 +119,7 @@ public final class InternalRESTAdapter implements RESTAdapterListener {
 
         if (isNotPolling(model)) {
             currentModel = model;
-            serviceManager.reconfigure(serviceManagerContext, currentModel);
-            endpointClient.close();
+            shutdownSession();
 
             state = State.STANDBY;
         }
@@ -165,6 +164,10 @@ public final class InternalRESTAdapter implements RESTAdapterListener {
 
             session.close();
             // TODO: Stop
+            return;
+        }
+        else if (state == State.STANDBY) {
+            session.close();
             return;
         }
 

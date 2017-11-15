@@ -16,6 +16,7 @@
 package com.pushtechnology.adapters.rest.adapter;
 
 import static com.pushtechnology.diffusion.client.session.SessionAttributes.Transport.WEBSOCKET;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.concurrent.CompletableFuture.completedFuture;
 import static org.mockito.ArgumentMatchers.any;
@@ -134,6 +135,12 @@ public final class InternalRESTAdapterTest {
         .active(true)
         .diffusion(diffusionConfig)
         .services(singletonList(serviceConfig1))
+        .build();
+    private final Model model2 = Model
+        .builder()
+        .active(true)
+        .diffusion(diffusionConfig)
+        .services(emptyList())
         .build();
     private final Model inactiveModel = Model
         .builder()
@@ -323,5 +330,72 @@ public final class InternalRESTAdapterTest {
         verify(session).feature(TopicUpdateControl.class);
         verify(topicControl).removeTopicsWithSession(eq("root2"), isNotNull());
         verify(updateControl).registerUpdateSource(eq("root2"), isNotNull());
+    }
+
+    @Test
+    public void startWithoutServices() throws Exception {
+        restAdapter.onReconfiguration(model2);
+    }
+
+    @Test
+    public void startConnectAndRemoveServices() throws Exception {
+        restAdapter.onReconfiguration(model0);
+
+        verify(sessionFactory).serverHost("localhost");
+        verify(sessionFactory).serverPort(8080);
+        verify(sessionFactory).transports(WEBSOCKET);
+        verify(sessionFactory).secureTransport(false);
+        verify(sessionFactory).connectionTimeout(10000);
+        verify(sessionFactory).reconnectionTimeout(10000);
+        verify(sessionFactory).maximumMessageSize(32000);
+        verify(sessionFactory).inputBufferSize(32000);
+        verify(sessionFactory).outputBufferSize(32000);
+        verify(sessionFactory).recoveryBufferSize(256);
+        verify(sessionFactory).listener(isNotNull());
+        verify(sessionFactory).principal("control");
+        verify(sessionFactory).password("password");
+        verify(sessionFactory).openAsync();
+
+        verify(httpClientFactory).create(model0, null);
+        verify(httpClient).start();
+
+        verify(session).feature(TopicControl.class);
+        verify(session).feature(TopicUpdateControl.class);
+        verify(topicControl).removeTopicsWithSession(eq("root"), isNotNull());
+        verify(updateControl).registerUpdateSource(eq("root"), isNotNull());
+
+        restAdapter.onReconfiguration(model2);
+
+        verify(session).close();
+        verify(httpClient).close();
+    }
+
+    @Test
+    public void startRemoveServicesAndConnect() throws Exception {
+        final CompletableFuture<Session> sessionFuture = new CompletableFuture<>();
+        when(sessionFactory.openAsync()).thenReturn(sessionFuture);
+
+        restAdapter.onReconfiguration(model0);
+
+        verify(sessionFactory).serverHost("localhost");
+        verify(sessionFactory).serverPort(8080);
+        verify(sessionFactory).transports(WEBSOCKET);
+        verify(sessionFactory).secureTransport(false);
+        verify(sessionFactory).connectionTimeout(10000);
+        verify(sessionFactory).reconnectionTimeout(10000);
+        verify(sessionFactory).maximumMessageSize(32000);
+        verify(sessionFactory).inputBufferSize(32000);
+        verify(sessionFactory).outputBufferSize(32000);
+        verify(sessionFactory).recoveryBufferSize(256);
+        verify(sessionFactory).listener(isNotNull());
+        verify(sessionFactory).principal("control");
+        verify(sessionFactory).password("password");
+        verify(sessionFactory).openAsync();
+
+        restAdapter.onReconfiguration(model2);
+
+        sessionFuture.complete(session);
+
+        verify(session).close();
     }
 }
