@@ -78,6 +78,8 @@ public final class InternalRESTAdapterTest {
     private TopicControl topicControl;
     @Mock
     private TopicUpdateControl updateControl;
+    @Mock
+    private Runnable shutdownHandler;
 
     private final DiffusionConfig diffusionConfig = DiffusionConfig
         .builder()
@@ -164,7 +166,6 @@ public final class InternalRESTAdapterTest {
         when(sessionFactory.outputBufferSize(anyInt())).thenReturn(sessionFactory);
         when(sessionFactory.recoveryBufferSize(anyInt())).thenReturn(sessionFactory);
         when(sessionFactory.listener(isNotNull())).thenReturn(sessionFactory);
-        when(sessionFactory.sslContext(isNotNull())).thenReturn(sessionFactory);
         when(sessionFactory.principal(isNotNull())).thenReturn(sessionFactory);
         when(sessionFactory.password(isNotNull())).thenReturn(sessionFactory);
         when(sessionFactory.openAsync()).thenReturn(completedFuture(session));
@@ -179,7 +180,8 @@ public final class InternalRESTAdapterTest {
             sessionLossHandler,
             serviceListener,
             sessionFactory,
-            httpClientFactory);
+            httpClientFactory,
+            shutdownHandler);
 
         verify(sessionFactory).transports(WEBSOCKET);
     }
@@ -194,7 +196,8 @@ public final class InternalRESTAdapterTest {
             session,
             httpClientFactory,
             topicControl,
-            updateControl);
+            updateControl,
+            shutdownHandler);
     }
 
     @Test
@@ -228,6 +231,7 @@ public final class InternalRESTAdapterTest {
 
         verify(session).close();
         verify(httpClient).close();
+        verify(shutdownHandler).run();
     }
 
     @Test
@@ -257,6 +261,7 @@ public final class InternalRESTAdapterTest {
         sessionFuture.complete(session);
 
         verify(session).close();
+        verify(shutdownHandler).run();
     }
 
     @Test

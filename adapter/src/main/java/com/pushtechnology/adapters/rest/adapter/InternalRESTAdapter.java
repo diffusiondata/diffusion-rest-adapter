@@ -61,6 +61,7 @@ public final class InternalRESTAdapter implements RESTAdapterListener {
     private final ServiceManager serviceManager = new ServiceManager();
     private final SSLContextFactory sslContextFactory = new SSLContextFactory();
     private final DiffusionSessionFactory sessionFactory;
+    private final Runnable shutdownHandler;
     @GuardedBy("this")
     private Model currentModel;
     @GuardedBy("this")
@@ -90,13 +91,15 @@ public final class InternalRESTAdapter implements RESTAdapterListener {
         SessionLossHandler sessionLossHandler,
         ServiceListener serviceListener,
         SessionFactory sessions,
-        HttpClientFactory httpClientFactory) {
+        HttpClientFactory httpClientFactory,
+        Runnable shutdownHandler) {
 
         this.executor = executor;
         this.sessionLossHandler = sessionLossHandler;
         this.serviceListener = serviceListener;
         this.httpClientFactory = httpClientFactory;
         sessionFactory = new DiffusionSessionFactory(sessions);
+        this.shutdownHandler = shutdownHandler;
     }
 
     @Override
@@ -111,9 +114,9 @@ public final class InternalRESTAdapter implements RESTAdapterListener {
             }
             else {
                 state = State.STOPPED;
+                shutdownHandler.run();
             }
 
-            // TODO: Stop
             return;
         }
 
@@ -163,7 +166,7 @@ public final class InternalRESTAdapter implements RESTAdapterListener {
             state = State.STOPPED;
 
             session.close();
-            // TODO: Stop
+            shutdownHandler.run();
             return;
         }
         else if (state == State.STANDBY) {
