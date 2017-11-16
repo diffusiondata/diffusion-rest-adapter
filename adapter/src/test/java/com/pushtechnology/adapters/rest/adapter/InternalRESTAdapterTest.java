@@ -403,4 +403,68 @@ public final class InternalRESTAdapterTest {
 
         verify(session).close();
     }
+
+    @Test
+    public void startConnectAndClose() throws Exception {
+        restAdapter.onReconfiguration(model0);
+
+        verify(sessionFactory).serverHost("localhost");
+        verify(sessionFactory).serverPort(8080);
+        verify(sessionFactory).transports(WEBSOCKET);
+        verify(sessionFactory).secureTransport(false);
+        verify(sessionFactory).connectionTimeout(10000);
+        verify(sessionFactory).reconnectionTimeout(10000);
+        verify(sessionFactory).maximumMessageSize(32000);
+        verify(sessionFactory).inputBufferSize(32000);
+        verify(sessionFactory).outputBufferSize(32000);
+        verify(sessionFactory).recoveryBufferSize(256);
+        verify(sessionFactory).listener(isNotNull());
+        verify(sessionFactory).principal("control");
+        verify(sessionFactory).password("password");
+        verify(sessionFactory).openAsync();
+
+        verify(httpClientFactory).create(model0, null);
+        verify(httpClient).start();
+
+        verify(session).feature(TopicControl.class);
+        verify(session).feature(TopicUpdateControl.class);
+        verify(topicControl).removeTopicsWithSession(eq("root"), isNotNull());
+        verify(updateControl).registerUpdateSource(eq("root"), isNotNull());
+
+        restAdapter.close();
+
+        verify(session).close();
+        verify(httpClient).close();
+        verify(shutdownHandler).run();
+    }
+
+    @Test
+    public void startAndClose() throws Exception {
+        final CompletableFuture<Session> sessionFuture = new CompletableFuture<>();
+        when(sessionFactory.openAsync()).thenReturn(sessionFuture);
+
+        restAdapter.onReconfiguration(model0);
+
+        verify(sessionFactory).serverHost("localhost");
+        verify(sessionFactory).serverPort(8080);
+        verify(sessionFactory).transports(WEBSOCKET);
+        verify(sessionFactory).secureTransport(false);
+        verify(sessionFactory).connectionTimeout(10000);
+        verify(sessionFactory).reconnectionTimeout(10000);
+        verify(sessionFactory).maximumMessageSize(32000);
+        verify(sessionFactory).inputBufferSize(32000);
+        verify(sessionFactory).outputBufferSize(32000);
+        verify(sessionFactory).recoveryBufferSize(256);
+        verify(sessionFactory).listener(isNotNull());
+        verify(sessionFactory).principal("control");
+        verify(sessionFactory).password("password");
+        verify(sessionFactory).openAsync();
+
+        restAdapter.close();
+
+        sessionFuture.complete(session);
+
+        verify(session).close();
+        verify(shutdownHandler).run();
+    }
 }

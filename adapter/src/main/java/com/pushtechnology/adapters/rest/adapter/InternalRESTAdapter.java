@@ -50,7 +50,7 @@ import net.jcip.annotations.GuardedBy;
  *
  * @author Matt Champion 07/10/2017
  */
-public final class InternalRESTAdapter implements RESTAdapterListener {
+public final class InternalRESTAdapter implements RESTAdapterListener, AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(InternalRESTAdapter.class);
     private final ScheduledExecutorService executor;
     private final SessionLossHandler sessionLossHandler;
@@ -259,6 +259,22 @@ public final class InternalRESTAdapter implements RESTAdapterListener {
         final List<ServiceConfig> oldServices = currentModel.getServices();
 
         return !oldServices.equals(newServices);
+    }
+
+    @Override
+    public void close() {
+        if (state == State.STOPPED || state == State.STOPPING) {
+            return;
+        }
+
+        shutdownSession();
+        if (state == State.CONNECTING_TO_DIFFUSION) {
+            state = State.STOPPING;
+        }
+        else {
+            state = State.STOPPED;
+            shutdownHandler.run();
+        }
     }
 
     private enum State {
