@@ -26,14 +26,16 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.pushtechnology.adapters.rest.adapter.RESTAdapter;
+import com.pushtechnology.adapters.rest.adapter.InternalRESTAdapter;
 import com.pushtechnology.adapters.rest.adapter.ServiceListener;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.store.ModelStore;
 import com.pushtechnology.adapters.rest.model.store.PollingPersistedModelStore;
 import com.pushtechnology.adapters.rest.persistence.FileSystemPersistence;
 import com.pushtechnology.adapters.rest.persistence.Persistence;
+import com.pushtechnology.adapters.rest.polling.HttpClientFactoryImpl;
 import com.pushtechnology.adapters.rest.session.management.SessionLossHandler;
+import com.pushtechnology.diffusion.client.Diffusion;
 
 import net.jcip.annotations.ThreadSafe;
 
@@ -47,7 +49,7 @@ public final class RESTAdapterClient {
     private static final Logger LOG = LoggerFactory.getLogger(RESTAdapterClient.class);
 
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
-    private final RESTAdapter restAdapter;
+    private final InternalRESTAdapter restAdapter;
     private final ModelStore modelStore;
     private final Runnable shutdownHandler;
 
@@ -58,13 +60,19 @@ public final class RESTAdapterClient {
             ServiceListener serviceListener) {
         this.modelStore = modelStore;
         this.shutdownHandler = shutdownHandler;
-        restAdapter = new RESTAdapter(
+        restAdapter = new InternalRESTAdapter(
             executor,
+            Diffusion.sessions(),
+            new HttpClientFactoryImpl(),
+            serviceListener,
             () -> {
                 isRunning.set(false);
                 shutdownHandler.run();
             },
-            serviceListener);
+            () -> {
+                isRunning.set(false);
+                shutdownHandler.run();
+            });
     }
 
     private RESTAdapterClient(
@@ -75,14 +83,16 @@ public final class RESTAdapterClient {
         ServiceListener serviceListener) {
         this.modelStore = modelStore;
         this.shutdownHandler = shutdownHandler;
-        restAdapter = new RESTAdapter(
+        restAdapter = new InternalRESTAdapter(
             executor,
+            Diffusion.sessions(),
+            new HttpClientFactoryImpl(),
+            serviceListener,
+            lossHandler,
             () -> {
                 isRunning.set(false);
                 shutdownHandler.run();
-            },
-            lossHandler,
-            serviceListener);
+            });
     }
 
     /**
@@ -101,7 +111,7 @@ public final class RESTAdapterClient {
         LOG.debug("Running REST adapter client with model : {}", newModel);
 
         try {
-            restAdapter.reconfigure(newModel);
+            restAdapter.onReconfiguration(newModel);
         }
         catch (IllegalArgumentException e) {
             LOG.warn("The new model is not valid", e);

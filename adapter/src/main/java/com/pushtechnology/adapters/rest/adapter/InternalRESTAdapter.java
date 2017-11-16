@@ -88,10 +88,10 @@ public final class InternalRESTAdapter implements RESTAdapterListener, AutoClose
      */
     public InternalRESTAdapter(
         ScheduledExecutorService executor,
-        SessionLossHandler sessionLossHandler,
-        ServiceListener serviceListener,
         SessionFactory sessions,
         HttpClientFactory httpClientFactory,
+        ServiceListener serviceListener,
+        SessionLossHandler sessionLossHandler,
         Runnable shutdownHandler) {
 
         this.executor = executor;
