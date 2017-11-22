@@ -73,12 +73,6 @@ public final class InternalRESTAdapter implements RESTAdapterListener, AutoClose
     @GuardedBy("this")
     private PublishingClientImpl publishingClient;
     @GuardedBy("this")
-    private ServiceSessionStarterImpl serviceSessionStarter;
-    @GuardedBy("this")
-    private ServiceSessionFactoryImpl serviceSessionFactory;
-    @GuardedBy("this")
-    private ServiceManagerContext serviceManagerContext;
-    @GuardedBy("this")
     private State state = State.STANDBY;
     @GuardedBy("this")
     private Session diffusionSession;
@@ -183,16 +177,16 @@ public final class InternalRESTAdapter implements RESTAdapterListener, AutoClose
 
     private void reconfigureServiceManager() {
         endpointClient = new EndpointClientImpl(currentModel, sslContext, httpClientFactory);
-        serviceSessionStarter = new ServiceSessionStarterImpl(
+        final ServiceSessionStarterImpl serviceSessionStarter = new ServiceSessionStarterImpl(
             topicManagementClient,
             endpointClient,
             publishingClient,
             serviceListener);
-        serviceSessionFactory = new ServiceSessionFactoryImpl(
+        final ServiceSessionFactoryImpl serviceSessionFactory = new ServiceSessionFactoryImpl(
             executor,
             endpointClient,
             new EndpointPollHandlerFactoryImpl(publishingClient));
-        serviceManagerContext = new ServiceManagerContext(
+        final ServiceManagerContext serviceManagerContext = new ServiceManagerContext(
             publishingClient,
             serviceSessionFactory,
             serviceSessionStarter);
