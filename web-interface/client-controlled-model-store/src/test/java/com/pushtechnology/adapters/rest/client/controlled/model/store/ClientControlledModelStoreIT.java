@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Push Technology Ltd.
+ * Copyright (C) 2017 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
 
 package com.pushtechnology.adapters.rest.client.controlled.model.store;
 
-import static com.pushtechnology.adapters.rest.client.controlled.model.store.ClientControlledModelStore.create;
 import static java.util.concurrent.Executors.newSingleThreadScheduledExecutor;
 import static org.mockito.MockitoAnnotations.initMocks;
 
@@ -49,7 +48,9 @@ public final class ClientControlledModelStoreIT {
 
     @Test
     public void startClose() {
-        final ClientControlledModelStore modelStore = create(newSingleThreadScheduledExecutor(), diffusionConfig, null);
+        final ClientControlledModelStore modelStore = new ClientControlledModelStore(
+            newSingleThreadScheduledExecutor(),
+            diffusionConfig);
 
         modelStore.start();
 

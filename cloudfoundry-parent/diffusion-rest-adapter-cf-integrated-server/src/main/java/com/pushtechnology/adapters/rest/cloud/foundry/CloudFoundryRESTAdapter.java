@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Push Technology Ltd.
+ * Copyright (C) 2017 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,11 @@ package com.pushtechnology.adapters.rest.cloud.foundry;
 import java.io.IOException;
 
 import javax.naming.NamingException;
-import javax.net.ssl.SSLContext;
 
 import com.pushtechnology.adapters.rest.cloud.foundry.vcap.DiffusionCloudCredentials;
 import com.pushtechnology.adapters.rest.cloud.foundry.vcap.VCAP;
 import com.pushtechnology.adapters.rest.integrated.server.RESTAdapterIntegratedServer;
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
-import com.pushtechnology.adapters.rest.session.management.SSLContextFactory;
 
 /**
  * Entry point for Diffusion Cloud Foundry REST Adapter.
@@ -49,8 +47,6 @@ public final class CloudFoundryRESTAdapter {
             .getDiffusionCloud()
             .getCredentials();
 
-        final SSLContext sslContext = SSLContextFactory.loadFromResource("diffusionCloudTruststore.jks");
-
         RESTAdapterIntegratedServer
             .create(
                 VCAP.getPort(),
@@ -60,7 +56,7 @@ public final class CloudFoundryRESTAdapter {
                     .secure(true)
                     .principal(diffusionCloudCredentials.getPrincipal())
                     .password(diffusionCloudCredentials.getCredentials()),
-                sslContext)
+                "diffusionCloudTruststore.jks")
             .start();
     }
 }

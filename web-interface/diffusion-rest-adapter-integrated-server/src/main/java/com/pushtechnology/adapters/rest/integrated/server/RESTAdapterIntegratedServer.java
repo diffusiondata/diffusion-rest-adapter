@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Push Technology Ltd.
+ * Copyright (C) 2017 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import java.nio.file.StandardOpenOption;
 import java.util.concurrent.ScheduledExecutorService;
 
 import javax.naming.NamingException;
-import javax.net.ssl.SSLContext;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.gzip.GzipHandler;
@@ -40,6 +39,7 @@ import com.pushtechnology.adapters.rest.client.RESTAdapterClient;
 import com.pushtechnology.adapters.rest.client.controlled.model.store.ClientControlledModelStore;
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig.DiffusionConfigBuilder;
+import com.pushtechnology.diffusion.client.session.Session;
 
 /**
  * Diffusion REST Adapter Integrated Server.
@@ -112,7 +112,7 @@ public final class RESTAdapterIntegratedServer implements AutoCloseable {
     public static RESTAdapterIntegratedServer create(
         int port,
         DiffusionConfigBuilder baseConfig,
-        SSLContext sslContext) throws NamingException, IOException {
+        String truststore) throws NamingException, IOException {
 
         final Path tempFile = Files.createTempFile("web-interface-servlet", ".war");
         extractWarTo(tempFile);
@@ -120,8 +120,10 @@ public final class RESTAdapterIntegratedServer implements AutoCloseable {
         final ScheduledExecutorService executor = newSingleThreadScheduledExecutor();
 
         final DiffusionConfig diffusionConfig = baseConfig.build();
-        final ClientControlledModelStore modelStore = ClientControlledModelStore
-            .create(executor, diffusionConfig, sslContext);
+        final ClientControlledModelStore modelStore = new ClientControlledModelStore(
+            executor,
+            diffusionConfig,
+            truststore);
 
         final Server jettyServer = new Server(port);
         final WebAppContext webapp = new WebAppContext();
@@ -139,7 +141,11 @@ public final class RESTAdapterIntegratedServer implements AutoCloseable {
             executor,
             executor::shutdown,
             ServiceListener.NULL_LISTENER,
-            (session, oldState, newState) -> { });
+            (session, oldState, newState) -> {
+                if (oldState == Session.State.CONNECTING && newState.isConnected()) {
+                    modelStore.onSessionReady(session);
+                }
+            });
 
         LOG.info("Running web interface on {}", port);
 

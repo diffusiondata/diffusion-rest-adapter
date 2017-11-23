@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Push Technology Ltd.
+ * Copyright (C) 2017 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,7 @@
 
 package com.pushtechnology.adapters.rest.client.controlled.model.store;
 
-import static com.pushtechnology.diffusion.client.session.SessionAttributes.Transport.WEBSOCKET;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -33,12 +31,9 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
-import com.pushtechnology.adapters.rest.session.management.DiffusionSessionFactory;
-import com.pushtechnology.diffusion.client.callbacks.TopicTreeHandler;
 import com.pushtechnology.diffusion.client.features.control.topics.MessagingControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 import com.pushtechnology.diffusion.client.session.Session;
-import com.pushtechnology.diffusion.client.session.SessionFactory;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
 /**
@@ -47,8 +42,6 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
  * @author Push Technology Limited
  */
 public final class ClientControlledModelStoreTest {
-    @Mock
-    private SessionFactory sessionFactory;
 
     @Mock
     private Session session;
@@ -84,21 +77,6 @@ public final class ClientControlledModelStoreTest {
     public void setUp() {
         initMocks(this);
 
-        when(sessionFactory.transports(WEBSOCKET)).thenReturn(sessionFactory);
-        when(sessionFactory.listener(isA(Session.Listener.class))).thenReturn(sessionFactory);
-        when(sessionFactory.serverHost("localhost")).thenReturn(sessionFactory);
-        when(sessionFactory.serverPort(8080)).thenReturn(sessionFactory);
-        when(sessionFactory.secureTransport(false)).thenReturn(sessionFactory);
-        when(sessionFactory.principal("control")).thenReturn(sessionFactory);
-        when(sessionFactory.password("password")).thenReturn(sessionFactory);
-        when(sessionFactory.connectionTimeout(10000)).thenReturn(sessionFactory);
-        when(sessionFactory.reconnectionTimeout(10000)).thenReturn(sessionFactory);
-        when(sessionFactory.maximumMessageSize(32000)).thenReturn(sessionFactory);
-        when(sessionFactory.inputBufferSize(32000)).thenReturn(sessionFactory);
-        when(sessionFactory.outputBufferSize(32000)).thenReturn(sessionFactory);
-        when(sessionFactory.recoveryBufferSize(256)).thenReturn(sessionFactory);
-        when(sessionFactory.open()).thenReturn(session);
-
         when(session.feature(MessagingControl.class)).thenReturn(messagingControl);
         when(session.feature(TopicControl.class)).thenReturn(topicControl);
     }
@@ -112,16 +90,15 @@ public final class ClientControlledModelStoreTest {
     public void startClose() {
         final ClientControlledModelStore modelStore = new ClientControlledModelStore(
             executor,
-            diffusionConfig,
-            null,
-            new DiffusionSessionFactory(sessionFactory));
+            diffusionConfig);
 
         verify(executor).execute(runnableCaptor.capture());
         runnableCaptor.getValue().run();
 
         modelStore.start();
 
-        verify(sessionFactory).open();
+        modelStore.onSessionReady(session);
+
         verify(session).feature(MessagingControl.class);
         verify(messagingControl).addRequestHandler(
             eq("adapter/rest/model/store"),
@@ -130,7 +107,5 @@ public final class ClientControlledModelStoreTest {
             requestHandlerCaptor.capture());
 
         modelStore.close();
-
-        verify(session).close();
     }
 }

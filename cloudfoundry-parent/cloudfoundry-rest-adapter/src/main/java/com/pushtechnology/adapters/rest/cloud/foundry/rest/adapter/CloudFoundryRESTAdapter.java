@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Push Technology Ltd.
+ * Copyright (C) 2017 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.util.concurrent.ScheduledExecutorService;
 
 import javax.naming.NamingException;
-import javax.net.ssl.SSLContext;
 
 import com.pushtechnology.adapters.rest.adapter.ServiceListener;
 import com.pushtechnology.adapters.rest.client.RESTAdapterClient;
@@ -29,7 +28,7 @@ import com.pushtechnology.adapters.rest.client.controlled.model.store.ClientCont
 import com.pushtechnology.adapters.rest.cloud.foundry.vcap.DiffusionCloudCredentials;
 import com.pushtechnology.adapters.rest.cloud.foundry.vcap.VCAP;
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
-import com.pushtechnology.adapters.rest.session.management.SSLContextFactory;
+import com.pushtechnology.diffusion.client.session.Session;
 
 /**
  * Entry point for Diffusion Cloud Foundry REST Adapter.
@@ -55,8 +54,6 @@ public final class CloudFoundryRESTAdapter {
             .getDiffusionCloud()
             .getCredentials();
 
-        final SSLContext sslContext = SSLContextFactory.loadFromResource("diffusionCloudTruststore.jks");
-
         final ScheduledExecutorService executor = newSingleThreadScheduledExecutor();
 
         final DiffusionConfig diffusionConfig = DiffusionConfig
@@ -68,8 +65,10 @@ public final class CloudFoundryRESTAdapter {
             .password(diffusionCloudCredentials.getCredentials())
             .build();
 
-        final ClientControlledModelStore modelStore = ClientControlledModelStore
-            .create(executor, diffusionConfig, sslContext);
+        final ClientControlledModelStore modelStore = new ClientControlledModelStore(
+            executor,
+            diffusionConfig,
+            "diffusionCloudTruststore.jks");
 
         modelStore.start();
 
@@ -78,7 +77,11 @@ public final class CloudFoundryRESTAdapter {
             executor,
             executor::shutdown,
             ServiceListener.NULL_LISTENER,
-            (session, oldState, newState) -> { });
+            (session, oldState, newState) -> {
+                if (oldState == Session.State.CONNECTING && newState.isConnected()) {
+                    modelStore.onSessionReady(session);
+                }
+            });
 
         adapterClient.start();
     }

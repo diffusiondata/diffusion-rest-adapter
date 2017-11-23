@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Push Technology Ltd.
+ * Copyright (C) 2017 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,26 +16,17 @@
 package com.pushtechnology.adapters.rest.client.controlled.model.store;
 
 import static java.util.Collections.emptyList;
-import static java.util.concurrent.TimeUnit.SECONDS;
 
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
-import javax.net.ssl.SSLContext;
-
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.store.AsyncMutableModelStore;
 import com.pushtechnology.adapters.rest.model.store.ModelStore;
-import com.pushtechnology.adapters.rest.session.management.DiffusionSessionFactory;
-import com.pushtechnology.adapters.rest.session.management.EventedSessionListener;
-import com.pushtechnology.adapters.rest.session.management.SessionLostListener;
 import com.pushtechnology.diffusion.client.features.control.topics.MessagingControl;
 import com.pushtechnology.diffusion.client.session.Session;
-import com.pushtechnology.diffusion.client.session.SessionEstablishmentException;
-
-import net.jcip.annotations.GuardedBy;
 
 /**
  * A {@link ModelStore} implementation that is controlled by Diffusion messages.
@@ -47,33 +38,35 @@ public final class ClientControlledModelStore implements ModelStore, AutoCloseab
      * Path the model store registers to receive messages on.
      */
     /*package*/ static final String CONTROL_PATH = "adapter/rest/model/store";
-    // Replace the session when lost
-    private final SessionLostListener sessionLostListener;
     private final DiffusionConfig diffusionConfig;
-    private final SSLContext sslContext;
-    private final DiffusionSessionFactory sessionFactory;
     private final AsyncMutableModelStore delegateModelStore;
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
-    private Session session;
 
     /**
      * Constructor.
      */
-    /*package*/ ClientControlledModelStore(
+    public ClientControlledModelStore(
+        ScheduledExecutorService executor,
+        DiffusionConfig diffusionConfig) {
+
+        this(executor, diffusionConfig, null);
+    }
+
+    /**
+     * Constructor.
+     */
+    public ClientControlledModelStore(
             ScheduledExecutorService executor,
             DiffusionConfig diffusionConfig,
-            SSLContext sslContext,
-            DiffusionSessionFactory sessionFactory) {
+            String truststore) {
         this.diffusionConfig = diffusionConfig;
-        this.sslContext = sslContext;
-        this.sessionFactory = sessionFactory;
-        sessionLostListener = new SessionLostListener(() -> executor.schedule(this::createSession, 5, SECONDS));
         delegateModelStore = new AsyncMutableModelStore(executor)
             .setModel(Model
             .builder()
             .active(true)
             .diffusion(diffusionConfig)
             .services(emptyList())
+            .truststore(truststore)
             .build());
     }
 
@@ -84,23 +77,14 @@ public final class ClientControlledModelStore implements ModelStore, AutoCloseab
         if (!isRunning.compareAndSet(false, true)) {
             throw new IllegalStateException("The " + this + " has already been started");
         }
-
-        createSession();
     }
 
-    @GuardedBy("this")
-    private synchronized void createSession() {
+    /**
+     * Notify the model store of the session to use.
+     */
+    public synchronized void onSessionReady(Session session) {
         if (!isRunning.get()) {
-            // Possible if closed while session is lost
-            return;
-        }
-
-        final EventedSessionListener listener = new EventedSessionListener();
-        try {
-            session = sessionFactory.openSession(diffusionConfig, sessionLostListener, listener, sslContext);
-        }
-        catch (SessionEstablishmentException e) {
-            // Handled by the session lost listener
+            // Notified the session is ready after shutdown
             return;
         }
 
@@ -114,11 +98,6 @@ public final class ClientControlledModelStore implements ModelStore, AutoCloseab
     public synchronized void close() {
         if (!isRunning.compareAndSet(true, false)) {
             throw new IllegalStateException("The " + this + " has not yet been started");
-        }
-
-        if (session != null) {
-            // Possible if closed while initial session failed
-            session.close();
         }
     }
 
@@ -136,15 +115,4 @@ public final class ClientControlledModelStore implements ModelStore, AutoCloseab
     public String toString() {
         return getClass().getSimpleName() + " " + diffusionConfig;
     }
-
-    /**
-     * @return a new model store
-     */
-    public static ClientControlledModelStore create(
-            ScheduledExecutorService executor,
-            DiffusionConfig diffusionConfig,
-            SSLContext sslContext) {
-        return new ClientControlledModelStore(executor, diffusionConfig, sslContext, DiffusionSessionFactory.create());
-    }
-
 }
