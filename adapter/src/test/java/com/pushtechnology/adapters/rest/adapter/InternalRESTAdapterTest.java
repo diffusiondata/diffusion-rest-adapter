@@ -341,6 +341,21 @@ public final class InternalRESTAdapterTest {
     @Test
     public void startWithoutServices() throws Exception {
         restAdapter.onReconfiguration(model2);
+
+        verify(sessionFactory).serverHost("localhost");
+        verify(sessionFactory).serverPort(8080);
+        verify(sessionFactory).transports(WEBSOCKET);
+        verify(sessionFactory).secureTransport(false);
+        verify(sessionFactory).connectionTimeout(10000);
+        verify(sessionFactory).reconnectionTimeout(10000);
+        verify(sessionFactory).maximumMessageSize(32000);
+        verify(sessionFactory).inputBufferSize(32000);
+        verify(sessionFactory).outputBufferSize(32000);
+        verify(sessionFactory).recoveryBufferSize(256);
+        verify(sessionFactory).listener(isNotNull());
+        verify(sessionFactory).principal("control");
+        verify(sessionFactory).password("password");
+        verify(sessionFactory).openAsync();
     }
 
     @Test
@@ -372,7 +387,6 @@ public final class InternalRESTAdapterTest {
 
         restAdapter.onReconfiguration(model2);
 
-        verify(session).close();
         verify(httpClient).close();
     }
 
@@ -401,8 +415,6 @@ public final class InternalRESTAdapterTest {
         restAdapter.onReconfiguration(model2);
 
         sessionFuture.complete(session);
-
-        verify(session).close();
     }
 
     @Test

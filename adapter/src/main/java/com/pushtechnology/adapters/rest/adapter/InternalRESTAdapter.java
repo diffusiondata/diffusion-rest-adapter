@@ -73,7 +73,7 @@ public final class InternalRESTAdapter implements RESTAdapterListener, AutoClose
     @GuardedBy("this")
     private PublishingClientImpl publishingClient;
     @GuardedBy("this")
-    private State state = State.STANDBY;
+    private State state = State.INIT;
     @GuardedBy("this")
     private Session diffusionSession;
 
@@ -98,6 +98,7 @@ public final class InternalRESTAdapter implements RESTAdapterListener, AutoClose
         eventedSessionListener.onSessionStateChange(listener);
     }
 
+    // CHECKSTYLE.OFF: CyclomaticComplexity
     @Override
     public synchronized void onReconfiguration(Model model) {
         LOG.warn("Model {}", model);
@@ -112,46 +113,56 @@ public final class InternalRESTAdapter implements RESTAdapterListener, AutoClose
                 state = State.STOPPED;
                 shutdownHandler.run();
             }
-
-            return;
         }
-
-        if (isNotPolling(model)) {
+        else if (state == State.INIT) {
             currentModel = model;
-            shutdownSession();
-
+            connectSession(model);
+        }
+        else if (isNotPolling(model)) {
+            currentModel = model;
+            shutdownPolling();
             state = State.STANDBY;
         }
-        else if (state == State.STANDBY || hasTruststoreChanged(model) || hasDiffusionChanged(model)) {
+        else if (hasTruststoreChanged(model) || hasDiffusionChanged(model)) {
+            currentModel = model;
             shutdownSession();
-
-            currentModel = model;
-            sslContext = sslContextFactory.provide(model);
-
-            state = State.CONNECTING_TO_DIFFUSION;
-
-            sessionFactory
-                .openSessionAsync(
-                    model.getDiffusion(),
-                    new SessionLostListener(sessionLossHandler),
-                    eventedSessionListener,
-                    sslContext)
-                .thenAccept(this::onSessionOpen);
+            connectSession(model);
         }
-        else if (state == State.ACTIVE && (hasServiceSecurityChanged(model) || haveServicesChanged(model))) {
+        else if (state == State.STANDBY ||
+                state == State.ACTIVE && (hasServiceSecurityChanged(model) || haveServicesChanged(model))) {
             currentModel = model;
-
             reconfigureServiceManager();
         }
         else {
             currentModel = model;
         }
     }
+    // CHECKSTYLE.ON: CyclomaticComplexity
 
-    private void shutdownSession() {
+    private void connectSession(Model model) {
+        state = State.CONNECTING_TO_DIFFUSION;
+
+        sslContext = sslContextFactory.provide(model);
+        sessionFactory
+            .openSessionAsync(
+                model.getDiffusion(),
+                new SessionLostListener(sessionLossHandler),
+                eventedSessionListener,
+                sslContext)
+            .thenAccept(this::onSessionOpen);
+    }
+
+    private void shutdownPolling() {
         if (state == State.ACTIVE) {
             serviceManager.close();
             endpointClient.close();
+        }
+    }
+
+    private void shutdownSession() {
+        shutdownPolling();
+
+        if (state == State.ACTIVE || state == State.STANDBY) {
             diffusionSession.close();
         }
     }
@@ -163,18 +174,20 @@ public final class InternalRESTAdapter implements RESTAdapterListener, AutoClose
 
             session.close();
             shutdownHandler.run();
-            return;
         }
-        else if (state == State.STANDBY) {
-            session.close();
-            return;
+        else if (isNotPolling(currentModel)) {
+            diffusionSession = session;
+            topicManagementClient = new TopicManagementClientImpl(diffusionSession);
+            publishingClient = new PublishingClientImpl(diffusionSession, eventedSessionListener);
+            state = State.STANDBY;
         }
-
-        diffusionSession = session;
-        topicManagementClient = new TopicManagementClientImpl(diffusionSession);
-        publishingClient = new PublishingClientImpl(diffusionSession, eventedSessionListener);
-        reconfigureServiceManager();
-        state = State.ACTIVE;
+        else {
+            diffusionSession = session;
+            topicManagementClient = new TopicManagementClientImpl(diffusionSession);
+            publishingClient = new PublishingClientImpl(diffusionSession, eventedSessionListener);
+            reconfigureServiceManager();
+            state = State.ACTIVE;
+        }
     }
 
     private void reconfigureServiceManager() {
@@ -274,6 +287,7 @@ public final class InternalRESTAdapter implements RESTAdapterListener, AutoClose
     }
 
     private enum State {
+        INIT,
         STANDBY,
         CONNECTING_TO_DIFFUSION,
         ACTIVE,
