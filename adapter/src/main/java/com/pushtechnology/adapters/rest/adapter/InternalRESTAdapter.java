@@ -96,6 +96,22 @@ public final class InternalRESTAdapter implements RESTAdapterListener, AutoClose
         this.shutdownHandler = shutdownHandler;
     }
 
+    /**
+     * Constructor.
+     */
+    public InternalRESTAdapter(
+        ScheduledExecutorService executor,
+        SessionFactory sessions,
+        HttpClientFactory httpClientFactory,
+        ServiceListener serviceListener,
+        SessionLossHandler sessionLossHandler,
+        Runnable shutdownHandler,
+        Session.Listener listener) {
+
+        this(executor, sessions, httpClientFactory, serviceListener, sessionLossHandler, shutdownHandler);
+        eventedSessionListener.onSessionStateChange(listener);
+    }
+
     @Override
     public synchronized void onReconfiguration(Model model) {
         LOG.warn("Model {}", model);
