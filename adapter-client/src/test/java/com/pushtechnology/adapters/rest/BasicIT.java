@@ -637,7 +637,8 @@ public final class BasicIT {
             modelStore,
             executor,
             executor::shutdown,
-            listener);
+            listener,
+            (session, oldState, newState) -> {});
         client.start();
         return client;
     }

@@ -37,6 +37,7 @@ import com.pushtechnology.adapters.rest.session.management.SSLContextFactory;
  * @author Push Technology Limited
  */
 public final class CloudFoundryRESTAdapter {
+
     private CloudFoundryRESTAdapter() {
     }
 
@@ -76,7 +77,8 @@ public final class CloudFoundryRESTAdapter {
             modelStore,
             executor,
             executor::shutdown,
-            ServiceListener.NULL_LISTENER);
+            ServiceListener.NULL_LISTENER,
+            (session, oldState, newState) -> { });
 
         adapterClient.start();
     }

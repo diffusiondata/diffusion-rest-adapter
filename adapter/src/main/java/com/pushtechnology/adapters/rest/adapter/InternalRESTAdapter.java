@@ -86,7 +86,8 @@ public final class InternalRESTAdapter implements RESTAdapterListener, AutoClose
         HttpClientFactory httpClientFactory,
         ServiceListener serviceListener,
         SessionLossHandler sessionLossHandler,
-        Runnable shutdownHandler) {
+        Runnable shutdownHandler,
+        Session.Listener listener) {
 
         this.executor = executor;
         this.sessionLossHandler = sessionLossHandler;
@@ -94,21 +95,6 @@ public final class InternalRESTAdapter implements RESTAdapterListener, AutoClose
         this.httpClientFactory = httpClientFactory;
         sessionFactory = new DiffusionSessionFactory(sessions);
         this.shutdownHandler = shutdownHandler;
-    }
-
-    /**
-     * Constructor.
-     */
-    public InternalRESTAdapter(
-        ScheduledExecutorService executor,
-        SessionFactory sessions,
-        HttpClientFactory httpClientFactory,
-        ServiceListener serviceListener,
-        SessionLossHandler sessionLossHandler,
-        Runnable shutdownHandler,
-        Session.Listener listener) {
-
-        this(executor, sessions, httpClientFactory, serviceListener, sessionLossHandler, shutdownHandler);
         eventedSessionListener.onSessionStateChange(listener);
     }
 

@@ -138,7 +138,8 @@ public final class RESTAdapterIntegratedServer implements AutoCloseable {
             modelStore,
             executor,
             executor::shutdown,
-            ServiceListener.NULL_LISTENER);
+            ServiceListener.NULL_LISTENER,
+            (session, oldState, newState) -> { });
 
         LOG.info("Running web interface on {}", port);
 

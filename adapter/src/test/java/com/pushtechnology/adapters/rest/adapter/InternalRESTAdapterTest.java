@@ -177,8 +177,12 @@ public final class InternalRESTAdapterTest {
 
         restAdapter = new InternalRESTAdapter(
             executorService,
-            sessionFactory, httpClientFactory, serviceListener, sessionLossHandler,
-            shutdownHandler);
+            sessionFactory,
+            httpClientFactory,
+            serviceListener,
+            sessionLossHandler,
+            shutdownHandler,
+            (session, oldState, newState) -> {});
 
         verify(sessionFactory).transports(WEBSOCKET);
     }

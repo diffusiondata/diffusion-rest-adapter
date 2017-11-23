@@ -34,8 +34,8 @@ import com.pushtechnology.adapters.rest.model.store.PollingPersistedModelStore;
 import com.pushtechnology.adapters.rest.persistence.FileSystemPersistence;
 import com.pushtechnology.adapters.rest.persistence.Persistence;
 import com.pushtechnology.adapters.rest.polling.HttpClientFactoryImpl;
-import com.pushtechnology.adapters.rest.session.management.SessionLossHandler;
 import com.pushtechnology.diffusion.client.Diffusion;
+import com.pushtechnology.diffusion.client.session.Session;
 
 import net.jcip.annotations.ThreadSafe;
 
@@ -57,7 +57,8 @@ public final class RESTAdapterClient {
             ModelStore modelStore,
             ScheduledExecutorService executor,
             Runnable shutdownHandler,
-            ServiceListener serviceListener) {
+            ServiceListener serviceListener,
+            Session.Listener listener) {
         this.modelStore = modelStore;
         this.shutdownHandler = shutdownHandler;
         restAdapter = new InternalRESTAdapter(
@@ -72,27 +73,8 @@ public final class RESTAdapterClient {
             () -> {
                 isRunning.set(false);
                 shutdownHandler.run();
-            });
-    }
-
-    private RESTAdapterClient(
-        ModelStore modelStore,
-        ScheduledExecutorService executor,
-        Runnable shutdownHandler,
-        SessionLossHandler lossHandler,
-        ServiceListener serviceListener) {
-        this.modelStore = modelStore;
-        this.shutdownHandler = shutdownHandler;
-        restAdapter = new InternalRESTAdapter(
-            executor,
-            Diffusion.sessions(),
-            new HttpClientFactoryImpl(),
-            serviceListener,
-            lossHandler,
-            () -> {
-                isRunning.set(false);
-                shutdownHandler.run();
-            });
+            },
+            listener);
     }
 
     /**
@@ -144,28 +126,13 @@ public final class RESTAdapterClient {
      * @return a new {@link RESTAdapterClient}
      */
     public static RESTAdapterClient create(
-            ModelStore modelStore,
-            ScheduledExecutorService executor,
-            Runnable shutdownHandler,
-            ServiceListener serviceListener) {
-        LOG.debug("Creating REST adapter client with model store: {}", modelStore);
-        return new RESTAdapterClient(modelStore, executor, shutdownHandler, serviceListener);
-    }
-
-    /**
-     * Factory method for {@link RESTAdapterClient}.
-     * @param modelStore the configuration store to use
-     * @param executor executor to use to schedule poll requests
-     * @return a new {@link RESTAdapterClient}
-     */
-    public static RESTAdapterClient create(
         ModelStore modelStore,
         ScheduledExecutorService executor,
         Runnable shutdownHandler,
-        SessionLossHandler lossHandler,
-        ServiceListener serviceListener) {
+        ServiceListener serviceListener,
+        Session.Listener listener) {
         LOG.debug("Creating REST adapter client with model store: {}", modelStore);
-        return new RESTAdapterClient(modelStore, executor, shutdownHandler, lossHandler, serviceListener);
+        return new RESTAdapterClient(modelStore, executor, shutdownHandler, serviceListener, listener);
     }
 
     /**
@@ -198,6 +165,8 @@ public final class RESTAdapterClient {
                 modelStore.stop();
                 executor.shutdown();
             },
-            ServiceListener.NULL_LISTENER);
+            ServiceListener.NULL_LISTENER,
+            (session, oldState, newState) ->
+                LOG.debug("Session state change {} {} -> {}", session, oldState, newState));
     }
 }
