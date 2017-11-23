@@ -16,12 +16,15 @@
 package com.pushtechnology.adapters.rest.topic.management;
 
 import static java.util.Arrays.asList;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.isA;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
+
+import java.util.concurrent.CompletableFuture;
 
 import org.junit.After;
 import org.junit.Before;
@@ -32,7 +35,7 @@ import org.mockito.Mock;
 
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.diffusion.client.callbacks.TopicTreeHandler;
+import com.pushtechnology.diffusion.client.callbacks.Registration;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
@@ -55,6 +58,8 @@ public final class TopicManagementClientImplTest {
     private JSON json;
     @Mock
     private Binary binary;
+    @Mock
+    private Registration registration;
     @Captor
     private ArgumentCaptor<TopicControl.AddCallback> callbackCaptor;
 
@@ -98,6 +103,7 @@ public final class TopicManagementClientImplTest {
         topicManagementClient = new TopicManagementClientImpl(session);
 
         when(session.feature(TopicControl.class)).thenReturn(topicControl);
+        when(topicControl.removeTopicsWithSession(any())).thenReturn(CompletableFuture.completedFuture(registration));
     }
 
     @After
@@ -109,7 +115,7 @@ public final class TopicManagementClientImplTest {
     public void addService() {
         topicManagementClient.addService(serviceConfig);
 
-        verify(topicControl).removeTopicsWithSession(eq("service"), isA(TopicTreeHandler.class));
+        verify(topicControl).removeTopicsWithSession(eq("service"));
     }
 
     @SuppressWarnings("deprecation")
@@ -194,5 +200,14 @@ public final class TopicManagementClientImplTest {
         topicManagementClient.removeEndpoint(serviceConfig, jsonEndpointConfig);
 
         verify(topicControl).removeTopics("service/jsonEndpoint");
+    }
+
+    @Test
+    public void removeService() {
+        addService();
+
+        topicManagementClient.removeService(serviceConfig);
+
+        verify(registration).close();
     }
 }

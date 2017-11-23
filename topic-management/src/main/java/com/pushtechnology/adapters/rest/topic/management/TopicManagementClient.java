@@ -58,4 +58,9 @@ public interface TopicManagementClient {
      * @param endpointConfig the endpoint
      */
     void removeEndpoint(ServiceConfig serviceConfig, EndpointConfig endpointConfig);
+
+    /**
+     * Stop managing the topics for a REST service.
+     */
+    void removeService(ServiceConfig serviceConfig);
 }

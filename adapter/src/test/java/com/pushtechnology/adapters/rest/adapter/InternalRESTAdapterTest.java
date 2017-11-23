@@ -22,6 +22,7 @@ import static java.util.concurrent.CompletableFuture.completedFuture;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Mockito.times;
@@ -47,6 +48,7 @@ import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.polling.HttpClientFactory;
 import com.pushtechnology.adapters.rest.session.management.SessionLossHandler;
+import com.pushtechnology.diffusion.client.callbacks.Registration;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
 import com.pushtechnology.diffusion.client.session.Session;
@@ -80,6 +82,8 @@ public final class InternalRESTAdapterTest {
     private TopicUpdateControl updateControl;
     @Mock
     private Runnable shutdownHandler;
+    @Mock
+    private Registration registration;
 
     private final DiffusionConfig diffusionConfig = DiffusionConfig
         .builder()
@@ -174,6 +178,7 @@ public final class InternalRESTAdapterTest {
 
         when(session.feature(TopicControl.class)).thenReturn(topicControl);
         when(session.feature(TopicUpdateControl.class)).thenReturn(updateControl);
+        when(topicControl.removeTopicsWithSession(anyString())).thenReturn(completedFuture(registration));
 
         restAdapter = new InternalRESTAdapter(
             executorService,
@@ -198,7 +203,8 @@ public final class InternalRESTAdapterTest {
             httpClientFactory,
             topicControl,
             updateControl,
-            shutdownHandler);
+            shutdownHandler,
+            registration);
     }
 
     @Test
@@ -225,7 +231,7 @@ public final class InternalRESTAdapterTest {
 
         verify(session).feature(TopicControl.class);
         verify(session).feature(TopicUpdateControl.class);
-        verify(topicControl).removeTopicsWithSession(eq("root"), isNotNull());
+        verify(topicControl).removeTopicsWithSession(eq("root"));
         verify(updateControl).registerUpdateSource(eq("root"), isNotNull());
 
         restAdapter.onReconfiguration(inactiveModel);
@@ -289,7 +295,7 @@ public final class InternalRESTAdapterTest {
 
         verify(session).feature(TopicControl.class);
         verify(session).feature(TopicUpdateControl.class);
-        verify(topicControl).removeTopicsWithSession(eq("root"), isNotNull());
+        verify(topicControl).removeTopicsWithSession(eq("root"));
         verify(updateControl).registerUpdateSource(eq("root"), isNotNull());
 
         restAdapter.onReconfiguration(model1);
@@ -299,7 +305,7 @@ public final class InternalRESTAdapterTest {
 
         verify(session, times(2)).feature(TopicControl.class);
         verify(session, times(2)).feature(TopicUpdateControl.class);
-        verify(topicControl).removeTopicsWithSession(eq("root2"), isNotNull());
+        verify(topicControl).removeTopicsWithSession(eq("root2"));
         verify(updateControl).registerUpdateSource(eq("root2"), isNotNull());
     }
 
@@ -334,7 +340,7 @@ public final class InternalRESTAdapterTest {
 
         verify(session).feature(TopicControl.class);
         verify(session).feature(TopicUpdateControl.class);
-        verify(topicControl).removeTopicsWithSession(eq("root2"), isNotNull());
+        verify(topicControl).removeTopicsWithSession(eq("root2"));
         verify(updateControl).registerUpdateSource(eq("root2"), isNotNull());
     }
 
@@ -382,7 +388,7 @@ public final class InternalRESTAdapterTest {
 
         verify(session).feature(TopicControl.class);
         verify(session).feature(TopicUpdateControl.class);
-        verify(topicControl).removeTopicsWithSession(eq("root"), isNotNull());
+        verify(topicControl).removeTopicsWithSession(eq("root"));
         verify(updateControl).registerUpdateSource(eq("root"), isNotNull());
 
         restAdapter.onReconfiguration(model2);
@@ -441,7 +447,7 @@ public final class InternalRESTAdapterTest {
 
         verify(session).feature(TopicControl.class);
         verify(session).feature(TopicUpdateControl.class);
-        verify(topicControl).removeTopicsWithSession(eq("root"), isNotNull());
+        verify(topicControl).removeTopicsWithSession(eq("root"));
         verify(updateControl).registerUpdateSource(eq("root"), isNotNull());
 
         restAdapter.close();

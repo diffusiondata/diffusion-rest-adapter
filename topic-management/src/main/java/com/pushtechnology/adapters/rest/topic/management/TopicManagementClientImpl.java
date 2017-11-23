@@ -15,15 +15,20 @@
 
 package com.pushtechnology.adapters.rest.topic.management;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.pushtechnology.adapters.rest.endpoints.EndpointType;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.diffusion.client.callbacks.TopicTreeHandler;
+import com.pushtechnology.diffusion.client.callbacks.Registration;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.AddCallback;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
 import com.pushtechnology.diffusion.datatype.Bytes;
+
+import net.jcip.annotations.GuardedBy;
 
 /**
  * Topic management client to control Diffusion topic tree.
@@ -31,6 +36,8 @@ import com.pushtechnology.diffusion.datatype.Bytes;
  * @author Push Technology Limited
  */
 public final class TopicManagementClientImpl implements TopicManagementClient {
+    @GuardedBy("this")
+    private final Map<ServiceConfig, Registration> handles = new HashMap<>();
     private final Session session;
 
     /**
@@ -44,7 +51,12 @@ public final class TopicManagementClientImpl implements TopicManagementClient {
     public void addService(ServiceConfig serviceConfig) {
         session
             .feature(TopicControl.class)
-            .removeTopicsWithSession(serviceConfig.getTopicPathRoot(), new TopicTreeHandler.Default());
+            .removeTopicsWithSession(serviceConfig.getTopicPathRoot())
+            .thenAccept(handle -> {
+                synchronized (this) {
+                    handles.put(serviceConfig, handle);
+                }
+            });
     }
 
     @SuppressWarnings("deprecation")
@@ -85,5 +97,15 @@ public final class TopicManagementClientImpl implements TopicManagementClient {
         session
             .feature(TopicControl.class)
             .removeTopics(serviceConfig.getTopicPathRoot() + "/" + endpointConfig.getTopicPath());
+    }
+
+    @Override
+    public void removeService(ServiceConfig serviceConfig) {
+        synchronized (this) {
+            final Registration handle = handles.remove(serviceConfig);
+            if (handle != null) {
+                handle.close();
+            }
+        }
     }
 }
