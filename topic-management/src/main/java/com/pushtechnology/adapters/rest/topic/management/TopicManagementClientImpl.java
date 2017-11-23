@@ -47,6 +47,7 @@ public final class TopicManagementClientImpl implements TopicManagementClient {
             .removeTopicsWithSession(serviceConfig.getTopicPathRoot(), new TopicTreeHandler.Default());
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void addEndpoint(
             ServiceConfig serviceConfig,
@@ -62,6 +63,7 @@ public final class TopicManagementClientImpl implements TopicManagementClient {
             .addTopic(topicPath, topicType, new TopicSetupCallback(callback));
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void addEndpoint(
             ServiceConfig serviceConfig,
@@ -76,5 +78,12 @@ public final class TopicManagementClientImpl implements TopicManagementClient {
         session
             .feature(TopicControl.class)
             .addTopic(topicPath, topicType, initialValue, new TopicSetupCallback(callback));
+    }
+
+    @Override
+    public void removeEndpoint(ServiceConfig serviceConfig, EndpointConfig endpointConfig) {
+        session
+            .feature(TopicControl.class)
+            .removeTopics(serviceConfig.getTopicPathRoot() + "/" + endpointConfig.getTopicPath());
     }
 }

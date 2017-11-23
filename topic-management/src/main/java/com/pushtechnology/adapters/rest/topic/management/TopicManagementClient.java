@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Push Technology Ltd.
+ * Copyright (C) 2017 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ public interface TopicManagementClient {
     void addService(ServiceConfig serviceConfig);
 
     /**
-     * Start managing the topics for a REST endpoint.
+     * Start managing the topic for a REST endpoint.
      * @param serviceConfig the service of the endpoint
      * @param endpointConfig the endpoint
      * @param callback callback for completion. The onTopicAddFailed with the reason EXISTS.
@@ -40,7 +40,7 @@ public interface TopicManagementClient {
     void addEndpoint(ServiceConfig serviceConfig, EndpointConfig endpointConfig, AddCallback callback);
 
     /**
-     * Start managing the topics for a REST endpoint.
+     * Start managing the topic for a REST endpoint.
      * @param serviceConfig the service of the endpoint
      * @param endpointConfig the endpoint
      * @param initialValue the initial value of the topic
@@ -51,4 +51,11 @@ public interface TopicManagementClient {
         EndpointConfig endpointConfig,
         Bytes initialValue,
         AddCallback callback);
+
+    /**
+     * Remove the topic for a REST endpoint.
+     * @param serviceConfig the service of the endpoint
+     * @param endpointConfig the endpoint
+     */
+    void removeEndpoint(ServiceConfig serviceConfig, EndpointConfig endpointConfig);
 }

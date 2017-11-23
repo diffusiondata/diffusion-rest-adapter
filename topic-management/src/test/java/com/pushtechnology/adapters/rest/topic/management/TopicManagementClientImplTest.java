@@ -112,6 +112,7 @@ public final class TopicManagementClientImplTest {
         verify(topicControl).removeTopicsWithSession(eq("service"), isA(TopicTreeHandler.class));
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void addJSONEndpoint() {
         topicManagementClient.addEndpoint(serviceConfig, jsonEndpointConfig, addCallback);
@@ -123,6 +124,7 @@ public final class TopicManagementClientImplTest {
         verify(addCallback).onDiscard();
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void addBinaryEndpoint() {
         topicManagementClient.addEndpoint(serviceConfig, binaryEndpointConfig, addCallback);
@@ -134,6 +136,7 @@ public final class TopicManagementClientImplTest {
         verify(addCallback).onDiscard();
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void addStringEndpoint() {
         topicManagementClient.addEndpoint(serviceConfig, stringEndpointConfig, addCallback);
@@ -145,6 +148,7 @@ public final class TopicManagementClientImplTest {
         verify(addCallback).onDiscard();
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void addJSONEndpointWithValue() {
         topicManagementClient.addEndpoint(serviceConfig, jsonEndpointConfig, json, addCallback);
@@ -157,6 +161,7 @@ public final class TopicManagementClientImplTest {
         verify(addCallback).onDiscard();
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void addBinaryEndpointWithValue() {
         topicManagementClient.addEndpoint(serviceConfig, binaryEndpointConfig, binary, addCallback);
@@ -169,6 +174,7 @@ public final class TopicManagementClientImplTest {
         verify(addCallback).onDiscard();
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void addStringEndpointWithValue() {
         topicManagementClient.addEndpoint(serviceConfig, stringEndpointConfig, binary, addCallback);
@@ -179,5 +185,14 @@ public final class TopicManagementClientImplTest {
         callbackCaptor.getValue().onDiscard();
 
         verify(addCallback).onDiscard();
+    }
+
+    @Test
+    public void removeEndpoint() {
+        addJSONEndpoint();
+
+        topicManagementClient.removeEndpoint(serviceConfig, jsonEndpointConfig);
+
+        verify(topicControl).removeTopics("service/jsonEndpoint");
     }
 }
