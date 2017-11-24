@@ -31,8 +31,8 @@ import org.mockito.Mock;
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.adapters.rest.polling.ServiceSession;
-import com.pushtechnology.adapters.rest.polling.ServiceSessionFactory;
+import com.pushtechnology.adapters.rest.services.ServiceSession;
+import com.pushtechnology.adapters.rest.services.ServiceSessionFactory;
 import com.pushtechnology.adapters.rest.publication.PublishingClient;
 
 /**

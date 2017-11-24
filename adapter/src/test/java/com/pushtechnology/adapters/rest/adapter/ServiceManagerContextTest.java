@@ -24,7 +24,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 
-import com.pushtechnology.adapters.rest.polling.ServiceSessionFactory;
+import com.pushtechnology.adapters.rest.services.ServiceSessionFactory;
 import com.pushtechnology.adapters.rest.publication.PublishingClient;
 
 /**

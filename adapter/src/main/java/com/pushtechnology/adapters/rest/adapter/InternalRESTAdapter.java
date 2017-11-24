@@ -32,7 +32,7 @@ import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.polling.EndpointClientImpl;
 import com.pushtechnology.adapters.rest.polling.HttpClientFactory;
-import com.pushtechnology.adapters.rest.polling.ServiceSessionFactoryImpl;
+import com.pushtechnology.adapters.rest.services.ServiceSessionFactoryImpl;
 import com.pushtechnology.adapters.rest.publication.PublishingClientImpl;
 import com.pushtechnology.adapters.rest.session.management.DiffusionSessionFactory;
 import com.pushtechnology.adapters.rest.session.management.EventedSessionListener;

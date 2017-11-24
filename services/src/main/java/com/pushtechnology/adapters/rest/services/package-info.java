@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Push Technology Ltd.
+ * Copyright (C) 2017 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,30 +13,9 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.polling;
-
-import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
-
 /**
- * The session for a REST service.
- * <p>
- * Supports multiple endpoints and dynamically changing the endpoints.
+ * Package for active REST services.
  *
  * @author Push Technology Limited
  */
-public interface ServiceSession {
-    /**
-     * Start the session.
-     */
-    void start();
-
-    /**
-     * Add an endpoint to the session.
-     */
-    void addEndpoint(EndpointConfig endpointConfig);
-
-    /**
-     * Start the session.
-     */
-    void stop();
-}
+package com.pushtechnology.adapters.rest.services;

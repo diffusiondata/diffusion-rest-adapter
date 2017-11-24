@@ -15,7 +15,7 @@
 
 package com.pushtechnology.adapters.rest.adapter;
 
-import com.pushtechnology.adapters.rest.polling.ServiceSessionFactory;
+import com.pushtechnology.adapters.rest.services.ServiceSessionFactory;
 import com.pushtechnology.adapters.rest.publication.PublishingClient;
 
 import net.jcip.annotations.Immutable;

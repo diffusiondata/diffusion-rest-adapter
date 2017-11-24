@@ -25,6 +25,7 @@
         <module>endpoints</module>
         <module>polling</module>
         <module>publication</module>
+        <module>services</module>
         <module>session-management</module>
         <module>topic-management</module>
         <module>web-interface</module>
@@ -139,6 +140,12 @@
             <dependency>
                 <groupId>com.pushtechnology.adapters.rest</groupId>
                 <artifactId>publication</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.pushtechnology.adapters.rest</groupId>
+                <artifactId>services</artifactId>
                 <version>${project.version}</version>
             </dependency>
 

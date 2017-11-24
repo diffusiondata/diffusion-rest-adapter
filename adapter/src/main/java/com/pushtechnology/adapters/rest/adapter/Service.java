@@ -18,8 +18,8 @@ package com.pushtechnology.adapters.rest.adapter;
 import static java.util.Objects.requireNonNull;
 
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.adapters.rest.polling.ServiceSession;
-import com.pushtechnology.adapters.rest.polling.ServiceSessionFactory;
+import com.pushtechnology.adapters.rest.services.ServiceSession;
+import com.pushtechnology.adapters.rest.services.ServiceSessionFactory;
 import com.pushtechnology.adapters.rest.publication.PublishingClient;
 
 import net.jcip.annotations.NotThreadSafe;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Push Technology Ltd.
+ * Copyright (C) 2017 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,19 +13,18 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.adapter;
+package com.pushtechnology.adapters.rest.services;
 
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.adapters.rest.services.ServiceSession;
 
 /**
- * Start the {@link ServiceSession}. Setup the update sources, topics etc.
+ * Factory for {@link ServiceSession}.
  *
  * @author Push Technology Limited
  */
-public interface ServiceSessionStarter {
+public interface ServiceSessionFactory {
     /**
-     * Bind a service session.
+     * @return a new {@link ServiceSession}
      */
-    void start(ServiceConfig serviceConfig, ServiceSession serviceSession);
+    ServiceSession create(ServiceConfig service);
 }

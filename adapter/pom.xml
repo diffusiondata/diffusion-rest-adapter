@@ -22,6 +22,11 @@
 
         <dependency>
             <groupId>com.pushtechnology.adapters.rest</groupId>
+            <artifactId>services</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.pushtechnology.adapters.rest</groupId>
             <artifactId>session-management</artifactId>
         </dependency>
 
