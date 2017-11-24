@@ -200,7 +200,8 @@ public final class InternalRESTAdapter implements RESTAdapterListener, AutoClose
         final ServiceSessionFactoryImpl serviceSessionFactory = new ServiceSessionFactoryImpl(
             executor,
             endpointClient,
-            new EndpointPollHandlerFactoryImpl(publishingClient));
+            new EndpointPollHandlerFactoryImpl(publishingClient),
+            topicManagementClient);
         final ServiceManagerContext serviceManagerContext = new ServiceManagerContext(
             publishingClient,
             serviceSessionFactory,

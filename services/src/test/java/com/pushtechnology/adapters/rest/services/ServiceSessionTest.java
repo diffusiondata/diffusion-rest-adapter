@@ -44,6 +44,7 @@ import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.polling.EndpointClient;
 import com.pushtechnology.adapters.rest.polling.EndpointPollHandlerFactory;
 import com.pushtechnology.adapters.rest.polling.EndpointResponse;
+import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
 
 /**
  * Unit tests for {@link ServiceSessionImpl}.
@@ -67,6 +68,8 @@ public final class ServiceSessionTest {
     private Future pollFuture1;
     @Mock
     private FutureCallback<EndpointResponse> handler;
+    @Mock
+    private TopicManagementClient topicManagementClient;
     @Captor
     private ArgumentCaptor<Runnable> runnableCaptor;
     @Captor
@@ -96,7 +99,7 @@ public final class ServiceSessionTest {
     public void setUp() {
         initMocks(this);
 
-        serviceSession = new ServiceSessionImpl(executor, endpointClient, serviceConfig, handlerFactory);
+        serviceSession = new ServiceSessionImpl(executor, endpointClient, serviceConfig, handlerFactory, topicManagementClient);
         when(executor
             .scheduleWithFixedDelay(isA(Runnable.class), isA(Long.class), isA(Long.class), isA(TimeUnit.class)))
             .thenReturn(taskFuture);
@@ -108,7 +111,7 @@ public final class ServiceSessionTest {
 
     @After
     public void postConditions() {
-        verifyNoMoreInteractions(executor, endpointClient, handlerFactory, taskFuture);
+        verifyNoMoreInteractions(executor, endpointClient, handlerFactory, taskFuture, topicManagementClient);
     }
 
     @Test
@@ -164,6 +167,7 @@ public final class ServiceSessionTest {
 
         serviceSession.stop();
 
+        verify(topicManagementClient).removeEndpoint(serviceConfig, endpointConfig);
         verify(taskFuture).cancel(false);
     }
 
@@ -183,6 +187,7 @@ public final class ServiceSessionTest {
 
         serviceSession.stop();
 
+        verify(topicManagementClient).removeEndpoint(serviceConfig, endpointConfig);
         verify(taskFuture).cancel(false);
         verify(pollFuture0).cancel(false);
     }
@@ -207,6 +212,7 @@ public final class ServiceSessionTest {
 
         serviceSession.stop();
 
+        verify(topicManagementClient).removeEndpoint(serviceConfig, endpointConfig);
         verify(taskFuture).cancel(false);
         verify(pollFuture1).cancel(false);
     }
@@ -228,6 +234,7 @@ public final class ServiceSessionTest {
         final FutureCallback<EndpointResponse> callback = callbackCaptor.getValue();
 
         serviceSession.stop();
+        verify(topicManagementClient).removeEndpoint(serviceConfig, endpointConfig);
         verify(taskFuture).cancel(false);
 
         callback.completed(endpointResponse);

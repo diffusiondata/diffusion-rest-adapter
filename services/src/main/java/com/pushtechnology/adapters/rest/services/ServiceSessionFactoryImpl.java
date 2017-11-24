@@ -20,6 +20,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.polling.EndpointClient;
 import com.pushtechnology.adapters.rest.polling.EndpointPollHandlerFactory;
+import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
 
 /**
  * Implementation of {@link ServiceSessionFactory}.
@@ -30,6 +31,7 @@ public final class ServiceSessionFactoryImpl implements ServiceSessionFactory {
     private final ScheduledExecutorService executor;
     private final EndpointClient endpointClient;
     private final EndpointPollHandlerFactory handlerFactory;
+    private final TopicManagementClient topicManagementClient;
 
     /**
      * Constructor.
@@ -37,14 +39,16 @@ public final class ServiceSessionFactoryImpl implements ServiceSessionFactory {
     public ServiceSessionFactoryImpl(
             ScheduledExecutorService executor,
             EndpointClient endpointClient,
-            EndpointPollHandlerFactory handlerFactory) {
+            EndpointPollHandlerFactory handlerFactory,
+            TopicManagementClient topicManagementClient) {
         this.executor = executor;
         this.endpointClient = endpointClient;
         this.handlerFactory = handlerFactory;
+        this.topicManagementClient = topicManagementClient;
     }
 
     @Override
     public ServiceSession create(ServiceConfig serviceConfig) {
-        return new ServiceSessionImpl(executor, endpointClient, serviceConfig, handlerFactory);
+        return new ServiceSessionImpl(executor, endpointClient, serviceConfig, handlerFactory, topicManagementClient);
     }
 }

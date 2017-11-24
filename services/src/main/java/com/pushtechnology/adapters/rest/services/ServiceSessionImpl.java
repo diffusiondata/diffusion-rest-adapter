@@ -32,6 +32,7 @@ import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.polling.EndpointClient;
 import com.pushtechnology.adapters.rest.polling.EndpointPollHandlerFactory;
 import com.pushtechnology.adapters.rest.polling.EndpointResponse;
+import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
 
 import net.jcip.annotations.GuardedBy;
 import net.jcip.annotations.ThreadSafe;
@@ -50,6 +51,7 @@ public final class ServiceSessionImpl implements ServiceSession {
     private final EndpointClient endpointClient;
     private final ServiceConfig serviceConfig;
     private final EndpointPollHandlerFactory handlerFactory;
+    private final TopicManagementClient topicManagementClient;
     @GuardedBy("this")
     private boolean isRunning;
 
@@ -60,12 +62,14 @@ public final class ServiceSessionImpl implements ServiceSession {
             ScheduledExecutorService executor,
             EndpointClient endpointClient,
             ServiceConfig serviceConfig,
-            EndpointPollHandlerFactory handlerFactory) {
+            EndpointPollHandlerFactory handlerFactory,
+            TopicManagementClient topicManagementClient) {
 
         this.executor = executor;
         this.endpointClient = endpointClient;
         this.serviceConfig = serviceConfig;
         this.handlerFactory = handlerFactory;
+        this.topicManagementClient = topicManagementClient;
     }
 
     @Override
@@ -105,7 +109,8 @@ public final class ServiceSessionImpl implements ServiceSession {
         return new PollHandle(future);
     }
 
-    private void stopEndpoint(PollHandle pollHandle) {
+    private void stopEndpoint(EndpointConfig endpointConfig, PollHandle pollHandle) {
+        topicManagementClient.removeEndpoint(serviceConfig, endpointConfig);
         if (pollHandle != null) {
             pollHandle.taskHandle.cancel(false);
             if (pollHandle.currentPollHandle != null) {
@@ -119,7 +124,7 @@ public final class ServiceSessionImpl implements ServiceSession {
         isRunning = false;
 
         endpointPollers.replaceAll((endpointConfig, pollHandle) -> {
-            stopEndpoint(pollHandle);
+            stopEndpoint(endpointConfig, pollHandle);
             return null;
         });
 

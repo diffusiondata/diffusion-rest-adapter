@@ -40,6 +40,7 @@ import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.polling.EndpointClient;
 import com.pushtechnology.adapters.rest.polling.EndpointPollHandlerFactory;
 import com.pushtechnology.adapters.rest.polling.EndpointResponse;
+import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
 
 /**
  * Unit tests for {@link ServiceSessionFactoryImpl}.
@@ -57,6 +58,8 @@ public final class ServiceSessionFactoryImplTest {
     private ScheduledFuture taskFuture;
     @Mock
     private FutureCallback<EndpointResponse> handler;
+    @Mock
+    private TopicManagementClient topicManagementClient;
 
     private final EndpointConfig endpointConfig = EndpointConfig
         .builder()
@@ -87,12 +90,16 @@ public final class ServiceSessionFactoryImplTest {
             .thenReturn(taskFuture);
         when(handlerFactory.create(serviceConfig, endpointConfig)).thenReturn(handler);
 
-        serviceSessionFactory = new ServiceSessionFactoryImpl(executor, endpointClient, handlerFactory);
+        serviceSessionFactory = new ServiceSessionFactoryImpl(
+            executor,
+            endpointClient,
+            handlerFactory,
+            topicManagementClient);
     }
 
     @After
     public void postConditions() {
-        verifyNoMoreInteractions(executor, endpointClient, handlerFactory, taskFuture);
+        verifyNoMoreInteractions(executor, endpointClient, handlerFactory, taskFuture, topicManagementClient);
     }
 
     @Test
