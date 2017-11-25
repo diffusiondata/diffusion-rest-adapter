@@ -78,4 +78,15 @@ public final class Service implements AutoCloseable {
             serviceConfig = null;
         }
     }
+
+    /**
+     * Release the service for another to take over.
+     */
+    public void release() {
+        if (serviceConfig != null) {
+            // Release the update source
+            publishingClient.removeService(serviceConfig);
+            serviceConfig = null;
+        }
+    }
 }

@@ -60,4 +60,12 @@ public final class ServiceManager implements AutoCloseable {
         services.forEach(Service::close);
         services.clear();
     }
+
+    /**
+     * Release the services for another client to take over.
+     */
+    public synchronized void release() {
+        services.forEach(Service::release);
+        services.clear();
+    }
 }

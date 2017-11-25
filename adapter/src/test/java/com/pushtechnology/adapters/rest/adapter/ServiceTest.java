@@ -28,9 +28,9 @@ import org.junit.Test;
 import org.mockito.Mock;
 
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
+import com.pushtechnology.adapters.rest.publication.PublishingClient;
 import com.pushtechnology.adapters.rest.services.ServiceSession;
 import com.pushtechnology.adapters.rest.services.ServiceSessionFactory;
-import com.pushtechnology.adapters.rest.publication.PublishingClient;
 
 /**
  * Unit tests for {@link Service}.
@@ -69,7 +69,7 @@ public final class ServiceTest {
 
     @After
     public void postConditions() {
-        verifyNoMoreInteractions(publishingClient, serviceSessionFactory, serviceSessionStarter);
+        verifyNoMoreInteractions(publishingClient, serviceSessionFactory, serviceSessionStarter, serviceSession);
     }
 
     @Test
@@ -95,6 +95,7 @@ public final class ServiceTest {
 
         verify(publishingClient).removeService(serviceConfig);
 
+        verify(serviceSession).stop();
         verify(serviceSessionFactory, times(2)).create(serviceConfig);
         verify(serviceSessionStarter, times(2)).start(serviceConfig, serviceSession);
     }
@@ -116,6 +117,21 @@ public final class ServiceTest {
         verify(serviceSessionStarter).start(serviceConfig, serviceSession);
 
         service.close();
+
+        verify(serviceSession).stop();
+        verify(publishingClient).removeService(serviceConfig);
+    }
+
+    @Test
+    public void configureRelease() {
+        final Service service = new Service();
+
+        service.reconfigure(serviceConfig, context);
+
+        verify(serviceSessionFactory).create(serviceConfig);
+        verify(serviceSessionStarter).start(serviceConfig, serviceSession);
+
+        service.release();
 
         verify(publishingClient).removeService(serviceConfig);
     }

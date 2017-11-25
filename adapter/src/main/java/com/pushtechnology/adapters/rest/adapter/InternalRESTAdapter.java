@@ -277,7 +277,15 @@ public final class InternalRESTAdapter implements RESTAdapterListener, AutoClose
             return;
         }
 
-        shutdownSession();
+        if (state == State.ACTIVE) {
+            serviceManager.release();
+            endpointClient.close();
+        }
+
+        if (state == State.ACTIVE || state == State.STANDBY) {
+            diffusionSession.close();
+        }
+
         if (state == State.CONNECTING_TO_DIFFUSION) {
             state = State.STOPPING;
         }
