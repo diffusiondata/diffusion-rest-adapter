@@ -37,7 +37,6 @@ public final class ClientControlledModelStore implements ModelStore {
      * Path the model store registers to receive messages on.
      */
     /*package*/ static final String CONTROL_PATH = "adapter/rest/model/store";
-    private final DiffusionConfig diffusionConfig;
     private final AsyncMutableModelStore delegateModelStore;
 
     /**
@@ -57,7 +56,6 @@ public final class ClientControlledModelStore implements ModelStore {
             ScheduledExecutorService executor,
             DiffusionConfig diffusionConfig,
             String truststore) {
-        this.diffusionConfig = diffusionConfig;
         delegateModelStore = new AsyncMutableModelStore(executor)
             .setModel(Model
             .builder()
@@ -90,6 +88,6 @@ public final class ClientControlledModelStore implements ModelStore {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + " " + diffusionConfig;
+        return getClass().getSimpleName();
     }
 }
