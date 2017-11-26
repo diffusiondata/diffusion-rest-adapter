@@ -18,7 +18,6 @@ package com.pushtechnology.adapters.rest.client.controlled.model.store;
 import static java.util.Collections.emptyList;
 
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
@@ -33,14 +32,13 @@ import com.pushtechnology.diffusion.client.session.Session;
  *
  * @author Push Technology Limited
  */
-public final class ClientControlledModelStore implements ModelStore, AutoCloseable {
+public final class ClientControlledModelStore implements ModelStore {
     /**
      * Path the model store registers to receive messages on.
      */
     /*package*/ static final String CONTROL_PATH = "adapter/rest/model/store";
     private final DiffusionConfig diffusionConfig;
     private final AsyncMutableModelStore delegateModelStore;
-    private final AtomicBoolean isRunning = new AtomicBoolean(false);
 
     /**
      * Constructor.
@@ -71,34 +69,13 @@ public final class ClientControlledModelStore implements ModelStore, AutoCloseab
     }
 
     /**
-     * Start the model store.
-     */
-    public synchronized void start() {
-        if (!isRunning.compareAndSet(false, true)) {
-            throw new IllegalStateException("The " + this + " has already been started");
-        }
-    }
-
-    /**
      * Notify the model store of the session to use.
      */
     public synchronized void onSessionReady(Session session) {
-        if (!isRunning.get()) {
-            // Notified the session is ready after shutdown
-            return;
-        }
-
         final ModelController modelController = new ModelController(delegateModelStore);
 
         final RequestManager requestManager = new RequestManager(session.feature(MessagingControl.class));
         requestManager.addHandler(CONTROL_PATH, modelController);
-    }
-
-    @Override
-    public synchronized void close() {
-        if (!isRunning.compareAndSet(true, false)) {
-            throw new IllegalStateException("The " + this + " has not yet been started");
-        }
     }
 
     @Override

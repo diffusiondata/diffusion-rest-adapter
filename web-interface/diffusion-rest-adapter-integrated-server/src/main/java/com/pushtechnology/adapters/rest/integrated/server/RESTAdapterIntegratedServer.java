@@ -69,7 +69,6 @@ public final class RESTAdapterIntegratedServer implements AutoCloseable {
      */
     public void start() {
         try {
-            modelStore.start();
             jettyServer.start();
             adapterClient.start();
         }
@@ -83,7 +82,6 @@ public final class RESTAdapterIntegratedServer implements AutoCloseable {
     @Override
     public void close() {
         try {
-            modelStore.close();
             adapterClient.close();
             jettyServer.stop();
         }

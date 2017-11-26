@@ -87,15 +87,13 @@ public final class ClientControlledModelStoreTest {
     }
 
     @Test
-    public void startClose() {
+    public void sessionReady() {
         final ClientControlledModelStore modelStore = new ClientControlledModelStore(
             executor,
             diffusionConfig);
 
         verify(executor).execute(runnableCaptor.capture());
         runnableCaptor.getValue().run();
-
-        modelStore.start();
 
         modelStore.onSessionReady(session);
 
@@ -105,7 +103,5 @@ public final class ClientControlledModelStoreTest {
             eq(JSON.class),
             eq(JSON.class),
             requestHandlerCaptor.capture());
-
-        modelStore.close();
     }
 }

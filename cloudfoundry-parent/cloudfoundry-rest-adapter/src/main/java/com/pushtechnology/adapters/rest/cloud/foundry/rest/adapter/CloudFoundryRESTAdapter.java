@@ -70,8 +70,6 @@ public final class CloudFoundryRESTAdapter {
             diffusionConfig,
             "diffusionCloudTruststore.jks");
 
-        modelStore.start();
-
         final RESTAdapterClient adapterClient = RESTAdapterClient.create(
             modelStore,
             executor,
