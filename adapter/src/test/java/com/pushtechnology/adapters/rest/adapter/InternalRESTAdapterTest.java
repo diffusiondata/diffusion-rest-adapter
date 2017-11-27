@@ -44,6 +44,7 @@ import org.mockito.junit.MockitoRule;
 
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
+import com.pushtechnology.adapters.rest.model.latest.MetricsConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.polling.HttpClientFactory;
@@ -135,24 +136,28 @@ public final class InternalRESTAdapterTest {
         .active(true)
         .diffusion(diffusionConfig)
         .services(singletonList(serviceConfig0))
+        .metrics(MetricsConfig.builder().type(MetricsConfig.Type.OFF).build())
         .build();
     private final Model model1 = Model
         .builder()
         .active(true)
         .diffusion(diffusionConfig)
         .services(singletonList(serviceConfig1))
+        .metrics(MetricsConfig.builder().type(MetricsConfig.Type.OFF).build())
         .build();
     private final Model model2 = Model
         .builder()
         .active(true)
         .diffusion(diffusionConfig)
         .services(emptyList())
+        .metrics(MetricsConfig.builder().type(MetricsConfig.Type.OFF).build())
         .build();
     private final Model inactiveModel = Model
         .builder()
         .active(false)
         .diffusion(diffusionConfig)
         .services(singletonList(serviceConfig0))
+        .metrics(MetricsConfig.builder().type(MetricsConfig.Type.OFF).build())
         .build();
 
     private InternalRESTAdapter restAdapter;
