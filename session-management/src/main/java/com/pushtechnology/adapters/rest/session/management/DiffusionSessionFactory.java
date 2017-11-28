@@ -21,8 +21,6 @@ import java.util.concurrent.CompletableFuture;
 
 import javax.net.ssl.SSLContext;
 
-import org.picocontainer.annotations.Nullable;
-
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.session.Session;
@@ -50,7 +48,7 @@ public final class DiffusionSessionFactory {
             DiffusionConfig diffusionConfig,
             SessionLostListener sessionLostListener,
             EventedSessionListener listener,
-            @Nullable SSLContext sslContext) {
+            SSLContext sslContext) {
 
         SessionFactory sessionFactory = baseSessionFactory
             .serverHost(diffusionConfig.getHost())
@@ -89,7 +87,7 @@ public final class DiffusionSessionFactory {
         DiffusionConfig diffusionConfig,
         SessionLostListener sessionLostListener,
         EventedSessionListener listener,
-        @Nullable SSLContext sslContext) {
+        SSLContext sslContext) {
 
         SessionFactory sessionFactory = baseSessionFactory
             .serverHost(diffusionConfig.getHost())

@@ -32,8 +32,6 @@ import java.security.cert.CertificateException;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
 
-import org.picocontainer.injectors.ProviderAdapter;
-
 import com.pushtechnology.adapters.rest.model.latest.Model;
 
 import net.jcip.annotations.Immutable;
@@ -44,12 +42,12 @@ import net.jcip.annotations.Immutable;
  * @author Push Technology Limited
  */
 @Immutable
-public final class SSLContextFactory extends ProviderAdapter {
+public final class SSLContextFactory {
 
     /**
      * @return an {@link SSLContext}.
      */
-    public SSLContext provide(Model model) {
+    public SSLContext create(Model model) {
         final String truststoreLocation = model.getTruststore();
 
         return loadFromResource(truststoreLocation);

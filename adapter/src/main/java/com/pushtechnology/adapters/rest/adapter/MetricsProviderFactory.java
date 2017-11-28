@@ -28,14 +28,16 @@ import java.util.stream.Stream;
 
 import org.picocontainer.MutablePicoContainer;
 import org.picocontainer.PicoBuilder;
-import org.picocontainer.injectors.Provider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.adapters.rest.metric.reporters.EventCountReporter;
 import com.pushtechnology.adapters.rest.metric.reporters.EventSummaryReporter;
+import com.pushtechnology.adapters.rest.metric.reporters.PollEventCounter;
 import com.pushtechnology.adapters.rest.metric.reporters.PollEventQuerier;
+import com.pushtechnology.adapters.rest.metric.reporters.PublicationEventCounter;
 import com.pushtechnology.adapters.rest.metric.reporters.PublicationEventQuerier;
+import com.pushtechnology.adapters.rest.metric.reporters.TopicCreationEventCounter;
 import com.pushtechnology.adapters.rest.metric.reporters.TopicCreationEventQuerier;
 import com.pushtechnology.adapters.rest.metrics.event.listeners.BoundedPollEventCollector;
 import com.pushtechnology.adapters.rest.metrics.event.listeners.BoundedPublicationEventCollector;
@@ -43,12 +45,6 @@ import com.pushtechnology.adapters.rest.metrics.event.listeners.BoundedTopicCrea
 import com.pushtechnology.adapters.rest.metrics.event.listeners.PollEventDispatcher;
 import com.pushtechnology.adapters.rest.metrics.event.listeners.PublicationEventDispatcher;
 import com.pushtechnology.adapters.rest.metrics.event.listeners.TopicCreationEventDispatcher;
-import com.pushtechnology.adapters.rest.metric.reporters.PollEventCounter;
-import com.pushtechnology.adapters.rest.metrics.listeners.PollListener;
-import com.pushtechnology.adapters.rest.metric.reporters.PublicationEventCounter;
-import com.pushtechnology.adapters.rest.metrics.listeners.PublicationListener;
-import com.pushtechnology.adapters.rest.metric.reporters.TopicCreationEventCounter;
-import com.pushtechnology.adapters.rest.metrics.listeners.TopicCreationListener;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.SummaryConfig;
 
@@ -57,13 +53,13 @@ import com.pushtechnology.adapters.rest.model.latest.SummaryConfig;
  *
  * @author Push Technology Limited
  */
-public final class MetricsProviderFactory implements Provider {
+public final class MetricsProviderFactory {
     private static final Logger LOG = LoggerFactory.getLogger(MetricsProviderFactory.class);
 
     /**
      * @return a new metrics provider
      */
-    public MetricsProvider provide(
+    public MetricsProvider create(
             Model model,
             ScheduledExecutorService executorService,
             MetricsDispatcher metricsDispatcher) {
@@ -75,46 +71,40 @@ public final class MetricsProviderFactory implements Provider {
         if (model.getMetrics().isCounting()) {
             LOG.info("Enabling counting metrics reporting.");
 
-            final MutablePicoContainer factoryContainer = new PicoBuilder()
-                .withCaching()
-                .withConstructorInjection()
-                .withJavaEE5Lifecycle()
-                .withLocking()
-                .build()
-                .addComponent(executorService)
-                .addComponent(PollEventCounter.class)
-                .addComponent(PublicationEventCounter.class)
-                .addComponent(TopicCreationEventCounter.class)
-                .addComponent(EventCountReporter.class);
+            final EventCountReporter reporter = createCountReporter(executorService, metricsDispatcher);
 
-            startTasks.add(factoryContainer.getComponent(EventCountReporter.class)::start);
-            stopTasks.add(factoryContainer.getComponent(EventCountReporter.class)::close);
-            metricsDispatcher.addPollListener(factoryContainer.getComponent(PollListener.class));
-            metricsDispatcher.addPublicationListener(factoryContainer.getComponent(PublicationListener.class));
-            metricsDispatcher.addTopicCreationListener(factoryContainer.getComponent(TopicCreationListener.class));
+            startTasks.add(reporter::start);
+            stopTasks.add(reporter::close);
         }
 
         if (summaryConfig != null) {
             final int eventBound = summaryConfig.getEventBound();
             LOG.info("Enabling summary metrics reporting. {} event bound", eventBound);
 
+            final BoundedPollEventCollector pollCollector = new BoundedPollEventCollector(eventBound);
+            final BoundedPublicationEventCollector publicationCollector = new BoundedPublicationEventCollector(
+                eventBound);
+            final BoundedTopicCreationEventCollector topicCreationCollector = new BoundedTopicCreationEventCollector(
+                eventBound);
+            final PollEventQuerier pollQuerier = new PollEventQuerier(pollCollector);
+            final PublicationEventQuerier publicationQuerier = new PublicationEventQuerier(publicationCollector);
+            final TopicCreationEventQuerier topicCreationQuerier =
+                new TopicCreationEventQuerier(topicCreationCollector);
+            final EventSummaryReporter reporter = new EventSummaryReporter(
+                executorService,
+                pollQuerier,
+                publicationQuerier,
+                topicCreationQuerier);
+
+            // Use pico container to handle the injection of custom components
             final MutablePicoContainer factoryContainer = new PicoBuilder()
                 .withCaching()
                 .withConstructorInjection()
-                .withJavaEE5Lifecycle()
-                .withLocking()
                 .build()
                 .addComponent(executorService)
-                .addComponent(PollEventDispatcher.class)
-                .addComponent(PublicationEventDispatcher.class)
-                .addComponent(TopicCreationEventDispatcher.class)
-                .addComponent(new BoundedPollEventCollector(eventBound))
-                .addComponent(new BoundedPublicationEventCollector(eventBound))
-                .addComponent(new BoundedTopicCreationEventCollector(eventBound))
-                .addComponent(PollEventQuerier.class)
-                .addComponent(PublicationEventQuerier.class)
-                .addComponent(TopicCreationEventQuerier.class)
-                .addComponent(EventSummaryReporter.class);
+                .addComponent(pollQuerier)
+                .addComponent(publicationQuerier)
+                .addComponent(topicCreationQuerier);
 
             summaryConfig
                 .getReporterClassNames()
@@ -127,20 +117,43 @@ public final class MetricsProviderFactory implements Provider {
                 .stream()
                 .flatMap(object -> tryGetMethod(object, "start"))
                 .forEach(startTasks::add);
+
             factoryContainer
                 .getComponents()
                 .stream()
                 .flatMap(object -> tryGetMethod(object, "close"))
-                .forEach(startTasks::add);
+                .forEach(stopTasks::add);
 
-            metricsDispatcher.addPollListener(factoryContainer.getComponent(PollListener.class));
-            metricsDispatcher.addPublicationListener(factoryContainer.getComponent(PublicationListener.class));
-            metricsDispatcher.addTopicCreationListener(factoryContainer.getComponent(TopicCreationListener.class));
+            startTasks.add(reporter::start);
+            stopTasks.add(reporter::close);
+
+            metricsDispatcher.addPollListener(new PollEventDispatcher(pollCollector));
+            metricsDispatcher.addPublicationListener(new PublicationEventDispatcher(publicationCollector));
+            metricsDispatcher.addTopicCreationListener(new TopicCreationEventDispatcher(topicCreationCollector));
+
         }
 
         return new MetricsProvider(
             () -> startTasks.forEach(Runnable::run),
             () -> stopTasks.forEach(Runnable::run));
+    }
+
+    private EventCountReporter createCountReporter(
+            ScheduledExecutorService executorService,
+            MetricsDispatcher metricsDispatcher) {
+        final PollEventCounter pollCounter = new PollEventCounter();
+        final PublicationEventCounter publicationCounter = new PublicationEventCounter();
+        final TopicCreationEventCounter topicCreationCounter = new TopicCreationEventCounter();
+
+        metricsDispatcher.addPollListener(new PollEventDispatcher(pollCounter));
+        metricsDispatcher.addPublicationListener(new PublicationEventDispatcher(publicationCounter));
+        metricsDispatcher.addTopicCreationListener(new TopicCreationEventDispatcher(topicCreationCounter));
+
+        return new EventCountReporter(
+            pollCounter,
+            publicationCounter,
+            topicCreationCounter,
+            executorService);
     }
 
     @SuppressWarnings({"PMD.EmptyCatchBlock", "PMD.AvoidThrowingRawExceptionTypes"})

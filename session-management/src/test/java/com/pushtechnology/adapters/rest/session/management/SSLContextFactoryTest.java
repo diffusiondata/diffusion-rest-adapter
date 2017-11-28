@@ -53,7 +53,7 @@ public final class SSLContextFactoryTest {
     }
 
     @Test
-    public void provideNoTruststore() {
-        assertNull(contextFactory.provide(model));
+    public void createNoTruststore() {
+        assertNull(contextFactory.create(model));
     }
 }

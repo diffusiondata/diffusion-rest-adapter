@@ -41,7 +41,7 @@ public final class MetricsProviderFactoryTest {
             .builder()
             .build();
 
-        final MetricsProvider provider = factory.provide(model, executorService, new MetricsDispatcher());
+        final MetricsProvider provider = factory.create(model, executorService, new MetricsDispatcher());
 
         assertNotNull(provider);
     }
@@ -58,7 +58,7 @@ public final class MetricsProviderFactoryTest {
                 .build())
             .build();
 
-        final MetricsProvider provider = factory.provide(model, executorService, new MetricsDispatcher());
+        final MetricsProvider provider = factory.create(model, executorService, new MetricsDispatcher());
 
         assertNotNull(provider);
     }
@@ -75,7 +75,7 @@ public final class MetricsProviderFactoryTest {
                 .build())
             .build();
 
-        final MetricsProvider provider = factory.provide(model, executorService, new MetricsDispatcher());
+        final MetricsProvider provider = factory.create(model, executorService, new MetricsDispatcher());
 
         assertNotNull(provider);
     }

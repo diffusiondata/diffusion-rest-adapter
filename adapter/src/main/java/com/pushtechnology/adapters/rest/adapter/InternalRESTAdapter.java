@@ -145,7 +145,7 @@ public final class InternalRESTAdapter implements RESTAdapterListener, AutoClose
     private void connectSession(Model model) {
         state = State.CONNECTING_TO_DIFFUSION;
 
-        sslContext = sslContextFactory.provide(model);
+        sslContext = sslContextFactory.create(model);
         sessionFactory
             .openSessionAsync(
                 model.getDiffusion(),
