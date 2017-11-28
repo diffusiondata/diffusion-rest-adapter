@@ -27,16 +27,13 @@ import javax.net.ssl.SSLContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.pushtechnology.adapters.rest.metrics.listeners.PollListener;
-import com.pushtechnology.adapters.rest.metrics.listeners.PublicationListener;
-import com.pushtechnology.adapters.rest.metrics.listeners.TopicCreationListener;
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.polling.EndpointClientImpl;
 import com.pushtechnology.adapters.rest.polling.HttpClientFactory;
-import com.pushtechnology.adapters.rest.services.ServiceSessionFactoryImpl;
 import com.pushtechnology.adapters.rest.publication.PublishingClientImpl;
+import com.pushtechnology.adapters.rest.services.ServiceSessionFactoryImpl;
 import com.pushtechnology.adapters.rest.session.management.DiffusionSessionFactory;
 import com.pushtechnology.adapters.rest.session.management.EventedSessionListener;
 import com.pushtechnology.adapters.rest.session.management.SSLContextFactory;
@@ -59,6 +56,7 @@ public final class InternalRESTAdapter implements RESTAdapterListener, AutoClose
     private final SessionLossHandler sessionLossHandler;
     private final ServiceListener serviceListener;
 
+    private final MetricsDispatcher metricsDispatcher = new MetricsDispatcher();
     private final EventedSessionListener eventedSessionListener = new EventedSessionListener();
     private final HttpClientFactory httpClientFactory;
     private final ServiceManager serviceManager = new ServiceManager();
@@ -181,23 +179,23 @@ public final class InternalRESTAdapter implements RESTAdapterListener, AutoClose
         else if (isNotPolling(currentModel)) {
             diffusionSession = session;
             topicManagementClient = new TopicManagementClientImpl(
-                TopicCreationListener.NULL_LISTENER,
+                metricsDispatcher,
                 diffusionSession);
             publishingClient = new PublishingClientImpl(
                 diffusionSession,
                 eventedSessionListener,
-                PublicationListener.NULL_LISTENER);
+                metricsDispatcher);
             state = State.STANDBY;
         }
         else {
             diffusionSession = session;
             topicManagementClient = new TopicManagementClientImpl(
-                TopicCreationListener.NULL_LISTENER,
+                metricsDispatcher,
                 diffusionSession);
             publishingClient = new PublishingClientImpl(
                 diffusionSession,
                 eventedSessionListener,
-                PublicationListener.NULL_LISTENER);
+                metricsDispatcher);
             reconfigureServiceManager();
             state = State.ACTIVE;
         }
@@ -208,7 +206,7 @@ public final class InternalRESTAdapter implements RESTAdapterListener, AutoClose
             currentModel,
             sslContext,
             httpClientFactory,
-            PollListener.NULL_LISTENER);
+            metricsDispatcher);
         final ServiceSessionStarterImpl serviceSessionStarter = new ServiceSessionStarterImpl(
             topicManagementClient,
             endpointClient,
