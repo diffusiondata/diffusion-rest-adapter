@@ -94,7 +94,7 @@ public final class InternalRESTAdapter implements RESTAdapterListener, AutoClose
         Runnable shutdownHandler,
         Session.Listener listener) {
 
-        this.executor = executor;
+        this.executor = new ReportingScheduledExecutorService(executor);
         this.sessionLossHandler = sessionLossHandler;
         this.serviceListener = serviceListener;
         this.httpClientFactory = httpClientFactory;
