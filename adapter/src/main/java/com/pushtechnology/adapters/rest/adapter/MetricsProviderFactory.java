@@ -45,8 +45,11 @@ import com.pushtechnology.adapters.rest.metrics.event.listeners.BoundedTopicCrea
 import com.pushtechnology.adapters.rest.metrics.event.listeners.PollEventDispatcher;
 import com.pushtechnology.adapters.rest.metrics.event.listeners.PublicationEventDispatcher;
 import com.pushtechnology.adapters.rest.metrics.event.listeners.TopicCreationEventDispatcher;
+import com.pushtechnology.adapters.rest.metrics.reporting.topics.TopicBasedMetricsReporter;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.SummaryConfig;
+import com.pushtechnology.adapters.rest.model.latest.TopicConfig;
+import com.pushtechnology.diffusion.client.session.Session;
 
 /**
  * Factory for {@link MetricsProvider}.
@@ -60,9 +63,10 @@ public final class MetricsProviderFactory {
      * @return a new metrics provider
      */
     public MetricsProvider create(
-            Model model,
-            ScheduledExecutorService executorService,
-            MetricsDispatcher metricsDispatcher) {
+        Session diffusionSession,
+        Model model,
+        ScheduledExecutorService executorService,
+        MetricsDispatcher metricsDispatcher) {
         final SummaryConfig summaryConfig = model.getMetrics().getSummary();
 
         final List<Runnable> startTasks = new ArrayList<>();
@@ -78,64 +82,95 @@ public final class MetricsProviderFactory {
         }
 
         if (summaryConfig != null) {
-            final int eventBound = summaryConfig.getEventBound();
-            LOG.info("Enabling summary metrics reporting. {} event bound", eventBound);
-
-            final BoundedPollEventCollector pollCollector = new BoundedPollEventCollector(eventBound);
-            final BoundedPublicationEventCollector publicationCollector = new BoundedPublicationEventCollector(
-                eventBound);
-            final BoundedTopicCreationEventCollector topicCreationCollector = new BoundedTopicCreationEventCollector(
-                eventBound);
-            final PollEventQuerier pollQuerier = new PollEventQuerier(pollCollector);
-            final PublicationEventQuerier publicationQuerier = new PublicationEventQuerier(publicationCollector);
-            final TopicCreationEventQuerier topicCreationQuerier =
-                new TopicCreationEventQuerier(topicCreationCollector);
-            final EventSummaryReporter reporter = new EventSummaryReporter(
+            setUpSummaryMetrics(
+                diffusionSession,
+                model,
                 executorService,
-                pollQuerier,
-                publicationQuerier,
-                topicCreationQuerier);
-
-            // Use pico container to handle the injection of custom components
-            final MutablePicoContainer factoryContainer = new PicoBuilder()
-                .withCaching()
-                .withConstructorInjection()
-                .build()
-                .addComponent(executorService)
-                .addComponent(pollQuerier)
-                .addComponent(publicationQuerier)
-                .addComponent(topicCreationQuerier);
-
-            summaryConfig
-                .getReporterClassNames()
-                .stream()
-                .flatMap(this::tryLoadClass)
-                .forEach(factoryContainer::addComponent);
-
-            factoryContainer
-                .getComponents()
-                .stream()
-                .flatMap(object -> tryGetMethod(object, "start"))
-                .forEach(startTasks::add);
-
-            factoryContainer
-                .getComponents()
-                .stream()
-                .flatMap(object -> tryGetMethod(object, "close"))
-                .forEach(stopTasks::add);
-
-            startTasks.add(reporter::start);
-            stopTasks.add(reporter::close);
-
-            metricsDispatcher.addPollListener(new PollEventDispatcher(pollCollector));
-            metricsDispatcher.addPublicationListener(new PublicationEventDispatcher(publicationCollector));
-            metricsDispatcher.addTopicCreationListener(new TopicCreationEventDispatcher(topicCreationCollector));
+                metricsDispatcher,
+                summaryConfig,
+                startTasks,
+                stopTasks);
 
         }
 
         return new MetricsProvider(
             () -> startTasks.forEach(Runnable::run),
             () -> stopTasks.forEach(Runnable::run));
+    }
+
+    private void setUpSummaryMetrics(
+            Session diffusionSession,
+            Model model,
+            ScheduledExecutorService executorService,
+            MetricsDispatcher metricsDispatcher,
+            SummaryConfig summaryConfig,
+            List<Runnable> startTasks,
+            List<Runnable> stopTasks) {
+        final int eventBound = summaryConfig.getEventBound();
+        LOG.info("Enabling summary metrics reporting. {} event bound", eventBound);
+
+        final BoundedPollEventCollector pollCollector = new BoundedPollEventCollector(eventBound);
+        final BoundedPublicationEventCollector publicationCollector = new BoundedPublicationEventCollector(
+            eventBound);
+        final BoundedTopicCreationEventCollector topicCreationCollector = new BoundedTopicCreationEventCollector(
+            eventBound);
+        final PollEventQuerier pollQuerier = new PollEventQuerier(pollCollector);
+        final PublicationEventQuerier publicationQuerier = new PublicationEventQuerier(publicationCollector);
+        final TopicCreationEventQuerier topicCreationQuerier =
+            new TopicCreationEventQuerier(topicCreationCollector);
+        final EventSummaryReporter reporter = new EventSummaryReporter(
+            executorService,
+            pollQuerier,
+            publicationQuerier,
+            topicCreationQuerier);
+
+        // Use pico container to handle the injection of custom components
+        final MutablePicoContainer factoryContainer = new PicoBuilder()
+            .withCaching()
+            .withConstructorInjection()
+            .build()
+            .addComponent(executorService)
+            .addComponent(pollQuerier)
+            .addComponent(publicationQuerier)
+            .addComponent(topicCreationQuerier);
+
+        summaryConfig
+            .getReporterClassNames()
+            .stream()
+            .flatMap(this::tryLoadClass)
+            .forEach(factoryContainer::addComponent);
+
+        factoryContainer
+            .getComponents()
+            .stream()
+            .flatMap(object -> tryGetMethod(object, "start"))
+            .forEach(startTasks::add);
+
+        factoryContainer
+            .getComponents()
+            .stream()
+            .flatMap(object -> tryGetMethod(object, "close"))
+            .forEach(stopTasks::add);
+
+        startTasks.add(reporter::start);
+        stopTasks.add(reporter::close);
+
+        final TopicConfig topicConfig = model.getMetrics().getTopic();
+        if (topicConfig != null) {
+            final TopicBasedMetricsReporter metricsReporter = new TopicBasedMetricsReporter(
+                diffusionSession,
+                executorService,
+                pollQuerier,
+                topicConfig
+                    .getMetricsTopic());
+
+            startTasks.add(metricsReporter::start);
+            stopTasks.add(metricsReporter::close);
+        }
+
+        metricsDispatcher.addPollListener(new PollEventDispatcher(pollCollector));
+        metricsDispatcher.addPublicationListener(new PublicationEventDispatcher(publicationCollector));
+        metricsDispatcher.addTopicCreationListener(new TopicCreationEventDispatcher(topicCreationCollector));
     }
 
     private EventCountReporter createCountReporter(

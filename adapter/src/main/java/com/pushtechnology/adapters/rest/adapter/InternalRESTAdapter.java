@@ -241,7 +241,11 @@ public final class InternalRESTAdapter implements RESTAdapterListener, AutoClose
             metricsProvider.close();
         }
         else {
-            metricsProvider = metricsProviderFactory.create(currentModel, executor, metricsDispatcher);
+            metricsProvider = metricsProviderFactory.create(
+                diffusionSession,
+                currentModel,
+                executor,
+                metricsDispatcher);
             metricsProvider.start();
         }
     }
