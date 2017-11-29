@@ -21,6 +21,7 @@ import static java.math.RoundingMode.HALF_UP;
 import static java.util.Collections.singletonList;
 import static java.util.concurrent.TimeUnit.MINUTES;
 
+import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.util.Collection;
 import java.util.HashSet;
@@ -181,25 +182,53 @@ public final class TopicBasedMetricsReporter implements AutoCloseable {
 
     private void reportPollEvents(TopicUpdateControl updateControl) {
         final OptionalLong requestTime = pollEventQuerier.get90thPercentileSuccessfulRequestTime();
+        final BigDecimal failureThroughput = pollEventQuerier.getFailureThroughput();
+        final BigDecimal requestThroughput = pollEventQuerier.getRequestThroughput();
+        final OptionalLong maximumSuccessfulRequestTime = pollEventQuerier.getMaximumSuccessfulRequestTime();
+        final OptionalLong minimumSuccessfulRequestTime = pollEventQuerier.getMinimumSuccessfulRequestTime();
+        String value = "{";
         if (requestTime.isPresent()) {
             final long successfulRequestTime = requestTime.getAsLong();
-            final JSON value = dataTypes()
-                .json()
-                .fromJsonString("{\"successfulRequestTimeNinetiethPercentile\":" + successfulRequestTime + "}");
-
-            updateControl
-                .updater()
-                .valueUpdater(JSON.class)
-                .update(rootTopic + "/poll", value, new UpdateCallback() {
-                    @Override
-                    public void onSuccess() {
-                    }
-
-                    @Override
-                    public void onError(ErrorReason errorReason) {
-                        LOG.warn("Failed to update metrics reporting topics: {}", errorReason);
-                    }
-                });
+            value += "\"successfulRequestTimeNinetiethPercentile\":" + successfulRequestTime + ",";
         }
+        else {
+            value += "\"successfulRequestTimeNinetiethPercentile\":null,";
+        }
+        value += "\"failureThroughput\":" + failureThroughput + ",";
+        value += "\"requestThroughput\":" + requestThroughput + ",";
+        if (maximumSuccessfulRequestTime.isPresent()) {
+            final long maximumRequestTime = maximumSuccessfulRequestTime.getAsLong();
+            value += "\"maximumSuccessfulRequestTime\":" + maximumRequestTime + ",";
+        }
+        else {
+            value += "\"maximumSuccessfulRequestTime\":null,";
+        }
+        if (minimumSuccessfulRequestTime.isPresent()) {
+            final long minimumRequestTime = minimumSuccessfulRequestTime.getAsLong();
+            value += "\"minimumSuccessfulRequestTime\":" + minimumRequestTime;
+        }
+        else {
+            value += "\"minimumSuccessfulRequestTime\":null";
+        }
+        value += "}";
+
+        updateControl
+            .updater()
+            .valueUpdater(JSON.class)
+            .update(
+                rootTopic + "/poll",
+                dataTypes()
+                    .json()
+                    .fromJsonString(value),
+                new UpdateCallback() {
+                @Override
+                public void onSuccess() {
+                }
+
+                @Override
+                public void onError(ErrorReason errorReason) {
+                    LOG.warn("Failed to update metrics reporting topics: {}", errorReason);
+                }
+            });
     }
 }
