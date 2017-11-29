@@ -28,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
+import com.pushtechnology.adapters.rest.model.latest.MetricsConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.polling.EndpointClientImpl;
@@ -56,6 +57,7 @@ public final class InternalRESTAdapter implements RESTAdapterListener, AutoClose
     private final SessionLossHandler sessionLossHandler;
     private final ServiceListener serviceListener;
 
+    private final MetricsProviderFactory metricsProviderFactory = new MetricsProviderFactory();
     private final MetricsDispatcher metricsDispatcher = new MetricsDispatcher();
     private final EventedSessionListener eventedSessionListener = new EventedSessionListener();
     private final HttpClientFactory httpClientFactory;
@@ -77,6 +79,8 @@ public final class InternalRESTAdapter implements RESTAdapterListener, AutoClose
     private State state = State.INIT;
     @GuardedBy("this")
     private Session diffusionSession;
+    @GuardedBy("this")
+    private MetricsProvider metricsProvider;
 
     /**
      * Constructor.
@@ -133,6 +137,10 @@ public final class InternalRESTAdapter implements RESTAdapterListener, AutoClose
                 state == State.ACTIVE && (hasServiceSecurityChanged(model) || haveServicesChanged(model))) {
             currentModel = model;
             reconfigureServiceManager();
+        }
+        else if (haveMetricsChanged(model)) {
+            currentModel = model;
+            reconfigureMetricsReporting();
         }
         else {
             currentModel = model;
@@ -222,8 +230,20 @@ public final class InternalRESTAdapter implements RESTAdapterListener, AutoClose
             serviceSessionFactory,
             serviceSessionStarter);
 
+        reconfigureMetricsReporting();
+
         endpointClient.start();
         serviceManager.reconfigure(serviceManagerContext, currentModel);
+    }
+
+    private void reconfigureMetricsReporting() {
+        if (metricsProvider != null) {
+            metricsProvider.close();
+        }
+        else {
+            metricsProvider = metricsProviderFactory.create(currentModel, executor, metricsDispatcher);
+            metricsProvider.start();
+        }
     }
 
     @Override
@@ -284,6 +304,13 @@ public final class InternalRESTAdapter implements RESTAdapterListener, AutoClose
         final List<ServiceConfig> oldServices = currentModel.getServices();
 
         return !oldServices.equals(newServices);
+    }
+
+    private boolean haveMetricsChanged(Model model) {
+        final MetricsConfig newMetrics = model.getMetrics();
+        final MetricsConfig oldMetrics = currentModel.getMetrics();
+
+        return !oldMetrics.equals(newMetrics);
     }
 
     @Override
