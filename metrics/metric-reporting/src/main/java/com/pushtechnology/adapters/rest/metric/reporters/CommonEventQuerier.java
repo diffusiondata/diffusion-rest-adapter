@@ -109,7 +109,12 @@ public abstract class CommonEventQuerier<R extends RequestEvent, S extends Succe
 
         if (successEvents.size() > 0) {
             successEvents.sort(comparingLong(SuccessEvent::getRequestTime));
-            return OptionalLong.of(successEvents.get((int) ceil(successEvents.size() * 0.9)).getRequestTime());
+            return OptionalLong.of(
+                successEvents
+                    .get(Math.min(
+                       (int) ceil(successEvents.size() - 1 * 0.9),
+                       successEvents.size() - 1))
+                    .getRequestTime());
         }
         return OptionalLong.empty();
     }
