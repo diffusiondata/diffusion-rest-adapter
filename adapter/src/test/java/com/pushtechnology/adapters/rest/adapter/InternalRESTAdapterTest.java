@@ -58,7 +58,7 @@ import com.pushtechnology.diffusion.client.session.SessionFactory;
 /**
  * Unit tests for {@link InternalRESTAdapter}.
  *
- * @author Matt Champion 11/11/2017
+ * @author Push Technology Limited
  */
 public final class InternalRESTAdapterTest {
     @Rule

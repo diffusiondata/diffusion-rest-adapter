@@ -35,7 +35,7 @@ import net.jcip.annotations.ThreadSafe;
 /**
  * Dispatcher for metrics events.
  *
- * @author Matt Champion 05/07/2017
+ * @author Push Technology Limited
  */
 @ThreadSafe
 public final class MetricsDispatcher implements

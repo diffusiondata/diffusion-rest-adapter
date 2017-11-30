@@ -54,7 +54,7 @@ import com.pushtechnology.diffusion.client.topics.details.TopicType;
 /**
  * Unit tests for {@link TopicBasedMetricsReporter}.
  *
- * @author Matt Champion 27/06/2017
+ * @author Push Technology Limited
  */
 public final class TopicBasedMetricsReporterTest {
     @Mock

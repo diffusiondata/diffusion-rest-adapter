@@ -48,7 +48,7 @@ import net.jcip.annotations.GuardedBy;
 /**
  * A topic based metrics reporter.
  *
- * @author Matt Champion 27/06/2017
+ * @author Push Technology Limited
  */
 public final class TopicBasedMetricsReporter implements AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(TopicBasedMetricsReporter.class);

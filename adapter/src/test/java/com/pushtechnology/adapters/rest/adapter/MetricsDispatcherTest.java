@@ -29,7 +29,7 @@ import com.pushtechnology.diffusion.datatype.Bytes;
 /**
  * Unit tests for {@link MetricsDispatcher}.
  *
- * @author Matt Champion 10/07/2017
+ * @author Push Technology Limited
  */
 public final class MetricsDispatcherTest {
 

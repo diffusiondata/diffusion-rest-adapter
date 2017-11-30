@@ -21,7 +21,7 @@ import com.pushtechnology.diffusion.client.session.Session;
 /**
  * Internal listener for the state of the adapter listener.
  *
- * @author Matt Champion 16/09/2017
+ * @author Push Technology Limited
  */
 /*package*/ interface RESTAdapterListener {
 

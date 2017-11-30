@@ -35,7 +35,7 @@ import net.jcip.annotations.Immutable;
 /**
  * Builder for the {@link RESTAdapterClient}.
  *
- * @author Matt Champion 25/06/2017
+ * @author Push Technology Limited
  */
 @Immutable
 public final class RESTAdapterClientBuilder {

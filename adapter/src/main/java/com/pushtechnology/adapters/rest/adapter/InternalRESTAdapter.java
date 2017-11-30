@@ -49,7 +49,7 @@ import net.jcip.annotations.GuardedBy;
 /**
  * The REST Adapter.
  *
- * @author Matt Champion 07/10/2017
+ * @author Push Technology Limited
  */
 public final class InternalRESTAdapter implements RESTAdapterListener, AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(InternalRESTAdapter.class);

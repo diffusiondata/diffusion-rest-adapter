@@ -17,7 +17,7 @@ package com.pushtechnology.adapters.rest.session.management;
 
 /**
  * Session loss handler.
- * @author Matt Champion 07/08/2017
+ * @author Push Technology Limited
  */
 @FunctionalInterface
 public interface SessionLossHandler {

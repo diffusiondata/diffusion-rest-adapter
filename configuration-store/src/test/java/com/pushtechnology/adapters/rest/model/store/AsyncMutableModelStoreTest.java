@@ -29,7 +29,7 @@ import com.pushtechnology.adapters.rest.model.store.AsyncMutableModelStore.Creat
 /**
  * Unit tests for {@link AsyncMutableModelStore}.
  *
- * @author Matt Champion on 19/08/2016
+ * @author Push Technology Limited
  */
 public final class AsyncMutableModelStoreTest {
 

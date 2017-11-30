@@ -20,7 +20,7 @@ import com.pushtechnology.diffusion.client.session.Session;
 /**
  * Unit tests for {@link MetricsProviderFactory}.
  *
- * @author Matt Champion 03/06/2017
+ * @author Push Technology Limited
  */
 public final class MetricsProviderFactoryTest {
     @Mock
