@@ -15,8 +15,12 @@
 
 package com.pushtechnology.adapters.rest.metrics.reporting.topics;
 
-import static com.pushtechnology.diffusion.client.topics.details.TopicType.JSON;
+import static com.pushtechnology.diffusion.client.features.control.topics.TopicControl.AddTopicResult.CREATED;
+import static com.pushtechnology.diffusion.client.topics.details.TopicType.DOUBLE;
+import static com.pushtechnology.diffusion.client.topics.details.TopicType.INT64;
+import static java.util.concurrent.CompletableFuture.completedFuture;
 import static java.util.concurrent.TimeUnit.MINUTES;
+import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.times;
@@ -31,18 +35,17 @@ import java.util.concurrent.TimeUnit;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
 import com.pushtechnology.adapters.rest.metric.reporters.PollEventQuerier;
 import com.pushtechnology.adapters.rest.metrics.event.listeners.BoundedPollEventCollector;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.AddCallback;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.RemovalCallback;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
 import com.pushtechnology.diffusion.client.session.Session;
+import com.pushtechnology.diffusion.client.topics.details.TopicType;
 
 /**
  * Unit tests for {@link TopicBasedMetricsReporter}.
@@ -61,9 +64,6 @@ public final class TopicBasedMetricsReporterTest {
     @Mock
     private TopicUpdateControl updateControl;
 
-    @Captor
-    private ArgumentCaptor<AddCallback> addCallbackCaptor;
-
     private TopicBasedMetricsReporter reporter;
 
     @SuppressWarnings("unchecked")
@@ -76,6 +76,8 @@ public final class TopicBasedMetricsReporterTest {
 
         when(session.feature(TopicControl.class)).thenReturn(topicControl);
         when(session.feature(TopicUpdateControl.class)).thenReturn(updateControl);
+
+        when(topicControl.addTopic(isNotNull(), ArgumentMatchers.<TopicType>isNotNull())).thenReturn(completedFuture(CREATED));
 
         reporter = new TopicBasedMetricsReporter(
             session,
@@ -93,9 +95,12 @@ public final class TopicBasedMetricsReporterTest {
     public void start() throws Exception {
         reporter.start();
 
-        verify(topicControl).addTopic(eq("metrics/poll"), eq(JSON), addCallbackCaptor.capture());
+        verify(topicControl).addTopic("metrics/poll/failureThroughput", DOUBLE);
+        verify(topicControl).addTopic("metrics/poll/requestThroughput", DOUBLE);
+        verify(topicControl).addTopic("metrics/poll/maximumSuccessfulRequestTime", INT64);
+        verify(topicControl).addTopic("metrics/poll/minimumSuccessfulRequestTime", INT64);
+        verify(topicControl).addTopic("metrics/poll/successfulRequestTimeNinetiethPercentile", INT64);
 
-        addCallbackCaptor.getValue().onTopicAdded("metrics/poll");
         verify(executor).scheduleAtFixedRate(isA(Runnable.class), eq(1L), eq(1L), eq(MINUTES));
     }
 
@@ -104,9 +109,13 @@ public final class TopicBasedMetricsReporterTest {
         start();
 
         reporter.start();
-        verify(topicControl, times(2)).addTopic(eq("metrics/poll"), eq(JSON), addCallbackCaptor.capture());
 
-        addCallbackCaptor.getValue().onTopicAdded("metrics/poll");
+        verify(topicControl, times(2)).addTopic("metrics/poll/failureThroughput", DOUBLE);
+        verify(topicControl, times(2)).addTopic("metrics/poll/requestThroughput", DOUBLE);
+        verify(topicControl, times(2)).addTopic("metrics/poll/maximumSuccessfulRequestTime", INT64);
+        verify(topicControl, times(2)).addTopic("metrics/poll/minimumSuccessfulRequestTime", INT64);
+        verify(topicControl, times(2)).addTopic("metrics/poll/successfulRequestTimeNinetiethPercentile", INT64);
+        verify(executor).scheduleAtFixedRate(isA(Runnable.class), eq(1L), eq(1L), eq(MINUTES));
     }
 
     @Test

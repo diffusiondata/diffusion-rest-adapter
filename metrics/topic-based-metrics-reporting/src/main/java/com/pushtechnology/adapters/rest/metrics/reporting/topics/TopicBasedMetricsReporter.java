@@ -15,18 +15,15 @@
 
 package com.pushtechnology.adapters.rest.metrics.reporting.topics;
 
-import static com.pushtechnology.diffusion.client.Diffusion.dataTypes;
-import static com.pushtechnology.diffusion.client.features.control.topics.TopicAddFailReason.EXISTS;
+import static com.pushtechnology.diffusion.client.topics.details.TopicType.DOUBLE;
+import static com.pushtechnology.diffusion.client.topics.details.TopicType.INT64;
 import static java.math.RoundingMode.HALF_UP;
-import static java.util.Collections.singletonList;
+import static java.util.concurrent.CompletableFuture.allOf;
 import static java.util.concurrent.TimeUnit.MINUTES;
 
 import java.math.BigDecimal;
 import java.text.NumberFormat;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.OptionalLong;
-import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -38,15 +35,11 @@ import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.adapters.rest.metric.reporters.PollEventQuerier;
 import com.pushtechnology.diffusion.client.callbacks.ErrorReason;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicAddFailReason;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.AddCallback;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.RemovalCallback;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater.UpdateCallback;
 import com.pushtechnology.diffusion.client.session.Session;
-import com.pushtechnology.diffusion.client.topics.details.TopicType;
-import com.pushtechnology.diffusion.datatype.json.JSON;
 
 import net.jcip.annotations.GuardedBy;
 
@@ -92,10 +85,21 @@ public final class TopicBasedMetricsReporter implements AutoCloseable {
      */
     @PostConstruct
     public synchronized void start() {
-        createTopics(
-            singletonList(rootTopic + "/poll"),
-            this::close,
-            this::beginReporting);
+        final TopicControl topicControl = session.feature(TopicControl.class);
+
+        allOf(
+            topicControl.addTopic(rootTopic + "/poll/failureThroughput", DOUBLE),
+            topicControl.addTopic(rootTopic + "/poll/requestThroughput", DOUBLE),
+            topicControl.addTopic(rootTopic + "/poll/maximumSuccessfulRequestTime", INT64),
+            topicControl.addTopic(rootTopic + "/poll/minimumSuccessfulRequestTime", INT64),
+            topicControl.addTopic(rootTopic + "/poll/successfulRequestTimeNinetiethPercentile", INT64)
+        )
+            .thenRun(this::beginReporting)
+            .exceptionally(e -> {
+                LOG.warn("Failed to create metrics topics", e);
+                close();
+                return null;
+            });
     }
 
     @PreDestroy
@@ -118,52 +122,6 @@ public final class TopicBasedMetricsReporter implements AutoCloseable {
         }
     }
 
-    private void createTopics(Collection<String> paths, Runnable onFailed, Runnable onSuccess) {
-        final TopicControl topicControl = session.feature(TopicControl.class);
-
-        final AddCallback addCallback = new AddCallback() {
-            @GuardedBy("this")
-            private final Set<String> topicsFailed = new HashSet<>();
-            @GuardedBy("this")
-            private final Set<String> topicsRemaining = new HashSet<>(paths);
-
-            @Override
-            public synchronized void onTopicAdded(String topicPath) {
-                topicsRemaining.remove(topicPath);
-                onResult();
-
-            }
-
-            @Override
-            public synchronized void onTopicAddFailed(String topicPath, TopicAddFailReason reason) {
-                topicsRemaining.remove(topicPath);
-                if (!EXISTS.equals(reason)) {
-                    topicsFailed.add(topicPath);
-                }
-                onResult();
-            }
-
-            @Override
-            public synchronized void onDiscard() {
-                onFailed.run();
-            }
-
-            @GuardedBy("this")
-            private void onResult() {
-                if (topicsRemaining.size() == 0) {
-                    if (topicsFailed.size() == 0) {
-                        onSuccess.run();
-                    }
-                    else {
-                        onFailed.run();
-                    }
-                }
-            }
-        };
-
-        paths.forEach(path -> topicControl.addTopic(path, TopicType.JSON, addCallback));
-    }
-
     private void beginReporting() {
         if (loggingTask != null) {
             return;
@@ -181,54 +139,50 @@ public final class TopicBasedMetricsReporter implements AutoCloseable {
     }
 
     private void reportPollEvents(TopicUpdateControl updateControl) {
+        final UpdateCallback updateCallback = new UpdateCallback() {
+            @Override
+            public void onSuccess() {
+            }
+
+            @Override
+            public void onError(ErrorReason errorReason) {
+                LOG.warn("Failed to update metrics reporting topics: {}", errorReason);
+            }
+        };
+
+        final TopicUpdateControl.ValueUpdater<Double> doubleUpdater = updateControl
+            .updater()
+            .valueUpdater(Double.class);
+        final TopicUpdateControl.ValueUpdater<Long> longUpdater = updateControl
+            .updater()
+            .valueUpdater(Long.class);
+
         final OptionalLong requestTime = pollEventQuerier.get90thPercentileSuccessfulRequestTime();
         final BigDecimal failureThroughput = pollEventQuerier.getFailureThroughput();
         final BigDecimal requestThroughput = pollEventQuerier.getRequestThroughput();
+
+        doubleUpdater.update(rootTopic + "/poll/failureThroughput", failureThroughput.doubleValue(), updateCallback);
+        doubleUpdater.update(rootTopic + "/poll/requestThroughput", requestThroughput.doubleValue(), updateCallback);
+
         final OptionalLong maximumSuccessfulRequestTime = pollEventQuerier.getMaximumSuccessfulRequestTime();
         final OptionalLong minimumSuccessfulRequestTime = pollEventQuerier.getMinimumSuccessfulRequestTime();
-        String value = "{";
         if (requestTime.isPresent()) {
-            final long successfulRequestTime = requestTime.getAsLong();
-            value += "\"successfulRequestTimeNinetiethPercentile\":" + successfulRequestTime + ",";
+            longUpdater.update(
+                rootTopic + "/poll/successfulRequestTimeNinetiethPercentile",
+                requestTime.getAsLong(),
+                updateCallback);
         }
-        else {
-            value += "\"successfulRequestTimeNinetiethPercentile\":null,";
-        }
-        value += "\"failureThroughput\":" + failureThroughput + ",";
-        value += "\"requestThroughput\":" + requestThroughput + ",";
         if (maximumSuccessfulRequestTime.isPresent()) {
-            final long maximumRequestTime = maximumSuccessfulRequestTime.getAsLong();
-            value += "\"maximumSuccessfulRequestTime\":" + maximumRequestTime + ",";
-        }
-        else {
-            value += "\"maximumSuccessfulRequestTime\":null,";
+            longUpdater.update(
+                rootTopic + "/poll/maximumSuccessfulRequestTime",
+                maximumSuccessfulRequestTime.getAsLong(),
+                updateCallback);
         }
         if (minimumSuccessfulRequestTime.isPresent()) {
-            final long minimumRequestTime = minimumSuccessfulRequestTime.getAsLong();
-            value += "\"minimumSuccessfulRequestTime\":" + minimumRequestTime;
+            longUpdater.update(
+                rootTopic + "/poll/minimumSuccessfulRequestTime",
+                minimumSuccessfulRequestTime.getAsLong(),
+                updateCallback);
         }
-        else {
-            value += "\"minimumSuccessfulRequestTime\":null";
-        }
-        value += "}";
-
-        updateControl
-            .updater()
-            .valueUpdater(JSON.class)
-            .update(
-                rootTopic + "/poll",
-                dataTypes()
-                    .json()
-                    .fromJsonString(value),
-                new UpdateCallback() {
-                @Override
-                public void onSuccess() {
-                }
-
-                @Override
-                public void onError(ErrorReason errorReason) {
-                    LOG.warn("Failed to update metrics reporting topics: {}", errorReason);
-                }
-            });
     }
 }
