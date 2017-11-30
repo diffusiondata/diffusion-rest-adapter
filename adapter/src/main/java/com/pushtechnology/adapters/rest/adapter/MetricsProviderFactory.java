@@ -73,7 +73,7 @@ public final class MetricsProviderFactory {
         final List<Runnable> stopTasks = new ArrayList<>();
 
         if (model.getMetrics().isCounting()) {
-            LOG.info("Enabling counting metrics reporting.");
+            LOG.info("Enabling counting metrics reporting");
 
             final EventCountReporter reporter = createCountReporter(executorService, metricsDispatcher);
 
@@ -83,8 +83,6 @@ public final class MetricsProviderFactory {
 
         if (summaryConfig != null) {
             setUpSummaryMetrics(
-                diffusionSession,
-                model,
                 executorService,
                 metricsDispatcher,
                 summaryConfig,
@@ -93,14 +91,47 @@ public final class MetricsProviderFactory {
 
         }
 
+        final TopicConfig topicConfig = model.getMetrics().getTopic();
+        if (topicConfig != null) {
+            LOG.info("Enabling metrics topic reporting");
+
+            final TopicBasedMetricsReporter reporter = createTopicReporter(
+                diffusionSession,
+                executorService,
+                metricsDispatcher,
+                topicConfig);
+
+            startTasks.add(reporter::start);
+            stopTasks.add(reporter::close);
+        }
+
         return new MetricsProvider(
             () -> startTasks.forEach(Runnable::run),
             () -> stopTasks.forEach(Runnable::run));
     }
 
+    private TopicBasedMetricsReporter createTopicReporter(
+        Session diffusionSession,
+        ScheduledExecutorService executorService,
+        MetricsDispatcher metricsDispatcher,
+        TopicConfig topicConfig) {
+        final int eventBound = topicConfig.getEventBound();
+        final BoundedPollEventCollector pollCollector = new BoundedPollEventCollector(eventBound);
+        final PollEventQuerier pollQuerier = new PollEventQuerier(pollCollector);
+
+        final TopicBasedMetricsReporter metricsReporter = new TopicBasedMetricsReporter(
+            diffusionSession,
+            executorService,
+            pollQuerier,
+            topicConfig
+                .getMetricsTopic());
+
+        metricsDispatcher.addPollListener(new PollEventDispatcher(pollCollector));
+
+        return metricsReporter;
+    }
+
     private void setUpSummaryMetrics(
-            Session diffusionSession,
-            Model model,
             ScheduledExecutorService executorService,
             MetricsDispatcher metricsDispatcher,
             SummaryConfig summaryConfig,
@@ -154,19 +185,6 @@ public final class MetricsProviderFactory {
 
         startTasks.add(reporter::start);
         stopTasks.add(reporter::close);
-
-        final TopicConfig topicConfig = model.getMetrics().getTopic();
-        if (topicConfig != null) {
-            final TopicBasedMetricsReporter metricsReporter = new TopicBasedMetricsReporter(
-                diffusionSession,
-                executorService,
-                pollQuerier,
-                topicConfig
-                    .getMetricsTopic());
-
-            startTasks.add(metricsReporter::start);
-            stopTasks.add(metricsReporter::close);
-        }
 
         metricsDispatcher.addPollListener(new PollEventDispatcher(pollCollector));
         metricsDispatcher.addPublicationListener(new PublicationEventDispatcher(publicationCollector));
