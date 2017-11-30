@@ -117,16 +117,26 @@ public final class MetricsProviderFactory {
         TopicConfig topicConfig) {
         final int eventBound = topicConfig.getEventBound();
         final BoundedPollEventCollector pollCollector = new BoundedPollEventCollector(eventBound);
+        final BoundedPublicationEventCollector publicationCollector = new BoundedPublicationEventCollector(
+            eventBound);
+        final BoundedTopicCreationEventCollector topicCreationCollector = new BoundedTopicCreationEventCollector(
+            eventBound);
         final PollEventQuerier pollQuerier = new PollEventQuerier(pollCollector);
+        final PublicationEventQuerier publicationQuerier = new PublicationEventQuerier(publicationCollector);
+        final TopicCreationEventQuerier topicCreationQuerier =
+            new TopicCreationEventQuerier(topicCreationCollector);
 
         final TopicBasedMetricsReporter metricsReporter = new TopicBasedMetricsReporter(
             diffusionSession,
             executorService,
-            pollQuerier,
+            pollQuerier, publicationQuerier,
+            topicCreationQuerier,
             topicConfig
                 .getMetricsTopic());
 
         metricsDispatcher.addPollListener(new PollEventDispatcher(pollCollector));
+        metricsDispatcher.addPublicationListener(new PublicationEventDispatcher(publicationCollector));
+        metricsDispatcher.addTopicCreationListener(new TopicCreationEventDispatcher(topicCreationCollector));
 
         return metricsReporter;
     }

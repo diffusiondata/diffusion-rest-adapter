@@ -34,6 +34,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.adapters.rest.metric.reporters.PollEventQuerier;
+import com.pushtechnology.adapters.rest.metric.reporters.PublicationEventQuerier;
+import com.pushtechnology.adapters.rest.metric.reporters.TopicCreationEventQuerier;
 import com.pushtechnology.diffusion.client.callbacks.ErrorReason;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.RemovalCallback;
@@ -54,6 +56,8 @@ public final class TopicBasedMetricsReporter implements AutoCloseable {
     private final Session session;
     private final ScheduledExecutorService executor;
     private final PollEventQuerier pollEventQuerier;
+    private final PublicationEventQuerier publicationQuerier;
+    private final TopicCreationEventQuerier topicCreationQuerier;
     private final String rootTopic;
     @GuardedBy("this")
     private Future<?> loggingTask;
@@ -72,11 +76,15 @@ public final class TopicBasedMetricsReporter implements AutoCloseable {
         Session session,
         ScheduledExecutorService executor,
         PollEventQuerier pollEventQuerier,
+        PublicationEventQuerier publicationQuerier,
+        TopicCreationEventQuerier topicCreationQuerier,
         String rootTopic) {
 
         this.session = session;
         this.executor = executor;
         this.pollEventQuerier = pollEventQuerier;
+        this.publicationQuerier = publicationQuerier;
+        this.topicCreationQuerier = topicCreationQuerier;
         this.rootTopic = rootTopic;
     }
 
@@ -92,8 +100,17 @@ public final class TopicBasedMetricsReporter implements AutoCloseable {
             topicControl.addTopic(rootTopic + "/poll/requestThroughput", DOUBLE),
             topicControl.addTopic(rootTopic + "/poll/maximumSuccessfulRequestTime", INT64),
             topicControl.addTopic(rootTopic + "/poll/minimumSuccessfulRequestTime", INT64),
-            topicControl.addTopic(rootTopic + "/poll/successfulRequestTimeNinetiethPercentile", INT64)
-        )
+            topicControl.addTopic(rootTopic + "/poll/successfulRequestTimeNinetiethPercentile", INT64),
+            topicControl.addTopic(rootTopic + "/publication/failureThroughput", DOUBLE),
+            topicControl.addTopic(rootTopic + "/publication/requestThroughput", DOUBLE),
+            topicControl.addTopic(rootTopic + "/publication/maximumSuccessfulRequestTime", INT64),
+            topicControl.addTopic(rootTopic + "/publication/minimumSuccessfulRequestTime", INT64),
+            topicControl.addTopic(rootTopic + "/publication/successfulRequestTimeNinetiethPercentile", INT64),
+            topicControl.addTopic(rootTopic + "/topicCreation/failureThroughput", DOUBLE),
+            topicControl.addTopic(rootTopic + "/topicCreation/requestThroughput", DOUBLE),
+            topicControl.addTopic(rootTopic + "/topicCreation/maximumSuccessfulRequestTime", INT64),
+            topicControl.addTopic(rootTopic + "/topicCreation/minimumSuccessfulRequestTime", INT64),
+            topicControl.addTopic(rootTopic + "/topicCreation/successfulRequestTimeNinetiethPercentile", INT64))
             .thenRun(this::beginReporting)
             .exceptionally(e -> {
                 LOG.warn("Failed to create metrics topics", e);
@@ -132,6 +149,8 @@ public final class TopicBasedMetricsReporter implements AutoCloseable {
         loggingTask = executor.scheduleAtFixedRate(
             () -> {
                 reportPollEvents(updateControl);
+                reportPublicationEvents(updateControl);
+                reportTopicCreationEvents(updateControl);
             },
             1,
             1,
@@ -181,6 +200,114 @@ public final class TopicBasedMetricsReporter implements AutoCloseable {
         if (minimumSuccessfulRequestTime.isPresent()) {
             longUpdater.update(
                 rootTopic + "/poll/minimumSuccessfulRequestTime",
+                minimumSuccessfulRequestTime.getAsLong(),
+                updateCallback);
+        }
+    }
+
+    private void reportPublicationEvents(TopicUpdateControl updateControl) {
+        final UpdateCallback updateCallback = new UpdateCallback() {
+            @Override
+            public void onSuccess() {
+            }
+
+            @Override
+            public void onError(ErrorReason errorReason) {
+                LOG.warn("Failed to update metrics reporting topics: {}", errorReason);
+            }
+        };
+
+        final TopicUpdateControl.ValueUpdater<Double> doubleUpdater = updateControl
+            .updater()
+            .valueUpdater(Double.class);
+        final TopicUpdateControl.ValueUpdater<Long> longUpdater = updateControl
+            .updater()
+            .valueUpdater(Long.class);
+
+        final OptionalLong requestTime = publicationQuerier.get90thPercentileSuccessfulRequestTime();
+        final BigDecimal failureThroughput = publicationQuerier.getFailureThroughput();
+        final BigDecimal requestThroughput = publicationQuerier.getRequestThroughput();
+
+        doubleUpdater.update(
+            rootTopic + "/publication/failureThroughput",
+            failureThroughput.doubleValue(),
+            updateCallback);
+        doubleUpdater.update(
+            rootTopic + "/publication/requestThroughput",
+            requestThroughput.doubleValue(),
+            updateCallback);
+
+        final OptionalLong maximumSuccessfulRequestTime = publicationQuerier.getMaximumSuccessfulRequestTime();
+        final OptionalLong minimumSuccessfulRequestTime = publicationQuerier.getMinimumSuccessfulRequestTime();
+        if (requestTime.isPresent()) {
+            longUpdater.update(
+                rootTopic + "/publication/successfulRequestTimeNinetiethPercentile",
+                requestTime.getAsLong(),
+                updateCallback);
+        }
+        if (maximumSuccessfulRequestTime.isPresent()) {
+            longUpdater.update(
+                rootTopic + "/publication/maximumSuccessfulRequestTime",
+                maximumSuccessfulRequestTime.getAsLong(),
+                updateCallback);
+        }
+        if (minimumSuccessfulRequestTime.isPresent()) {
+            longUpdater.update(
+                rootTopic + "/publication/minimumSuccessfulRequestTime",
+                minimumSuccessfulRequestTime.getAsLong(),
+                updateCallback);
+        }
+    }
+
+    private void reportTopicCreationEvents(TopicUpdateControl updateControl) {
+        final UpdateCallback updateCallback = new UpdateCallback() {
+            @Override
+            public void onSuccess() {
+            }
+
+            @Override
+            public void onError(ErrorReason errorReason) {
+                LOG.warn("Failed to update metrics reporting topics: {}", errorReason);
+            }
+        };
+
+        final TopicUpdateControl.ValueUpdater<Double> doubleUpdater = updateControl
+            .updater()
+            .valueUpdater(Double.class);
+        final TopicUpdateControl.ValueUpdater<Long> longUpdater = updateControl
+            .updater()
+            .valueUpdater(Long.class);
+
+        final OptionalLong requestTime = topicCreationQuerier.get90thPercentileSuccessfulRequestTime();
+        final BigDecimal failureThroughput = topicCreationQuerier.getFailureThroughput();
+        final BigDecimal requestThroughput = topicCreationQuerier.getRequestThroughput();
+
+        doubleUpdater.update(
+            rootTopic + "/topicCreation/failureThroughput",
+            failureThroughput.doubleValue(),
+            updateCallback);
+        doubleUpdater.update(
+            rootTopic + "/topicCreation/requestThroughput",
+            requestThroughput.doubleValue(),
+            updateCallback);
+
+        final OptionalLong maximumSuccessfulRequestTime = topicCreationQuerier.getMaximumSuccessfulRequestTime();
+        final OptionalLong minimumSuccessfulRequestTime = topicCreationQuerier.getMinimumSuccessfulRequestTime();
+        if (requestTime.isPresent()) {
+            longUpdater.update(
+                rootTopic + "/topicCreation/successfulRequestTimeNinetiethPercentile",
+                requestTime.getAsLong(),
+                updateCallback);
+        }
+        if (maximumSuccessfulRequestTime.isPresent()) {
+            longUpdater.update(
+                rootTopic + "/topicCreation/maximumSuccessfulRequestTime",
+                maximumSuccessfulRequestTime.getAsLong(),
+                updateCallback);
+        }
+        if (minimumSuccessfulRequestTime.isPresent()) {
+            longUpdater.update(
+                rootTopic + "/topicCreation/minimumSuccessfulRequestTime",
                 minimumSuccessfulRequestTime.getAsLong(),
                 updateCallback);
         }

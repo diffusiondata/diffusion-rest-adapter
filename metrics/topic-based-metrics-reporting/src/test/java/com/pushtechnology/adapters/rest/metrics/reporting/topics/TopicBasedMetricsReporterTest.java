@@ -40,7 +40,11 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 
 import com.pushtechnology.adapters.rest.metric.reporters.PollEventQuerier;
+import com.pushtechnology.adapters.rest.metric.reporters.PublicationEventQuerier;
+import com.pushtechnology.adapters.rest.metric.reporters.TopicCreationEventQuerier;
 import com.pushtechnology.adapters.rest.metrics.event.listeners.BoundedPollEventCollector;
+import com.pushtechnology.adapters.rest.metrics.event.listeners.BoundedPublicationEventCollector;
+import com.pushtechnology.adapters.rest.metrics.event.listeners.BoundedTopicCreationEventCollector;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.RemovalCallback;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
@@ -83,6 +87,8 @@ public final class TopicBasedMetricsReporterTest {
             session,
             executor,
             new PollEventQuerier(new BoundedPollEventCollector(100)),
+            new PublicationEventQuerier(new BoundedPublicationEventCollector(100)),
+            new TopicCreationEventQuerier(new BoundedTopicCreationEventCollector(100)),
             "metrics");
     }
 
@@ -100,6 +106,16 @@ public final class TopicBasedMetricsReporterTest {
         verify(topicControl).addTopic("metrics/poll/maximumSuccessfulRequestTime", INT64);
         verify(topicControl).addTopic("metrics/poll/minimumSuccessfulRequestTime", INT64);
         verify(topicControl).addTopic("metrics/poll/successfulRequestTimeNinetiethPercentile", INT64);
+        verify(topicControl).addTopic("metrics/publication/failureThroughput", DOUBLE);
+        verify(topicControl).addTopic("metrics/publication/requestThroughput", DOUBLE);
+        verify(topicControl).addTopic("metrics/publication/maximumSuccessfulRequestTime", INT64);
+        verify(topicControl).addTopic("metrics/publication/minimumSuccessfulRequestTime", INT64);
+        verify(topicControl).addTopic("metrics/publication/successfulRequestTimeNinetiethPercentile", INT64);
+        verify(topicControl).addTopic("metrics/topicCreation/failureThroughput", DOUBLE);
+        verify(topicControl).addTopic("metrics/topicCreation/requestThroughput", DOUBLE);
+        verify(topicControl).addTopic("metrics/topicCreation/maximumSuccessfulRequestTime", INT64);
+        verify(topicControl).addTopic("metrics/topicCreation/minimumSuccessfulRequestTime", INT64);
+        verify(topicControl).addTopic("metrics/topicCreation/successfulRequestTimeNinetiethPercentile", INT64);
 
         verify(executor).scheduleAtFixedRate(isA(Runnable.class), eq(1L), eq(1L), eq(MINUTES));
     }
@@ -115,6 +131,16 @@ public final class TopicBasedMetricsReporterTest {
         verify(topicControl, times(2)).addTopic("metrics/poll/maximumSuccessfulRequestTime", INT64);
         verify(topicControl, times(2)).addTopic("metrics/poll/minimumSuccessfulRequestTime", INT64);
         verify(topicControl, times(2)).addTopic("metrics/poll/successfulRequestTimeNinetiethPercentile", INT64);
+        verify(topicControl, times(2)).addTopic("metrics/publication/failureThroughput", DOUBLE);
+        verify(topicControl, times(2)).addTopic("metrics/publication/requestThroughput", DOUBLE);
+        verify(topicControl, times(2)).addTopic("metrics/publication/maximumSuccessfulRequestTime", INT64);
+        verify(topicControl, times(2)).addTopic("metrics/publication/minimumSuccessfulRequestTime", INT64);
+        verify(topicControl, times(2)).addTopic("metrics/publication/successfulRequestTimeNinetiethPercentile", INT64);
+        verify(topicControl, times(2)).addTopic("metrics/topicCreation/failureThroughput", DOUBLE);
+        verify(topicControl, times(2)).addTopic("metrics/topicCreation/requestThroughput", DOUBLE);
+        verify(topicControl, times(2)).addTopic("metrics/topicCreation/maximumSuccessfulRequestTime", INT64);
+        verify(topicControl, times(2)).addTopic("metrics/topicCreation/minimumSuccessfulRequestTime", INT64);
+        verify(topicControl, times(2)).addTopic("metrics/topicCreation/successfulRequestTimeNinetiethPercentile", INT64);
         verify(executor).scheduleAtFixedRate(isA(Runnable.class), eq(1L), eq(1L), eq(MINUTES));
     }
 
