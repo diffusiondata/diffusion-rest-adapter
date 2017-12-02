@@ -33,8 +33,11 @@ import javax.annotation.PreDestroy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.pushtechnology.adapters.rest.metric.reporters.PollEventCounter;
 import com.pushtechnology.adapters.rest.metric.reporters.PollEventQuerier;
+import com.pushtechnology.adapters.rest.metric.reporters.PublicationEventCounter;
 import com.pushtechnology.adapters.rest.metric.reporters.PublicationEventQuerier;
+import com.pushtechnology.adapters.rest.metric.reporters.TopicCreationEventCounter;
 import com.pushtechnology.adapters.rest.metric.reporters.TopicCreationEventQuerier;
 import com.pushtechnology.diffusion.client.callbacks.ErrorReason;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
@@ -54,6 +57,9 @@ public final class TopicBasedMetricsReporter implements AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(TopicBasedMetricsReporter.class);
     private static final NumberFormat FORMAT;
     private final Session session;
+    private final PollEventCounter pollEventCounter;
+    private final PublicationEventCounter publicationEventCounter;
+    private final TopicCreationEventCounter topicCreationEventCounter;
     private final ScheduledExecutorService executor;
     private final PollEventQuerier pollEventQuerier;
     private final PublicationEventQuerier publicationQuerier;
@@ -72,15 +78,23 @@ public final class TopicBasedMetricsReporter implements AutoCloseable {
     /**
      * Constructor.
      */
+    // CHECKSTYLE.OFF: ParameterNumber
     public TopicBasedMetricsReporter(
         Session session,
+        PollEventCounter pollEventCounter,
+        PublicationEventCounter publicationEventCounter,
+        TopicCreationEventCounter topicCreationEventCounter,
         ScheduledExecutorService executor,
         PollEventQuerier pollEventQuerier,
         PublicationEventQuerier publicationQuerier,
         TopicCreationEventQuerier topicCreationQuerier,
         String rootTopic) {
+    // CHECKSTYLE.ON: ParameterNumber
 
         this.session = session;
+        this.pollEventCounter = pollEventCounter;
+        this.publicationEventCounter = publicationEventCounter;
+        this.topicCreationEventCounter = topicCreationEventCounter;
         this.executor = executor;
         this.pollEventQuerier = pollEventQuerier;
         this.publicationQuerier = publicationQuerier;
@@ -96,16 +110,25 @@ public final class TopicBasedMetricsReporter implements AutoCloseable {
         final TopicControl topicControl = session.feature(TopicControl.class);
 
         allOf(
+            topicControl.addTopic(rootTopic + "/poll/requests", INT64),
+            topicControl.addTopic(rootTopic + "/poll/successes", INT64),
+            topicControl.addTopic(rootTopic + "/poll/failures", INT64),
             topicControl.addTopic(rootTopic + "/poll/failureThroughput", DOUBLE),
             topicControl.addTopic(rootTopic + "/poll/requestThroughput", DOUBLE),
             topicControl.addTopic(rootTopic + "/poll/maximumSuccessfulRequestTime", INT64),
             topicControl.addTopic(rootTopic + "/poll/minimumSuccessfulRequestTime", INT64),
             topicControl.addTopic(rootTopic + "/poll/successfulRequestTimeNinetiethPercentile", INT64),
+            topicControl.addTopic(rootTopic + "/publication/requests", INT64),
+            topicControl.addTopic(rootTopic + "/publication/successes", INT64),
+            topicControl.addTopic(rootTopic + "/publication/failures", INT64),
             topicControl.addTopic(rootTopic + "/publication/failureThroughput", DOUBLE),
             topicControl.addTopic(rootTopic + "/publication/requestThroughput", DOUBLE),
             topicControl.addTopic(rootTopic + "/publication/maximumSuccessfulRequestTime", INT64),
             topicControl.addTopic(rootTopic + "/publication/minimumSuccessfulRequestTime", INT64),
             topicControl.addTopic(rootTopic + "/publication/successfulRequestTimeNinetiethPercentile", INT64),
+            topicControl.addTopic(rootTopic + "/topicCreation/requests", INT64),
+            topicControl.addTopic(rootTopic + "/topicCreation/successes", INT64),
+            topicControl.addTopic(rootTopic + "/topicCreation/failures", INT64),
             topicControl.addTopic(rootTopic + "/topicCreation/failureThroughput", DOUBLE),
             topicControl.addTopic(rootTopic + "/topicCreation/requestThroughput", DOUBLE),
             topicControl.addTopic(rootTopic + "/topicCreation/maximumSuccessfulRequestTime", INT64),
@@ -176,6 +199,10 @@ public final class TopicBasedMetricsReporter implements AutoCloseable {
             .updater()
             .valueUpdater(Long.class);
 
+        longUpdater.update(rootTopic + "/poll/requests", (long) pollEventCounter.getRequests(), updateCallback);
+        longUpdater.update(rootTopic + "/poll/successes", (long) pollEventCounter.getSuccesses(), updateCallback);
+        longUpdater.update(rootTopic + "/poll/failures", (long) pollEventCounter.getFailures(), updateCallback);
+
         final OptionalLong requestTime = pollEventQuerier.get90thPercentileSuccessfulRequestTime();
         final BigDecimal failureThroughput = pollEventQuerier.getFailureThroughput();
         final BigDecimal requestThroughput = pollEventQuerier.getRequestThroughput();
@@ -223,6 +250,19 @@ public final class TopicBasedMetricsReporter implements AutoCloseable {
         final TopicUpdateControl.ValueUpdater<Long> longUpdater = updateControl
             .updater()
             .valueUpdater(Long.class);
+
+        longUpdater.update(
+            rootTopic + "/publication/requests",
+            (long) publicationEventCounter.getRequests(),
+            updateCallback);
+        longUpdater.update(
+            rootTopic + "/publication/successes",
+            (long) publicationEventCounter.getSuccesses(),
+            updateCallback);
+        longUpdater.update(
+            rootTopic + "/publication/failures",
+            (long) publicationEventCounter.getFailures(),
+            updateCallback);
 
         final OptionalLong requestTime = publicationQuerier.get90thPercentileSuccessfulRequestTime();
         final BigDecimal failureThroughput = publicationQuerier.getFailureThroughput();
@@ -277,6 +317,19 @@ public final class TopicBasedMetricsReporter implements AutoCloseable {
         final TopicUpdateControl.ValueUpdater<Long> longUpdater = updateControl
             .updater()
             .valueUpdater(Long.class);
+
+        longUpdater.update(
+            rootTopic + "/topicCreation/requests",
+            (long) topicCreationEventCounter.getRequests(),
+            updateCallback);
+        longUpdater.update(
+            rootTopic + "/topicCreation/successes",
+            (long) topicCreationEventCounter.getSuccesses(),
+            updateCallback);
+        longUpdater.update(
+            rootTopic + "/topicCreation/failures",
+            (long) topicCreationEventCounter.getFailures(),
+            updateCallback);
 
         final OptionalLong requestTime = topicCreationQuerier.get90thPercentileSuccessfulRequestTime();
         final BigDecimal failureThroughput = topicCreationQuerier.getFailureThroughput();

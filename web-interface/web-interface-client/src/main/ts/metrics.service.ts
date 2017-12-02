@@ -21,6 +21,9 @@ export class MetricsService {
 
     private static createCommonMetrics(): CommonMetrics {
         return {
+            requests: 0,
+            successes: 0,
+            failures: 0,
             requestThroughput: 0,
             failureThroughput: 0,
             maximumSuccessfulRequestTime: 0,
@@ -31,6 +34,24 @@ export class MetricsService {
 
     private registerCommonMetrics(session, topicRoot, metrics) {
         let streams = [
+            session
+                .stream(topicRoot + '/requests')
+                .asType(longDataType)
+                .on('value', (topic, specification, newValue) => {
+                    metrics.requests = newValue;
+                }),
+            session
+                .stream(topicRoot + '/successes')
+                .asType(longDataType)
+                .on('value', (topic, specification, newValue) => {
+                    metrics.successes = newValue;
+                }),
+            session
+                .stream(topicRoot + '/failures')
+                .asType(longDataType)
+                .on('value', (topic, specification, newValue) => {
+                    metrics.failures = newValue;
+                }),
             session
                 .stream(topicRoot + '/requestThroughput')
                 .asType(doubleDataType)
@@ -86,6 +107,9 @@ export class MetricsService {
 }
 
 export interface CommonMetrics {
+    requests: number,
+    successes: number,
+    failures: number,
     requestThroughput: number;
     failureThroughput: number;
     maximumSuccessfulRequestTime: number;

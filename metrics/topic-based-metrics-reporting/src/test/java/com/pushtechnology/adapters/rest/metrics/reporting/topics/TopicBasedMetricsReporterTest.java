@@ -39,8 +39,11 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
+import com.pushtechnology.adapters.rest.metric.reporters.PollEventCounter;
 import com.pushtechnology.adapters.rest.metric.reporters.PollEventQuerier;
+import com.pushtechnology.adapters.rest.metric.reporters.PublicationEventCounter;
 import com.pushtechnology.adapters.rest.metric.reporters.PublicationEventQuerier;
+import com.pushtechnology.adapters.rest.metric.reporters.TopicCreationEventCounter;
 import com.pushtechnology.adapters.rest.metric.reporters.TopicCreationEventQuerier;
 import com.pushtechnology.adapters.rest.metrics.event.listeners.BoundedPollEventCollector;
 import com.pushtechnology.adapters.rest.metrics.event.listeners.BoundedPublicationEventCollector;
@@ -85,6 +88,9 @@ public final class TopicBasedMetricsReporterTest {
 
         reporter = new TopicBasedMetricsReporter(
             session,
+            new PollEventCounter(),
+            new PublicationEventCounter(),
+            new TopicCreationEventCounter(),
             executor,
             new PollEventQuerier(new BoundedPollEventCollector(100)),
             new PublicationEventQuerier(new BoundedPublicationEventCollector(100)),
@@ -101,16 +107,25 @@ public final class TopicBasedMetricsReporterTest {
     public void start() throws Exception {
         reporter.start();
 
+        verify(topicControl).addTopic("metrics/poll/requests", INT64);
+        verify(topicControl).addTopic("metrics/poll/successes", INT64);
+        verify(topicControl).addTopic("metrics/poll/failures", INT64);
         verify(topicControl).addTopic("metrics/poll/failureThroughput", DOUBLE);
         verify(topicControl).addTopic("metrics/poll/requestThroughput", DOUBLE);
         verify(topicControl).addTopic("metrics/poll/maximumSuccessfulRequestTime", INT64);
         verify(topicControl).addTopic("metrics/poll/minimumSuccessfulRequestTime", INT64);
         verify(topicControl).addTopic("metrics/poll/successfulRequestTimeNinetiethPercentile", INT64);
+        verify(topicControl).addTopic("metrics/publication/requests", INT64);
+        verify(topicControl).addTopic("metrics/publication/successes", INT64);
+        verify(topicControl).addTopic("metrics/publication/failures", INT64);
         verify(topicControl).addTopic("metrics/publication/failureThroughput", DOUBLE);
         verify(topicControl).addTopic("metrics/publication/requestThroughput", DOUBLE);
         verify(topicControl).addTopic("metrics/publication/maximumSuccessfulRequestTime", INT64);
         verify(topicControl).addTopic("metrics/publication/minimumSuccessfulRequestTime", INT64);
         verify(topicControl).addTopic("metrics/publication/successfulRequestTimeNinetiethPercentile", INT64);
+        verify(topicControl).addTopic("metrics/topicCreation/requests", INT64);
+        verify(topicControl).addTopic("metrics/topicCreation/successes", INT64);
+        verify(topicControl).addTopic("metrics/topicCreation/failures", INT64);
         verify(topicControl).addTopic("metrics/topicCreation/failureThroughput", DOUBLE);
         verify(topicControl).addTopic("metrics/topicCreation/requestThroughput", DOUBLE);
         verify(topicControl).addTopic("metrics/topicCreation/maximumSuccessfulRequestTime", INT64);
@@ -126,16 +141,25 @@ public final class TopicBasedMetricsReporterTest {
 
         reporter.start();
 
+        verify(topicControl, times(2)).addTopic("metrics/poll/requests", INT64);
+        verify(topicControl, times(2)).addTopic("metrics/poll/successes", INT64);
+        verify(topicControl, times(2)).addTopic("metrics/poll/failures", INT64);
         verify(topicControl, times(2)).addTopic("metrics/poll/failureThroughput", DOUBLE);
         verify(topicControl, times(2)).addTopic("metrics/poll/requestThroughput", DOUBLE);
         verify(topicControl, times(2)).addTopic("metrics/poll/maximumSuccessfulRequestTime", INT64);
         verify(topicControl, times(2)).addTopic("metrics/poll/minimumSuccessfulRequestTime", INT64);
         verify(topicControl, times(2)).addTopic("metrics/poll/successfulRequestTimeNinetiethPercentile", INT64);
+        verify(topicControl, times(2)).addTopic("metrics/publication/requests", INT64);
+        verify(topicControl, times(2)).addTopic("metrics/publication/successes", INT64);
+        verify(topicControl, times(2)).addTopic("metrics/publication/failures", INT64);
         verify(topicControl, times(2)).addTopic("metrics/publication/failureThroughput", DOUBLE);
         verify(topicControl, times(2)).addTopic("metrics/publication/requestThroughput", DOUBLE);
         verify(topicControl, times(2)).addTopic("metrics/publication/maximumSuccessfulRequestTime", INT64);
         verify(topicControl, times(2)).addTopic("metrics/publication/minimumSuccessfulRequestTime", INT64);
         verify(topicControl, times(2)).addTopic("metrics/publication/successfulRequestTimeNinetiethPercentile", INT64);
+        verify(topicControl, times(2)).addTopic("metrics/topicCreation/requests", INT64);
+        verify(topicControl, times(2)).addTopic("metrics/topicCreation/successes", INT64);
+        verify(topicControl, times(2)).addTopic("metrics/topicCreation/failures", INT64);
         verify(topicControl, times(2)).addTopic("metrics/topicCreation/failureThroughput", DOUBLE);
         verify(topicControl, times(2)).addTopic("metrics/topicCreation/requestThroughput", DOUBLE);
         verify(topicControl, times(2)).addTopic("metrics/topicCreation/maximumSuccessfulRequestTime", INT64);
