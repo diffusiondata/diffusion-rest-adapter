@@ -237,17 +237,17 @@ public final class InternalRESTAdapter implements RESTAdapterListener, AutoClose
     }
 
     private void reconfigureMetricsReporting() {
+        LOG.warn("Updating metrics providers");
+
         if (metricsProvider != null) {
             metricsProvider.close();
         }
-        else {
-            metricsProvider = metricsProviderFactory.create(
-                diffusionSession,
-                currentModel,
-                executor,
-                metricsDispatcher);
-            metricsProvider.start();
-        }
+        metricsProvider = metricsProviderFactory.create(
+            diffusionSession,
+            currentModel,
+            executor,
+            metricsDispatcher);
+        metricsProvider.start();
     }
 
     @Override

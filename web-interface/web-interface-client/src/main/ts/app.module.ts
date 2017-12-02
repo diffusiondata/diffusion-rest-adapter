@@ -15,6 +15,7 @@ import { UnselectedComponent } from './unselected.component';
 import { RootComponent } from './root.component';
 import { DiffusionService } from './diffusion.service';
 import { ModelService } from './model.service';
+import { MetricsService } from './metrics.service';
 import { StackService } from './stack.service';
 import { ErrorService } from './error.service';
 import { SessionEstablishmentGuard } from './session-establishment.guard';
@@ -33,6 +34,7 @@ const diffusionConfig: diffusion.Options = require('diffusionConfig');
             useValue: diffusionConfig
         }),
         DiffusionService,
+        MetricsService,
         ModelService,
         StackService,
         ErrorService,

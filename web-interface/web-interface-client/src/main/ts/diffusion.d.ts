@@ -87,6 +87,8 @@ declare module "diffusion" {
     export interface DataTypes {
         binary: () => BinaryDataType;
         json: () => JsonDataType;
+        double: () => any;
+        int64: () => any;
         get: (name: any) => DataType < Json > | DataType < Binary > ;
         BinaryDataType: BinaryDataType;
         JSONDataType: JsonDataType;

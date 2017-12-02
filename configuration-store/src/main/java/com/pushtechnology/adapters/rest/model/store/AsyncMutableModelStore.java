@@ -29,7 +29,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
-import com.pushtechnology.adapters.rest.model.latest.MetricsConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 
@@ -143,9 +142,7 @@ public final class AsyncMutableModelStore implements ModelStore {
                 .active(model.isActive())
                 .diffusion(model.getDiffusion())
                 .services(serviceConfigs)
-                .metrics(MetricsConfig
-                    .builder()
-                    .build())
+                .metrics(model.getMetrics())
                 .truststore(model.getTruststore())
                 .build());
 
@@ -242,9 +239,7 @@ public final class AsyncMutableModelStore implements ModelStore {
                 .active(model.isActive())
                 .diffusion(model.getDiffusion())
                 .services(serviceConfigs)
-                .metrics(MetricsConfig
-                    .builder()
-                    .build())
+                .metrics(model.getMetrics())
                 .truststore(model.getTruststore())
                 .build());
 

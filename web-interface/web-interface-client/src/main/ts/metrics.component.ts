@@ -1,5 +1,6 @@
 
-import { Component, OnInit } from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
+import {MetricsService, MetricsView} from "./metrics.service";
 
 @Component({
     selector: 'metrics',
@@ -7,32 +8,110 @@ import { Component, OnInit } from '@angular/core';
 <div class="col-md-8">
     <div class="panel panel-default">
         <div class="panel-heading">
-            <h3 class="panel-title">Metrics</h3>
+            <h3 class="panel-title">Poll metrics</h3>
         </div>
         <div class="panel-body">
-            <div id="visualization"></div>
+            <div class="form-horizontal">
+                <div class="form-group">
+                    <label for="url" class="col-sm-2 control-label">Request throughput</label>
+                    <p id="url" class="form-control-static col-sm-4">{{view.pollMetrics.requestThroughput}}</p>
+                </div>
+                <div class="form-group">
+                    <label for="topicPath" class="col-sm-2 control-label">Failure throughput</label>
+                    <p id="topicPath" class="form-control-static col-sm-4">{{view.pollMetrics.failureThroughput}}</p>
+                </div>
+                <div class="form-group">
+                    <label for="topicPath" class="col-sm-2 control-label">Max. successful request time</label>
+                    <p id="topicPath" class="form-control-static col-sm-4">{{view.pollMetrics.maximumSuccessfulRequestTime}}</p>
+                </div>
+                <div class="form-group">
+                    <label for="topicPath" class="col-sm-2 control-label">Min. successful request time</label>
+                    <p id="topicPath" class="form-control-static col-sm-4">{{view.pollMetrics.minimumSuccessfulRequestTime}}</p>
+                </div>
+                <div class="form-group">
+                    <label for="topicPath" class="col-sm-2 control-label">Successful request time 90th percentile</label>
+                    <p id="topicPath" class="form-control-static col-sm-4">{{view.pollMetrics.successfulRequestTimeNinetiethPercentile}}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">Publication metrics</h3>
+        </div>
+        <div class="panel-body">
+            <div class="form-horizontal">
+                <div class="form-group">
+                    <label for="url" class="col-sm-2 control-label">Request throughput</label>
+                    <p id="topicPath" class="form-control-static col-sm-4">{{view.publicationMetrics.requestThroughput}}</p>
+                </div>
+                <div class="form-group">
+                    <label for="topicPath" class="col-sm-2 control-label">Failure throughput</label>
+                    <p id="topicPath" class="form-control-static col-sm-4">{{view.publicationMetrics.failureThroughput}}</p>
+                </div>
+                <div class="form-group">
+                    <label for="topicPath" class="col-sm-2 control-label">Max. successful request time</label>
+                    <p id="topicPath" class="form-control-static col-sm-4">{{view.publicationMetrics.maximumSuccessfulRequestTime}}</p>
+                </div>
+                <div class="form-group">
+                    <label for="topicPath" class="col-sm-2 control-label">Min. successful request time</label>
+                    <p id="topicPath" class="form-control-static col-sm-4">{{view.publicationMetrics.minimumSuccessfulRequestTime}}</p>
+                </div>
+                <div class="form-group">
+                    <label for="topicPath" class="col-sm-2 control-label">Successful request time 90th percentile</label>
+                    <p id="topicPath" class="form-control-static col-sm-4">{{view.publicationMetrics.successfulRequestTimeNinetiethPercentile}}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">Topic creation metrics</h3>
+        </div>
+        <div class="panel-body">
+            <div class="form-horizontal">
+                <div class="form-group">
+                    <label for="url" class="col-sm-2 control-label">Request throughput</label>
+                    <p id="url" class="form-control-static col-sm-4">{{view.topicCreationMetrics.requestThroughput}}</p>
+                </div>
+                <div class="form-group">
+                    <label for="topicPath" class="col-sm-2 control-label">Failure throughput</label>
+                    <p id="topicPath" class="form-control-static col-sm-4">{{view.topicCreationMetrics.failureThroughput}}</p>
+                </div>
+                <div class="form-group">
+                    <label for="topicPath" class="col-sm-2 control-label">Max. successful request time</label>
+                    <p id="topicPath" class="form-control-static col-sm-4">{{view.topicCreationMetrics.maximumSuccessfulRequestTime}}</p>
+                </div>
+                <div class="form-group">
+                    <label for="topicPath" class="col-sm-2 control-label">Min. successful request time</label>
+                    <p id="topicPath" class="form-control-static col-sm-4">{{view.topicCreationMetrics.minimumSuccessfulRequestTime}}</p>
+                </div>
+                <div class="form-group">
+                    <label for="topicPath" class="col-sm-2 control-label">Successful request time 90th percentile</label>
+                    <p id="topicPath" class="form-control-static col-sm-4">{{view.topicCreationMetrics.successfulRequestTimeNinetiethPercentile}}</p>
+                </div>
+            </div>
         </div>
     </div>
 </div>`
 })
-export class MetricsComponent implements OnInit {
+export class MetricsComponent implements OnInit, OnDestroy {
+    private view: MetricsView;
+
+    constructor(private metricsService: MetricsService) {
+        this.view = this.metricsService.createEmptyView();
+    }
 
     ngOnInit(): void {
-        // DOM element where the Timeline will be attached
-        var container = document.getElementById('visualization');
+        this
+            .metricsService
+            .getMetricsView()
+            .then(view => {
+                this.view = view;
+            });
+    }
 
-        // Create a DataSet (allows two way data-binding)
-        var items = new vis.DataSet([
-            {id: 1, content: 'www.example.org/hello', className: 'poll-event', start: new Date(2017, 7, 11, 0, 0, 0, 0)},
-            {id: 2, content: 'example/data', className: 'publish-event', start: new Date(2017, 7, 11, 0, 0, 1, 0)}
-        ]);
-
-        // Configuration for the Timeline
-        var options = {
-            selectable: false
-        };
-
-        // Create a Timeline
-        var timeline = new vis.Timeline(container, items, options);
+    ngOnDestroy(): void {
+        this.view.close();
     }
 }

@@ -23,6 +23,7 @@ import java.util.function.Consumer;
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.MetricsConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
+import com.pushtechnology.adapters.rest.model.latest.TopicConfig;
 import com.pushtechnology.adapters.rest.model.store.AsyncMutableModelStore;
 import com.pushtechnology.adapters.rest.model.store.ModelStore;
 import com.pushtechnology.diffusion.client.features.control.topics.MessagingControl;
@@ -66,6 +67,7 @@ public final class ClientControlledModelStore implements ModelStore {
             .truststore(truststore)
             .metrics(MetricsConfig
                 .builder()
+                .topic(TopicConfig.builder().build())
                 .build())
             .build());
     }
