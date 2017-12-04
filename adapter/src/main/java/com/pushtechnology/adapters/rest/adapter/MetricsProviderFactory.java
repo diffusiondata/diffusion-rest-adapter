@@ -42,9 +42,6 @@ import com.pushtechnology.adapters.rest.metric.reporters.TopicCreationEventQueri
 import com.pushtechnology.adapters.rest.metrics.event.listeners.BoundedPollEventCollector;
 import com.pushtechnology.adapters.rest.metrics.event.listeners.BoundedPublicationEventCollector;
 import com.pushtechnology.adapters.rest.metrics.event.listeners.BoundedTopicCreationEventCollector;
-import com.pushtechnology.adapters.rest.metrics.event.listeners.PollEventDispatcher;
-import com.pushtechnology.adapters.rest.metrics.event.listeners.PublicationEventDispatcher;
-import com.pushtechnology.adapters.rest.metrics.event.listeners.TopicCreationEventDispatcher;
 import com.pushtechnology.adapters.rest.metrics.reporting.topics.TopicBasedMetricsReporter;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.SummaryConfig;
@@ -141,12 +138,12 @@ public final class MetricsProviderFactory {
             topicCreationQuerier,
             topicConfig.getMetricsTopic());
 
-        metricsDispatcher.addPollListener(new PollEventDispatcher(pollCounter));
-        metricsDispatcher.addPublicationListener(new PublicationEventDispatcher(publicationCounter));
-        metricsDispatcher.addTopicCreationListener(new TopicCreationEventDispatcher(topicCreationCounter));
-        metricsDispatcher.addPollListener(new PollEventDispatcher(pollCollector));
-        metricsDispatcher.addPublicationListener(new PublicationEventDispatcher(publicationCollector));
-        metricsDispatcher.addTopicCreationListener(new TopicCreationEventDispatcher(topicCreationCollector));
+        metricsDispatcher.addPollEventListener(pollCounter);
+        metricsDispatcher.addPublicationEventListener(publicationCounter);
+        metricsDispatcher.addTopicCreationEventListener(topicCreationCounter);
+        metricsDispatcher.addPollEventListener(pollCollector);
+        metricsDispatcher.addPublicationEventListener(publicationCollector);
+        metricsDispatcher.addTopicCreationEventListener(topicCreationCollector);
 
         return metricsReporter;
     }
@@ -206,9 +203,9 @@ public final class MetricsProviderFactory {
         startTasks.add(reporter::start);
         stopTasks.add(reporter::close);
 
-        metricsDispatcher.addPollListener(new PollEventDispatcher(pollCollector));
-        metricsDispatcher.addPublicationListener(new PublicationEventDispatcher(publicationCollector));
-        metricsDispatcher.addTopicCreationListener(new TopicCreationEventDispatcher(topicCreationCollector));
+        metricsDispatcher.addPollEventListener(pollCollector);
+        metricsDispatcher.addPublicationEventListener(publicationCollector);
+        metricsDispatcher.addTopicCreationEventListener(topicCreationCollector);
     }
 
     private EventCountReporter createCountReporter(
@@ -218,9 +215,9 @@ public final class MetricsProviderFactory {
         final PublicationEventCounter publicationCounter = new PublicationEventCounter();
         final TopicCreationEventCounter topicCreationCounter = new TopicCreationEventCounter();
 
-        metricsDispatcher.addPollListener(new PollEventDispatcher(pollCounter));
-        metricsDispatcher.addPublicationListener(new PublicationEventDispatcher(publicationCounter));
-        metricsDispatcher.addTopicCreationListener(new TopicCreationEventDispatcher(topicCreationCounter));
+        metricsDispatcher.addPollEventListener(pollCounter);
+        metricsDispatcher.addPublicationEventListener(publicationCounter);
+        metricsDispatcher.addTopicCreationEventListener(topicCreationCounter);
 
         return new EventCountReporter(
             pollCounter,

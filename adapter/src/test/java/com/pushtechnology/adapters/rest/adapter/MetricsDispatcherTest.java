@@ -115,7 +115,7 @@ public final class MetricsDispatcherTest {
         when(topicCreationListener1.onTopicCreationRequest(any(), any(), any())).thenReturn(topicCreationCompletionListener1);
         when(httpResponse.getStatusLine()).thenReturn(statusLine);
         when(httpResponse.getEntity()).thenReturn(entity);
-    }   
+    }
 
     @Test
     public void pollListenerDispatch() {
