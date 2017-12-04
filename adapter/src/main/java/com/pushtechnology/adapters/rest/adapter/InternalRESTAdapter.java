@@ -135,6 +135,10 @@ public final class InternalRESTAdapter implements RESTAdapterListener, AutoClose
         }
         else if (state == State.STANDBY ||
                 state == State.ACTIVE && (hasServiceSecurityChanged(model) || haveServicesChanged(model))) {
+            if (haveMetricsChanged(model)) {
+                reconfigureMetricsReporting();
+            }
+
             currentModel = model;
             reconfigureServiceManager();
         }
@@ -194,6 +198,7 @@ public final class InternalRESTAdapter implements RESTAdapterListener, AutoClose
                 eventedSessionListener,
                 metricsDispatcher);
             state = State.STANDBY;
+            reconfigureMetricsReporting();
         }
         else {
             diffusionSession = session;
@@ -204,6 +209,7 @@ public final class InternalRESTAdapter implements RESTAdapterListener, AutoClose
                 diffusionSession,
                 eventedSessionListener,
                 metricsDispatcher);
+            reconfigureMetricsReporting();
             reconfigureServiceManager();
             state = State.ACTIVE;
         }
@@ -230,14 +236,12 @@ public final class InternalRESTAdapter implements RESTAdapterListener, AutoClose
             serviceSessionFactory,
             serviceSessionStarter);
 
-        reconfigureMetricsReporting();
-
         endpointClient.start();
         serviceManager.reconfigure(serviceManagerContext, currentModel);
     }
 
     private void reconfigureMetricsReporting() {
-        LOG.warn("Updating metrics providers");
+        LOG.debug("Updating metrics providers");
 
         if (metricsProvider != null) {
             metricsProvider.close();
