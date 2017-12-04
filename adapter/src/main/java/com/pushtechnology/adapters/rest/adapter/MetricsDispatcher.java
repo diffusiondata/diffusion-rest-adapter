@@ -66,27 +66,6 @@ public final class MetricsDispatcher implements
     }
 
     /**
-     * Add a poll listener.
-     */
-    public synchronized void addPollListener(PollListener pollListener) {
-        pollListeners.add(pollListener);
-    }
-
-    /**
-     * Add a publication listener.
-     */
-    public synchronized void addPublicationListener(PublicationListener publicationListener) {
-        publicationListeners.add(publicationListener);
-    }
-
-    /**
-     * Add a topic creation listener.
-     */
-    public synchronized void addTopicCreationListener(TopicCreationListener topicCreationListener) {
-        topicCreationListeners.add(topicCreationListener);
-    }
-
-    /**
      * Add a poll event listener.
      */
     public synchronized void addPollEventListener(PollEventListener pollListener) {
