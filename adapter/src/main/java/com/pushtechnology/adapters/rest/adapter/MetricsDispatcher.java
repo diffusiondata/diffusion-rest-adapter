@@ -20,6 +20,12 @@ import java.util.Collection;
 
 import org.apache.http.HttpResponse;
 
+import com.pushtechnology.adapters.rest.metrics.event.listeners.PollEventDispatcher;
+import com.pushtechnology.adapters.rest.metrics.event.listeners.PollEventListener;
+import com.pushtechnology.adapters.rest.metrics.event.listeners.PublicationEventDispatcher;
+import com.pushtechnology.adapters.rest.metrics.event.listeners.PublicationEventListener;
+import com.pushtechnology.adapters.rest.metrics.event.listeners.TopicCreationEventDispatcher;
+import com.pushtechnology.adapters.rest.metrics.event.listeners.TopicCreationEventListener;
 import com.pushtechnology.adapters.rest.metrics.listeners.PollListener;
 import com.pushtechnology.adapters.rest.metrics.listeners.PublicationListener;
 import com.pushtechnology.adapters.rest.metrics.listeners.TopicCreationListener;
@@ -78,6 +84,27 @@ public final class MetricsDispatcher implements
      */
     public synchronized void addTopicCreationListener(TopicCreationListener topicCreationListener) {
         topicCreationListeners.add(topicCreationListener);
+    }
+
+    /**
+     * Add a poll event listener.
+     */
+    public synchronized void addPollEventListener(PollEventListener pollListener) {
+        pollListeners.add(new PollEventDispatcher(pollListener));
+    }
+
+    /**
+     * Add a publication event listener.
+     */
+    public synchronized void addPublicationEventListener(PublicationEventListener publicationListener) {
+        publicationListeners.add(new PublicationEventDispatcher(publicationListener));
+    }
+
+    /**
+     * Add a topic creation event listener.
+     */
+    public synchronized void addTopicCreationEventListener(TopicCreationEventListener topicCreationListener) {
+        topicCreationListeners.add(new TopicCreationEventDispatcher(topicCreationListener));
     }
 
     @Override
