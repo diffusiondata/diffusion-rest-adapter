@@ -40,6 +40,7 @@ import com.pushtechnology.adapters.rest.metric.reporters.PublicationEventQuerier
 import com.pushtechnology.adapters.rest.metric.reporters.TopicCreationEventCounter;
 import com.pushtechnology.adapters.rest.metric.reporters.TopicCreationEventQuerier;
 import com.pushtechnology.diffusion.client.callbacks.ErrorReason;
+import com.pushtechnology.diffusion.client.callbacks.Registration;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.RemovalCallback;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
@@ -67,6 +68,8 @@ public final class TopicBasedMetricsReporter implements AutoCloseable {
     private final String rootTopic;
     @GuardedBy("this")
     private Future<?> loggingTask;
+    @GuardedBy("this")
+    private Registration registration;
 
     static {
         FORMAT = NumberFormat.getInstance();
@@ -74,6 +77,7 @@ public final class TopicBasedMetricsReporter implements AutoCloseable {
         FORMAT.setMinimumFractionDigits(3);
         FORMAT.setRoundingMode(HALF_UP);
     }
+
 
     /**
      * Constructor.
@@ -110,6 +114,12 @@ public final class TopicBasedMetricsReporter implements AutoCloseable {
         final TopicControl topicControl = session.feature(TopicControl.class);
 
         allOf(
+            topicControl.removeTopicsWithSession(rootTopic)
+                .thenAccept(registration -> {
+                    synchronized (this) {
+                        this.registration = registration;
+                    }
+                }),
             topicControl.addTopic(rootTopic + "/poll/requests", INT64),
             topicControl.addTopic(rootTopic + "/poll/successes", INT64),
             topicControl.addTopic(rootTopic + "/poll/failures", INT64),
@@ -145,6 +155,9 @@ public final class TopicBasedMetricsReporter implements AutoCloseable {
     @PreDestroy
     @Override
     public synchronized void close() {
+        if (registration != null) {
+            registration.close();
+        }
         session.feature(TopicControl.class).remove("?" + rootTopic + "/", new RemovalCallback() {
             @Override
             public void onTopicsRemoved() {

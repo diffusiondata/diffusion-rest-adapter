@@ -48,6 +48,7 @@ import com.pushtechnology.adapters.rest.metric.reporters.TopicCreationEventQueri
 import com.pushtechnology.adapters.rest.metrics.event.listeners.BoundedPollEventCollector;
 import com.pushtechnology.adapters.rest.metrics.event.listeners.BoundedPublicationEventCollector;
 import com.pushtechnology.adapters.rest.metrics.event.listeners.BoundedTopicCreationEventCollector;
+import com.pushtechnology.diffusion.client.callbacks.Registration;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.RemovalCallback;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
@@ -70,6 +71,8 @@ public final class TopicBasedMetricsReporterTest {
     private TopicControl topicControl;
     @Mock
     private TopicUpdateControl updateControl;
+    @Mock
+    private Registration registration;
 
     private TopicBasedMetricsReporter reporter;
 
@@ -85,6 +88,8 @@ public final class TopicBasedMetricsReporterTest {
         when(session.feature(TopicUpdateControl.class)).thenReturn(updateControl);
 
         when(topicControl.addTopic(isNotNull(), ArgumentMatchers.<TopicType>isNotNull())).thenReturn(completedFuture(CREATED));
+
+        when(topicControl.removeTopicsWithSession("metrics")).thenReturn(completedFuture(registration));
 
         reporter = new TopicBasedMetricsReporter(
             session,
@@ -107,6 +112,7 @@ public final class TopicBasedMetricsReporterTest {
     public void start() throws Exception {
         reporter.start();
 
+        verify(topicControl).removeTopicsWithSession("metrics");
         verify(topicControl).addTopic("metrics/poll/requests", INT64);
         verify(topicControl).addTopic("metrics/poll/successes", INT64);
         verify(topicControl).addTopic("metrics/poll/failures", INT64);
@@ -141,6 +147,7 @@ public final class TopicBasedMetricsReporterTest {
 
         reporter.start();
 
+        verify(topicControl, times(2)).removeTopicsWithSession("metrics");
         verify(topicControl, times(2)).addTopic("metrics/poll/requests", INT64);
         verify(topicControl, times(2)).addTopic("metrics/poll/successes", INT64);
         verify(topicControl, times(2)).addTopic("metrics/poll/failures", INT64);
@@ -174,6 +181,7 @@ public final class TopicBasedMetricsReporterTest {
 
         reporter.close();
 
+        verify(registration).close();
         verify(topicControl).remove(eq("?metrics/"), isA(RemovalCallback.class));
         verify(loggingTask).cancel(false);
     }
