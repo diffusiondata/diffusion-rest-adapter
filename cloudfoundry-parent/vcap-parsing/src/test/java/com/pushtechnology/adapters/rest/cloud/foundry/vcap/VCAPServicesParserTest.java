@@ -22,7 +22,7 @@ public final class VCAPServicesParserTest {
             "    \"push-reappt\": [\n" +
             "        {\n" +
             "            \"credentials\": {\n" +
-            "                \"host\": \"example.us.reappt.io\",\n" +
+            "                \"host\": \"example.ng.diffusion.cloud\",\n" +
             "                \"principal\": \"binding\",\n" +
             "                \"credentials\": \"password\"\n" +
             "            },\n" +
@@ -68,7 +68,7 @@ public final class VCAPServicesParserTest {
         final DiffusionCloudCredentials credentials = serviceEntry.getCredentials();
         assertNotNull(credentials);
 
-        assertEquals("example.us.reappt.io", credentials.getHost());
+        assertEquals("example.ng.diffusion.cloud", credentials.getHost());
         assertEquals("binding", credentials.getPrincipal());
         assertEquals("password", credentials.getCredentials());
     }

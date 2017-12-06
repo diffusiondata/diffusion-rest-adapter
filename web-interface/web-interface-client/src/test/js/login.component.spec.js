@@ -6,7 +6,7 @@ var lc = require('../../../target/js/login.component'),
 
 describe('Login component', function() {
     var diffusionCloud = {
-        host: 'example.reappt.io',
+        host: 'example.ng.diffusion.cloud',
         port: 443,
         secure: true
     };
