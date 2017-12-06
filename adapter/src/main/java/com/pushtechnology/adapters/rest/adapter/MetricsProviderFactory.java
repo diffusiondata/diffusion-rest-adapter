@@ -16,7 +16,9 @@
 package com.pushtechnology.adapters.rest.adapter;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.slf4j.Logger;
@@ -60,34 +62,50 @@ public final class MetricsProviderFactory {
         final List<Runnable> startTasks = new ArrayList<>();
         final List<Runnable> stopTasks = new ArrayList<>();
 
+        final Helper helper = new Helper(metricsDispatcher);
+
         if (model.getMetrics().isCounting()) {
             LOG.info("Enabling counting metrics reporting");
 
-            final EventCountReporter reporter = createCountReporter(executorService, metricsDispatcher);
+            final EventCountReporter reporter = new EventCountReporter(
+                helper.getPollEventCounter(),
+                helper.getPublicationEventCounter(),
+                helper.getTopicCreationEventCounter(),
+                executorService);
 
             startTasks.add(reporter::start);
             stopTasks.add(reporter::close);
         }
 
         if (summaryConfig != null) {
-            setUpSummaryMetrics(
-                executorService,
-                metricsDispatcher,
-                summaryConfig,
-                startTasks,
-                stopTasks);
+            final int eventBound = summaryConfig.getEventBound();
+            LOG.info("Enabling summary metrics reporting. {} event bound", eventBound);
 
+            final EventSummaryReporter reporter = new EventSummaryReporter(
+                executorService,
+                helper.getPollEventQuerier(eventBound),
+                helper.getPublicationEventQuerier(eventBound),
+                helper.getTopicCreationEventQuerier(eventBound));
+
+            startTasks.add(reporter::start);
+            stopTasks.add(reporter::close);
         }
 
         final TopicConfig topicConfig = model.getMetrics().getTopic();
         if (topicConfig != null) {
-            LOG.info("Enabling metrics topic reporting");
+            final int eventBound = topicConfig.getEventBound();
+            LOG.info("Enabling metrics topic reporting. {} event bound", eventBound);
 
-            final TopicBasedMetricsReporter reporter = createTopicReporter(
+            final TopicBasedMetricsReporter reporter = new TopicBasedMetricsReporter(
                 diffusionSession,
+                helper.getPollEventCounter(),
+                helper.getPublicationEventCounter(),
+                helper.getTopicCreationEventCounter(),
                 executorService,
-                metricsDispatcher,
-                topicConfig);
+                helper.getPollEventQuerier(eventBound),
+                helper.getPublicationEventQuerier(eventBound),
+                helper.getTopicCreationEventQuerier(eventBound),
+                topicConfig.getMetricsTopic());
 
             startTasks.add(reporter::start);
             stopTasks.add(reporter::close);
@@ -98,94 +116,72 @@ public final class MetricsProviderFactory {
             () -> stopTasks.forEach(Runnable::run));
     }
 
-    private TopicBasedMetricsReporter createTopicReporter(
-        Session diffusionSession,
-        ScheduledExecutorService executorService,
-        MetricsDispatcher metricsDispatcher,
-        TopicConfig topicConfig) {
+    /**
+     * Helper class for the lazy creation of counters and queriers.
+     */
+    private static final class Helper {
+        private final Map<Integer, PollEventQuerier> pollEventQueriers;
+        private final Map<Integer, PublicationEventQuerier> publicationEventQueriers;
+        private final Map<Integer, TopicCreationEventQuerier> topicCreationEventQueriers;
+        private final MetricsDispatcher metricsDispatcher;
+        private PollEventCounter pollEventCounter;
+        private PublicationEventCounter publicationEventCounter;
+        private TopicCreationEventCounter topicCreationEventCounter;
 
-        final int eventBound = topicConfig.getEventBound();
-        final PollEventCounter pollCounter = new PollEventCounter();
-        final PublicationEventCounter publicationCounter = new PublicationEventCounter();
-        final TopicCreationEventCounter topicCreationCounter = new TopicCreationEventCounter();
-        final BoundedPollEventCollector pollCollector = new BoundedPollEventCollector(eventBound);
-        final BoundedPublicationEventCollector publicationCollector = new BoundedPublicationEventCollector(
-            eventBound);
-        final BoundedTopicCreationEventCollector topicCreationCollector = new BoundedTopicCreationEventCollector(
-            eventBound);
-        final PollEventQuerier pollQuerier = new PollEventQuerier(pollCollector);
-        final PublicationEventQuerier publicationQuerier = new PublicationEventQuerier(publicationCollector);
-        final TopicCreationEventQuerier topicCreationQuerier =
-            new TopicCreationEventQuerier(topicCreationCollector);
+        Helper(MetricsDispatcher metricsDispatcher) {
+            this.metricsDispatcher = metricsDispatcher;
+            pollEventQueriers = new HashMap<>();
+            publicationEventQueriers = new HashMap<>();
+            topicCreationEventQueriers = new HashMap<>();
+        }
 
-        final TopicBasedMetricsReporter metricsReporter = new TopicBasedMetricsReporter(
-            diffusionSession,
-            pollCounter,
-            publicationCounter,
-            topicCreationCounter,
-            executorService,
-            pollQuerier,
-            publicationQuerier,
-            topicCreationQuerier,
-            topicConfig.getMetricsTopic());
+        PollEventQuerier getPollEventQuerier(int eventBound) {
+            return pollEventQueriers.computeIfAbsent(eventBound, bound -> {
+                final BoundedPollEventCollector collector = new BoundedPollEventCollector(bound);
+                metricsDispatcher.addPollEventListener(collector);
+                return new PollEventQuerier(collector);
+            });
+        }
 
-        metricsDispatcher.addPollEventListener(pollCounter);
-        metricsDispatcher.addPublicationEventListener(publicationCounter);
-        metricsDispatcher.addTopicCreationEventListener(topicCreationCounter);
-        metricsDispatcher.addPollEventListener(pollCollector);
-        metricsDispatcher.addPublicationEventListener(publicationCollector);
-        metricsDispatcher.addTopicCreationEventListener(topicCreationCollector);
+        PublicationEventQuerier getPublicationEventQuerier(int eventBound) {
+            return publicationEventQueriers.computeIfAbsent(eventBound, bound -> {
+                final BoundedPublicationEventCollector collector = new BoundedPublicationEventCollector(bound);
+                metricsDispatcher.addPublicationEventListener(collector);
+                return new PublicationEventQuerier(collector);
+            });
+        }
 
-        return metricsReporter;
-    }
+        TopicCreationEventQuerier getTopicCreationEventQuerier(int eventBound) {
+            return topicCreationEventQueriers.computeIfAbsent(eventBound, bound -> {
+                final BoundedTopicCreationEventCollector collector = new BoundedTopicCreationEventCollector(bound);
+                metricsDispatcher.addTopicCreationEventListener(collector);
+                return new TopicCreationEventQuerier(collector);
+            });
+        }
 
-    private void setUpSummaryMetrics(
-            ScheduledExecutorService executorService,
-            MetricsDispatcher metricsDispatcher,
-            SummaryConfig summaryConfig,
-            List<Runnable> startTasks,
-            List<Runnable> stopTasks) {
-        final int eventBound = summaryConfig.getEventBound();
-        LOG.info("Enabling summary metrics reporting. {} event bound", eventBound);
 
-        final BoundedPollEventCollector pollCollector = new BoundedPollEventCollector(eventBound);
-        final BoundedPublicationEventCollector publicationCollector = new BoundedPublicationEventCollector(
-            eventBound);
-        final BoundedTopicCreationEventCollector topicCreationCollector = new BoundedTopicCreationEventCollector(
-            eventBound);
-        final PollEventQuerier pollQuerier = new PollEventQuerier(pollCollector);
-        final PublicationEventQuerier publicationQuerier = new PublicationEventQuerier(publicationCollector);
-        final TopicCreationEventQuerier topicCreationQuerier =
-            new TopicCreationEventQuerier(topicCreationCollector);
-        final EventSummaryReporter reporter = new EventSummaryReporter(
-            executorService,
-            pollQuerier,
-            publicationQuerier,
-            topicCreationQuerier);
+        PollEventCounter getPollEventCounter() {
+            if (pollEventCounter == null) {
+                pollEventCounter = new PollEventCounter();
+                metricsDispatcher.addPollEventListener(pollEventCounter);
+            }
+            return pollEventCounter;
+        }
 
-        startTasks.add(reporter::start);
-        stopTasks.add(reporter::close);
+        PublicationEventCounter getPublicationEventCounter() {
+            if (publicationEventCounter == null) {
+                publicationEventCounter = new PublicationEventCounter();
+                metricsDispatcher.addPublicationEventListener(publicationEventCounter);
+            }
+            return publicationEventCounter;
+        }
 
-        metricsDispatcher.addPollEventListener(pollCollector);
-        metricsDispatcher.addPublicationEventListener(publicationCollector);
-        metricsDispatcher.addTopicCreationEventListener(topicCreationCollector);
-    }
-
-    private EventCountReporter createCountReporter(
-            ScheduledExecutorService executorService,
-            MetricsDispatcher metricsDispatcher) {
-        final PollEventCounter pollCounter = new PollEventCounter();
-        final PublicationEventCounter publicationCounter = new PublicationEventCounter();
-        final TopicCreationEventCounter topicCreationCounter = new TopicCreationEventCounter();
-
-        metricsDispatcher.addPollEventListener(pollCounter);
-        metricsDispatcher.addPublicationEventListener(publicationCounter);
-        metricsDispatcher.addTopicCreationEventListener(topicCreationCounter);
-
-        return new EventCountReporter(
-            pollCounter,
-            publicationCounter,
-            topicCreationCounter,
-            executorService);
+        TopicCreationEventCounter getTopicCreationEventCounter() {
+            if (topicCreationEventCounter == null) {
+                topicCreationEventCounter = new TopicCreationEventCounter();
+                metricsDispatcher.addTopicCreationEventListener(topicCreationEventCounter);
+            }
+            return topicCreationEventCounter;
+        }
     }
 }
