@@ -68,7 +68,7 @@ public final class CloudFoundryRESTAdapter {
         final ClientControlledModelStore modelStore = new ClientControlledModelStore(
             executor,
             diffusionConfig,
-            "diffusionCloudTruststore.jks");
+            "mozilla-ca.jks");
 
         final RESTAdapterClient adapterClient = RESTAdapterClient.create(
             modelStore,

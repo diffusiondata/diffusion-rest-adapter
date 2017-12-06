@@ -56,7 +56,7 @@ public final class CloudFoundryRESTAdapter {
                     .secure(true)
                     .principal(diffusionCloudCredentials.getPrincipal())
                     .password(diffusionCloudCredentials.getCredentials()),
-                "diffusionCloudTruststore.jks")
+                "mozilla-ca.jks")
             .start();
     }
 }

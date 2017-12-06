@@ -105,3 +105,11 @@ A client can have both active and standby services.
 When a client with `active` services closes one client with the service in `standby` will switch to `active` and take
 over.
 If there is no other client configured with the service the topics associated with the service will be removed.
+
+## Licensing
+
+This project is licensed under the [Apache Licence, v. 2](https://www.apache.org/licenses/LICENSE-2.0).
+
+The CloudFoundry artifacts include a copy of the
+[Mozilla CA certificate store](https://www.mozilla.org/en-US/about/governance/policies/security-group/certs/) in JKS
+format. This is licensed under [Mozilla Public License, v. 2](http://mozilla.org/MPL/2.0/).
