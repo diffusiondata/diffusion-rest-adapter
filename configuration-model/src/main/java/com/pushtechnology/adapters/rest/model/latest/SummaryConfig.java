@@ -36,10 +36,4 @@ public final class SummaryConfig {
      */
     @Builder.Default
     int eventBound = 100;
-
-    /**
-     * List of class names to load as reporters.
-     */
-    @Builder.Default
-    List<String> reporterClassNames = new ArrayList<>();
 }

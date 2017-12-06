@@ -15,19 +15,10 @@
 
 package com.pushtechnology.adapters.rest.adapter;
 
-import static java.util.stream.Stream.empty;
-import static java.util.stream.Stream.of;
-
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.stream.Stream;
 
-import org.picocontainer.MutablePicoContainer;
-import org.picocontainer.PicoBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -172,34 +163,6 @@ public final class MetricsProviderFactory {
             publicationQuerier,
             topicCreationQuerier);
 
-        // Use pico container to handle the injection of custom components
-        final MutablePicoContainer factoryContainer = new PicoBuilder()
-            .withCaching()
-            .withConstructorInjection()
-            .build()
-            .addComponent(executorService)
-            .addComponent(pollQuerier)
-            .addComponent(publicationQuerier)
-            .addComponent(topicCreationQuerier);
-
-        summaryConfig
-            .getReporterClassNames()
-            .stream()
-            .flatMap(this::tryLoadClass)
-            .forEach(factoryContainer::addComponent);
-
-        factoryContainer
-            .getComponents()
-            .stream()
-            .flatMap(object -> tryGetMethod(object, "start"))
-            .forEach(startTasks::add);
-
-        factoryContainer
-            .getComponents()
-            .stream()
-            .flatMap(object -> tryGetMethod(object, "close"))
-            .forEach(stopTasks::add);
-
         startTasks.add(reporter::start);
         stopTasks.add(reporter::close);
 
@@ -224,37 +187,5 @@ public final class MetricsProviderFactory {
             publicationCounter,
             topicCreationCounter,
             executorService);
-    }
-
-    @SuppressWarnings({"PMD.EmptyCatchBlock", "PMD.AvoidThrowingRawExceptionTypes"})
-    private Stream<Runnable> tryGetMethod(Object object, String methodName) {
-        try {
-            final Method startMethod = object.getClass().getMethod(methodName);
-            if ((startMethod.getModifiers() & Modifier.PUBLIC) != 0) {
-                return of(() -> {
-                    try {
-                        startMethod.invoke(object);
-                    }
-                    catch (IllegalAccessException | InvocationTargetException e) {
-                        throw new RuntimeException(e);
-                    }
-                });
-            }
-        }
-        // CHECKSTYLE.OFF: EmptyCatch
-        catch (NoSuchMethodException e) {
-            // The object may not have a callable method
-        }
-        // CHECKSTYLE.ON: EmptyCatch
-        return empty();
-    }
-
-    private Stream<Class<?>> tryLoadClass(String className) {
-        try {
-            return of(Thread.currentThread().getContextClassLoader().loadClass(className));
-        }
-        catch (ClassNotFoundException e) {
-            return empty();
-        }
     }
 }
