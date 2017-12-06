@@ -24,4 +24,4 @@ applications:
   env:
     JVM: openjdk
   services:
-    - reappt-service
+    - diffusion-cloud-service
