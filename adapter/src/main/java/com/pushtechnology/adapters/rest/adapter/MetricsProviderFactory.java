@@ -35,7 +35,7 @@ import com.pushtechnology.adapters.rest.metric.reporters.TopicCreationEventQueri
 import com.pushtechnology.adapters.rest.metrics.event.listeners.BoundedPollEventCollector;
 import com.pushtechnology.adapters.rest.metrics.event.listeners.BoundedPublicationEventCollector;
 import com.pushtechnology.adapters.rest.metrics.event.listeners.BoundedTopicCreationEventCollector;
-import com.pushtechnology.adapters.rest.metrics.reporting.topics.TopicBasedMetricsReporter;
+import com.pushtechnology.adapters.rest.metric.reporters.TopicBasedMetricsReporter;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.SummaryConfig;
 import com.pushtechnology.adapters.rest.model.latest.TopicConfig;

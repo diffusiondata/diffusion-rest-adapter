@@ -13,7 +13,7 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.metrics.reporting.topics;
+package com.pushtechnology.adapters.rest.metric.reporters;
 
 import static com.pushtechnology.diffusion.client.features.control.topics.TopicControl.AddTopicResult.CREATED;
 import static com.pushtechnology.diffusion.client.topics.details.TopicType.DOUBLE;
@@ -43,6 +43,7 @@ import com.pushtechnology.adapters.rest.metric.reporters.PollEventCounter;
 import com.pushtechnology.adapters.rest.metric.reporters.PollEventQuerier;
 import com.pushtechnology.adapters.rest.metric.reporters.PublicationEventCounter;
 import com.pushtechnology.adapters.rest.metric.reporters.PublicationEventQuerier;
+import com.pushtechnology.adapters.rest.metric.reporters.TopicBasedMetricsReporter;
 import com.pushtechnology.adapters.rest.metric.reporters.TopicCreationEventCounter;
 import com.pushtechnology.adapters.rest.metric.reporters.TopicCreationEventQuerier;
 import com.pushtechnology.adapters.rest.metrics.event.listeners.BoundedPollEventCollector;
