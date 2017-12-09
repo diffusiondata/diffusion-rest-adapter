@@ -25,6 +25,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isNull;
+import static org.mockito.Mockito.isA;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
@@ -68,9 +69,11 @@ import com.pushtechnology.adapters.rest.client.RESTAdapterClient;
 import com.pushtechnology.adapters.rest.model.latest.BasicAuthenticationConfig;
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
+import com.pushtechnology.adapters.rest.model.latest.MetricsConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.SecurityConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
+import com.pushtechnology.adapters.rest.model.latest.TopicConfig;
 import com.pushtechnology.adapters.rest.model.store.MutableModelStore;
 import com.pushtechnology.adapters.rest.resources.IncrementingResource;
 import com.pushtechnology.adapters.rest.resources.TimestampResource;
@@ -222,6 +225,13 @@ public final class BasicIT {
         .topicPathRoot("rest/auto")
         .endpoints(singletonList(TIMESTAMP_AUTO_ENDPOINT))
         .build();
+    private static final MetricsConfig TOPIC_REPORTED_METRICS = MetricsConfig
+        .builder()
+        .counting(false)
+        .topic(TopicConfig
+            .builder()
+            .build())
+        .build();
 
     private static Server jettyServer;
 
@@ -235,6 +245,10 @@ public final class BasicIT {
     private Topics.ValueStream<JSON> stream;
     @Mock
     private Topics.ValueStream<Binary> binaryStream;
+    @Mock
+    private Topics.ValueStream<Long> int64Stream;
+    @Mock
+    private Topics.ValueStream<Double> dobuleStream;
     @Mock
     private Topics.CompletionCallback callback;
     @Captor
@@ -337,9 +351,14 @@ public final class BasicIT {
 
         final Topics topics = session.feature(Topics.class);
         topics.addFallbackStream(JSON.class, stream);
+        topics.addFallbackStream(Long.class, int64Stream);
+        topics.addFallbackStream(Double.class, dobuleStream);
         topics.subscribe("?rest/", callback);
+        topics.subscribe("?adapter/", callback);
 
-        verify(callback, timed()).onComplete();
+        verifyMetricsTopics();
+
+        verify(callback, timed().times(2)).onComplete();
         verify(stream, timed()).onSubscription(eq("rest/json/timestamp"), isNotNull());
         verify(stream, timed()).onSubscription(eq("rest/json/increment"), isNotNull());
         verify(stream, timed()).onSubscription(eq("rest/tls/timestamp"), isNotNull());
@@ -368,9 +387,14 @@ public final class BasicIT {
 
         final Topics topics = session.feature(Topics.class);
         topics.addFallbackStream(Binary.class, binaryStream);
+        topics.addFallbackStream(Long.class, int64Stream);
+        topics.addFallbackStream(Double.class, dobuleStream);
         topics.subscribe("?rest/", callback);
+        topics.subscribe("?adapter/", callback);
 
-        verify(callback, timed()).onComplete();
+        verifyMetricsTopics();
+
+        verify(callback, timed().times(2)).onComplete();
         verify(binaryStream, timed()).onSubscription(eq("rest/binary/timestamp"), isNotNull());
         verify(binaryStream, timed()).onSubscription(eq("rest/binary/increment"), isNotNull());
 
@@ -402,9 +426,14 @@ public final class BasicIT {
 
         final Topics topics = session.feature(Topics.class);
         topics.addFallbackStream(Binary.class, binaryStream);
+        topics.addFallbackStream(Long.class, int64Stream);
+        topics.addFallbackStream(Double.class, dobuleStream);
         topics.subscribe("?rest/", callback);
+        topics.subscribe("?adapter/", callback);
 
-        verify(callback, timed()).onComplete();
+        verifyMetricsTopics();
+
+        verify(callback, timed().times(2)).onComplete();
         verify(binaryStream, timed()).onSubscription(eq("rest/string/timestamp"), isNotNull());
         verify(binaryStream, timed()).onSubscription(eq("rest/string/increment"), isNotNull());
 
@@ -437,9 +466,14 @@ public final class BasicIT {
 
         final Topics topics = session.feature(Topics.class);
         topics.addFallbackStream(JSON.class, stream);
+        topics.addFallbackStream(Long.class, int64Stream);
+        topics.addFallbackStream(Double.class, dobuleStream);
         topics.subscribe("?rest/", callback);
+        topics.subscribe("?adapter/", callback);
 
-        verify(callback, timed()).onComplete();
+        verifyMetricsTopics();
+
+        verify(callback, timed().times(2)).onComplete();
 
         modelStore.setModel(modelWith(INSECURE_SERVICE, SECURE_SERVICE));
 
@@ -474,9 +508,14 @@ public final class BasicIT {
 
         final Topics topics = session.feature(Topics.class);
         topics.addFallbackStream(JSON.class, stream);
+        topics.addFallbackStream(Long.class, int64Stream);
+        topics.addFallbackStream(Double.class, dobuleStream);
         topics.subscribe("?rest/", callback);
+        topics.subscribe("?adapter/", callback);
 
-        verify(callback, timed()).onComplete();
+        verifyMetricsTopics();
+
+        verify(callback, timed().times(2)).onComplete();
 
         modelStore.setModel(modelWith(INSECURE_SERVICE));
         verify(serviceListener, timed()).onActive(INSECURE_SERVICE);
@@ -502,9 +541,14 @@ public final class BasicIT {
 
         final Topics topics = session.feature(Topics.class);
         topics.addFallbackStream(JSON.class, stream);
+        topics.addFallbackStream(Long.class, int64Stream);
+        topics.addFallbackStream(Double.class, dobuleStream);
         topics.subscribe("?rest/", callback);
+        topics.subscribe("?adapter/", callback);
 
-        verify(callback, timed()).onComplete();
+        verifyMetricsTopics();
+
+        verify(callback, timed().times(2)).onComplete();
 
         verify(stream, timed()).onSubscription(eq("rest/json/timestamp"), isNotNull());
         verify(stream, timed()).onSubscription(eq("rest/json/increment"), isNotNull());
@@ -533,9 +577,14 @@ public final class BasicIT {
         final Topics topics = session.feature(Topics.class);
         topics.addStream("?rest/json/", JSON.class, stream);
         topics.addStream("?rest/binary/", Binary.class, binaryStream);
+        topics.addFallbackStream(Long.class, int64Stream);
+        topics.addFallbackStream(Double.class, dobuleStream);
         topics.subscribe("?rest/", callback);
+        topics.subscribe("?adapter/", callback);
 
-        verify(callback, timed()).onComplete();
+        verifyMetricsTopics();
+
+        verify(callback, timed().times(2)).onComplete();
 
         verify(stream, timed()).onSubscription(eq("rest/json/timestamp"), isNotNull());
         verify(stream, timed()).onSubscription(eq("rest/json/increment"), isNotNull());
@@ -577,9 +626,14 @@ public final class BasicIT {
 
         final Topics topics = session.feature(Topics.class);
         topics.addFallbackStream(JSON.class, stream);
+        topics.addFallbackStream(Long.class, int64Stream);
+        topics.addFallbackStream(Double.class, dobuleStream);
         topics.subscribe("?rest/", callback);
+        topics.subscribe("?adapter/", callback);
 
-        verify(callback, timed()).onComplete();
+        verifyMetricsTopics();
+
+        verify(callback, timed().times(2)).onComplete();
         verify(stream, timed()).onSubscription(eq("rest/json/timestamp"), isNotNull());
         verify(stream, timed()).onSubscription(eq("rest/json/increment"), isNotNull());
 
@@ -613,9 +667,14 @@ public final class BasicIT {
 
         final Topics topics = session.feature(Topics.class);
         topics.addFallbackStream(JSON.class, stream);
+        topics.addFallbackStream(Long.class, int64Stream);
+        topics.addFallbackStream(Double.class, dobuleStream);
         topics.subscribe("?rest/", callback);
+        topics.subscribe("?adapter/", callback);
 
-        verify(callback, timed()).onComplete();
+        verifyMetricsTopics();
+
+        verify(callback, timed().times(2)).onComplete();
         verify(stream, timed()).onSubscription(eq("rest/auto/timestamp"), specificationCaptor.capture());
 
         assertEquals(TopicType.JSON, specificationCaptor.getValue().getType());
@@ -626,6 +685,38 @@ public final class BasicIT {
         client.close();
 
         verify(serviceListener, timed()).onRemove(INFERRED_SERVICE);
+    }
+
+    private void verifyMetricsTopics() {
+        // Verify metrics poll topics
+        verify(int64Stream, timed()).onSubscription(eq("adapter/rest/metrics/poll/requests"), isNotNull());
+        verify(int64Stream, timed()).onSubscription(eq("adapter/rest/metrics/poll/successes"), isNotNull());
+        verify(int64Stream, timed()).onSubscription(eq("adapter/rest/metrics/poll/failures"), isNotNull());
+        verify(int64Stream, timed()).onSubscription(eq("adapter/rest/metrics/poll/maximumSuccessfulRequestTime"), isNotNull());
+        verify(int64Stream, timed()).onSubscription(eq("adapter/rest/metrics/poll/minimumSuccessfulRequestTime"), isNotNull());
+        verify(int64Stream, timed()).onSubscription(eq("adapter/rest/metrics/poll/successfulRequestTimeNinetiethPercentile"), isNotNull());
+        verify(dobuleStream, timed()).onSubscription(eq("adapter/rest/metrics/poll/failureThroughput"), isNotNull());
+        verify(dobuleStream, timed()).onSubscription(eq("adapter/rest/metrics/poll/requestThroughput"), isNotNull());
+
+        // Verify metrics publication topics
+        verify(int64Stream, timed()).onSubscription(eq("adapter/rest/metrics/publication/requests"), isNotNull());
+        verify(int64Stream, timed()).onSubscription(eq("adapter/rest/metrics/publication/successes"), isNotNull());
+        verify(int64Stream, timed()).onSubscription(eq("adapter/rest/metrics/publication/failures"), isNotNull());
+        verify(int64Stream, timed()).onSubscription(eq("adapter/rest/metrics/publication/maximumSuccessfulRequestTime"), isNotNull());
+        verify(int64Stream, timed()).onSubscription(eq("adapter/rest/metrics/publication/minimumSuccessfulRequestTime"), isNotNull());
+        verify(int64Stream, timed()).onSubscription(eq("adapter/rest/metrics/publication/successfulRequestTimeNinetiethPercentile"), isNotNull());
+        verify(dobuleStream, timed()).onSubscription(eq("adapter/rest/metrics/publication/failureThroughput"), isNotNull());
+        verify(dobuleStream, timed()).onSubscription(eq("adapter/rest/metrics/publication/requestThroughput"), isNotNull());
+
+        // Verify metrics topic creation topics
+        verify(int64Stream, timed()).onSubscription(eq("adapter/rest/metrics/topicCreation/requests"), isNotNull());
+        verify(int64Stream, timed()).onSubscription(eq("adapter/rest/metrics/topicCreation/successes"), isNotNull());
+        verify(int64Stream, timed()).onSubscription(eq("adapter/rest/metrics/topicCreation/failures"), isNotNull());
+        verify(int64Stream, timed()).onSubscription(eq("adapter/rest/metrics/topicCreation/maximumSuccessfulRequestTime"), isNotNull());
+        verify(int64Stream, timed()).onSubscription(eq("adapter/rest/metrics/topicCreation/minimumSuccessfulRequestTime"), isNotNull());
+        verify(int64Stream, timed()).onSubscription(eq("adapter/rest/metrics/topicCreation/successfulRequestTimeNinetiethPercentile"), isNotNull());
+        verify(dobuleStream, timed()).onSubscription(eq("adapter/rest/metrics/topicCreation/failureThroughput"), isNotNull());
+        verify(dobuleStream, timed()).onSubscription(eq("adapter/rest/metrics/topicCreation/requestThroughput"), isNotNull());
     }
 
     private static VerificationWithTimeout timed() {
