@@ -22,9 +22,9 @@ import static com.pushtechnology.diffusion.client.session.Session.State.CONNECTI
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isNull;
-import static org.mockito.Mockito.isA;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
@@ -68,7 +68,6 @@ import com.pushtechnology.adapters.rest.client.RESTAdapterClient;
 import com.pushtechnology.adapters.rest.model.latest.BasicAuthenticationConfig;
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
-import com.pushtechnology.adapters.rest.model.latest.MetricsConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.SecurityConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
@@ -341,15 +340,15 @@ public final class BasicIT {
         topics.subscribe("?rest/", callback);
 
         verify(callback, timed()).onComplete();
-        verify(stream, timed()).onSubscription(eq("rest/json/timestamp"), isA(TopicSpecification.class));
-        verify(stream, timed()).onSubscription(eq("rest/json/increment"), isA(TopicSpecification.class));
-        verify(stream, timed()).onSubscription(eq("rest/tls/timestamp"), isA(TopicSpecification.class));
-        verify(stream, timed()).onSubscription(eq("rest/tls/increment"), isA(TopicSpecification.class));
+        verify(stream, timed()).onSubscription(eq("rest/json/timestamp"), isNotNull());
+        verify(stream, timed()).onSubscription(eq("rest/json/increment"), isNotNull());
+        verify(stream, timed()).onSubscription(eq("rest/tls/timestamp"), isNotNull());
+        verify(stream, timed()).onSubscription(eq("rest/tls/increment"), isNotNull());
 
-        verify(stream, timed()).onValue(eq("rest/json/timestamp"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
-        verify(stream, timed()).onValue(eq("rest/json/increment"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
-        verify(stream, timed()).onValue(eq("rest/tls/timestamp"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
-        verify(stream, timed()).onValue(eq("rest/tls/increment"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
+        verify(stream, timed()).onValue(eq("rest/json/timestamp"), isNotNull(), isNull(), isNotNull());
+        verify(stream, timed()).onValue(eq("rest/json/increment"), isNotNull(), isNull(), isNotNull());
+        verify(stream, timed()).onValue(eq("rest/tls/timestamp"), isNotNull(), isNull(), isNotNull());
+        verify(stream, timed()).onValue(eq("rest/tls/increment"), isNotNull(), isNull(), isNotNull());
 
         stopSession(session);
         client.close();
@@ -372,19 +371,19 @@ public final class BasicIT {
         topics.subscribe("?rest/", callback);
 
         verify(callback, timed()).onComplete();
-        verify(binaryStream, timed()).onSubscription(eq("rest/binary/timestamp"), isA(TopicSpecification.class));
-        verify(binaryStream, timed()).onSubscription(eq("rest/binary/increment"), isA(TopicSpecification.class));
+        verify(binaryStream, timed()).onSubscription(eq("rest/binary/timestamp"), isNotNull());
+        verify(binaryStream, timed()).onSubscription(eq("rest/binary/increment"), isNotNull());
 
         verify(binaryStream, timed()).onValue(
             eq("rest/binary/timestamp"),
-            isA(TopicSpecification.class),
-            isNull(Binary.class),
-            isA(Binary.class));
+            isNotNull(),
+            isNull(),
+            isNotNull());
         verify(binaryStream, timed()).onValue(
             eq("rest/binary/increment"),
-            isA(TopicSpecification.class),
-            isNull(Binary.class),
-            isA(Binary.class));
+            isNotNull(),
+            isNull(),
+            isNotNull());
 
         stopSession(session);
         client.close();
@@ -406,19 +405,19 @@ public final class BasicIT {
         topics.subscribe("?rest/", callback);
 
         verify(callback, timed()).onComplete();
-        verify(binaryStream, timed()).onSubscription(eq("rest/string/timestamp"), isA(TopicSpecification.class));
-        verify(binaryStream, timed()).onSubscription(eq("rest/string/increment"), isA(TopicSpecification.class));
+        verify(binaryStream, timed()).onSubscription(eq("rest/string/timestamp"), isNotNull());
+        verify(binaryStream, timed()).onSubscription(eq("rest/string/increment"), isNotNull());
 
         verify(binaryStream, timed()).onValue(
             eq("rest/string/timestamp"),
-            isA(TopicSpecification.class),
-            isNull(Binary.class),
-            isA(Binary.class));
+            isNotNull(),
+            isNull(),
+            isNotNull());
         verify(binaryStream, timed()).onValue(
             eq("rest/string/increment"),
-            isA(TopicSpecification.class),
-            isNull(Binary.class),
-            isA(Binary.class));
+            isNotNull(),
+            isNull(),
+            isNotNull());
 
         stopSession(session);
         client.close();
@@ -447,15 +446,15 @@ public final class BasicIT {
         verify(serviceListener, timed()).onActive(SECURE_SERVICE);
         verify(serviceListener, timed()).onActive(INSECURE_SERVICE);
 
-        verify(stream, timed()).onSubscription(eq("rest/json/timestamp"), isA(TopicSpecification.class));
-        verify(stream, timed()).onSubscription(eq("rest/json/increment"), isA(TopicSpecification.class));
-        verify(stream, timed()).onSubscription(eq("rest/tls/timestamp"), isA(TopicSpecification.class));
-        verify(stream, timed()).onSubscription(eq("rest/tls/increment"), isA(TopicSpecification.class));
+        verify(stream, timed()).onSubscription(eq("rest/json/timestamp"), isNotNull());
+        verify(stream, timed()).onSubscription(eq("rest/json/increment"), isNotNull());
+        verify(stream, timed()).onSubscription(eq("rest/tls/timestamp"), isNotNull());
+        verify(stream, timed()).onSubscription(eq("rest/tls/increment"), isNotNull());
 
-        verify(stream, timed()).onValue(eq("rest/json/timestamp"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
-        verify(stream, timed()).onValue(eq("rest/json/increment"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
-        verify(stream, timed()).onValue(eq("rest/tls/timestamp"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
-        verify(stream, timed()).onValue(eq("rest/tls/increment"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
+        verify(stream, timed()).onValue(eq("rest/json/timestamp"), isNotNull(), isNull(), isNotNull());
+        verify(stream, timed()).onValue(eq("rest/json/increment"), isNotNull(), isNull(), isNotNull());
+        verify(stream, timed()).onValue(eq("rest/tls/timestamp"), isNotNull(), isNull(), isNotNull());
+        verify(stream, timed()).onValue(eq("rest/tls/increment"), isNotNull(), isNull(), isNotNull());
 
         stopSession(session);
         client.close();
@@ -482,11 +481,11 @@ public final class BasicIT {
         modelStore.setModel(modelWith(INSECURE_SERVICE));
         verify(serviceListener, timed()).onActive(INSECURE_SERVICE);
 
-        verify(stream, timed()).onSubscription(eq("rest/json/timestamp"), isA(TopicSpecification.class));
-        verify(stream, timed()).onSubscription(eq("rest/json/increment"), isA(TopicSpecification.class));
+        verify(stream, timed()).onSubscription(eq("rest/json/timestamp"), isNotNull());
+        verify(stream, timed()).onSubscription(eq("rest/json/increment"), isNotNull());
 
-        verify(stream, timed()).onValue(eq("rest/json/timestamp"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
-        verify(stream, timed()).onValue(eq("rest/json/increment"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
+        verify(stream, timed()).onValue(eq("rest/json/timestamp"), isNotNull(), isNull(), isNotNull());
+        verify(stream, timed()).onValue(eq("rest/json/increment"), isNotNull(), isNull(), isNotNull());
 
         stopSession(session);
         client.close();
@@ -507,18 +506,18 @@ public final class BasicIT {
 
         verify(callback, timed()).onComplete();
 
-        verify(stream, timed()).onSubscription(eq("rest/json/timestamp"), isA(TopicSpecification.class));
-        verify(stream, timed()).onSubscription(eq("rest/json/increment"), isA(TopicSpecification.class));
+        verify(stream, timed()).onSubscription(eq("rest/json/timestamp"), isNotNull());
+        verify(stream, timed()).onSubscription(eq("rest/json/increment"), isNotNull());
 
-        verify(stream, timed()).onValue(eq("rest/json/timestamp"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
-        verify(stream, timed()).onValue(eq("rest/json/increment"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
+        verify(stream, timed()).onValue(eq("rest/json/timestamp"), isNotNull(), isNull(), isNotNull());
+        verify(stream, timed()).onValue(eq("rest/json/increment"), isNotNull(), isNull(), isNotNull());
 
         modelStore.setModel(modelWith());
 
         verify(serviceListener, timed()).onRemove(INSECURE_SERVICE);
 
-        verify(stream, timed()).onUnsubscription(eq("rest/json/timestamp"), isA(TopicSpecification.class), eq(REMOVAL));
-        verify(stream, timed()).onUnsubscription(eq("rest/json/increment"), isA(TopicSpecification.class), eq(REMOVAL));
+        verify(stream, timed()).onUnsubscription(eq("rest/json/timestamp"), isNotNull(), eq(REMOVAL));
+        verify(stream, timed()).onUnsubscription(eq("rest/json/increment"), isNotNull(), eq(REMOVAL));
 
         stopSession(session);
         client.close();
@@ -538,11 +537,11 @@ public final class BasicIT {
 
         verify(callback, timed()).onComplete();
 
-        verify(stream, timed()).onSubscription(eq("rest/json/timestamp"), isA(TopicSpecification.class));
-        verify(stream, timed()).onSubscription(eq("rest/json/increment"), isA(TopicSpecification.class));
+        verify(stream, timed()).onSubscription(eq("rest/json/timestamp"), isNotNull());
+        verify(stream, timed()).onSubscription(eq("rest/json/increment"), isNotNull());
 
-        verify(stream, timed()).onValue(eq("rest/json/timestamp"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
-        verify(stream, timed()).onValue(eq("rest/json/increment"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
+        verify(stream, timed()).onValue(eq("rest/json/timestamp"), isNotNull(), isNull(), isNotNull());
+        verify(stream, timed()).onValue(eq("rest/json/increment"), isNotNull(), isNull(), isNotNull());
 
         modelStore.setModel(modelWith(INSECURE_SERVICE, INSECURE_BINARY_SERVICE));
 
@@ -550,11 +549,11 @@ public final class BasicIT {
         verify(serviceListener, timed()).onActive(INSECURE_BINARY_SERVICE);
         verify(serviceListener, timed().times(2)).onActive(INSECURE_SERVICE);
 
-        verify(binaryStream, timed()).onSubscription(eq("rest/binary/timestamp"), isA(TopicSpecification.class));
-        verify(binaryStream, timed()).onSubscription(eq("rest/binary/increment"), isA(TopicSpecification.class));
+        verify(binaryStream, timed()).onSubscription(eq("rest/binary/timestamp"), isNotNull());
+        verify(binaryStream, timed()).onSubscription(eq("rest/binary/increment"), isNotNull());
 
-        verify(binaryStream, timed()).onValue(eq("rest/binary/timestamp"), isA(TopicSpecification.class), isNull(Binary.class), isA(Binary.class));
-        verify(binaryStream, timed()).onValue(eq("rest/binary/increment"), isA(TopicSpecification.class), isNull(Binary.class), isA(Binary.class));
+        verify(binaryStream, timed()).onValue(eq("rest/binary/timestamp"), isNotNull(), isNull(), isNotNull());
+        verify(binaryStream, timed()).onValue(eq("rest/binary/increment"), isNotNull(), isNull(), isNotNull());
 
         stopSession(session);
         client.close();
@@ -581,24 +580,24 @@ public final class BasicIT {
         topics.subscribe("?rest/", callback);
 
         verify(callback, timed()).onComplete();
-        verify(stream, timed()).onSubscription(eq("rest/json/timestamp"), isA(TopicSpecification.class));
-        verify(stream, timed()).onSubscription(eq("rest/json/increment"), isA(TopicSpecification.class));
+        verify(stream, timed()).onSubscription(eq("rest/json/timestamp"), isNotNull());
+        verify(stream, timed()).onSubscription(eq("rest/json/increment"), isNotNull());
 
-        verify(stream, timed()).onValue(eq("rest/json/timestamp"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
-        verify(stream, timed()).onValue(eq("rest/json/increment"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
+        verify(stream, timed()).onValue(eq("rest/json/timestamp"), isNotNull(), isNull(), isNotNull());
+        verify(stream, timed()).onValue(eq("rest/json/increment"), isNotNull(), isNull(), isNotNull());
 
         client0.close();
         verify(serviceListener, timed()).onRemove(INSECURE_SERVICE);
         verify(backupServiceListener, timed()).onActive(INSECURE_SERVICE);
 
-        verify(stream, never()).onUnsubscription(eq("rest/json/timestamp"), isA(TopicSpecification.class), eq(REMOVAL));
-        verify(stream, never()).onUnsubscription(eq("rest/json/increment"), isA(TopicSpecification.class), eq(REMOVAL));
+        verify(stream, never()).onUnsubscription(eq("rest/json/timestamp"), isNotNull(), eq(REMOVAL));
+        verify(stream, never()).onUnsubscription(eq("rest/json/increment"), isNotNull(), eq(REMOVAL));
 
         client1.close();
         verify(backupServiceListener, timed()).onRemove(INSECURE_SERVICE);
 
-        verify(stream, timed()).onUnsubscription(eq("rest/json/timestamp"), isA(TopicSpecification.class), eq(REMOVAL));
-        verify(stream, timed()).onUnsubscription(eq("rest/json/increment"), isA(TopicSpecification.class), eq(REMOVAL));
+        verify(stream, timed()).onUnsubscription(eq("rest/json/timestamp"), isNotNull(), eq(REMOVAL));
+        verify(stream, timed()).onUnsubscription(eq("rest/json/increment"), isNotNull(), eq(REMOVAL));
 
         stopSession(session);
     }
@@ -621,7 +620,7 @@ public final class BasicIT {
 
         assertEquals(TopicType.JSON, specificationCaptor.getValue().getType());
 
-        verify(stream, timed()).onValue(eq("rest/auto/timestamp"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
+        verify(stream, timed()).onValue(eq("rest/auto/timestamp"), isNotNull(), isNull(), isNotNull());
 
         stopSession(session);
         client.close();
@@ -671,9 +670,7 @@ public final class BasicIT {
             .active(true)
             .diffusion(DIFFUSION_CONFIG)
             .services(asList(services))
-            .metrics(MetricsConfig
-                .builder()
-                .build())
+            .metrics(TOPIC_REPORTED_METRICS)
             .truststore("testKeystore.jks")
             .build();
     }
