@@ -135,6 +135,15 @@ public final class PublishingClientImpl implements PublishingClient {
             sessionListener.onSessionStateChange(binaryUpdateContext);
             return binaryUpdateContext;
         }
+        else if (TopicType.STRING.equals(topicType)) {
+            final UpdateContextImpl stringUpdateContext = new UpdateContextImpl(
+                session,
+                updater,
+                topicPath,
+                new ListenerNotifierImpl(publicationListener, serviceConfig, endpointConfig));
+            sessionListener.onSessionStateChange(stringUpdateContext);
+            return stringUpdateContext;
+        }
         else {
             throw new IllegalArgumentException("Unsupported type");
         }

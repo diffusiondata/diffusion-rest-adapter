@@ -19,7 +19,6 @@ import static com.pushtechnology.diffusion.transform.transformer.Transformers.by
 import static com.pushtechnology.diffusion.transform.transformer.Transformers.toSuperClass;
 import static java.util.Arrays.asList;
 
-import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -61,13 +60,11 @@ public enum EndpointType {
      */
     PLAIN_TEXT(
         asList("string", "text/plain"),
-        TopicType.BINARY,
+        TopicType.STRING,
         Transformers
             .builder(EndpointResponse.class)
             .unsafeTransform(EndpointResponseToStringTransformer.INSTANCE)
-            .transform(value -> value.getBytes(Charset.forName("UTF-8")))
-            .transform(Transformers.byteArrayToBinary())
-            .<Bytes>transform(toSuperClass())
+            .unsafeTransform(StringToBytesTransformer.STRING_TO_BYTES)
             .buildUnsafe()) {
 
         @Override

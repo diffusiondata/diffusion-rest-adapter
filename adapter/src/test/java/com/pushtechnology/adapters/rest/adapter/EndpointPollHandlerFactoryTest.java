@@ -17,6 +17,7 @@ package com.pushtechnology.adapters.rest.adapter;
 
 import static com.pushtechnology.diffusion.client.topics.details.TopicType.BINARY;
 import static com.pushtechnology.diffusion.client.topics.details.TopicType.JSON;
+import static com.pushtechnology.diffusion.client.topics.details.TopicType.STRING;
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
@@ -117,7 +118,7 @@ public final class EndpointPollHandlerFactoryTest {
         final FutureCallback<EndpointResponse> callback = pollHandlerFactory.create(serviceConfig, plainTextEndpoint);
 
         assertTrue(callback instanceof TransformingHandler);
-        verify(publishingClient).createUpdateContext(serviceConfig, plainTextEndpoint, BINARY);
+        verify(publishingClient).createUpdateContext(serviceConfig, plainTextEndpoint, STRING);
     }
 
     @Test(expected = IllegalArgumentException.class)

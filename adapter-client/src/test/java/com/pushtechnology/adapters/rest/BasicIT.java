@@ -272,7 +272,7 @@ public final class BasicIT {
         .build();
     private static final ServiceConfig CONSTANT_STRING_SERVICE = ServiceConfig
         .builder()
-        .name("service-6")
+        .name("service-7")
         .host("localhost")
         .port(8081)
         .secure(false)
@@ -312,6 +312,8 @@ public final class BasicIT {
     private Topics.ValueStream<Long> int64Stream;
     @Mock
     private Topics.ValueStream<Double> dobuleStream;
+    @Mock
+    private Topics.ValueStream<String> stringStream;
     @Mock
     private Topics.CompletionCallback callback;
     @Captor
@@ -502,7 +504,7 @@ public final class BasicIT {
         final Session session = startSession();
 
         final Topics topics = session.feature(Topics.class);
-        topics.addFallbackStream(Binary.class, binaryStream);
+        topics.addFallbackStream(String.class, stringStream);
         topics.addFallbackStream(Long.class, int64Stream);
         topics.addFallbackStream(Double.class, dobuleStream);
         topics.subscribe("?rest/", callback);
@@ -511,15 +513,15 @@ public final class BasicIT {
         verifyMetricsTopics();
 
         verify(callback, timed().times(2)).onComplete();
-        verify(binaryStream, timed()).onSubscription(eq("rest/string/timestamp"), isNotNull());
-        verify(binaryStream, timed()).onSubscription(eq("rest/string/increment"), isNotNull());
+        verify(stringStream, timed()).onSubscription(eq("rest/string/timestamp"), isNotNull());
+        verify(stringStream, timed()).onSubscription(eq("rest/string/increment"), isNotNull());
 
-        verify(binaryStream, timed()).onValue(
+        verify(stringStream, timed()).onValue(
             eq("rest/string/timestamp"),
             isNotNull(),
             isNull(),
             isNotNull());
-        verify(binaryStream, timed()).onValue(
+        verify(stringStream, timed()).onValue(
             eq("rest/string/increment"),
             isNotNull(),
             isNull(),
@@ -830,17 +832,17 @@ public final class BasicIT {
         final Session session = startSession();
 
         final Topics topics = session.feature(Topics.class);
-        topics.addFallbackStream(Binary.class, binaryStream);
+        topics.addFallbackStream(String.class, stringStream);
         topics.subscribe("rest/string/constant", callback);
 
         verify(callback, timed()).onComplete();
-        verify(binaryStream, timed()).onSubscription(eq("rest/string/constant"), isNotNull());
+        verify(stringStream, timed()).onSubscription(eq("rest/string/constant"), isNotNull());
 
-        verify(binaryStream, timed()).onValue(
+        verify(stringStream, timed()).onValue(
             eq("rest/string/constant"),
             isNotNull(),
             isNull(),
-            eq(BINARY_CONSTANT));
+            eq(STRING_CONSTANT));
 
         stopSession(session);
         client.close();

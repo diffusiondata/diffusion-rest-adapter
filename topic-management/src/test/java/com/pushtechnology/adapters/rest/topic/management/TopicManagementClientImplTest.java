@@ -153,7 +153,7 @@ public final class TopicManagementClientImplTest {
         topicManagementClient.addEndpoint(serviceConfig, stringEndpointConfig, addCallback);
 
         verify(topicCreationListener).onTopicCreationRequest(serviceConfig, stringEndpointConfig);
-        verify(topicControl).addTopic(eq("service/stringEndpoint"), eq(TopicType.BINARY), callbackCaptor.capture());
+        verify(topicControl).addTopic(eq("service/stringEndpoint"), eq(TopicType.STRING), callbackCaptor.capture());
 
         callbackCaptor.getValue().onDiscard();
 
@@ -195,7 +195,7 @@ public final class TopicManagementClientImplTest {
 
         verify(topicCreationListener).onTopicCreationRequest(serviceConfig, stringEndpointConfig, binary);
         verify(topicControl)
-            .addTopic(eq("service/stringEndpoint"), eq(TopicType.BINARY), isA(Binary.class), callbackCaptor.capture());
+            .addTopic(eq("service/stringEndpoint"), eq(TopicType.STRING), isA(Binary.class), callbackCaptor.capture());
 
         callbackCaptor.getValue().onDiscard();
 

@@ -1,7 +1,7 @@
 package com.pushtechnology.adapters.rest.metrics.event.listeners;
 
 import static com.pushtechnology.diffusion.client.features.control.topics.TopicAddFailReason.USER_CODE_ERROR;
-import static com.pushtechnology.diffusion.client.topics.details.TopicType.BINARY;
+import static com.pushtechnology.diffusion.client.topics.details.TopicType.STRING;
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.isA;
@@ -82,7 +82,7 @@ public final class TopicCreationEventDispatcherTest {
         verify(topicCreationEventListener).onTopicCreationRequest(requestCaptor.capture());
         final TopicCreationRequestEvent value = requestCaptor.getValue();
         assertEquals("service/endpoint", value.getPath());
-        assertEquals(BINARY, value.getTopicType());
+        assertEquals(STRING, value.getTopicType());
         assertEquals(0, value.getInitialValueLength());
     }
 
@@ -95,7 +95,7 @@ public final class TopicCreationEventDispatcherTest {
         verify(topicCreationEventListener).onTopicCreationRequest(requestCaptor.capture());
         final TopicCreationRequestEvent value = requestCaptor.getValue();
         assertEquals("service/endpoint", value.getPath());
-        assertEquals(BINARY, value.getTopicType());
+        assertEquals(STRING, value.getTopicType());
         assertEquals(10, value.getInitialValueLength());
         verify(bytes).length();
     }
@@ -110,7 +110,7 @@ public final class TopicCreationEventDispatcherTest {
         verify(topicCreationEventListener).onTopicCreationSuccess(successCaptor.capture());
         final TopicCreationSuccessEvent value = successCaptor.getValue();
         assertEquals("service/endpoint", value.getRequestEvent().getPath());
-        assertEquals(BINARY, value.getRequestEvent().getTopicType());
+        assertEquals(STRING, value.getRequestEvent().getTopicType());
         assertEquals(0, value.getRequestEvent().getInitialValueLength());
     }
 
@@ -124,7 +124,7 @@ public final class TopicCreationEventDispatcherTest {
         verify(topicCreationEventListener).onTopicCreationFailed(failedCaptor.capture());
         final TopicCreationFailedEvent value = failedCaptor.getValue();
         assertEquals("service/endpoint", value.getRequestEvent().getPath());
-        assertEquals(BINARY, value.getRequestEvent().getTopicType());
+        assertEquals(STRING, value.getRequestEvent().getTopicType());
         assertEquals(0, value.getRequestEvent().getInitialValueLength());
         assertEquals(USER_CODE_ERROR, value.getFailReason());
     }

@@ -50,7 +50,7 @@ public final class EndpointTypeTest {
 
     @Test
     public void plainText() {
-        assertEquals(TopicType.BINARY, EndpointType.PLAIN_TEXT.getTopicType());
+        assertEquals(TopicType.STRING, EndpointType.PLAIN_TEXT.getTopicType());
         assertTrue(EndpointType.PLAIN_TEXT.canHandle("text/json"));
         assertTrue(EndpointType.PLAIN_TEXT.canHandle("application/json"));
         assertTrue(EndpointType.PLAIN_TEXT.canHandle("text/plain"));
