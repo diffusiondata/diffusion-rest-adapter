@@ -17,7 +17,12 @@ import {MetricsService} from "./metrics.service";
             <li *ngFor="let service of model.services" (click)="onSelect(service)" class="list-group-item"><span class="list-group-item-text">{{service.name}}</span></li>
             <li routerLink="/createService" class="list-group-item"><span class="list-group-item-text">Create new service</span></li>
         </ul>
-        <ul *ngIf="hasMetrics" class="list-group">
+    </div>
+    <div *ngIf="hasMetrics" class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">Metrics</h3>
+        </div>
+        <ul class="list-group">
             <li routerLink="/metrics" class="list-group-item"><span class="list-group-item-text">Metrics</span></li>
         </ul>
     </div>
