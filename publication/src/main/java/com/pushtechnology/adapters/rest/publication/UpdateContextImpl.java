@@ -21,7 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.adapters.rest.metrics.listeners.PublicationListener.PublicationCompletionListener;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.ValueUpdater;
+import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.datatype.Bytes;
 
@@ -35,14 +35,14 @@ import com.pushtechnology.diffusion.datatype.Bytes;
     private static final Logger LOG = LoggerFactory.getLogger(UpdateContextImpl.class);
     private final AtomicReference<CachedRequest<T>> cachedValue = new AtomicReference<>(null);
     private final ListenerNotifier listenerNotifier;
-    private final ValueUpdater<T> updater;
+    private final Updater updater;
     private final Session session;
     private final String topicPath;
 
     /**
      * Constructor.
      */
-    UpdateContextImpl(Session session, ValueUpdater<T> updater, String topicPath, ListenerNotifier listenerNotifier) {
+    UpdateContextImpl(Session session, Updater updater, String topicPath, ListenerNotifier listenerNotifier) {
         this.session = session;
         this.updater = updater;
         this.topicPath = topicPath;

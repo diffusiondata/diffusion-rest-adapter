@@ -50,7 +50,6 @@ import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateCo
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.UpdateSource;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater.UpdateContextCallback;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.ValueUpdater;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.session.SessionFactory;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
@@ -71,10 +70,6 @@ public final class PublishingClientImplTest {
     private Registration registration;
     @Mock
     private Updater rawUpdater;
-    @Mock
-    private ValueUpdater<JSON> jsonUpdater;
-    @Mock
-    private ValueUpdater<Binary> binaryUpdater;
     @Mock
     private JSON json;
     @Mock
@@ -97,8 +92,6 @@ public final class PublishingClientImplTest {
 
         when(session.feature(TopicUpdateControl.class)).thenReturn(updateControl);
         when(session.getState()).thenReturn(CONNECTED_ACTIVE);
-        when(rawUpdater.valueUpdater(JSON.class)).thenReturn(jsonUpdater);
-        when(rawUpdater.valueUpdater(Binary.class)).thenReturn(binaryUpdater);
 
         endpointConfig = EndpointConfig
             .builder()
@@ -132,7 +125,7 @@ public final class PublishingClientImplTest {
 
     @After
     public void postConditions() {
-        verifyNoMoreInteractions(session, updateControl, rawUpdater, binaryUpdater, registration);
+        verifyNoMoreInteractions(session, updateControl, rawUpdater, registration);
     }
 
     @Test
@@ -203,15 +196,13 @@ public final class PublishingClientImplTest {
         verify(updateControl).registerUpdateSource(eq("a"), updateSourceCaptor.capture());
 
         updateSourceCaptor.getValue().onActive("a/topic", rawUpdater);
-        verify(rawUpdater).valueUpdater(JSON.class);
-        verify(rawUpdater).valueUpdater(Binary.class);
 
         final UpdateContext<JSON> updateContext = client.createUpdateContext(serviceConfig, endpointConfig, JSON);
 
         updateContext.publish(json);
 
         verify(session).getState();
-        verify(jsonUpdater).update(eq("a/topic"), eq(json), eq("a/topic"), isA(UpdateContextCallback.class));
+        verify(rawUpdater).update(eq("a/topic"), eq(json), eq("a/topic"), isA(UpdateContextCallback.class));
     }
 
     @SuppressWarnings("unchecked")
@@ -222,15 +213,13 @@ public final class PublishingClientImplTest {
         verify(updateControl).registerUpdateSource(eq("a"), updateSourceCaptor.capture());
 
         updateSourceCaptor.getValue().onActive("a/topic", rawUpdater);
-        verify(rawUpdater).valueUpdater(JSON.class);
-        verify(rawUpdater).valueUpdater(Binary.class);
 
         final UpdateContext<Binary> updateContext = client.createUpdateContext(serviceConfig, endpointConfig, BINARY);
 
         updateContext.publish(binary);
 
         verify(session).getState();
-        verify(binaryUpdater).update(eq("a/topic"), eq(binary), eq("a/topic"), isA(UpdateContextCallback.class));
+        verify(rawUpdater).update(eq("a/topic"), eq(binary), eq("a/topic"), isA(UpdateContextCallback.class));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -240,8 +229,6 @@ public final class PublishingClientImplTest {
         verify(updateControl).registerUpdateSource(eq("a"), updateSourceCaptor.capture());
 
         updateSourceCaptor.getValue().onActive("a/topic", rawUpdater);
-        verify(rawUpdater).valueUpdater(JSON.class);
-        verify(rawUpdater).valueUpdater(Binary.class);
 
         client.createUpdateContext(serviceConfig, endpointConfig, TopicType.SINGLE_VALUE);
     }
@@ -259,8 +246,6 @@ public final class PublishingClientImplTest {
         verify(updateControl).registerUpdateSource(eq("a"), updateSourceCaptor.capture());
 
         updateSourceCaptor.getValue().onActive("a/topic", rawUpdater);
-        verify(rawUpdater).valueUpdater(JSON.class);
-        verify(rawUpdater).valueUpdater(Binary.class);
 
         when(session.getState()).thenReturn(RECOVERING_RECONNECT);
 
@@ -269,10 +254,10 @@ public final class PublishingClientImplTest {
         updateContext.publish(json);
 
         verify(session).getState();
-        verify(jsonUpdater, never()).update(eq("a/topic"), eq(json), eq("a/topic"), isA(UpdateContextCallback.class));
+        verify(rawUpdater, never()).update(eq("a/topic"), eq(json), eq("a/topic"), isA(UpdateContextCallback.class));
 
         sessionListener.onSessionStateChanged(session, RECOVERING_RECONNECT, CONNECTED_ACTIVE);
 
-        verify(jsonUpdater).update(eq("a/topic"), eq(json), eq("a/topic"), isA(UpdateContextCallback.class));
+        verify(rawUpdater).update(eq("a/topic"), eq(json), eq("a/topic"), isA(UpdateContextCallback.class));
     }
 }

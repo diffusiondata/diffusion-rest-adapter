@@ -31,8 +31,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 
+import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater.UpdateContextCallback;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.ValueUpdater;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.datatype.binary.Binary;
 
@@ -45,7 +45,7 @@ public final class UpdateContextImplTest {
     @Mock
     private Session session;
     @Mock
-    private ValueUpdater<Binary> updater;
+    private Updater updater;
     @Mock
     private Binary binary;
     @Mock

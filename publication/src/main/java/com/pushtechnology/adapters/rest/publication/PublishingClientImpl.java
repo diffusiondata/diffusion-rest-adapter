@@ -24,12 +24,10 @@ import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.session.management.EventedSessionListener;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.ValueUpdater;
+import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
 import com.pushtechnology.diffusion.datatype.Bytes;
-import com.pushtechnology.diffusion.datatype.binary.Binary;
-import com.pushtechnology.diffusion.datatype.json.JSON;
 
 import net.jcip.annotations.GuardedBy;
 import net.jcip.annotations.ThreadSafe;
@@ -49,7 +47,7 @@ public final class PublishingClientImpl implements PublishingClient {
     @GuardedBy("this")
     private Map<ServiceConfig, EventedUpdateSource> updaterSources = new HashMap<>();
     @GuardedBy("this")
-    private Map<ServiceConfig, UpdaterSet> updaters = new HashMap<>();
+    private Map<ServiceConfig, Updater> updaters = new HashMap<>();
 
     /**
      * Constructor.
@@ -69,12 +67,7 @@ public final class PublishingClientImpl implements PublishingClient {
         final EventedUpdateSource source = new EventedUpdateSourceImpl(serviceConfig.getTopicPathRoot())
             .onActive(updater -> {
                 synchronized (PublishingClientImpl.this) {
-                    final ValueUpdater<JSON> jsonUpdater = updater.valueUpdater(JSON.class);
-                    final ValueUpdater<Binary> binaryUpdater = updater.valueUpdater(Binary.class);
-                    // Remove cached values to prevent stale values poisoning the delta calculation
-                    // The cache is shared by all updaters
-                    jsonUpdater.removeCachedValues(serviceConfig.getTopicPathRoot());
-                    updaters.put(serviceConfig, new UpdaterSet(jsonUpdater, binaryUpdater));
+                    updaters.put(serviceConfig, updater);
                 }
             })
             .onClose(() -> {
@@ -118,8 +111,8 @@ public final class PublishingClientImpl implements PublishingClient {
             EndpointConfig endpointConfig,
             TopicType topicType) {
 
-        final UpdaterSet updaterSet = updaters.get(serviceConfig);
-        if (updaterSet == null) {
+        final Updater updater = updaters.get(serviceConfig);
+        if (updater == null) {
             throw new IllegalStateException("The service has not been added or is not active, no updater found");
         }
 
@@ -127,7 +120,7 @@ public final class PublishingClientImpl implements PublishingClient {
         if (TopicType.JSON.equals(topicType)) {
             final UpdateContextImpl jsonUpdateContext = new UpdateContextImpl(
                 session,
-                updaterSet.jsonUpdater,
+                updater,
                 topicPath,
                 new ListenerNotifierImpl(publicationListener, serviceConfig, endpointConfig));
             sessionListener.onSessionStateChange(jsonUpdateContext);
@@ -136,7 +129,7 @@ public final class PublishingClientImpl implements PublishingClient {
         else if (TopicType.BINARY.equals(topicType)) {
             final UpdateContextImpl binaryUpdateContext = new UpdateContextImpl(
                 session,
-                updaterSet.binaryUpdater,
+                updater,
                 topicPath,
                 new ListenerNotifierImpl(publicationListener, serviceConfig, endpointConfig));
             sessionListener.onSessionStateChange(binaryUpdateContext);
@@ -144,16 +137,6 @@ public final class PublishingClientImpl implements PublishingClient {
         }
         else {
             throw new IllegalArgumentException("Unsupported type");
-        }
-    }
-
-    private static final class UpdaterSet {
-        private final ValueUpdater<JSON> jsonUpdater;
-        private final ValueUpdater<Binary> binaryUpdater;
-
-        private UpdaterSet(ValueUpdater<JSON> jsonUpdater, ValueUpdater<Binary> binaryUpdater) {
-            this.jsonUpdater = jsonUpdater;
-            this.binaryUpdater = binaryUpdater;
         }
     }
 }
