@@ -7,7 +7,23 @@ const longDataType = diffusion.datatypes.int64();
 
 @Injectable()
 export class MetricsService {
+    private areMetricsReady: Promise<void>;
+
     constructor(private diffusionService: DiffusionService) {
+        this.areMetricsReady = new Promise(((resolve, reject) => {
+            diffusionService.get().then(session => {
+                session
+                    .stream('adapter/rest/metrics/poll/requests')
+                    .on('subscribe', () => {
+                        session.unsubscribe('adapter/rest/metrics/poll/requests');
+                        resolve();
+                    })
+                    .on('error', (err) => {
+                        reject(err);
+                    });
+                session.subscribe('adapter/rest/metrics/poll/requests');
+            }, reject);
+        }));
     }
 
     public createEmptyView(): MetricsView {
@@ -87,6 +103,10 @@ export class MetricsService {
                 streams.forEach(stream => stream.close());
             }
         };
+    }
+
+    public metricsReady(): Promise<void> {
+        return this.areMetricsReady;
     }
 
     public getMetricsView(): Promise<MetricsView> {
