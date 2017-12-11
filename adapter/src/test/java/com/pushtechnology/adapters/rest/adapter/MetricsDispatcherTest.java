@@ -111,8 +111,6 @@ public final class MetricsDispatcherTest {
         when(publicationListener1.onPublicationRequest(any(), any(), any())).thenReturn(publicationCompletionListener1);
         when(topicCreationListener0.onTopicCreationRequest(any(), any())).thenReturn(topicCreationCompletionListener0);
         when(topicCreationListener1.onTopicCreationRequest(any(), any())).thenReturn(topicCreationCompletionListener1);
-        when(topicCreationListener0.onTopicCreationRequest(any(), any(), any())).thenReturn(topicCreationCompletionListener0);
-        when(topicCreationListener1.onTopicCreationRequest(any(), any(), any())).thenReturn(topicCreationCompletionListener1);
         when(httpResponse.getStatusLine()).thenReturn(statusLine);
         when(httpResponse.getEntity()).thenReturn(entity);
     }
@@ -172,29 +170,6 @@ public final class MetricsDispatcherTest {
         dispatcher.addTopicCreationEventListener(topicCreationEventListener1);
 
         final TopicCreationCompletionListener completionListener = dispatcher.onTopicCreationRequest(serviceConfig, endpointConfig);
-
-        verify(topicCreationEventListener0).onTopicCreationRequest(isNotNull());
-        verify(topicCreationEventListener1).onTopicCreationRequest(isNotNull());
-
-        completionListener.onTopicCreated();
-
-        verify(topicCreationEventListener0).onTopicCreationSuccess(isNotNull());
-        verify(topicCreationEventListener1).onTopicCreationSuccess(isNotNull());
-
-        completionListener.onTopicCreationFailed(INVALID_DETAILS);
-
-        verify(topicCreationEventListener0).onTopicCreationFailed(isNotNull());
-        verify(topicCreationEventListener1).onTopicCreationFailed(isNotNull());
-    }
-
-    @Test
-    public void topicCreationEventListenerWithValueDispatch() {
-        final MetricsDispatcher dispatcher = new MetricsDispatcher();
-
-        dispatcher.addTopicCreationEventListener(topicCreationEventListener0);
-        dispatcher.addTopicCreationEventListener(topicCreationEventListener1);
-
-        final TopicCreationCompletionListener completionListener = dispatcher.onTopicCreationRequest(serviceConfig, endpointConfig, bytes);
 
         verify(topicCreationEventListener0).onTopicCreationRequest(isNotNull());
         verify(topicCreationEventListener1).onTopicCreationRequest(isNotNull());

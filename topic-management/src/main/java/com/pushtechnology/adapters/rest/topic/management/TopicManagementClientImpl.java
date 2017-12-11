@@ -28,7 +28,6 @@ import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.AddCallback;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
-import com.pushtechnology.diffusion.datatype.Bytes;
 
 import net.jcip.annotations.GuardedBy;
 
@@ -81,29 +80,6 @@ public final class TopicManagementClientImpl implements TopicManagementClient {
             .addTopic(
                 topicPath,
                 topicType,
-                new TopicSetupCallback(completionListener, callback));
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    public void addEndpoint(
-            ServiceConfig serviceConfig,
-            EndpointConfig endpointConfig,
-            Bytes initialValue,
-            AddCallback callback) {
-
-        final String produces = endpointConfig.getProduces();
-        final String topicPath = serviceConfig.getTopicPathRoot() + "/" + endpointConfig.getTopicPath();
-        final TopicType topicType = EndpointType.from(produces).getTopicType();
-
-        final TopicCreationCompletionListener completionListener =
-            topicCreationListener.onTopicCreationRequest(serviceConfig, endpointConfig, initialValue);
-        session
-            .feature(TopicControl.class)
-            .addTopic(
-                topicPath,
-                topicType,
-                initialValue,
                 new TopicSetupCallback(completionListener, callback));
     }
 

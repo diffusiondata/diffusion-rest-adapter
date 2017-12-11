@@ -15,7 +15,6 @@
 
 package com.pushtechnology.adapters.rest.adapter;
 
-import static com.pushtechnology.diffusion.client.Diffusion.dataTypes;
 import static java.util.Collections.emptyList;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.isA;
@@ -127,7 +126,6 @@ public final class InitialiseEndpointTest {
         verify(topicManagementClient).addEndpoint(
             eq(serviceConfig),
             eq(endpointConfig),
-            eq(dataTypes().json().fromJsonString("{}")),
             isA(AddCallback.class));
     }
 }

@@ -18,7 +18,6 @@ package com.pushtechnology.adapters.rest.metrics.listeners;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicAddFailReason;
-import com.pushtechnology.diffusion.datatype.Bytes;
 
 /**
  * Listener for Diffusion topic creation events.
@@ -35,18 +34,6 @@ public interface TopicCreationListener {
     TopicCreationCompletionListener onTopicCreationRequest(
         ServiceConfig serviceConfig,
         EndpointConfig endpointConfig);
-
-    /**
-     * Notified when an attempt to create a Diffusion topic is made and there is an initial value.
-     *
-     * @param serviceConfig the service
-     * @param endpointConfig the endpoint
-     * @param value the initial value
-     */
-    TopicCreationCompletionListener onTopicCreationRequest(
-        ServiceConfig serviceConfig,
-        EndpointConfig endpointConfig,
-        Bytes value);
 
     /**
      * Listener for the completion of a topic creation request.
@@ -86,14 +73,6 @@ public interface TopicCreationListener {
         public TopicCreationCompletionListener onTopicCreationRequest(
                 ServiceConfig serviceConfig,
                 EndpointConfig endpointConfig) {
-            return TopicCreationCompletionListener.NULL_LISTENER;
-        }
-
-        @Override
-        public TopicCreationCompletionListener onTopicCreationRequest(
-                ServiceConfig serviceConfig,
-                EndpointConfig endpointConfig,
-                Bytes value) {
             return TopicCreationCompletionListener.NULL_LISTENER;
         }
     };

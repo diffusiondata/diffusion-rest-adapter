@@ -23,7 +23,6 @@ import com.pushtechnology.adapters.rest.metrics.listeners.TopicCreationListener;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicAddFailReason;
-import com.pushtechnology.diffusion.datatype.Bytes;
 
 /**
  * Implementation of {@link TopicCreationListener} that notifies a
@@ -48,24 +47,7 @@ public final class TopicCreationEventDispatcher implements TopicCreationListener
 
         final TopicCreationRequestEvent requestEvent = TopicCreationRequestEvent.Factory.create(
             serviceConfig.getTopicPathRoot() + "/" + endpointConfig.getTopicPath(),
-            EndpointType.from(endpointConfig.getProduces()).getTopicType(),
-            0);
-
-        listener.onTopicCreationRequest(requestEvent);
-
-        return new CompletionListener(listener, requestEvent);
-    }
-
-    @Override
-    public TopicCreationCompletionListener onTopicCreationRequest(
-            ServiceConfig serviceConfig,
-            EndpointConfig endpointConfig,
-            Bytes value) {
-
-        final TopicCreationRequestEvent requestEvent = TopicCreationRequestEvent.Factory.create(
-            serviceConfig.getTopicPathRoot() + "/" + endpointConfig.getTopicPath(),
-            EndpointType.from(endpointConfig.getProduces()).getTopicType(),
-            value.length());
+            EndpointType.from(endpointConfig.getProduces()).getTopicType());
 
         listener.onTopicCreationRequest(requestEvent);
 

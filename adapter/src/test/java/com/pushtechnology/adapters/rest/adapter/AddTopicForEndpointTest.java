@@ -20,8 +20,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-import java.util.Collections;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -84,7 +82,7 @@ public final class AddTopicForEndpointTest {
     public void completed() {
         handler.completed(response);
 
-        verify(topicManagementClient).addEndpoint(serviceConfig, endpointConfig, response, callback);
+        verify(topicManagementClient).addEndpoint(serviceConfig, endpointConfig, callback);
     }
 
     @Test

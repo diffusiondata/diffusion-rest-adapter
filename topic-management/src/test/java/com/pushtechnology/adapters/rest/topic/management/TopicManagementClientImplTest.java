@@ -18,7 +18,6 @@ package com.pushtechnology.adapters.rest.topic.management;
 import static java.util.Arrays.asList;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.isA;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -154,48 +153,6 @@ public final class TopicManagementClientImplTest {
 
         verify(topicCreationListener).onTopicCreationRequest(serviceConfig, stringEndpointConfig);
         verify(topicControl).addTopic(eq("service/stringEndpoint"), eq(TopicType.STRING), callbackCaptor.capture());
-
-        callbackCaptor.getValue().onDiscard();
-
-        verify(addCallback).onDiscard();
-    }
-
-    @SuppressWarnings("deprecation")
-    @Test
-    public void addJSONEndpointWithValue() {
-        topicManagementClient.addEndpoint(serviceConfig, jsonEndpointConfig, json, addCallback);
-
-        verify(topicCreationListener).onTopicCreationRequest(serviceConfig, jsonEndpointConfig, json);
-        verify(topicControl)
-            .addTopic(eq("service/jsonEndpoint"), eq(TopicType.JSON), eq(json), callbackCaptor.capture());
-
-        callbackCaptor.getValue().onDiscard();
-
-        verify(addCallback).onDiscard();
-    }
-
-    @SuppressWarnings("deprecation")
-    @Test
-    public void addBinaryEndpointWithValue() {
-        topicManagementClient.addEndpoint(serviceConfig, binaryEndpointConfig, binary, addCallback);
-
-        verify(topicCreationListener).onTopicCreationRequest(serviceConfig, binaryEndpointConfig, binary);
-        verify(topicControl)
-            .addTopic(eq("service/binaryEndpoint"), eq(TopicType.BINARY), eq(binary), callbackCaptor.capture());
-
-        callbackCaptor.getValue().onDiscard();
-
-        verify(addCallback).onDiscard();
-    }
-
-    @SuppressWarnings("deprecation")
-    @Test
-    public void addStringEndpointWithValue() {
-        topicManagementClient.addEndpoint(serviceConfig, stringEndpointConfig, binary, addCallback);
-
-        verify(topicCreationListener).onTopicCreationRequest(serviceConfig, stringEndpointConfig, binary);
-        verify(topicControl)
-            .addTopic(eq("service/stringEndpoint"), eq(TopicType.STRING), isA(Binary.class), callbackCaptor.capture());
 
         callbackCaptor.getValue().onDiscard();
 

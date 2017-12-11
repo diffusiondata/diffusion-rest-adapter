@@ -55,7 +55,7 @@ import com.pushtechnology.diffusion.datatype.Bytes;
 
     @Override
     public void completed(T value) {
-        topicManagementClient.addEndpoint(service, endpoint, value, callback);
+        topicManagementClient.addEndpoint(service, endpoint, callback);
     }
 
     @Override

@@ -87,20 +87,6 @@ public final class TopicCreationEventDispatcherTest {
     }
 
     @Test
-    public void onTopicCreationRequestWithData() throws Exception {
-        final TopicCreationEventDispatcher dispatcher = new TopicCreationEventDispatcher(topicCreationEventListener);
-
-        dispatcher.onTopicCreationRequest(serviceConfig, endpointConfig, bytes);
-
-        verify(topicCreationEventListener).onTopicCreationRequest(requestCaptor.capture());
-        final TopicCreationRequestEvent value = requestCaptor.getValue();
-        assertEquals("service/endpoint", value.getPath());
-        assertEquals(STRING, value.getTopicType());
-        assertEquals(10, value.getInitialValueLength());
-        verify(bytes).length();
-    }
-
-    @Test
     public void onTopicCreationSuccess() throws Exception {
         final TopicCreationEventDispatcher dispatcher = new TopicCreationEventDispatcher(topicCreationEventListener);
 
