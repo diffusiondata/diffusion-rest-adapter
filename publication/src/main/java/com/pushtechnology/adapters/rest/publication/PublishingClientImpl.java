@@ -119,6 +119,7 @@ public final class PublishingClientImpl implements PublishingClient {
         final String topicPath = serviceConfig.getTopicPathRoot() + "/" + endpointConfig.getTopicPath();
         if (TopicType.JSON.equals(topicType)) {
             final UpdateContextImpl jsonUpdateContext = new UpdateContextImpl(
+                value -> value,
                 session,
                 updater,
                 topicPath,
@@ -128,6 +129,7 @@ public final class PublishingClientImpl implements PublishingClient {
         }
         else if (TopicType.BINARY.equals(topicType)) {
             final UpdateContextImpl binaryUpdateContext = new UpdateContextImpl(
+                value -> value,
                 session,
                 updater,
                 topicPath,
@@ -137,6 +139,7 @@ public final class PublishingClientImpl implements PublishingClient {
         }
         else if (TopicType.STRING.equals(topicType)) {
             final UpdateContextImpl stringUpdateContext = new UpdateContextImpl(
+                value -> value,
                 session,
                 updater,
                 topicPath,

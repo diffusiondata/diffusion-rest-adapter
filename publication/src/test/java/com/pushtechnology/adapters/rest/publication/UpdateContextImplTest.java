@@ -57,7 +57,7 @@ public final class UpdateContextImplTest {
     public void setUp() {
         initMocks(this);
 
-        updateContext = new UpdateContextImpl<>(session, updater, "a/topic", notifier);
+        updateContext = new UpdateContextImpl<>(value -> value, session, updater, "a/topic", notifier);
     }
 
     @After

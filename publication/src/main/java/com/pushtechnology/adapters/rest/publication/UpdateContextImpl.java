@@ -16,6 +16,7 @@
 package com.pushtechnology.adapters.rest.publication;
 
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,8 +32,9 @@ import com.pushtechnology.diffusion.datatype.Bytes;
  * @param <T> The type of updates the context accepts
  * @author Push Technology Limited
  */
-/*package*/ final class UpdateContextImpl<T extends Bytes> implements UpdateContext<T>, Session.Listener {
+/*package*/ final class UpdateContextImpl<T> implements UpdateContext<T>, Session.Listener {
     private static final Logger LOG = LoggerFactory.getLogger(UpdateContextImpl.class);
+    private final Function<T, Bytes> toBytes;
     private final AtomicReference<CachedRequest<T>> cachedValue = new AtomicReference<>(null);
     private final ListenerNotifier listenerNotifier;
     private final Updater updater;
@@ -42,7 +44,13 @@ import com.pushtechnology.diffusion.datatype.Bytes;
     /**
      * Constructor.
      */
-    UpdateContextImpl(Session session, Updater updater, String topicPath, ListenerNotifier listenerNotifier) {
+    UpdateContextImpl(
+            Function<T, Bytes> toBytes,
+            Session session,
+            Updater updater,
+            String topicPath,
+            ListenerNotifier listenerNotifier) {
+        this.toBytes = toBytes;
         this.session = session;
         this.updater = updater;
         this.topicPath = topicPath;
@@ -57,7 +65,7 @@ import com.pushtechnology.diffusion.datatype.Bytes;
                 LOG.debug("Publishing cached value on recovery");
                 updater.update(
                     topicPath,
-                    cachedRequest.value,
+                    toBytes.apply(cachedRequest.value),
                     topicPath,
                     new UpdateTopicCallback(cachedRequest.completionListener));
             }
@@ -72,13 +80,15 @@ import com.pushtechnology.diffusion.datatype.Bytes;
         }
         else if (state.isRecovering()) {
             LOG.debug("Caching value while in recovery");
-            final PublicationCompletionListener completionListener = listenerNotifier.notifyPublicationRequest(value);
+            final PublicationCompletionListener completionListener =
+                listenerNotifier.notifyPublicationRequest(toBytes.apply(value));
             cachedValue.set(new CachedRequest<>(value, completionListener));
             return;
         }
 
-        final PublicationCompletionListener completionListener = listenerNotifier.notifyPublicationRequest(value);
-        updater.update(topicPath, value, topicPath, new UpdateTopicCallback(completionListener));
+        final PublicationCompletionListener completionListener =
+            listenerNotifier.notifyPublicationRequest(toBytes.apply(value));
+        updater.update(topicPath, toBytes.apply(value), topicPath, new UpdateTopicCallback(completionListener));
     }
 
     private static final class CachedRequest<T> {
