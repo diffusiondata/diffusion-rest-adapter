@@ -15,17 +15,18 @@
 
 package com.pushtechnology.adapters.rest;
 
+import static com.pushtechnology.diffusion.client.Diffusion.dataTypes;
 import static com.pushtechnology.diffusion.client.features.Topics.UnsubscribeReason.REMOVAL;
 import static com.pushtechnology.diffusion.client.session.Session.State.CLOSED_BY_CLIENT;
 import static com.pushtechnology.diffusion.client.session.Session.State.CONNECTED_ACTIVE;
 import static com.pushtechnology.diffusion.client.session.Session.State.CONNECTING;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.joining;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isNull;
-import static org.mockito.Mockito.isA;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
@@ -33,8 +34,10 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.stream.Stream;
 
 import org.eclipse.jetty.security.ConstraintMapping;
 import org.eclipse.jetty.security.ConstraintSecurityHandler;
@@ -75,6 +78,7 @@ import com.pushtechnology.adapters.rest.model.latest.SecurityConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.model.latest.TopicConfig;
 import com.pushtechnology.adapters.rest.model.store.MutableModelStore;
+import com.pushtechnology.adapters.rest.resources.ConstantResource;
 import com.pushtechnology.adapters.rest.resources.IncrementingResource;
 import com.pushtechnology.adapters.rest.resources.TimestampResource;
 import com.pushtechnology.diffusion.client.Diffusion;
@@ -169,6 +173,27 @@ public final class BasicIT {
         .url("/auth/rest/timestamp")
         .produces("json")
         .build();
+    private static final EndpointConfig CONSTANT_JSON_ENDPOINT = EndpointConfig
+        .builder()
+        .name("constant")
+        .topicPath("constant")
+        .url("/rest/constant")
+        .produces("json")
+        .build();
+    private static final EndpointConfig CONSTANT_BINARY_ENDPOINT = EndpointConfig
+        .builder()
+        .name("constant")
+        .topicPath("constant")
+        .url("/rest/constant")
+        .produces("binary")
+        .build();
+    private static final EndpointConfig CONSTANT_STRING_ENDPOINT = EndpointConfig
+        .builder()
+        .name("constant")
+        .topicPath("constant")
+        .url("/rest/constant")
+        .produces("string")
+        .build();
     private static final BasicAuthenticationConfig BASIC_AUTHENTICATION_CONFIG = BasicAuthenticationConfig
         .builder()
         .userid("principal")
@@ -225,6 +250,36 @@ public final class BasicIT {
         .topicPathRoot("rest/auto")
         .endpoints(singletonList(TIMESTAMP_AUTO_ENDPOINT))
         .build();
+    private static final ServiceConfig CONSTANT_JSON_SERVICE = ServiceConfig
+        .builder()
+        .name("service-5")
+        .host("localhost")
+        .port(8081)
+        .secure(false)
+        .pollPeriod(500)
+        .topicPathRoot("rest/json")
+        .endpoints(singletonList(CONSTANT_JSON_ENDPOINT))
+        .build();
+    private static final ServiceConfig CONSTANT_BINARY_SERVICE = ServiceConfig
+        .builder()
+        .name("service-6")
+        .host("localhost")
+        .port(8081)
+        .secure(false)
+        .pollPeriod(500)
+        .topicPathRoot("rest/binary")
+        .endpoints(singletonList(CONSTANT_BINARY_ENDPOINT))
+        .build();
+    private static final ServiceConfig CONSTANT_STRING_SERVICE = ServiceConfig
+        .builder()
+        .name("service-6")
+        .host("localhost")
+        .port(8081)
+        .secure(false)
+        .pollPeriod(500)
+        .topicPathRoot("rest/string")
+        .endpoints(singletonList(CONSTANT_STRING_ENDPOINT))
+        .build();
     private static final MetricsConfig TOPIC_REPORTED_METRICS = MetricsConfig
         .builder()
         .counting(false)
@@ -232,6 +287,14 @@ public final class BasicIT {
             .builder()
             .build())
         .build();
+
+    private static final String STRING_CONSTANT = "{\"cromulent\":\"good\",\"embiggen\":\"to make larger\"}";
+    private static final JSON JSON_CONSTANT = dataTypes()
+        .json()
+        .fromJsonString(STRING_CONSTANT);
+    private static final Binary BINARY_CONSTANT = dataTypes()
+        .binary()
+        .readValue(STRING_CONSTANT.getBytes(Charset.forName("UTF-8")));
 
     private static Server jettyServer;
 
@@ -264,7 +327,14 @@ public final class BasicIT {
         jerseyServlet0.setInitOrder(0);
         jerseyServlet0.setInitParameter(
             "jersey.config.server.provider.classnames",
-            TimestampResource.class.getCanonicalName() + "," + IncrementingResource.class.getCanonicalName());
+            Stream
+                .<Class<?>>builder()
+                .add(TimestampResource.class)
+                .add(IncrementingResource.class)
+                .add(ConstantResource.class)
+                .build()
+                .map(Class::getCanonicalName)
+                .collect(joining(",")));
 
         final Constraint constraint = new Constraint();
         constraint.setName("constraint-0");
@@ -291,7 +361,14 @@ public final class BasicIT {
         jerseyServlet1.setInitOrder(0);
         jerseyServlet1.setInitParameter(
             "jersey.config.server.provider.classnames",
-            TimestampResource.class.getCanonicalName() + "," + IncrementingResource.class.getCanonicalName());
+            Stream
+                .<Class<?>>builder()
+                .add(TimestampResource.class)
+                .add(IncrementingResource.class)
+                .add(ConstantResource.class)
+                .build()
+                .map(Class::getCanonicalName)
+                .collect(joining(",")));
 
         final HandlerCollection handlers = new HandlerCollection();
         handlers.addHandler(context0);
@@ -685,6 +762,90 @@ public final class BasicIT {
         client.close();
 
         verify(serviceListener, timed()).onRemove(INFERRED_SERVICE);
+    }
+
+    @Test
+    public void testJSONValue() throws IOException {
+        modelStore.setModel(modelWith(CONSTANT_JSON_SERVICE));
+        final RESTAdapterClient client = startClient();
+
+        verify(serviceListener, timed()).onActive(CONSTANT_JSON_SERVICE);
+
+        final Session session = startSession();
+
+        final Topics topics = session.feature(Topics.class);
+        topics.addFallbackStream(JSON.class, stream);
+        topics.subscribe("rest/json/constant", callback);
+
+        verify(callback, timed()).onComplete();
+        verify(stream, timed()).onSubscription(eq("rest/json/constant"), isNotNull());
+
+        verify(stream, timed()).onValue(
+            eq("rest/json/constant"),
+            isNotNull(),
+            isNull(),
+            eq(JSON_CONSTANT));
+
+        stopSession(session);
+        client.close();
+
+        verify(serviceListener, timed()).onRemove(CONSTANT_JSON_SERVICE);
+    }
+
+    @Test
+    public void testBinaryValue() throws IOException {
+        modelStore.setModel(modelWith(CONSTANT_BINARY_SERVICE));
+        final RESTAdapterClient client = startClient();
+
+        verify(serviceListener, timed()).onActive(CONSTANT_BINARY_SERVICE);
+
+        final Session session = startSession();
+
+        final Topics topics = session.feature(Topics.class);
+        topics.addFallbackStream(Binary.class, binaryStream);
+        topics.subscribe("rest/binary/constant", callback);
+
+        verify(callback, timed()).onComplete();
+        verify(binaryStream, timed()).onSubscription(eq("rest/binary/constant"), isNotNull());
+
+        verify(binaryStream, timed()).onValue(
+            eq("rest/binary/constant"),
+            isNotNull(),
+            isNull(),
+            eq(BINARY_CONSTANT));
+
+        stopSession(session);
+        client.close();
+
+        verify(serviceListener, timed()).onRemove(CONSTANT_BINARY_SERVICE);
+    }
+
+    @Test
+    public void testStringValue() throws IOException {
+        modelStore.setModel(modelWith(CONSTANT_STRING_SERVICE));
+        final RESTAdapterClient client = startClient();
+
+        verify(serviceListener, timed()).onActive(CONSTANT_STRING_SERVICE);
+
+        final Session session = startSession();
+
+        final Topics topics = session.feature(Topics.class);
+        topics.addFallbackStream(Binary.class, binaryStream);
+        topics.subscribe("rest/string/constant", callback);
+
+        verify(callback, timed()).onComplete();
+        verify(binaryStream, timed()).onSubscription(eq("rest/string/constant"), isNotNull());
+
+        verify(binaryStream, timed()).onValue(
+            eq("rest/string/constant"),
+            isNotNull(),
+            isNull(),
+            eq(BINARY_CONSTANT));
+
+        stopSession(session);
+        client.close();
+
+        verify(serviceListener, timed()).onRemove(CONSTANT_STRING_SERVICE);
     }
 
     private void verifyMetricsTopics() {
