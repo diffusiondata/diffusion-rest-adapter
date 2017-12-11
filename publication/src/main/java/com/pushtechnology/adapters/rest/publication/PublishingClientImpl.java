@@ -27,7 +27,6 @@ import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateCo
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
-import com.pushtechnology.diffusion.datatype.Bytes;
 
 import net.jcip.annotations.GuardedBy;
 import net.jcip.annotations.ThreadSafe;
@@ -106,7 +105,7 @@ public final class PublishingClientImpl implements PublishingClient {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T extends Bytes> UpdateContext<T> createUpdateContext(
+    public <T> UpdateContext<T> createUpdateContext(
             ServiceConfig serviceConfig,
             EndpointConfig endpointConfig,
             TopicType topicType) {

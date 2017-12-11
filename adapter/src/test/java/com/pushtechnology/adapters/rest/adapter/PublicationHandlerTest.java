@@ -1,6 +1,5 @@
 package com.pushtechnology.adapters.rest.adapter;
 
-import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -11,7 +10,6 @@ import org.junit.Test;
 import org.mockito.Mock;
 
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
-import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.publication.UpdateContext;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
