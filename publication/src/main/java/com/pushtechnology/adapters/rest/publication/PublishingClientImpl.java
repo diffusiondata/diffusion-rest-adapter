@@ -120,30 +120,30 @@ public final class PublishingClientImpl implements PublishingClient {
         final String topicPath = serviceConfig.getTopicPathRoot() + "/" + endpointConfig.getTopicPath();
         if (TopicType.JSON.equals(topicType)) {
             final UpdateContextImpl jsonUpdateContext = new UpdateContextImpl(
-                value -> dataType.toBytes((T) value),
                 session,
                 updater,
                 topicPath,
+                dataType,
                 new ListenerNotifierImpl(publicationListener, serviceConfig, endpointConfig));
             sessionListener.onSessionStateChange(jsonUpdateContext);
             return jsonUpdateContext;
         }
         else if (TopicType.BINARY.equals(topicType)) {
             final UpdateContextImpl binaryUpdateContext = new UpdateContextImpl(
-                value -> dataType.toBytes((T) value),
                 session,
                 updater,
                 topicPath,
+                dataType,
                 new ListenerNotifierImpl(publicationListener, serviceConfig, endpointConfig));
             sessionListener.onSessionStateChange(binaryUpdateContext);
             return binaryUpdateContext;
         }
         else if (TopicType.STRING.equals(topicType)) {
             final UpdateContextImpl stringUpdateContext = new UpdateContextImpl(
-                value -> dataType.toBytes((T) value),
                 session,
                 updater,
                 topicPath,
+                dataType,
                 new ListenerNotifierImpl(publicationListener, serviceConfig, endpointConfig));
             sessionListener.onSessionStateChange(stringUpdateContext);
             return stringUpdateContext;

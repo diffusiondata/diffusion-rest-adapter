@@ -16,7 +16,6 @@
 package com.pushtechnology.adapters.rest.publication;
 
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +24,7 @@ import com.pushtechnology.adapters.rest.metrics.listeners.PublicationListener.Pu
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.datatype.Bytes;
+import com.pushtechnology.diffusion.datatype.DataType;
 
 /**
  * Implementation of {@link UpdateContext} that supports recovery.
@@ -34,8 +34,8 @@ import com.pushtechnology.diffusion.datatype.Bytes;
  */
 /*package*/ final class UpdateContextImpl<T> implements UpdateContext<T>, Session.Listener {
     private static final Logger LOG = LoggerFactory.getLogger(UpdateContextImpl.class);
-    private final Function<T, Bytes> toBytes;
     private final AtomicReference<CachedRequest<T>> cachedValue = new AtomicReference<>(null);
+    private final DataType<T> dataType;
     private final ListenerNotifier listenerNotifier;
     private final Updater updater;
     private final Session session;
@@ -45,15 +45,15 @@ import com.pushtechnology.diffusion.datatype.Bytes;
      * Constructor.
      */
     UpdateContextImpl(
-            Function<T, Bytes> toBytes,
             Session session,
             Updater updater,
             String topicPath,
+            DataType<T> dataType,
             ListenerNotifier listenerNotifier) {
-        this.toBytes = toBytes;
         this.session = session;
         this.updater = updater;
         this.topicPath = topicPath;
+        this.dataType = dataType;
         this.listenerNotifier = listenerNotifier;
     }
 
@@ -65,7 +65,7 @@ import com.pushtechnology.diffusion.datatype.Bytes;
                 LOG.debug("Publishing cached value on recovery");
                 updater.update(
                     topicPath,
-                    toBytes.apply(cachedRequest.value),
+                    dataType.toBytes(cachedRequest.value),
                     topicPath,
                     new UpdateTopicCallback(cachedRequest.completionListener));
             }
@@ -78,17 +78,17 @@ import com.pushtechnology.diffusion.datatype.Bytes;
         if (state.isClosed()) {
             throw new IllegalStateException("Session closed");
         }
-        else if (state.isRecovering()) {
+
+        final Bytes bytes = dataType.toBytes(value);
+        if (state.isRecovering()) {
             LOG.debug("Caching value while in recovery");
-            final PublicationCompletionListener completionListener =
-                listenerNotifier.notifyPublicationRequest(toBytes.apply(value));
+            final PublicationCompletionListener completionListener = listenerNotifier.notifyPublicationRequest(bytes);
             cachedValue.set(new CachedRequest<>(value, completionListener));
             return;
         }
 
-        final PublicationCompletionListener completionListener =
-            listenerNotifier.notifyPublicationRequest(toBytes.apply(value));
-        updater.update(topicPath, toBytes.apply(value), topicPath, new UpdateTopicCallback(completionListener));
+        final PublicationCompletionListener completionListener = listenerNotifier.notifyPublicationRequest(bytes);
+        updater.update(topicPath, bytes, topicPath, new UpdateTopicCallback(completionListener));
     }
 
     private static final class CachedRequest<T> {

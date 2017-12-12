@@ -21,6 +21,7 @@ import static com.pushtechnology.diffusion.client.session.Session.State.RECOVERI
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -34,6 +35,7 @@ import org.mockito.Mock;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater.UpdateContextCallback;
 import com.pushtechnology.diffusion.client.session.Session;
+import com.pushtechnology.diffusion.datatype.DataType;
 import com.pushtechnology.diffusion.datatype.binary.Binary;
 
 /**
@@ -50,6 +52,8 @@ public final class UpdateContextImplTest {
     private Binary binary;
     @Mock
     private ListenerNotifier notifier;
+    @Mock
+    private DataType<Binary> dataType;
 
     private UpdateContextImpl<Binary> updateContext;
 
@@ -57,12 +61,14 @@ public final class UpdateContextImplTest {
     public void setUp() {
         initMocks(this);
 
-        updateContext = new UpdateContextImpl<>(value -> value, session, updater, "a/topic", notifier);
+        when(dataType.toBytes(binary)).thenReturn(binary);
+
+        updateContext = new UpdateContextImpl<>(session, updater, "a/topic", dataType, notifier);
     }
 
     @After
     public void postConditions() {
-        verifyNoMoreInteractions(session, updater, notifier);
+        verifyNoMoreInteractions(session, updater, notifier, dataType);
     }
 
     @Test
@@ -72,6 +78,7 @@ public final class UpdateContextImplTest {
         updateContext.publish(binary);
 
         verify(session).getState();
+        verify(dataType).toBytes(binary);
         verify(updater).update(eq("a/topic"), eq(binary), eq("a/topic"), isA(UpdateContextCallback.class));
         verify(notifier).notifyPublicationRequest(binary);
     }
@@ -87,6 +94,7 @@ public final class UpdateContextImplTest {
         updateContext.onSessionStateChanged(session, RECOVERING_RECONNECT, CONNECTED_ACTIVE);
 
         verify(session).getState();
+        verify(dataType, times(2)).toBytes(binary);
         verify(updater).update(eq("a/topic"), eq(binary), eq("a/topic"), isA(UpdateContextCallback.class));
     }
 
