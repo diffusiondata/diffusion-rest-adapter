@@ -108,7 +108,7 @@ public enum EndpointType {
 
     private final Collection<String> identifiers;
     private final TopicType topicType;
-    private final UnsafeTransformer<EndpointResponse, Bytes> parser;
+    private final UnsafeTransformer<EndpointResponse, ?> parser;
 
     /**
      * Constructor.
@@ -116,7 +116,7 @@ public enum EndpointType {
     EndpointType(
             Collection<String> identifiers,
             TopicType topicType,
-            UnsafeTransformer<EndpointResponse, Bytes> parser) {
+            UnsafeTransformer<EndpointResponse, ?> parser) {
 
         this.identifiers = identifiers;
         this.topicType = topicType;
@@ -140,7 +140,7 @@ public enum EndpointType {
     /**
      * @return parser for endpoints
      */
-    public UnsafeTransformer<EndpointResponse, Bytes> getParser() {
+    public UnsafeTransformer<EndpointResponse, ?> getParser() {
         return parser;
     }
 
