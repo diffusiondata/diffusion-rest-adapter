@@ -27,6 +27,7 @@ import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateCo
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
+import com.pushtechnology.diffusion.datatype.DataType;
 
 import net.jcip.annotations.GuardedBy;
 import net.jcip.annotations.ThreadSafe;
@@ -108,7 +109,8 @@ public final class PublishingClientImpl implements PublishingClient {
     public <T> UpdateContext<T> createUpdateContext(
             ServiceConfig serviceConfig,
             EndpointConfig endpointConfig,
-            TopicType topicType) {
+            TopicType topicType,
+            DataType<T> dataType) {
 
         final Updater updater = updaters.get(serviceConfig);
         if (updater == null) {
@@ -118,7 +120,7 @@ public final class PublishingClientImpl implements PublishingClient {
         final String topicPath = serviceConfig.getTopicPathRoot() + "/" + endpointConfig.getTopicPath();
         if (TopicType.JSON.equals(topicType)) {
             final UpdateContextImpl jsonUpdateContext = new UpdateContextImpl(
-                value -> value,
+                value -> dataType.toBytes((T) value),
                 session,
                 updater,
                 topicPath,
@@ -128,7 +130,7 @@ public final class PublishingClientImpl implements PublishingClient {
         }
         else if (TopicType.BINARY.equals(topicType)) {
             final UpdateContextImpl binaryUpdateContext = new UpdateContextImpl(
-                value -> value,
+                value -> dataType.toBytes((T) value),
                 session,
                 updater,
                 topicPath,
@@ -138,7 +140,7 @@ public final class PublishingClientImpl implements PublishingClient {
         }
         else if (TopicType.STRING.equals(topicType)) {
             final UpdateContextImpl stringUpdateContext = new UpdateContextImpl(
-                value -> value,
+                value -> dataType.toBytes((T) value),
                 session,
                 updater,
                 topicPath,

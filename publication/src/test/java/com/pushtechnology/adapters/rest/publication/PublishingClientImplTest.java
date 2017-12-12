@@ -19,6 +19,7 @@ import static com.pushtechnology.diffusion.client.session.Session.State.CONNECTE
 import static com.pushtechnology.diffusion.client.session.Session.State.RECOVERING_RECONNECT;
 import static com.pushtechnology.diffusion.client.topics.details.TopicType.BINARY;
 import static com.pushtechnology.diffusion.client.topics.details.TopicType.JSON;
+import static com.pushtechnology.diffusion.client.topics.details.TopicType.SINGLE_VALUE;
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -52,7 +53,7 @@ import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateCo
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater.UpdateContextCallback;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.session.SessionFactory;
-import com.pushtechnology.diffusion.client.topics.details.TopicType;
+import com.pushtechnology.diffusion.datatype.DataType;
 import com.pushtechnology.diffusion.datatype.binary.Binary;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
@@ -76,6 +77,10 @@ public final class PublishingClientImplTest {
     private Binary binary;
     @Mock
     private PublicationListener publicationListener;
+    @Mock
+    private DataType<Binary> binaryDataType;
+    @Mock
+    private DataType<JSON> jsonDataType;
     @Captor
     private ArgumentCaptor<UpdateSource> updateSourceCaptor;
 
@@ -92,6 +97,8 @@ public final class PublishingClientImplTest {
 
         when(session.feature(TopicUpdateControl.class)).thenReturn(updateControl);
         when(session.getState()).thenReturn(CONNECTED_ACTIVE);
+        when(binaryDataType.toBytes(binary)).thenReturn(binary);
+        when(jsonDataType.toBytes(json)).thenReturn(json);
 
         endpointConfig = EndpointConfig
             .builder()
@@ -197,7 +204,11 @@ public final class PublishingClientImplTest {
 
         updateSourceCaptor.getValue().onActive("a/topic", rawUpdater);
 
-        final UpdateContext<JSON> updateContext = client.createUpdateContext(serviceConfig, endpointConfig, JSON);
+        final UpdateContext<JSON> updateContext = client.createUpdateContext(
+            serviceConfig,
+            endpointConfig,
+            JSON,
+            jsonDataType);
 
         updateContext.publish(json);
 
@@ -214,7 +225,11 @@ public final class PublishingClientImplTest {
 
         updateSourceCaptor.getValue().onActive("a/topic", rawUpdater);
 
-        final UpdateContext<Binary> updateContext = client.createUpdateContext(serviceConfig, endpointConfig, BINARY);
+        final UpdateContext<Binary> updateContext = client.createUpdateContext(
+            serviceConfig,
+            endpointConfig,
+            BINARY,
+            binaryDataType);
 
         updateContext.publish(binary);
 
@@ -222,6 +237,7 @@ public final class PublishingClientImplTest {
         verify(rawUpdater).update(eq("a/topic"), eq(binary), eq("a/topic"), isA(UpdateContextCallback.class));
     }
 
+    @SuppressWarnings("deprecation")
     @Test(expected = IllegalArgumentException.class)
     public void singleValueContext() {
         final EventedUpdateSource source = client.addService(serviceConfig);
@@ -230,12 +246,12 @@ public final class PublishingClientImplTest {
 
         updateSourceCaptor.getValue().onActive("a/topic", rawUpdater);
 
-        client.createUpdateContext(serviceConfig, endpointConfig, TopicType.SINGLE_VALUE);
+        client.createUpdateContext(serviceConfig, endpointConfig, SINGLE_VALUE, null);
     }
 
     @Test(expected = IllegalStateException.class)
     public void noUpdater() {
-        client.createUpdateContext(serviceConfig, endpointConfig, JSON);
+        client.createUpdateContext(serviceConfig, endpointConfig, JSON, jsonDataType);
     }
 
     @SuppressWarnings("unchecked")
@@ -249,7 +265,11 @@ public final class PublishingClientImplTest {
 
         when(session.getState()).thenReturn(RECOVERING_RECONNECT);
 
-        final UpdateContext<JSON> updateContext = client.createUpdateContext(serviceConfig, endpointConfig, JSON);
+        final UpdateContext<JSON> updateContext = client.createUpdateContext(
+            serviceConfig,
+            endpointConfig,
+            JSON,
+            jsonDataType);
 
         updateContext.publish(json);
 

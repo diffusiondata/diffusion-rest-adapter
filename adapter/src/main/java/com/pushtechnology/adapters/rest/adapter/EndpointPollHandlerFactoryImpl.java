@@ -39,14 +39,24 @@ public final class EndpointPollHandlerFactoryImpl implements EndpointPollHandler
         this.publishingClient = publishingClient;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public FutureCallback<EndpointResponse> create(ServiceConfig serviceConfig, EndpointConfig endpointConfig) {
         final EndpointType<?> endpointType = EndpointType.from(endpointConfig.getProduces());
+        return create(serviceConfig, endpointConfig, endpointType);
+    }
+
+    private <T> FutureCallback<EndpointResponse> create(
+            ServiceConfig serviceConfig,
+            EndpointConfig endpointConfig,
+            EndpointType<T> endpointType) {
         return new TransformingHandler<>(
             endpointType.getParser(),
             new PublicationHandler<>(
                 endpointConfig,
-                publishingClient.createUpdateContext(serviceConfig, endpointConfig, endpointType.getTopicType())));
+                publishingClient.createUpdateContext(
+                    serviceConfig,
+                    endpointConfig,
+                    endpointType.getTopicType(),
+                    endpointType.getDataType())));
     }
 }

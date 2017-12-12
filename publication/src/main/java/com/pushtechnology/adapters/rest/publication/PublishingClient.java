@@ -20,6 +20,7 @@ import java.util.concurrent.CompletableFuture;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
+import com.pushtechnology.diffusion.datatype.DataType;
 
 /**
  * Publishing client to update Diffusion.
@@ -43,5 +44,6 @@ public interface PublishingClient {
     <T> UpdateContext<T> createUpdateContext(
         ServiceConfig serviceConfig,
         EndpointConfig endpointConfig,
-        TopicType topicType);
+        TopicType topicType,
+        DataType<T> dataType);
 }

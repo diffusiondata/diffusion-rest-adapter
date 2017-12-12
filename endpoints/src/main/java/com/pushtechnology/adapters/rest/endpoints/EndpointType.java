@@ -16,7 +16,6 @@
 package com.pushtechnology.adapters.rest.endpoints;
 
 import static com.pushtechnology.diffusion.transform.transformer.Transformers.byteArrayToBinary;
-import static com.pushtechnology.diffusion.transform.transformer.Transformers.toSuperClass;
 import static java.util.Arrays.asList;
 
 import java.util.Collection;
@@ -26,8 +25,9 @@ import java.util.Objects;
 import java.util.function.Predicate;
 
 import com.pushtechnology.adapters.rest.polling.EndpointResponse;
+import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
-import com.pushtechnology.diffusion.datatype.Bytes;
+import com.pushtechnology.diffusion.datatype.DataType;
 import com.pushtechnology.diffusion.datatype.binary.Binary;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 import com.pushtechnology.diffusion.transform.transformer.Transformers;
@@ -46,11 +46,11 @@ public final class EndpointType<T> {
     public static final EndpointType<JSON> JSON_ENDPOINT_TYPE = new EndpointType<>(
         asList("json", "application/json", "text/json"),
         TopicType.JSON,
+        Diffusion.dataTypes().json(),
         Transformers
             .builder(EndpointResponse.class)
             .unsafeTransform(EndpointResponseToStringTransformer.INSTANCE)
             .unsafeTransform(Transformers.parseJSON())
-            .<Bytes>transform(toSuperClass())
             .buildUnsafe(),
         contentType ->
             contentType != null && (contentType.startsWith("application/json") || contentType.startsWith("text/json")));
@@ -60,10 +60,10 @@ public final class EndpointType<T> {
     public static final EndpointType<String> PLAIN_TEXT_ENDPOINT_TYPE = new EndpointType<>(
         asList("string", "text/plain"),
         TopicType.STRING,
+        Diffusion.dataTypes().string(),
         Transformers
             .builder(EndpointResponse.class)
             .unsafeTransform(EndpointResponseToStringTransformer.INSTANCE)
-            .unsafeTransform(StringToBytesTransformer.STRING_TO_BYTES)
             .buildUnsafe(),
         contentType ->
             contentType != null && (contentType.startsWith("text/plain") || JSON_ENDPOINT_TYPE.canHandle(contentType)));
@@ -73,11 +73,11 @@ public final class EndpointType<T> {
     public static final EndpointType<Binary> BINARY_ENDPOINT_TYPE = new EndpointType<>(
         asList("binary", "application/octet-stream"),
         TopicType.BINARY,
+        Diffusion.dataTypes().binary(),
         Transformers
             .builder(EndpointResponse.class)
             .unsafeTransform(EndpointResponse::getResponse)
             .transform(byteArrayToBinary())
-            .<Bytes>transform(toSuperClass())
             .buildUnsafe(),
             contentType -> true);
 
@@ -98,7 +98,8 @@ public final class EndpointType<T> {
 
     private final Collection<String> identifiers;
     private final TopicType topicType;
-    private final UnsafeTransformer<EndpointResponse, ?> parser;
+    private final DataType<T> dataType;
+    private final UnsafeTransformer<EndpointResponse, T> parser;
     private final Predicate<String> canHandle;
 
     /**
@@ -107,11 +108,13 @@ public final class EndpointType<T> {
     private EndpointType(
         Collection<String> identifiers,
         TopicType topicType,
-        UnsafeTransformer<EndpointResponse, ?> parser,
+        DataType<T> dataType,
+        UnsafeTransformer<EndpointResponse, T> parser,
         Predicate<String> canHandle) {
 
         this.identifiers = identifiers;
         this.topicType = topicType;
+        this.dataType = dataType;
         this.parser = parser;
         this.canHandle = canHandle;
     }
@@ -124,6 +127,13 @@ public final class EndpointType<T> {
     }
 
     /**
+     * @return the data type for the endpoint type
+     */
+    public DataType<T> getDataType() {
+        return dataType;
+    }
+
+    /**
      * @return an identifier for the endpoint type
      */
     public String getIdentifier() {
@@ -133,7 +143,7 @@ public final class EndpointType<T> {
     /**
      * @return parser for endpoints
      */
-    public UnsafeTransformer<EndpointResponse, ?> getParser() {
+    public UnsafeTransformer<EndpointResponse, T> getParser() {
         return parser;
     }
 

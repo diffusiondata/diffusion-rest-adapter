@@ -15,6 +15,7 @@
 
 package com.pushtechnology.adapters.rest.adapter;
 
+import static com.pushtechnology.diffusion.client.Diffusion.dataTypes;
 import static com.pushtechnology.diffusion.client.topics.details.TopicType.BINARY;
 import static com.pushtechnology.diffusion.client.topics.details.TopicType.JSON;
 import static com.pushtechnology.diffusion.client.topics.details.TopicType.STRING;
@@ -102,7 +103,7 @@ public final class EndpointPollHandlerFactoryTest {
         final FutureCallback<EndpointResponse> callback = pollHandlerFactory.create(serviceConfig, jsonEndpoint);
 
         assertTrue(callback instanceof TransformingHandler);
-        verify(publishingClient).createUpdateContext(serviceConfig, jsonEndpoint, JSON);
+        verify(publishingClient).createUpdateContext(serviceConfig, jsonEndpoint, JSON, dataTypes().json());
     }
 
     @Test
@@ -110,7 +111,7 @@ public final class EndpointPollHandlerFactoryTest {
         final FutureCallback<EndpointResponse> callback = pollHandlerFactory.create(serviceConfig, binaryEndpoint);
 
         assertTrue(callback instanceof TransformingHandler);
-        verify(publishingClient).createUpdateContext(serviceConfig, binaryEndpoint, BINARY);
+        verify(publishingClient).createUpdateContext(serviceConfig, binaryEndpoint, BINARY, dataTypes().binary());
     }
 
     @Test
@@ -118,7 +119,7 @@ public final class EndpointPollHandlerFactoryTest {
         final FutureCallback<EndpointResponse> callback = pollHandlerFactory.create(serviceConfig, plainTextEndpoint);
 
         assertTrue(callback instanceof TransformingHandler);
-        verify(publishingClient).createUpdateContext(serviceConfig, plainTextEndpoint, STRING);
+        verify(publishingClient).createUpdateContext(serviceConfig, plainTextEndpoint, STRING, dataTypes().string());
     }
 
     @Test(expected = IllegalArgumentException.class)
