@@ -31,62 +31,62 @@ import com.pushtechnology.diffusion.client.topics.details.TopicType;
 public final class EndpointTypeTest {
     @Test
     public void json() {
-        assertEquals(TopicType.JSON, EndpointType.JSON.getTopicType());
-        assertTrue(EndpointType.JSON.canHandle("text/json"));
-        assertTrue(EndpointType.JSON.canHandle("application/json"));
-        assertFalse(EndpointType.JSON.canHandle("text/plain"));
-        assertFalse(EndpointType.JSON.canHandle("application/octet-stream"));
+        assertEquals(TopicType.JSON, EndpointType.JSON_ENDPOINT_TYPE.getTopicType());
+        assertTrue(EndpointType.JSON_ENDPOINT_TYPE.canHandle("text/json"));
+        assertTrue(EndpointType.JSON_ENDPOINT_TYPE.canHandle("application/json"));
+        assertFalse(EndpointType.JSON_ENDPOINT_TYPE.canHandle("text/plain"));
+        assertFalse(EndpointType.JSON_ENDPOINT_TYPE.canHandle("application/octet-stream"));
     }
 
     @Test
     public void binary() {
-        assertEquals(TopicType.BINARY, EndpointType.BINARY.getTopicType());
-        assertTrue(EndpointType.BINARY.canHandle("text/json"));
-        assertTrue(EndpointType.BINARY.canHandle("application/json"));
-        assertTrue(EndpointType.BINARY.canHandle("text/plain"));
-        assertTrue(EndpointType.BINARY.canHandle("text/plain; charset=utf-8"));
-        assertTrue(EndpointType.BINARY.canHandle("application/octet-stream"));
+        assertEquals(TopicType.BINARY, EndpointType.BINARY_ENDPOINT_TYPE.getTopicType());
+        assertTrue(EndpointType.BINARY_ENDPOINT_TYPE.canHandle("text/json"));
+        assertTrue(EndpointType.BINARY_ENDPOINT_TYPE.canHandle("application/json"));
+        assertTrue(EndpointType.BINARY_ENDPOINT_TYPE.canHandle("text/plain"));
+        assertTrue(EndpointType.BINARY_ENDPOINT_TYPE.canHandle("text/plain; charset=utf-8"));
+        assertTrue(EndpointType.BINARY_ENDPOINT_TYPE.canHandle("application/octet-stream"));
     }
 
     @Test
     public void plainText() {
-        assertEquals(TopicType.STRING, EndpointType.PLAIN_TEXT.getTopicType());
-        assertTrue(EndpointType.PLAIN_TEXT.canHandle("text/json"));
-        assertTrue(EndpointType.PLAIN_TEXT.canHandle("application/json"));
-        assertTrue(EndpointType.PLAIN_TEXT.canHandle("text/plain"));
-        assertTrue(EndpointType.PLAIN_TEXT.canHandle("text/plain; charset=utf-8"));
-        assertFalse(EndpointType.PLAIN_TEXT.canHandle("application/octet-stream"));
+        assertEquals(TopicType.STRING, EndpointType.PLAIN_TEXT_ENDPOINT_TYPE.getTopicType());
+        assertTrue(EndpointType.PLAIN_TEXT_ENDPOINT_TYPE.canHandle("text/json"));
+        assertTrue(EndpointType.PLAIN_TEXT_ENDPOINT_TYPE.canHandle("application/json"));
+        assertTrue(EndpointType.PLAIN_TEXT_ENDPOINT_TYPE.canHandle("text/plain"));
+        assertTrue(EndpointType.PLAIN_TEXT_ENDPOINT_TYPE.canHandle("text/plain; charset=utf-8"));
+        assertFalse(EndpointType.PLAIN_TEXT_ENDPOINT_TYPE.canHandle("application/octet-stream"));
     }
 
     @Test
     public void fromNames() {
-        assertEquals(EndpointType.JSON, EndpointType.from("json"));
-        assertEquals(EndpointType.PLAIN_TEXT, EndpointType.from("string"));
-        assertEquals(EndpointType.BINARY, EndpointType.from("binary"));
+        assertEquals(EndpointType.JSON_ENDPOINT_TYPE, EndpointType.from("json"));
+        assertEquals(EndpointType.PLAIN_TEXT_ENDPOINT_TYPE, EndpointType.from("string"));
+        assertEquals(EndpointType.BINARY_ENDPOINT_TYPE, EndpointType.from("binary"));
     }
 
     @Test
     public void fromMediaTypes() {
-        assertEquals(EndpointType.JSON, EndpointType.from("text/json"));
-        assertEquals(EndpointType.JSON, EndpointType.from("application/json"));
-        assertEquals(EndpointType.PLAIN_TEXT, EndpointType.from("text/plain"));
-        assertEquals(EndpointType.BINARY, EndpointType.from("application/octet-stream"));
+        assertEquals(EndpointType.JSON_ENDPOINT_TYPE, EndpointType.from("text/json"));
+        assertEquals(EndpointType.JSON_ENDPOINT_TYPE, EndpointType.from("application/json"));
+        assertEquals(EndpointType.PLAIN_TEXT_ENDPOINT_TYPE, EndpointType.from("text/plain"));
+        assertEquals(EndpointType.BINARY_ENDPOINT_TYPE, EndpointType.from("application/octet-stream"));
     }
 
     @Test
     public void fromUnknown() {
-        assertEquals(EndpointType.JSON, EndpointType.from("text/json"));
-        assertEquals(EndpointType.JSON, EndpointType.from("application/json"));
-        assertEquals(EndpointType.PLAIN_TEXT, EndpointType.from("text/plain"));
-        assertEquals(EndpointType.BINARY, EndpointType.from("application/octet-stream"));
+        assertEquals(EndpointType.JSON_ENDPOINT_TYPE, EndpointType.from("text/json"));
+        assertEquals(EndpointType.JSON_ENDPOINT_TYPE, EndpointType.from("application/json"));
+        assertEquals(EndpointType.PLAIN_TEXT_ENDPOINT_TYPE, EndpointType.from("text/plain"));
+        assertEquals(EndpointType.BINARY_ENDPOINT_TYPE, EndpointType.from("application/octet-stream"));
     }
 
     @Test
     public void infer() {
-        assertEquals(EndpointType.JSON, EndpointType.inferFromContentType("application/json"));
-        assertEquals(EndpointType.PLAIN_TEXT, EndpointType.inferFromContentType("text/plain"));
-        assertEquals(EndpointType.PLAIN_TEXT, EndpointType.inferFromContentType("text/plain; charset=utf-8"));
-        assertEquals(EndpointType.BINARY, EndpointType.inferFromContentType("application/octet-stream"));
-        assertEquals(EndpointType.BINARY, EndpointType.inferFromContentType("who/knows"));
+        assertEquals(EndpointType.JSON_ENDPOINT_TYPE, EndpointType.inferFromContentType("application/json"));
+        assertEquals(EndpointType.PLAIN_TEXT_ENDPOINT_TYPE, EndpointType.inferFromContentType("text/plain"));
+        assertEquals(EndpointType.PLAIN_TEXT_ENDPOINT_TYPE, EndpointType.inferFromContentType("text/plain; charset=utf-8"));
+        assertEquals(EndpointType.BINARY_ENDPOINT_TYPE, EndpointType.inferFromContentType("application/octet-stream"));
+        assertEquals(EndpointType.BINARY_ENDPOINT_TYPE, EndpointType.inferFromContentType("who/knows"));
     }
 }

@@ -47,7 +47,7 @@ public final class ValidateContentType implements FutureCallback<EndpointRespons
             return;
         }
 
-        final EndpointType type = EndpointType.from(endpointConfig.getProduces());
+        final EndpointType<?> type = EndpointType.from(endpointConfig.getProduces());
 
         if (type.canHandle(contentType)) {
             delegate.completed(result);

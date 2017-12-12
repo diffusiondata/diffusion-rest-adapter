@@ -30,7 +30,6 @@ import org.junit.Test;
 import org.mockito.Mock;
 
 import com.pushtechnology.adapters.rest.endpoints.EndpointType;
-import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.polling.EndpointResponse;
 
 /**
@@ -67,7 +66,7 @@ public final class InferTopicTypeTest {
         inferTopicType.completed(endpointResponse);
 
         verify(endpointResponse).getHeader("content-type");
-        verify(factory).apply(EndpointType.BINARY);
+        verify(factory).apply(EndpointType.BINARY_ENDPOINT_TYPE);
         verify(delegate).completed(endpointResponse);
     }
 
@@ -77,7 +76,7 @@ public final class InferTopicTypeTest {
         inferTopicType.completed(endpointResponse);
 
         verify(endpointResponse).getHeader("content-type");
-        verify(factory).apply(EndpointType.JSON);
+        verify(factory).apply(EndpointType.JSON_ENDPOINT_TYPE);
         verify(delegate).completed(endpointResponse);
     }
 
@@ -87,7 +86,7 @@ public final class InferTopicTypeTest {
         inferTopicType.completed(endpointResponse);
 
         verify(endpointResponse).getHeader("content-type");
-        verify(factory).apply(EndpointType.PLAIN_TEXT);
+        verify(factory).apply(EndpointType.PLAIN_TEXT_ENDPOINT_TYPE);
         verify(delegate).completed(endpointResponse);
     }
 
@@ -97,7 +96,7 @@ public final class InferTopicTypeTest {
         inferTopicType.completed(endpointResponse);
 
         verify(endpointResponse).getHeader("content-type");
-        verify(factory).apply(EndpointType.BINARY);
+        verify(factory).apply(EndpointType.BINARY_ENDPOINT_TYPE);
         verify(delegate).completed(endpointResponse);
     }
 
@@ -107,7 +106,7 @@ public final class InferTopicTypeTest {
         inferTopicType.completed(endpointResponse);
 
         verify(endpointResponse).getHeader("content-type");
-        verify(factory).apply(EndpointType.BINARY);
+        verify(factory).apply(EndpointType.BINARY_ENDPOINT_TYPE);
         verify(delegate).completed(endpointResponse);
     }
 
@@ -115,7 +114,7 @@ public final class InferTopicTypeTest {
     public void cancelled() {
         inferTopicType.cancelled();
 
-        verify(factory).apply(EndpointType.BINARY);
+        verify(factory).apply(EndpointType.BINARY_ENDPOINT_TYPE);
         verify(delegate).cancelled();
     }
 
@@ -124,7 +123,7 @@ public final class InferTopicTypeTest {
         final Exception exception = new Exception("Intentional for test");
         inferTopicType.failed(exception);
 
-        verify(factory).apply(EndpointType.BINARY);
+        verify(factory).apply(EndpointType.BINARY_ENDPOINT_TYPE);
         verify(delegate).failed(exception);
     }
 }

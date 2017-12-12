@@ -23,23 +23,27 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Predicate;
 
 import com.pushtechnology.adapters.rest.polling.EndpointResponse;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
 import com.pushtechnology.diffusion.datatype.Bytes;
+import com.pushtechnology.diffusion.datatype.binary.Binary;
+import com.pushtechnology.diffusion.datatype.json.JSON;
 import com.pushtechnology.diffusion.transform.transformer.Transformers;
 import com.pushtechnology.diffusion.transform.transformer.UnsafeTransformer;
 
 /**
  * The supported endpoint types that can be processed by the adapter.
  *
+ * @param <T> the type of value produced by the endpoint
  * @author Push Technology Limited
  */
-public enum EndpointType {
+public final class EndpointType<T> {
     /**
      * Endpoint type for JSON endpoints.
      */
-    JSON(
+    public static final EndpointType<JSON> JSON_ENDPOINT_TYPE = new EndpointType<>(
         asList("json", "application/json", "text/json"),
         TopicType.JSON,
         Transformers
@@ -47,35 +51,26 @@ public enum EndpointType {
             .unsafeTransform(EndpointResponseToStringTransformer.INSTANCE)
             .unsafeTransform(Transformers.parseJSON())
             .<Bytes>transform(toSuperClass())
-            .buildUnsafe()) {
-
-        @Override
-        public boolean canHandle(String contentType) {
-            return contentType != null &&
-                (contentType.startsWith("application/json") || contentType.startsWith("text/json"));
-        }
-    },
+            .buildUnsafe(),
+        contentType ->
+            contentType != null && (contentType.startsWith("application/json") || contentType.startsWith("text/json")));
     /**
      * Endpoint type for text endpoints.
      */
-    PLAIN_TEXT(
+    public static final EndpointType<String> PLAIN_TEXT_ENDPOINT_TYPE = new EndpointType<>(
         asList("string", "text/plain"),
         TopicType.STRING,
         Transformers
             .builder(EndpointResponse.class)
             .unsafeTransform(EndpointResponseToStringTransformer.INSTANCE)
             .unsafeTransform(StringToBytesTransformer.STRING_TO_BYTES)
-            .buildUnsafe()) {
-
-        @Override
-        public boolean canHandle(String contentType) {
-            return contentType != null && (contentType.startsWith("text/plain") || JSON.canHandle(contentType));
-        }
-    },
+            .buildUnsafe(),
+        contentType ->
+            contentType != null && (contentType.startsWith("text/plain") || JSON_ENDPOINT_TYPE.canHandle(contentType)));
     /**
      * Endpoint type for Binary endpoints.
      */
-    BINARY(
+    public static final EndpointType<Binary> BINARY_ENDPOINT_TYPE = new EndpointType<>(
         asList("binary", "application/octet-stream"),
         TopicType.BINARY,
         Transformers
@@ -83,18 +78,13 @@ public enum EndpointType {
             .unsafeTransform(EndpointResponse::getResponse)
             .transform(byteArrayToBinary())
             .<Bytes>transform(toSuperClass())
-            .buildUnsafe()) {
-
-        @Override
-        public boolean canHandle(String contentType) {
-            return true;
-        }
-    };
+            .buildUnsafe(),
+            contentType -> true);
 
     private static final Map<String, EndpointType> IDENTIFIER_LOOKUP = new HashMap<>();
 
     static {
-        for (EndpointType type : EndpointType.values()) {
+        for (EndpointType<?> type : asList(JSON_ENDPOINT_TYPE, PLAIN_TEXT_ENDPOINT_TYPE, BINARY_ENDPOINT_TYPE)) {
             type.identifiers
                 .stream()
                 .map(identifier -> IDENTIFIER_LOOKUP.putIfAbsent(identifier, type))
@@ -109,18 +99,21 @@ public enum EndpointType {
     private final Collection<String> identifiers;
     private final TopicType topicType;
     private final UnsafeTransformer<EndpointResponse, ?> parser;
+    private final Predicate<String> canHandle;
 
     /**
      * Constructor.
      */
-    EndpointType(
-            Collection<String> identifiers,
-            TopicType topicType,
-            UnsafeTransformer<EndpointResponse, ?> parser) {
+    private EndpointType(
+        Collection<String> identifiers,
+        TopicType topicType,
+        UnsafeTransformer<EndpointResponse, ?> parser,
+        Predicate<String> canHandle) {
 
         this.identifiers = identifiers;
         this.topicType = topicType;
         this.parser = parser;
+        this.canHandle = canHandle;
     }
 
     /**
@@ -147,13 +140,15 @@ public enum EndpointType {
     /**
      * @return if the content type if valid for the endpoint type
      */
-    public abstract boolean canHandle(String contentType);
+    public boolean canHandle(String contentType) {
+        return canHandle.test(contentType);
+    }
 
     /**
      * @return the endpoint type resolved from the name or a supported media type
      * @throws IllegalArgumentException if the endpoint type is unknown
      */
-    public static EndpointType from(String identifier) {
+    public static EndpointType<?> from(String identifier) {
         final EndpointType endpointType = IDENTIFIER_LOOKUP.get(identifier);
         if (endpointType == null) {
             throw new IllegalArgumentException("Unknown endpoint type " + identifier);
@@ -164,15 +159,15 @@ public enum EndpointType {
     /**
      * @return best guess for the topic type for the provided content type
      */
-    public static EndpointType inferFromContentType(String contentType) {
-        if (JSON.canHandle(contentType)) {
-            return JSON;
+    public static EndpointType<?> inferFromContentType(String contentType) {
+        if (JSON_ENDPOINT_TYPE.canHandle(contentType)) {
+            return JSON_ENDPOINT_TYPE;
         }
-        else if (PLAIN_TEXT.canHandle(contentType)) {
-            return PLAIN_TEXT;
+        else if (PLAIN_TEXT_ENDPOINT_TYPE.canHandle(contentType)) {
+            return PLAIN_TEXT_ENDPOINT_TYPE;
         }
         else {
-            return BINARY;
+            return BINARY_ENDPOINT_TYPE;
         }
     }
 }

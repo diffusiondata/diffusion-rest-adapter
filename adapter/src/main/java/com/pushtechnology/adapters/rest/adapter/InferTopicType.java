@@ -47,11 +47,11 @@ public final class InferTopicType implements FutureCallback<EndpointResponse> {
 
     @Override
     public void failed(Exception ex) {
-        factory.apply(EndpointType.BINARY).failed(ex);
+        factory.apply(EndpointType.BINARY_ENDPOINT_TYPE).failed(ex);
     }
 
     @Override
     public void cancelled() {
-        factory.apply(EndpointType.BINARY).cancelled();
+        factory.apply(EndpointType.BINARY_ENDPOINT_TYPE).cancelled();
     }
 }
