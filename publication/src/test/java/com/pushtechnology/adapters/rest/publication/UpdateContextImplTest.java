@@ -157,7 +157,7 @@ public final class UpdateContextImplTest {
         updateContext.onSessionStateChanged(session, RECOVERING_RECONNECT, CONNECTED_ACTIVE);
 
         verify(session).getState();
-        verify(dataType, times(2)).toBytes(binary);
+        verify(dataType).toBytes(binary);
         verify(updater).update(eq("a/topic"), eq(binary), eq("a/topic"), isA(UpdateContextCallback.class));
     }
 

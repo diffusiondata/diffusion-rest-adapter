@@ -80,7 +80,7 @@ import com.pushtechnology.diffusion.datatype.DeltaType;
                 lastPublishedValue = cachedRequest.value;
                 updater.update(
                     topicPath,
-                    dataType.toBytes(cachedRequest.value),
+                    cachedRequest.bytes,
                     topicPath,
                     new UpdateTopicCallback(cachedRequest.completionListener));
             }
@@ -93,21 +93,29 @@ import com.pushtechnology.diffusion.datatype.DeltaType;
         if (state.isClosed()) {
             throw new IllegalStateException("Session closed");
         }
-
-        if (state.isRecovering()) {
+        else if (state.isRecovering()) {
             LOG.debug("Caching value while in recovery");
             final Bytes bytes = dataType.toBytes(value);
             final PublicationCompletionListener completionListener = listenerNotifier.notifyPublicationRequest(bytes);
-            cachedValue.set(new CachedRequest<>(value, completionListener));
-            return;
+            cachedValue.set(new CachedRequest<>(value, bytes, completionListener));
         }
+        else {
+            applyUpdate(value);
+        }
+    }
 
+    private void applyUpdate(T value) {
         if (lastPublishedValue != null) {
-            final BinaryDelta delta = deltaType.diff(lastPublishedValue, value);
-            if (!delta.hasChanges()) {
-                return;
-            }
+            applyDelta(value);
+        }
+        else {
+            applyValue(value);
+        }
+    }
 
+    private void applyDelta(T value) {
+        final BinaryDelta delta = deltaType.diff(lastPublishedValue, value);
+        if (delta.hasChanges()) {
             final Bytes bytes = deltaToBytes.apply(delta);
             final PublicationCompletionListener completionListener = listenerNotifier.notifyPublicationRequest(bytes);
             lastPublishedValue = value;
@@ -117,24 +125,31 @@ import com.pushtechnology.diffusion.datatype.DeltaType;
                 topicPath,
                 new UpdateTopicCallback(completionListener));
         }
-        else {
-            final Bytes bytes = dataType.toBytes(value);
-            final PublicationCompletionListener completionListener = listenerNotifier.notifyPublicationRequest(bytes);
-            lastPublishedValue = value;
-            updater.update(
-                topicPath,
-                bytes,
-                topicPath,
-                new UpdateTopicCallback(completionListener));
-        }
+    }
+
+    private void applyValue(T value) {
+        final Bytes bytes = dataType.toBytes(value);
+        final PublicationCompletionListener completionListener = listenerNotifier.notifyPublicationRequest(bytes);
+        lastPublishedValue = value;
+        updater.update(
+            topicPath,
+            bytes,
+            topicPath,
+            new UpdateTopicCallback(completionListener));
     }
 
     private static final class CachedRequest<T> {
         private final T value;
+        private final Bytes bytes;
         private final PublicationCompletionListener completionListener;
 
-        private CachedRequest(T value, PublicationCompletionListener completionListener) {
+        private CachedRequest(
+            T value,
+            Bytes bytes,
+            PublicationCompletionListener completionListener) {
+
             this.value = value;
+            this.bytes = bytes;
             this.completionListener = completionListener;
         }
     }

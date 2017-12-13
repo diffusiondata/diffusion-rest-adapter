@@ -314,7 +314,7 @@ public final class PublishingClientImplTest {
 
         sessionListener.onSessionStateChanged(session, RECOVERING_RECONNECT, CONNECTED_ACTIVE);
 
-        verify(jsonDataType, times(2)).toBytes(json);
+        verify(jsonDataType).toBytes(json);
         verify(jsonDataType).deltaType(BinaryDelta.class);
         verify(rawUpdater).update(eq("a/topic"), eq(json), eq("a/topic"), isA(UpdateContextCallback.class));
     }
