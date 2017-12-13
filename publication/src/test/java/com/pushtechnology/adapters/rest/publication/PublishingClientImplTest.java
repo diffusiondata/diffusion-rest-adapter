@@ -27,6 +27,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.isA;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -47,13 +48,16 @@ import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.session.management.EventedSessionListener;
 import com.pushtechnology.diffusion.client.callbacks.ErrorReason;
 import com.pushtechnology.diffusion.client.callbacks.Registration;
+import com.pushtechnology.diffusion.client.content.update.ContentUpdateFactory;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.UpdateSource;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater.UpdateContextCallback;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.session.SessionFactory;
+import com.pushtechnology.diffusion.datatype.BinaryDelta;
 import com.pushtechnology.diffusion.datatype.DataType;
+import com.pushtechnology.diffusion.datatype.DeltaType;
 import com.pushtechnology.diffusion.datatype.binary.Binary;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
@@ -62,11 +66,14 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
  *
  * @author Push Technology Limited
  */
+@SuppressWarnings("deprecation")
 public final class PublishingClientImplTest {
     @Mock
     private Session session;
     @Mock
     private TopicUpdateControl updateControl;
+    @Mock
+    private ContentUpdateFactory updateFactory;
     @Mock
     private Registration registration;
     @Mock
@@ -81,6 +88,10 @@ public final class PublishingClientImplTest {
     private DataType<Binary> binaryDataType;
     @Mock
     private DataType<JSON> jsonDataType;
+    @Mock
+    private DeltaType<Binary, BinaryDelta> binaryDeltaType;
+    @Mock
+    private DeltaType<JSON, BinaryDelta> jsonDeltaType;
     @Captor
     private ArgumentCaptor<UpdateSource> updateSourceCaptor;
 
@@ -99,6 +110,9 @@ public final class PublishingClientImplTest {
         when(session.getState()).thenReturn(CONNECTED_ACTIVE);
         when(binaryDataType.toBytes(binary)).thenReturn(binary);
         when(jsonDataType.toBytes(json)).thenReturn(json);
+        when(binaryDataType.deltaType(BinaryDelta.class)).thenReturn(binaryDeltaType);
+        when(jsonDataType.deltaType(BinaryDelta.class)).thenReturn(jsonDeltaType);
+        when(updateControl.updateFactory(ContentUpdateFactory.class)).thenReturn(updateFactory);
 
         endpointConfig = EndpointConfig
             .builder()
@@ -132,7 +146,16 @@ public final class PublishingClientImplTest {
 
     @After
     public void postConditions() {
-        verifyNoMoreInteractions(session, updateControl, rawUpdater, registration);
+        verifyNoMoreInteractions(
+            session,
+            updateControl,
+            rawUpdater,
+            registration,
+            updateFactory,
+            binaryDataType,
+            jsonDataType,
+            binaryDeltaType,
+            jsonDeltaType);
     }
 
     @Test
@@ -210,8 +233,13 @@ public final class PublishingClientImplTest {
             JSON,
             jsonDataType);
 
+        verify(jsonDataType).deltaType(BinaryDelta.class);
+        verify(session, times(2)).feature(TopicUpdateControl.class);
+        verify(updateControl).updateFactory(ContentUpdateFactory.class);
+
         updateContext.publish(json);
 
+        verify(jsonDataType).toBytes(json);
         verify(session).getState();
         verify(rawUpdater).update(eq("a/topic"), eq(json), eq("a/topic"), isA(UpdateContextCallback.class));
     }
@@ -231,13 +259,17 @@ public final class PublishingClientImplTest {
             BINARY,
             binaryDataType);
 
+        verify(binaryDataType).deltaType(BinaryDelta.class);
+        verify(session, times(2)).feature(TopicUpdateControl.class);
+        verify(updateControl).updateFactory(ContentUpdateFactory.class);
+
         updateContext.publish(binary);
 
+        verify(binaryDataType).toBytes(binary);
         verify(session).getState();
         verify(rawUpdater).update(eq("a/topic"), eq(binary), eq("a/topic"), isA(UpdateContextCallback.class));
     }
 
-    @SuppressWarnings("deprecation")
     @Test(expected = IllegalArgumentException.class)
     public void singleValueContext() {
         final EventedUpdateSource source = client.addService(serviceConfig);
@@ -271,13 +303,19 @@ public final class PublishingClientImplTest {
             JSON,
             jsonDataType);
 
+        verify(session, times(2)).feature(TopicUpdateControl.class);
+        verify(updateControl).updateFactory(ContentUpdateFactory.class);
+
         updateContext.publish(json);
 
+        verify(jsonDataType).toBytes(json);
         verify(session).getState();
         verify(rawUpdater, never()).update(eq("a/topic"), eq(json), eq("a/topic"), isA(UpdateContextCallback.class));
 
         sessionListener.onSessionStateChanged(session, RECOVERING_RECONNECT, CONNECTED_ACTIVE);
 
+        verify(jsonDataType, times(2)).toBytes(json);
+        verify(jsonDataType).deltaType(BinaryDelta.class);
         verify(rawUpdater).update(eq("a/topic"), eq(json), eq("a/topic"), isA(UpdateContextCallback.class));
     }
 }

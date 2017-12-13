@@ -124,6 +124,7 @@ public final class PublishingClientImpl implements PublishingClient {
                 updater,
                 topicPath,
                 dataType,
+                new BytesToDeltaUpdate(session),
                 new ListenerNotifierImpl(publicationListener, serviceConfig, endpointConfig));
             sessionListener.onSessionStateChange(jsonUpdateContext);
             return jsonUpdateContext;
@@ -134,6 +135,7 @@ public final class PublishingClientImpl implements PublishingClient {
                 updater,
                 topicPath,
                 dataType,
+                new BytesToDeltaUpdate(session),
                 new ListenerNotifierImpl(publicationListener, serviceConfig, endpointConfig));
             sessionListener.onSessionStateChange(binaryUpdateContext);
             return binaryUpdateContext;
@@ -144,6 +146,7 @@ public final class PublishingClientImpl implements PublishingClient {
                 updater,
                 topicPath,
                 dataType,
+                new BytesToDeltaUpdate(session),
                 new ListenerNotifierImpl(publicationListener, serviceConfig, endpointConfig));
             sessionListener.onSessionStateChange(stringUpdateContext);
             return stringUpdateContext;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Push Technology Ltd.
+ * Copyright (C) 2017 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,15 +27,21 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
+import java.util.function.Function;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 
+import com.pushtechnology.diffusion.client.content.update.Update;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater.UpdateContextCallback;
 import com.pushtechnology.diffusion.client.session.Session;
+import com.pushtechnology.diffusion.datatype.BinaryDelta;
+import com.pushtechnology.diffusion.datatype.Bytes;
 import com.pushtechnology.diffusion.datatype.DataType;
+import com.pushtechnology.diffusion.datatype.DeltaType;
 import com.pushtechnology.diffusion.datatype.binary.Binary;
 
 /**
@@ -43,6 +49,7 @@ import com.pushtechnology.diffusion.datatype.binary.Binary;
  *
  * @author Push Technology Limited
  */
+@SuppressWarnings("deprecation")
 public final class UpdateContextImplTest {
     @Mock
     private Session session;
@@ -54,6 +61,16 @@ public final class UpdateContextImplTest {
     private ListenerNotifier notifier;
     @Mock
     private DataType<Binary> dataType;
+    @Mock
+    private DeltaType<Binary, BinaryDelta> deltaType;
+    @Mock
+    private Function<Bytes, Update> bytesToDeltaUpdate;
+    @Mock
+    private BinaryDelta delta;
+    @Mock
+    private Bytes bytes;
+    @Mock
+    private Update update;
 
     private UpdateContextImpl<Binary> updateContext;
 
@@ -62,13 +79,19 @@ public final class UpdateContextImplTest {
         initMocks(this);
 
         when(dataType.toBytes(binary)).thenReturn(binary);
+        when(dataType.deltaType(BinaryDelta.class)).thenReturn(deltaType);
+        when(deltaType.diff(binary, binary)).thenReturn(delta);
+        when(deltaType.toBytes(delta)).thenReturn(bytes);
+        when(bytesToDeltaUpdate.apply(bytes)).thenReturn(update);
 
-        updateContext = new UpdateContextImpl<>(session, updater, "a/topic", dataType, notifier);
+        updateContext = new UpdateContextImpl<>(session, updater, "a/topic", dataType, bytesToDeltaUpdate, notifier);
+
+        verify(dataType).deltaType(BinaryDelta.class);
     }
 
     @After
     public void postConditions() {
-        verifyNoMoreInteractions(session, updater, notifier, dataType);
+        verifyNoMoreInteractions(session, updater, notifier, dataType, deltaType, bytesToDeltaUpdate);
     }
 
     @Test
@@ -81,6 +104,27 @@ public final class UpdateContextImplTest {
         verify(dataType).toBytes(binary);
         verify(updater).update(eq("a/topic"), eq(binary), eq("a/topic"), isA(UpdateContextCallback.class));
         verify(notifier).notifyPublicationRequest(binary);
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testPublishDeltas() {
+        when(session.getState()).thenReturn(CONNECTED_ACTIVE);
+        updateContext.publish(binary);
+
+        verify(session).getState();
+        verify(dataType).toBytes(binary);
+        verify(updater).update(eq("a/topic"), eq(binary), eq("a/topic"), isA(UpdateContextCallback.class));
+        verify(notifier).notifyPublicationRequest(binary);
+
+        updateContext.publish(binary);
+
+        verify(session, times(2)).getState();
+        verify(deltaType).diff(binary, binary);
+        verify(deltaType).toBytes(delta);
+        verify(bytesToDeltaUpdate).apply(bytes);
+        verify(updater).update(eq("a/topic"), eq(update), eq("a/topic"), isA(UpdateContextCallback.class));
+        verify(notifier).notifyPublicationRequest(bytes);
     }
 
     @Test
