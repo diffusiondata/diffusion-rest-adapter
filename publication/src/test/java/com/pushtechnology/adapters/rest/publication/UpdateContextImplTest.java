@@ -109,6 +109,7 @@ public final class UpdateContextImplTest {
     @Test
     @SuppressWarnings("unchecked")
     public void testPublishDeltas() {
+        when(delta.hasChanges()).thenReturn(true);
         when(session.getState()).thenReturn(CONNECTED_ACTIVE);
         updateContext.publish(binary);
 
@@ -125,6 +126,24 @@ public final class UpdateContextImplTest {
         verify(bytesToDeltaUpdate).apply(bytes);
         verify(updater).update(eq("a/topic"), eq(update), eq("a/topic"), isA(UpdateContextCallback.class));
         verify(notifier).notifyPublicationRequest(bytes);
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testNoPublishWithoutChange() {
+        when(delta.hasChanges()).thenReturn(false);
+        when(session.getState()).thenReturn(CONNECTED_ACTIVE);
+        updateContext.publish(binary);
+
+        verify(session).getState();
+        verify(dataType).toBytes(binary);
+        verify(updater).update(eq("a/topic"), eq(binary), eq("a/topic"), isA(UpdateContextCallback.class));
+        verify(notifier).notifyPublicationRequest(binary);
+
+        updateContext.publish(binary);
+
+        verify(session, times(2)).getState();
+        verify(deltaType).diff(binary, binary);
     }
 
     @Test

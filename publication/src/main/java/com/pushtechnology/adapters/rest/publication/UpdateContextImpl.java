@@ -104,6 +104,10 @@ import com.pushtechnology.diffusion.datatype.DeltaType;
 
         if (lastPublishedValue != null) {
             final BinaryDelta delta = deltaType.diff(lastPublishedValue, value);
+            if (!delta.hasChanges()) {
+                return;
+            }
+
             final Bytes bytes = deltaToBytes.apply(delta);
             final PublicationCompletionListener completionListener = listenerNotifier.notifyPublicationRequest(bytes);
             lastPublishedValue = value;
