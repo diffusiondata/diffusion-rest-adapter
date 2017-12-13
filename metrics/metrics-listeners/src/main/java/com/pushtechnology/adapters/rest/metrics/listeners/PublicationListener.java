@@ -31,13 +31,13 @@ public interface PublicationListener {
      *
      * @param serviceConfig the service
      * @param endpointConfig the endpoint
-     * @param value the value to publish
+     * @param update the update to apply
      * @return a listener for the completion of the publication request
      */
     PublicationCompletionListener onPublicationRequest(
         ServiceConfig serviceConfig,
         EndpointConfig endpointConfig,
-        Bytes value);
+        Bytes update);
 
     /**
      * Listener for the completion of a publication request.
@@ -72,6 +72,6 @@ public interface PublicationListener {
     /**
      * Implementation of {@link PublicationListener} that ignores notifications.
      */
-    PublicationListener NULL_LISTENER = (PublicationListener) (serviceConfig, endpointConfig, value) ->
+    PublicationListener NULL_LISTENER = (PublicationListener) (serviceConfig, endpointConfig, update) ->
         PublicationCompletionListener.NULL_LISTENER;
 }

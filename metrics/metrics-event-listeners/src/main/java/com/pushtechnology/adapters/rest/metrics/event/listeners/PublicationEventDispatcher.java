@@ -43,10 +43,10 @@ public final class PublicationEventDispatcher implements PublicationListener {
     public PublicationCompletionListener onPublicationRequest(
             ServiceConfig serviceConfig,
             EndpointConfig endpointConfig,
-            Bytes value) {
+            Bytes update) {
         final PublicationRequestEvent publicationRequestEvent = PublicationRequestEvent.Factory.create(
             serviceConfig.getTopicPathRoot() + "/" + endpointConfig.getTopicPath(),
-            value.length());
+            update.length());
 
         publicationEventListener.onPublicationRequest(publicationRequestEvent);
 

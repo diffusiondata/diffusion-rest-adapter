@@ -138,13 +138,13 @@ public final class MetricsDispatcher implements
     public PublicationCompletionListener onPublicationRequest(
         ServiceConfig serviceConfig,
         EndpointConfig endpointConfig,
-        Bytes value) {
+        Bytes update) {
 
         final Collection<PublicationCompletionListener> listeners = new ArrayList<>();
         synchronized (this) {
             publicationListeners.forEach(publicationListener -> {
                 final PublicationCompletionListener completionListener =
-                    publicationListener.onPublicationRequest(serviceConfig, endpointConfig, value);
+                    publicationListener.onPublicationRequest(serviceConfig, endpointConfig, update);
                 listeners.add(completionListener);
             });
         }
