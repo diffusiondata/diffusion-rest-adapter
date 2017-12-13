@@ -125,8 +125,12 @@ public final class TopicBasedMetricsReporter implements AutoCloseable {
             topicControl.addTopic(rootTopic + "/publication/requests", INT64),
             topicControl.addTopic(rootTopic + "/publication/successes", INT64),
             topicControl.addTopic(rootTopic + "/publication/failures", INT64),
+            topicControl.addTopic(rootTopic + "/publication/requestBytes", INT64),
+            topicControl.addTopic(rootTopic + "/publication/successBytes", INT64),
+            topicControl.addTopic(rootTopic + "/publication/failureBytes", INT64),
             topicControl.addTopic(rootTopic + "/publication/failureThroughput", DOUBLE),
             topicControl.addTopic(rootTopic + "/publication/requestThroughput", DOUBLE),
+            topicControl.addTopic(rootTopic + "/publication/meanPublicationBytes", DOUBLE),
             topicControl.addTopic(rootTopic + "/publication/maximumSuccessfulRequestTime", INT64),
             topicControl.addTopic(rootTopic + "/publication/minimumSuccessfulRequestTime", INT64),
             topicControl.addTopic(rootTopic + "/publication/successfulRequestTimeNinetiethPercentile", INT64),
@@ -271,6 +275,19 @@ public final class TopicBasedMetricsReporter implements AutoCloseable {
             (long) publicationEventCounter.getFailures(),
             updateCallback);
 
+        longUpdater.update(
+            rootTopic + "/publication/requestBytes",
+            (long) publicationEventCounter.getRequestBytes(),
+            updateCallback);
+        longUpdater.update(
+            rootTopic + "/publication/successBytes",
+            (long) publicationEventCounter.getSuccessBytes(),
+            updateCallback);
+        longUpdater.update(
+            rootTopic + "/publication/failureBytes",
+            (long) publicationEventCounter.getFailedBytes(),
+            updateCallback);
+
         final OptionalLong requestTime = publicationQuerier.get90thPercentileSuccessfulRequestTime();
         final BigDecimal failureThroughput = publicationQuerier.getFailureThroughput();
         final BigDecimal requestThroughput = publicationQuerier.getRequestThroughput();
@@ -282,6 +299,11 @@ public final class TopicBasedMetricsReporter implements AutoCloseable {
         doubleUpdater.update(
             rootTopic + "/publication/requestThroughput",
             requestThroughput.doubleValue(),
+            updateCallback);
+
+        doubleUpdater.update(
+            rootTopic + "/publication/requestThroughput",
+            publicationQuerier.getMeanPublicationSize().doubleValue(),
             updateCallback);
 
         final OptionalLong maximumSuccessfulRequestTime = publicationQuerier.getMaximumSuccessfulRequestTime();
@@ -304,6 +326,11 @@ public final class TopicBasedMetricsReporter implements AutoCloseable {
                 minimumSuccessfulRequestTime.getAsLong(),
                 updateCallback);
         }
+
+        doubleUpdater.update(
+            rootTopic + "/publication/meanPublicationBytes",
+            publicationQuerier.getMeanPublicationSize().doubleValue(),
+            updateCallback);
     }
 
     private void reportTopicCreationEvents(TopicUpdateControl updateControl) {

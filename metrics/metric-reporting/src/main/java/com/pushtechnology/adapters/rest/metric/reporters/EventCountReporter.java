@@ -71,7 +71,7 @@ public final class EventCountReporter implements AutoCloseable {
 
         loggingTask = executor.scheduleAtFixedRate(
             () -> LOG.info(
-                "Polls {}/{}/{} Topic creation {}/{}/{} Updates {}/{}/{}",
+                "Polls {}/{}/{} Topic creation {}/{}/{} Updates {}/{}/{} {}/{}/{}",
                 pollEventCounter.getRequests(),
                 pollEventCounter.getSuccesses(),
                 pollEventCounter.getFailures(),
@@ -80,7 +80,10 @@ public final class EventCountReporter implements AutoCloseable {
                 topicCreationEventCounter.getFailures(),
                 publicationEventCounter.getRequests(),
                 publicationEventCounter.getSuccesses(),
-                publicationEventCounter.getFailures()),
+                publicationEventCounter.getFailures(),
+                publicationEventCounter.getRequestBytes(),
+                publicationEventCounter.getSuccessBytes(),
+                publicationEventCounter.getFailedBytes()),
             1,
             1,
             MINUTES);

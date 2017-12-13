@@ -145,6 +145,9 @@ public final class EventSummaryReporter implements AutoCloseable {
         LOG.info(
             "Publication failure throughput {} /s",
             FORMAT.format(pollFailureThroughput));
+        LOG.info(
+            "Mean publication size {}",
+            FORMAT.format(publicationEventQuerier.getMeanPublicationSize()));
     }
 
     private void reportTopicCreationEvents() {
