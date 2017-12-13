@@ -36,9 +36,9 @@ import com.pushtechnology.adapters.rest.metrics.event.listeners.BoundedTopicCrea
  */
 public final class TopicCreationEventQuerierTest {
 
-    private final TopicCreationRequestEvent requestEvent0 = TopicCreationRequestEvent.Factory.create("topic/path", BINARY, 10, 100);
-    private final TopicCreationRequestEvent requestEvent1 = TopicCreationRequestEvent.Factory.create("topic/path", BINARY, 10, 150);
-    private final TopicCreationRequestEvent requestEvent2 = TopicCreationRequestEvent.Factory.create("topic/path", BINARY, 10, 200);
+    private final TopicCreationRequestEvent requestEvent0 = TopicCreationRequestEvent.Factory.create("topic/path", BINARY, 100);
+    private final TopicCreationRequestEvent requestEvent1 = TopicCreationRequestEvent.Factory.create("topic/path", BINARY, 150);
+    private final TopicCreationRequestEvent requestEvent2 = TopicCreationRequestEvent.Factory.create("topic/path", BINARY, 200);
     private final TopicCreationSuccessEvent successEvent0 = TopicCreationSuccessEvent.Factory.create(requestEvent0, 200);
     private final TopicCreationSuccessEvent successEvent1 = TopicCreationSuccessEvent.Factory.create(requestEvent1, 250);
     private final TopicCreationSuccessEvent successEvent = TopicCreationSuccessEvent.Factory.create(requestEvent2, 300);

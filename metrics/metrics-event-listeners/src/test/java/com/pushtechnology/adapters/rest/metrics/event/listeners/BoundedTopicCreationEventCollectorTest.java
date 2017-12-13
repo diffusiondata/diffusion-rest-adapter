@@ -37,7 +37,7 @@ public final class BoundedTopicCreationEventCollectorTest {
 
     private static final int EVENT_LIMIT = 100;
 
-    private final TopicCreationRequestEvent publicationRequestEvent = TopicCreationRequestEvent.Factory.create("topic/path", BINARY, 0, 100);
+    private final TopicCreationRequestEvent publicationRequestEvent = TopicCreationRequestEvent.Factory.create("topic/path", BINARY, 100);
     private final TopicCreationSuccessEvent publicationSuccessEvent = TopicCreationSuccessEvent.Factory.create(publicationRequestEvent,100);
     private final TopicCreationFailedEvent publicationFailedEvent = TopicCreationFailedEvent.Factory.create(publicationRequestEvent, EXISTS, 100);
 

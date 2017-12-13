@@ -78,10 +78,6 @@ interface TopicCreationRequestEvent : RequestEvent {
      * @return the topic type
      */
     val topicType: TopicType
-    /**
-     * @return the length of any initial value
-     */
-    val initialValueLength: Int
 
     /**
      * Factory for {@link TopicCreationRequestEvent}.
@@ -90,15 +86,15 @@ interface TopicCreationRequestEvent : RequestEvent {
         /**
          * @return a new instance of {@link TopicCreationRequestEvent}
          */
-        fun create(path: String, topicType: TopicType, initialValueLength: Int): TopicCreationRequestEvent {
-            return TopicCreationRequestEventImpl(path, topicType, initialValueLength, System.currentTimeMillis())
+        fun create(path: String, topicType: TopicType): TopicCreationRequestEvent {
+            return TopicCreationRequestEventImpl(path, topicType, System.currentTimeMillis())
         }
 
         /**
          * @return a new instance of {@link TopicCreationRequestEvent}
          */
-        fun create(path: String, topicType: TopicType, initialValueLength: Int, timestamp: Long): TopicCreationRequestEvent {
-            return TopicCreationRequestEventImpl(path, topicType, initialValueLength, timestamp)
+        fun create(path: String, topicType: TopicType, timestamp: Long): TopicCreationRequestEvent {
+            return TopicCreationRequestEventImpl(path, topicType, timestamp)
         }
     }
 }
@@ -111,7 +107,6 @@ interface TopicCreationRequestEvent : RequestEvent {
 private data class TopicCreationRequestEventImpl(
     override val path: String,
     override val topicType: TopicType,
-    override val initialValueLength: Int,
     override val requestTimestamp: Long): TopicCreationRequestEvent
 
 /**
@@ -361,9 +356,9 @@ interface PublicationRequestEvent : RequestEvent {
      */
     val path: String
     /**
-     * @return the length of the value
+     * @return the length of the update
      */
-    val valueLength: Int
+    val updateLength: Int
 
     /**
      * Factory for {@link PublicationRequestEvent}.
@@ -372,15 +367,15 @@ interface PublicationRequestEvent : RequestEvent {
         /**
          * @return a new instance of {@link PublicationRequestEvent}
          */
-        fun create(path: String, valueLength: Int): PublicationRequestEvent {
-            return PublicationRequestEventImpl(path, valueLength, System.currentTimeMillis())
+        fun create(path: String, updateLength: Int): PublicationRequestEvent {
+            return PublicationRequestEventImpl(path, updateLength, System.currentTimeMillis())
         }
 
         /**
          * @return a new instance of {@link PublicationRequestEvent}
          */
-        fun create(path: String, valueLength: Int, timestamp: Long): PublicationRequestEvent {
-            return PublicationRequestEventImpl(path, valueLength, timestamp)
+        fun create(path: String, updateLength: Int, timestamp: Long): PublicationRequestEvent {
+            return PublicationRequestEventImpl(path, updateLength, timestamp)
         }
     }
 }
@@ -398,7 +393,7 @@ private data class PublicationRequestEventImpl(
     /**
      * @return the length of the value
      */
-    override val valueLength: Int,
+    override val updateLength: Int,
     /**
      * @return the request timestamp
      */

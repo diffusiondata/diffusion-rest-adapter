@@ -83,7 +83,6 @@ public final class TopicCreationEventDispatcherTest {
         final TopicCreationRequestEvent value = requestCaptor.getValue();
         assertEquals("service/endpoint", value.getPath());
         assertEquals(STRING, value.getTopicType());
-        assertEquals(0, value.getInitialValueLength());
     }
 
     @Test
@@ -97,7 +96,6 @@ public final class TopicCreationEventDispatcherTest {
         final TopicCreationSuccessEvent value = successCaptor.getValue();
         assertEquals("service/endpoint", value.getRequestEvent().getPath());
         assertEquals(STRING, value.getRequestEvent().getTopicType());
-        assertEquals(0, value.getRequestEvent().getInitialValueLength());
     }
 
     @Test
@@ -111,7 +109,6 @@ public final class TopicCreationEventDispatcherTest {
         final TopicCreationFailedEvent value = failedCaptor.getValue();
         assertEquals("service/endpoint", value.getRequestEvent().getPath());
         assertEquals(STRING, value.getRequestEvent().getTopicType());
-        assertEquals(0, value.getRequestEvent().getInitialValueLength());
         assertEquals(USER_CODE_ERROR, value.getFailReason());
     }
 }
