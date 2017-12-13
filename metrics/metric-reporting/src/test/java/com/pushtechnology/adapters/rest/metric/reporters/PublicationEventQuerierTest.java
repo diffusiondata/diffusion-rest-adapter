@@ -84,4 +84,11 @@ public final class PublicationEventQuerierTest {
 
         assertEquals(BigDecimal.valueOf(4000, 3), failureThroughput);
     }
+
+    @Test
+    public void getMeanPublicationSize() {
+        final BigDecimal meanPublicationSize = publicationEventQuerier.getMeanPublicationSize();
+
+        assertEquals(BigDecimal.valueOf(10000, 3), meanPublicationSize);
+    }
 }

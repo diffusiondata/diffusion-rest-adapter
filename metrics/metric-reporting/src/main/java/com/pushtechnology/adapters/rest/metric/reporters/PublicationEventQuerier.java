@@ -15,6 +15,11 @@
 
 package com.pushtechnology.adapters.rest.metric.reporters;
 
+import static java.math.RoundingMode.HALF_UP;
+
+import java.math.BigDecimal;
+import java.util.List;
+
 import com.pushtechnology.adapters.rest.metrics.PublicationFailedEvent;
 import com.pushtechnology.adapters.rest.metrics.PublicationRequestEvent;
 import com.pushtechnology.adapters.rest.metrics.PublicationSuccessEvent;
@@ -36,5 +41,16 @@ public final class PublicationEventQuerier
      */
     public PublicationEventQuerier(BoundedPublicationEventCollector publicationEventCollector) {
         super(publicationEventCollector);
+    }
+
+    /**
+     * @return mean publication size
+     */
+    public BigDecimal getMeanPublicationSize() {
+        final List<PublicationRequestEvent> requestEvents = getEventCollector().getRequestEvents();
+        final int numberOfEvents = requestEvents.size();
+        final int publicationSize = requestEvents.stream().mapToInt(PublicationRequestEvent::getUpdateLength).sum();
+        return BigDecimal.valueOf(publicationSize * 1000, 3)
+            .divide(BigDecimal.valueOf(numberOfEvents * 1000, 3), 3, HALF_UP);
     }
 }
