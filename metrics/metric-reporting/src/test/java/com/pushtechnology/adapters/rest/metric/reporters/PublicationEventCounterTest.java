@@ -15,9 +15,14 @@
 
 package com.pushtechnology.adapters.rest.metric.reporters;
 
+import static com.pushtechnology.diffusion.client.callbacks.ErrorReason.COMMUNICATION_FAILURE;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
+
+import com.pushtechnology.adapters.rest.metrics.PublicationFailedEvent;
+import com.pushtechnology.adapters.rest.metrics.PublicationRequestEvent;
+import com.pushtechnology.adapters.rest.metrics.PublicationSuccessEvent;
 
 /**
  * Unit tests for {@link PublicationEventCounter}.
@@ -29,34 +34,49 @@ public final class PublicationEventCounterTest {
     public void onRequest() throws Exception {
         final PublicationEventCounter counter = new PublicationEventCounter();
 
-        counter.onPublicationRequest(null);
+        counter.onPublicationRequest(PublicationRequestEvent.Factory.create("", 5));
 
         assertEquals(1, counter.getRequests());
         assertEquals(0, counter.getSuccesses());
         assertEquals(0, counter.getFailures());
+
+        assertEquals(5, counter.getRequestBytes());
+        assertEquals(0, counter.getSuccessBytes());
+        assertEquals(0, counter.getFailedBytes());
     }
 
     @Test
     public void onSuccess() throws Exception {
         final PublicationEventCounter counter = new PublicationEventCounter();
 
-        counter.onPublicationRequest(null);
-        counter.onPublicationSuccess(null);
+        final PublicationRequestEvent requestEvent = PublicationRequestEvent.Factory.create("", 5);
+        counter.onPublicationRequest(requestEvent);
+        counter.onPublicationSuccess(PublicationSuccessEvent.Factory.create(requestEvent));
 
         assertEquals(1, counter.getRequests());
         assertEquals(1, counter.getSuccesses());
         assertEquals(0, counter.getFailures());
+
+        assertEquals(5, counter.getRequestBytes());
+        assertEquals(5, counter.getSuccessBytes());
+        assertEquals(0, counter.getFailedBytes());
+
     }
 
     @Test
     public void onFailure() throws Exception {
         final PublicationEventCounter counter = new PublicationEventCounter();
 
-        counter.onPublicationRequest(null);
-        counter.onPublicationFailed(null);
+        final PublicationRequestEvent requestEvent = PublicationRequestEvent.Factory.create("", 5);
+        counter.onPublicationRequest(requestEvent);
+        counter.onPublicationFailed(PublicationFailedEvent.Factory.create(requestEvent, COMMUNICATION_FAILURE));
 
         assertEquals(1, counter.getRequests());
         assertEquals(0, counter.getSuccesses());
         assertEquals(1, counter.getFailures());
+
+        assertEquals(5, counter.getRequestBytes());
+        assertEquals(0, counter.getSuccessBytes());
+        assertEquals(5, counter.getFailedBytes());
     }
 }

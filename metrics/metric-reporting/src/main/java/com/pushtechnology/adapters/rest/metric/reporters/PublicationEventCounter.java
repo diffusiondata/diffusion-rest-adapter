@@ -15,6 +15,8 @@
 
 package com.pushtechnology.adapters.rest.metric.reporters;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import com.pushtechnology.adapters.rest.metrics.PublicationFailedEvent;
 import com.pushtechnology.adapters.rest.metrics.PublicationRequestEvent;
 import com.pushtechnology.adapters.rest.metrics.PublicationSuccessEvent;
@@ -26,18 +28,46 @@ import com.pushtechnology.adapters.rest.metrics.event.listeners.PublicationEvent
  * @author Push Technology Limited
  */
 public final class PublicationEventCounter extends AbstractEventCounter implements PublicationEventListener {
+    private final AtomicInteger requestBytes = new AtomicInteger();
+    private final AtomicInteger successBytes = new AtomicInteger();
+    private final AtomicInteger failedBytes = new AtomicInteger();
+
     @Override
     public void onPublicationRequest(PublicationRequestEvent event) {
         onRequest();
+        requestBytes.addAndGet(event.getUpdateLength());
     }
 
     @Override
     public void onPublicationSuccess(PublicationSuccessEvent event) {
         onSuccess();
+        successBytes.addAndGet(event.getRequestEvent().getUpdateLength());
     }
 
     @Override
     public void onPublicationFailed(PublicationFailedEvent event) {
         onFailure();
+        failedBytes.addAndGet(event.getRequestEvent().getUpdateLength());
+    }
+
+    /**
+     * @return the requested publication bytes
+     */
+    public int getRequestBytes() {
+        return requestBytes.get();
+    }
+
+    /**
+     * @return the successful publication bytes
+     */
+    public int getSuccessBytes() {
+        return successBytes.get();
+    }
+
+    /**
+     * @return the failed publication bytes
+     */
+    public int getFailedBytes() {
+        return failedBytes.get();
     }
 }
