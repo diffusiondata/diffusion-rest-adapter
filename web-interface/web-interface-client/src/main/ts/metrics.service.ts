@@ -5,6 +5,10 @@ import * as diffusion from 'diffusion';
 const doubleDataType = diffusion.datatypes.double();
 const longDataType = diffusion.datatypes.int64();
 
+export interface Closeable {
+    close();
+}
+
 @Injectable()
 export class MetricsService {
     private areMetricsReady: Promise<void>;
@@ -29,7 +33,7 @@ export class MetricsService {
     public createEmptyView(): MetricsView {
         return {
             pollMetrics: MetricsService.createCommonMetrics(),
-            publicationMetrics: MetricsService.createCommonMetrics(),
+            publicationMetrics: MetricsService.createPublicationMetrics(),
             topicCreationMetrics: MetricsService.createCommonMetrics(),
             close: () => {}
         }
@@ -48,7 +52,24 @@ export class MetricsService {
         };
     }
 
-    private registerCommonMetrics(session, topicRoot, metrics) {
+    private static createPublicationMetrics(): PublicationMetrics {
+        return {
+            requests: 0,
+            successes: 0,
+            failures: 0,
+            requestBytes: 0,
+            successBytes: 0,
+            failureBytes: 0,
+            requestThroughput: 0,
+            failureThroughput: 0,
+            maximumSuccessfulRequestTime: 0,
+            minimumSuccessfulRequestTime: 0,
+            successfulRequestTimeNinetiethPercentile: 0,
+            meanBytes: 0
+        };
+    }
+
+    private registerCommonMetrics(session, topicRoot, metrics: CommonMetrics): Closeable {
         let streams = [
             session
                 .stream(topicRoot + '/requests')
@@ -105,6 +126,40 @@ export class MetricsService {
         };
     }
 
+    private registerPublicationMetrics(session, topicRoot, metrics: PublicationMetrics): Closeable {
+        let streams = [
+            this.registerCommonMetrics(session, topicRoot, metrics),
+            session
+                .stream(topicRoot + '/successBytes')
+                .asType(longDataType)
+                .on('value', (topic, specification, newValue) => {
+                    metrics.successBytes = newValue;
+                }),
+            session
+                .stream(topicRoot + '/failureBytes')
+                .asType(longDataType)
+                .on('value', (topic, specification, newValue) => {
+                    metrics.failureBytes = newValue;
+                }),
+            session
+                .stream(topicRoot + '/requestBytes')
+                .asType(longDataType)
+                .on('value', (topic, specification, newValue) => {
+                    metrics.requestBytes = newValue;
+                }),
+            session
+                .stream(topicRoot + '/meanPublicationBytes')
+                .asType(doubleDataType)
+                .on('value', (topic, specification, newValue) => {
+                    metrics.meanBytes = newValue;
+                })];
+        return {
+            close() {
+                streams.forEach(stream => stream.close());
+            }
+        };
+    }
+
     public metricsReady(): Promise<void> {
         return this.areMetricsReady;
     }
@@ -112,12 +167,12 @@ export class MetricsService {
     public getMetricsView(): Promise<MetricsView> {
         return this.diffusionService.get().then((session) => {
             let pollMetrics = MetricsService.createCommonMetrics();
-            let publicationMetrics = MetricsService.createCommonMetrics();
+            let publicationMetrics = MetricsService.createPublicationMetrics();
             let topicCreationMetrics = MetricsService.createCommonMetrics();
 
             let streams = [
                 this.registerCommonMetrics(session, 'adapter/rest/metrics/poll', pollMetrics),
-                this.registerCommonMetrics(session, 'adapter/rest/metrics/publication', publicationMetrics),
+                this.registerPublicationMetrics(session, 'adapter/rest/metrics/publication', publicationMetrics),
                 this.registerCommonMetrics(session, 'adapter/rest/metrics/topicCreation', topicCreationMetrics)];
             session.subscribe('?adapter/rest/metrics/');
 
@@ -137,12 +192,17 @@ export interface CommonMetrics {
     successfulRequestTimeNinetiethPercentile: number;
 }
 
-export interface MetricsView {
-    pollMetrics: CommonMetrics;
-    publicationMetrics: CommonMetrics;
-    topicCreationMetrics: CommonMetrics;
+export interface PublicationMetrics extends CommonMetrics {
+    requestBytes: number,
+    successBytes: number,
+    failureBytes: number,
+    meanBytes: number
+}
 
-    close();
+export interface MetricsView extends Closeable {
+    pollMetrics: CommonMetrics;
+    publicationMetrics: PublicationMetrics;
+    topicCreationMetrics: CommonMetrics;
 }
 
 class MetricsViewImpl implements MetricsView {
@@ -150,7 +210,7 @@ class MetricsViewImpl implements MetricsView {
         private session,
         private streams,
         public pollMetrics: CommonMetrics,
-        public publicationMetrics: CommonMetrics,
+        public publicationMetrics: PublicationMetrics,
         public topicCreationMetrics: CommonMetrics) {}
 
     close() {

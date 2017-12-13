@@ -122,6 +122,7 @@ declare module "diffusion" {
     export interface Stream {
         on: (events: string | Object, listener ? : Function) => Stream;
         off: (event: string, listener: Function) => Stream;
+        close: () => void;
     }
     export interface Subscription extends Stream {
         selector: string;

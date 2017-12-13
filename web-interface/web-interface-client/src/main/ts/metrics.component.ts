@@ -85,6 +85,22 @@ import {MetricsService, MetricsView} from "./metrics.service";
                     <label for="publication-90" class="col-sm-6 control-label">Successful request time 90th percentile</label>
                     <p id="publication-90" class="form-control-static col-sm-6">{{view.publicationMetrics.successfulRequestTimeNinetiethPercentile}} ms</p>
                 </div>
+                <div class="form-group col-sm-4">
+                    <label for="publication-request-bytes" class="col-sm-6 control-label">Request bytes</label>
+                    <p id="publication-request-bytes" class="form-control-static col-sm-6">{{view.publicationMetrics.requestBytes}}</p>
+                </div>
+                <div class="form-group col-sm-4">
+                    <label for="publication-success-bytes" class="col-sm-6 control-label">Successful request bytes</label>
+                    <p id="publication-success-bytes" class="form-control-static col-sm-6">{{view.publicationMetrics.successBytes}}</p>
+                </div>
+                <div class="form-group col-sm-4">
+                    <label for="publication-failure-bytes" class="col-sm-6 control-label">Failed request bytes</label>
+                    <p id="publication-failure-bytes" class="form-control-static col-sm-6">{{view.publicationMetrics.failureBytes}}</p>
+                </div>
+                <div class="form-group col-sm-4">
+                    <label for="publication-mean-bytes" class="col-sm-6 control-label">Mean bytes</label>
+                    <p id="publication-mean-bytes" class="form-control-static col-sm-6">{{view.publicationMetrics.meanBytes}}</p>
+                </div>
             </div>
         </div>
     </div>
