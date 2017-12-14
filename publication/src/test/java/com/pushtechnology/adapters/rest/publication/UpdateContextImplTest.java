@@ -103,7 +103,7 @@ public final class UpdateContextImplTest {
         verify(session).getState();
         verify(dataType).toBytes(binary);
         verify(updater).update(eq("a/topic"), eq(binary), eq("a/topic"), isA(UpdateContextCallback.class));
-        verify(notifier).notifyPublicationRequest(binary);
+        verify(notifier).notifyPublicationRequest(0);
     }
 
     @Test
@@ -116,7 +116,7 @@ public final class UpdateContextImplTest {
         verify(session).getState();
         verify(dataType).toBytes(binary);
         verify(updater).update(eq("a/topic"), eq(binary), eq("a/topic"), isA(UpdateContextCallback.class));
-        verify(notifier).notifyPublicationRequest(binary);
+        verify(notifier).notifyPublicationRequest(0);
 
         updateContext.publish(binary);
 
@@ -125,7 +125,7 @@ public final class UpdateContextImplTest {
         verify(deltaType).toBytes(delta);
         verify(bytesToDeltaUpdate).apply(bytes);
         verify(updater).update(eq("a/topic"), eq(update), eq("a/topic"), isA(UpdateContextCallback.class));
-        verify(notifier).notifyPublicationRequest(bytes);
+        verify(notifier, times(2)).notifyPublicationRequest(0);
     }
 
     @Test
@@ -138,7 +138,7 @@ public final class UpdateContextImplTest {
         verify(session).getState();
         verify(dataType).toBytes(binary);
         verify(updater).update(eq("a/topic"), eq(binary), eq("a/topic"), isA(UpdateContextCallback.class));
-        verify(notifier).notifyPublicationRequest(binary);
+        verify(notifier).notifyPublicationRequest(0);
 
         updateContext.publish(binary);
 
@@ -152,7 +152,7 @@ public final class UpdateContextImplTest {
         when(session.getState()).thenReturn(RECOVERING_RECONNECT);
         updateContext.publish(binary);
         verify(updater, never()).update(eq("a/topic"), eq(binary), eq("a/topic"), isA(UpdateContextCallback.class));
-        verify(notifier).notifyPublicationRequest(binary);
+        verify(notifier).notifyPublicationRequest(0);
 
         updateContext.onSessionStateChanged(session, RECOVERING_RECONNECT, CONNECTED_ACTIVE);
 

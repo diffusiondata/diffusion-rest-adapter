@@ -19,7 +19,6 @@ import com.pushtechnology.adapters.rest.metrics.listeners.PublicationListener;
 import com.pushtechnology.adapters.rest.metrics.listeners.PublicationListener.PublicationCompletionListener;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.diffusion.datatype.Bytes;
 
 /**
  * Implementation of {@link ListenerNotifier}.
@@ -41,7 +40,7 @@ import com.pushtechnology.diffusion.datatype.Bytes;
     }
 
     @Override
-    public PublicationCompletionListener notifyPublicationRequest(Bytes bytes) {
-        return publicationListener.onPublicationRequest(serviceConfig, endpointConfig, bytes);
+    public PublicationCompletionListener notifyPublicationRequest(int size) {
+        return publicationListener.onPublicationRequest(serviceConfig, endpointConfig, size);
     }
 }

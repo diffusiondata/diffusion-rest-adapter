@@ -96,7 +96,8 @@ import com.pushtechnology.diffusion.datatype.DeltaType;
         else if (state.isRecovering()) {
             LOG.debug("Caching value while in recovery");
             final Bytes bytes = dataType.toBytes(value);
-            final PublicationCompletionListener completionListener = listenerNotifier.notifyPublicationRequest(bytes);
+            final PublicationCompletionListener completionListener =
+                listenerNotifier.notifyPublicationRequest(bytes.length());
             cachedValue.set(new CachedRequest<>(value, bytes, completionListener));
         }
         else {
@@ -117,7 +118,8 @@ import com.pushtechnology.diffusion.datatype.DeltaType;
         final BinaryDelta delta = deltaType.diff(lastPublishedValue, value);
         if (delta.hasChanges()) {
             final Bytes bytes = deltaToBytes.apply(delta);
-            final PublicationCompletionListener completionListener = listenerNotifier.notifyPublicationRequest(bytes);
+            final PublicationCompletionListener completionListener =
+                listenerNotifier.notifyPublicationRequest(delta.length());
             lastPublishedValue = value;
             updater.update(
                 topicPath,
@@ -129,7 +131,8 @@ import com.pushtechnology.diffusion.datatype.DeltaType;
 
     private void applyValue(T value) {
         final Bytes bytes = dataType.toBytes(value);
-        final PublicationCompletionListener completionListener = listenerNotifier.notifyPublicationRequest(bytes);
+        final PublicationCompletionListener completionListener =
+            listenerNotifier.notifyPublicationRequest(bytes.length());
         lastPublishedValue = value;
         updater.update(
             topicPath,

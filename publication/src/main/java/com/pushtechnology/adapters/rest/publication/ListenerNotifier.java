@@ -16,7 +16,6 @@
 package com.pushtechnology.adapters.rest.publication;
 
 import com.pushtechnology.adapters.rest.metrics.listeners.PublicationListener.PublicationCompletionListener;
-import com.pushtechnology.diffusion.datatype.Bytes;
 
 /**
  * Notifier for {@link com.pushtechnology.adapters.rest.metrics.listeners.PublicationListener}.
@@ -27,5 +26,5 @@ import com.pushtechnology.diffusion.datatype.Bytes;
     /**
      * Notify a {@link com.pushtechnology.adapters.rest.metrics.listeners.PublicationListener} of a publication attempt.
      */
-    PublicationCompletionListener notifyPublicationRequest(Bytes bytes);
+    PublicationCompletionListener notifyPublicationRequest(int size);
 }

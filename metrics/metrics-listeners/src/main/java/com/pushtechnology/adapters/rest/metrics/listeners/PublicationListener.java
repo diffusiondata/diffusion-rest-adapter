@@ -18,7 +18,6 @@ package com.pushtechnology.adapters.rest.metrics.listeners;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.diffusion.client.callbacks.ErrorReason;
-import com.pushtechnology.diffusion.datatype.Bytes;
 
 /**
  * Listener for Diffusion topic publication events.
@@ -31,13 +30,13 @@ public interface PublicationListener {
      *
      * @param serviceConfig the service
      * @param endpointConfig the endpoint
-     * @param update the update to apply
+     * @param size the size of the update to apply
      * @return a listener for the completion of the publication request
      */
     PublicationCompletionListener onPublicationRequest(
         ServiceConfig serviceConfig,
         EndpointConfig endpointConfig,
-        Bytes update);
+        int size);
 
     /**
      * Listener for the completion of a publication request.

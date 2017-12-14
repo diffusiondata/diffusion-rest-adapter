@@ -22,7 +22,6 @@ import com.pushtechnology.adapters.rest.metrics.listeners.PublicationListener;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.diffusion.client.callbacks.ErrorReason;
-import com.pushtechnology.diffusion.datatype.Bytes;
 
 /**
  * Listener for events about publication.
@@ -43,10 +42,10 @@ public final class PublicationEventDispatcher implements PublicationListener {
     public PublicationCompletionListener onPublicationRequest(
             ServiceConfig serviceConfig,
             EndpointConfig endpointConfig,
-            Bytes update) {
+            int size) {
         final PublicationRequestEvent publicationRequestEvent = PublicationRequestEvent.Factory.create(
             serviceConfig.getTopicPathRoot() + "/" + endpointConfig.getTopicPath(),
-            update.length());
+            size);
 
         publicationEventListener.onPublicationRequest(publicationRequestEvent);
 

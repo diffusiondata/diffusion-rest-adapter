@@ -14,7 +14,6 @@ import com.pushtechnology.adapters.rest.metrics.listeners.PublicationListener;
 import com.pushtechnology.adapters.rest.metrics.listeners.PublicationListener.PublicationCompletionListener;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.diffusion.datatype.Bytes;
 
 /**
  * Unit tests for {@link ListenerNotifierImpl}.
@@ -26,8 +25,6 @@ public final class ListenerNotifierTest {
     private PublicationListener publicationListener;
     @Mock
     private PublicationCompletionListener completionListener;
-    @Mock
-    private Bytes bytes;
 
     private EndpointConfig endpointConfig;
     private ServiceConfig serviceConfig;
@@ -54,7 +51,7 @@ public final class ListenerNotifierTest {
             .topicPathRoot("a")
             .build();
 
-        when(publicationListener.onPublicationRequest(serviceConfig, endpointConfig, bytes))
+        when(publicationListener.onPublicationRequest(serviceConfig, endpointConfig, 5))
             .thenReturn(completionListener);
     }
 
@@ -62,9 +59,9 @@ public final class ListenerNotifierTest {
     public void notifyPublicationRequest() throws Exception {
         final ListenerNotifierImpl notifier = new ListenerNotifierImpl(publicationListener, serviceConfig, endpointConfig);
 
-        final PublicationCompletionListener listener = notifier.notifyPublicationRequest(bytes);
+        final PublicationCompletionListener listener = notifier.notifyPublicationRequest(5);
 
         assertEquals(completionListener, listener);
-        verify(publicationListener).onPublicationRequest(serviceConfig, endpointConfig, bytes);
+        verify(publicationListener).onPublicationRequest(serviceConfig, endpointConfig, 5);
     }
 }

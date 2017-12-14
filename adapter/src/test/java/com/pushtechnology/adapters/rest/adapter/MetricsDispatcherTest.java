@@ -3,6 +3,7 @@ package com.pushtechnology.adapters.rest.adapter;
 import static com.pushtechnology.diffusion.client.callbacks.ErrorReason.ACCESS_DENIED;
 import static com.pushtechnology.diffusion.client.features.control.topics.TopicAddFailReason.INVALID_DETAILS;
 import static java.util.Collections.singletonList;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
@@ -107,8 +108,8 @@ public final class MetricsDispatcherTest {
     public void setUp() {
         when(pollListener0.onPollRequest(any(), any())).thenReturn(pollCompletionListener0);
         when(pollListener1.onPollRequest(any(), any())).thenReturn(pollCompletionListener1);
-        when(publicationListener0.onPublicationRequest(any(), any(), any())).thenReturn(publicationCompletionListener0);
-        when(publicationListener1.onPublicationRequest(any(), any(), any())).thenReturn(publicationCompletionListener1);
+        when(publicationListener0.onPublicationRequest(any(), any(), anyInt())).thenReturn(publicationCompletionListener0);
+        when(publicationListener1.onPublicationRequest(any(), any(), anyInt())).thenReturn(publicationCompletionListener1);
         when(topicCreationListener0.onTopicCreationRequest(any(), any())).thenReturn(topicCreationCompletionListener0);
         when(topicCreationListener1.onTopicCreationRequest(any(), any())).thenReturn(topicCreationCompletionListener1);
         when(httpResponse.getStatusLine()).thenReturn(statusLine);
@@ -146,7 +147,7 @@ public final class MetricsDispatcherTest {
         dispatcher.addPublicationEventListener(publicationEventListener0);
         dispatcher.addPublicationEventListener(publicationEventListener1);
 
-        final PublicationCompletionListener completionListener = dispatcher.onPublicationRequest(serviceConfig, endpointConfig, bytes);
+        final PublicationCompletionListener completionListener = dispatcher.onPublicationRequest(serviceConfig, endpointConfig, 10);
 
         verify(publicationEventListener0).onPublicationRequest(isNotNull());
         verify(publicationEventListener1).onPublicationRequest(isNotNull());
