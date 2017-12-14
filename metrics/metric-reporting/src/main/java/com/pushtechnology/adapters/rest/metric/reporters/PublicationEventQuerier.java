@@ -49,8 +49,11 @@ public final class PublicationEventQuerier
     public BigDecimal getMeanPublicationSize() {
         final List<PublicationRequestEvent> requestEvents = getEventCollector().getRequestEvents();
         final int numberOfEvents = requestEvents.size();
-        final int publicationSize = requestEvents.stream().mapToInt(PublicationRequestEvent::getUpdateLength).sum();
-        return BigDecimal.valueOf(publicationSize * 1000, 3)
-            .divide(BigDecimal.valueOf(numberOfEvents * 1000, 3), 3, HALF_UP);
+        if (numberOfEvents > 0) {
+            final int publicationSize = requestEvents.stream().mapToInt(PublicationRequestEvent::getUpdateLength).sum();
+            return BigDecimal.valueOf(publicationSize * 1000, 3)
+                .divide(BigDecimal.valueOf(numberOfEvents * 1000, 3), 3, HALF_UP);
+        }
+        return BigDecimal.ZERO;
     }
 }
