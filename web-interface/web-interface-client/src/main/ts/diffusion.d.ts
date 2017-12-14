@@ -58,6 +58,7 @@ declare module "diffusion" {
         topics: TopicControl;
         messages: Messages;
         clients: ClientControl;
+        notifications: Notifications;
         options: Options;
         sessionID: string;
         toString: () => string;
@@ -153,6 +154,22 @@ declare module "diffusion" {
         send: (path: string, message: any, sessionID ? : string) => Result < SendResult, any > ;
         listen: (path: string, listener ? : (message: SessionMessage) => void) => MessageStream;
         addHandler: (path: string, handler: MessageHandler) => Result < void, any > ;
+    }
+    export interface Notifications {
+        addListener: (listener) => Result<TopicNotificationRegistration, any>;
+        TopicNotificationType: {
+            ADDED: any;
+            SELECTED: any;
+            REMOVED: any;
+            DESELECTED: any;
+        };
+    }
+    export interface TopicNotificationRegistration {
+        select(topicSelector: string | TopicSelector): Result<void, any>;
+
+        deselect(topicSelector: string | TopicSelector): Result<void, any>;
+
+        close();
     }
     export interface MessageStream extends Stream {}
     export interface Message {

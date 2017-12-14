@@ -16,16 +16,27 @@ export class MetricsService {
     constructor(private diffusionService: DiffusionService) {
         this.areMetricsReady = new Promise(((resolve, reject) => {
             diffusionService.get().then(session => {
-                session
-                    .stream('adapter/rest/metrics/poll/requests')
-                    .on('subscribe', () => {
-                        session.unsubscribe('adapter/rest/metrics/poll/requests');
-                        resolve();
-                    })
-                    .on('error', (err) => {
-                        reject(err);
+                var registration;
+                let pendingRegistration = session
+                    .notifications
+                    .addListener({
+                        onTopicNotification: (path, spec, type) => {
+                            if (type === session.notifications.TopicNotificationType.ADDED ||
+                                type === session.notifications.TopicNotificationType.SELECTED) {
+
+                                resolve();
+                                registration.close();
+                            }
+                        },
+                        onDescendantNotification: () => {},
+                        onError: (err) => {
+                            reject(err);
+                        },
+                        onClose: () => {}
                     });
-                session.subscribe('adapter/rest/metrics/poll/requests');
+                pendingRegistration
+                    .then(reg => registration = reg)
+                    .then(() => registration.select('adapter/rest/metrics/poll/requests'), reject);
             }, reject);
         }));
     }
