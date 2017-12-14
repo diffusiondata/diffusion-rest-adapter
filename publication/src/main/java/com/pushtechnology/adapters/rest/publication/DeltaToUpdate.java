@@ -23,29 +23,32 @@ import com.pushtechnology.diffusion.client.content.update.ContentUpdateFactory;
 import com.pushtechnology.diffusion.client.content.update.Update;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
 import com.pushtechnology.diffusion.client.session.Session;
-import com.pushtechnology.diffusion.datatype.Bytes;
+import com.pushtechnology.diffusion.datatype.BinaryDelta;
+import com.pushtechnology.diffusion.datatype.DeltaType;
 
 /**
- * Convert a {@link Bytes} to an applicative update.
+ * Convert a {@link BinaryDelta} to an applicative update.
  *
  * @author Push Technology Limited
  */
 @SuppressWarnings("deprecation")
-public final class BytesToDeltaUpdate implements Function<Bytes, Update> {
+public final class DeltaToUpdate implements Function<BinaryDelta, Update> {
     private static final ContentFactory CONTENT_FACTORY = Diffusion.content();
     private final ContentUpdateFactory updateFactory;
+    private final DeltaType<?, BinaryDelta> deltaType;
 
     /**
      * Constructor.
      */
-    /*package*/ BytesToDeltaUpdate(Session session) {
+    /*package*/ DeltaToUpdate(Session session, DeltaType<?, BinaryDelta> deltaType) {
         updateFactory = session
             .feature(TopicUpdateControl.class)
             .updateFactory(ContentUpdateFactory.class);
+        this.deltaType = deltaType;
     }
 
     @Override
-    public Update apply(Bytes bytes) {
-        return updateFactory.apply(CONTENT_FACTORY.newContent(bytes.toByteArray()));
+    public Update apply(BinaryDelta delta) {
+        return updateFactory.apply(CONTENT_FACTORY.newContent(deltaType.toBytes(delta).toByteArray()));
     }
 }

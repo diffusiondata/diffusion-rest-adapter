@@ -45,8 +45,7 @@ import com.pushtechnology.diffusion.datatype.DeltaType;
     private final Updater updater;
     private final Session session;
     private final String topicPath;
-    private final Function<BinaryDelta, Bytes> deltaToBytes;
-    private final Function<Bytes, Update> bytesToDeltaUpdate;
+    private final Function<BinaryDelta, Update> deltaToUpdate;
     private final DeltaType<T, BinaryDelta> deltaType;
     private T lastPublishedValue;
 
@@ -58,7 +57,6 @@ import com.pushtechnology.diffusion.datatype.DeltaType;
             Updater updater,
             String topicPath,
             DataType<T> dataType,
-            Function<Bytes, Update> bytesToDeltaUpdate,
             ListenerNotifier listenerNotifier) {
         this.session = session;
         this.updater = updater;
@@ -67,8 +65,7 @@ import com.pushtechnology.diffusion.datatype.DeltaType;
         this.listenerNotifier = listenerNotifier;
 
         deltaType = dataType.deltaType(BinaryDelta.class);
-        deltaToBytes = deltaType::toBytes;
-        this.bytesToDeltaUpdate = bytesToDeltaUpdate;
+        this.deltaToUpdate = new DeltaToUpdate(session, deltaType);
     }
 
     @Override
@@ -117,13 +114,12 @@ import com.pushtechnology.diffusion.datatype.DeltaType;
     private void applyDelta(T value) {
         final BinaryDelta delta = deltaType.diff(lastPublishedValue, value);
         if (delta.hasChanges()) {
-            final Bytes bytes = deltaToBytes.apply(delta);
             final PublicationCompletionListener completionListener =
                 listenerNotifier.notifyPublicationRequest(delta.length());
             lastPublishedValue = value;
             updater.update(
                 topicPath,
-                bytesToDeltaUpdate.apply(bytes),
+                deltaToUpdate.apply(delta),
                 topicPath,
                 new UpdateTopicCallback(completionListener));
         }

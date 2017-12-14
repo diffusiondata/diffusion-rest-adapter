@@ -18,6 +18,7 @@ package com.pushtechnology.adapters.rest.publication;
 import static com.pushtechnology.diffusion.client.session.Session.State.CLOSED_BY_CLIENT;
 import static com.pushtechnology.diffusion.client.session.Session.State.CONNECTED_ACTIVE;
 import static com.pushtechnology.diffusion.client.session.Session.State.RECOVERING_RECONNECT;
+import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.never;
@@ -27,14 +28,14 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-import java.util.function.Function;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 
+import com.pushtechnology.diffusion.client.content.update.ContentUpdateFactory;
 import com.pushtechnology.diffusion.client.content.update.Update;
+import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater.UpdateContextCallback;
 import com.pushtechnology.diffusion.client.session.Session;
@@ -64,13 +65,15 @@ public final class UpdateContextImplTest {
     @Mock
     private DeltaType<Binary, BinaryDelta> deltaType;
     @Mock
-    private Function<Bytes, Update> bytesToDeltaUpdate;
-    @Mock
     private BinaryDelta delta;
     @Mock
     private Bytes bytes;
     @Mock
     private Update update;
+    @Mock
+    private TopicUpdateControl updateControl;
+    @Mock
+    private ContentUpdateFactory updateFactory;
 
     private UpdateContextImpl<Binary> updateContext;
 
@@ -82,16 +85,20 @@ public final class UpdateContextImplTest {
         when(dataType.deltaType(BinaryDelta.class)).thenReturn(deltaType);
         when(deltaType.diff(binary, binary)).thenReturn(delta);
         when(deltaType.toBytes(delta)).thenReturn(bytes);
-        when(bytesToDeltaUpdate.apply(bytes)).thenReturn(update);
+        when(bytes.toByteArray()).thenReturn(new byte[0]);
+        when(session.feature(TopicUpdateControl.class)).thenReturn(updateControl);
+        when(updateControl.updateFactory(ContentUpdateFactory.class)).thenReturn(updateFactory);
+        when(updateFactory.apply(isNotNull())).thenReturn(update);
 
-        updateContext = new UpdateContextImpl<>(session, updater, "a/topic", dataType, bytesToDeltaUpdate, notifier);
+        updateContext = new UpdateContextImpl<>(session, updater, "a/topic", dataType, notifier);
 
         verify(dataType).deltaType(BinaryDelta.class);
+        verify(session).feature(TopicUpdateControl.class);
     }
 
     @After
     public void postConditions() {
-        verifyNoMoreInteractions(session, updater, notifier, dataType, deltaType, bytesToDeltaUpdate);
+        verifyNoMoreInteractions(session, updater, notifier, dataType, deltaType);
     }
 
     @Test
@@ -123,7 +130,6 @@ public final class UpdateContextImplTest {
         verify(session, times(2)).getState();
         verify(deltaType).diff(binary, binary);
         verify(deltaType).toBytes(delta);
-        verify(bytesToDeltaUpdate).apply(bytes);
         verify(updater).update(eq("a/topic"), eq(update), eq("a/topic"), isA(UpdateContextCallback.class));
         verify(notifier, times(2)).notifyPublicationRequest(0);
     }
