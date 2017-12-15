@@ -44,6 +44,10 @@ import {MetricsService, MetricsView} from "./metrics.service";
                     <label for="poll-90" class="col-sm-6 control-label">Successful request time 90th percentile</label>
                     <p id="poll-90" class="form-control-static col-sm-6">{{view.pollMetrics.successfulRequestTimeNinetiethPercentile}} ms</p>
                 </div>
+                <div class="form-group col-sm-4">
+                    <label for="poll-bytes" class="col-sm-6 control-label">Polled bytes</label>
+                    <p id="poll-bytes" class="form-control-static col-sm-6">{{view.pollMetrics.bytes}}</p>
+                </div>
             </div>
         </div>
     </div>

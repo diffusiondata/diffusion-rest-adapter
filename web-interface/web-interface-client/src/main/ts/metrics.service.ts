@@ -43,7 +43,7 @@ export class MetricsService {
 
     public createEmptyView(): MetricsView {
         return {
-            pollMetrics: MetricsService.createCommonMetrics(),
+            pollMetrics: MetricsService.createPollMetrics(),
             publicationMetrics: MetricsService.createPublicationMetrics(),
             topicCreationMetrics: MetricsService.createCommonMetrics(),
             close: () => {}
@@ -75,6 +75,20 @@ export class MetricsService {
             minimumSuccessfulRequestTime: 0,
             successfulRequestTimeNinetiethPercentile: 0,
             meanBytes: 0
+        };
+    }
+
+    private static createPollMetrics(): PollMetrics {
+        return {
+            requests: 0,
+            successes: 0,
+            failures: 0,
+            bytes: 0,
+            requestThroughput: 0,
+            failureThroughput: 0,
+            maximumSuccessfulRequestTime: 0,
+            minimumSuccessfulRequestTime: 0,
+            successfulRequestTimeNinetiethPercentile: 0
         };
     }
 
@@ -157,18 +171,34 @@ export class MetricsService {
         };
     }
 
+    private registerPollMetrics(session, topicRoot, metrics: PollMetrics): Closeable {
+        let streams = [
+            this.registerCommonMetrics(session, topicRoot, metrics),
+            session
+                .stream(topicRoot + '/bytes')
+                .asType(longDataType)
+                .on('value', (topic, specification, newValue) => {
+                    metrics.bytes = newValue;
+                })];
+        return {
+            close() {
+                streams.forEach(stream => stream.close());
+            }
+        };
+    }
+
     public metricsReady(): Promise<void> {
         return this.areMetricsReady;
     }
 
     public getMetricsView(): Promise<MetricsView> {
         return this.diffusionService.get().then((session) => {
-            let pollMetrics = MetricsService.createCommonMetrics();
+            let pollMetrics = MetricsService.createPollMetrics();
             let publicationMetrics = MetricsService.createPublicationMetrics();
             let topicCreationMetrics = MetricsService.createCommonMetrics();
 
             let streams = [
-                this.registerCommonMetrics(session, 'adapter/rest/metrics/poll', pollMetrics),
+                this.registerPollMetrics(session, 'adapter/rest/metrics/poll', pollMetrics),
                 this.registerPublicationMetrics(session, 'adapter/rest/metrics/publication', publicationMetrics),
                 this.registerCommonMetrics(session, 'adapter/rest/metrics/topicCreation', topicCreationMetrics)];
             session.subscribe('?adapter/rest/metrics/');
@@ -194,8 +224,12 @@ export interface PublicationMetrics extends CommonMetrics {
     meanBytes: number
 }
 
+export interface PollMetrics extends CommonMetrics {
+    bytes: number
+}
+
 export interface MetricsView extends Closeable {
-    pollMetrics: CommonMetrics;
+    pollMetrics: PollMetrics;
     publicationMetrics: PublicationMetrics;
     topicCreationMetrics: CommonMetrics;
 }
@@ -204,7 +238,7 @@ class MetricsViewImpl implements MetricsView {
     constructor(
         private session,
         private streams,
-        public pollMetrics: CommonMetrics,
+        public pollMetrics: PollMetrics,
         public publicationMetrics: PublicationMetrics,
         public topicCreationMetrics: CommonMetrics) {}
 
