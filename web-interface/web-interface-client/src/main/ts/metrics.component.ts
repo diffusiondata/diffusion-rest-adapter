@@ -86,19 +86,11 @@ import {MetricsService, MetricsView} from "./metrics.service";
                     <p id="publication-90" class="form-control-static col-sm-6">{{view.publicationMetrics.successfulRequestTimeNinetiethPercentile}} ms</p>
                 </div>
                 <div class="form-group col-sm-4">
-                    <label for="publication-request-bytes" class="col-sm-6 control-label">Request bytes</label>
-                    <p id="publication-request-bytes" class="form-control-static col-sm-6">{{view.publicationMetrics.requestBytes}}</p>
+                    <label for="publication-bytes" class="col-sm-6 control-label">Published bytes</label>
+                    <p id="publication-bytes" class="form-control-static col-sm-6">{{view.publicationMetrics.bytes}}</p>
                 </div>
                 <div class="form-group col-sm-4">
-                    <label for="publication-success-bytes" class="col-sm-6 control-label">Successful request bytes</label>
-                    <p id="publication-success-bytes" class="form-control-static col-sm-6">{{view.publicationMetrics.successBytes}}</p>
-                </div>
-                <div class="form-group col-sm-4">
-                    <label for="publication-failure-bytes" class="col-sm-6 control-label">Failed request bytes</label>
-                    <p id="publication-failure-bytes" class="form-control-static col-sm-6">{{view.publicationMetrics.failureBytes}}</p>
-                </div>
-                <div class="form-group col-sm-4">
-                    <label for="publication-mean-bytes" class="col-sm-6 control-label">Mean bytes</label>
+                    <label for="publication-mean-bytes" class="col-sm-6 control-label">Mean bytes per publication</label>
                     <p id="publication-mean-bytes" class="form-control-static col-sm-6">{{view.publicationMetrics.meanBytes}}</p>
                 </div>
             </div>

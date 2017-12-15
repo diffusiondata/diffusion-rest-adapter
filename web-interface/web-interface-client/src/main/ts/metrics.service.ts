@@ -68,9 +68,7 @@ export class MetricsService {
             requests: 0,
             successes: 0,
             failures: 0,
-            requestBytes: 0,
-            successBytes: 0,
-            failureBytes: 0,
+            bytes: 0,
             requestThroughput: 0,
             failureThroughput: 0,
             maximumSuccessfulRequestTime: 0,
@@ -141,25 +139,13 @@ export class MetricsService {
         let streams = [
             this.registerCommonMetrics(session, topicRoot, metrics),
             session
-                .stream(topicRoot + '/successBytes')
+                .stream(topicRoot + '/bytes')
                 .asType(longDataType)
                 .on('value', (topic, specification, newValue) => {
-                    metrics.successBytes = newValue;
+                    metrics.bytes = newValue;
                 }),
             session
-                .stream(topicRoot + '/failureBytes')
-                .asType(longDataType)
-                .on('value', (topic, specification, newValue) => {
-                    metrics.failureBytes = newValue;
-                }),
-            session
-                .stream(topicRoot + '/requestBytes')
-                .asType(longDataType)
-                .on('value', (topic, specification, newValue) => {
-                    metrics.requestBytes = newValue;
-                }),
-            session
-                .stream(topicRoot + '/meanPublicationBytes')
+                .stream(topicRoot + '/meanBytesPerPublication')
                 .asType(doubleDataType)
                 .on('value', (topic, specification, newValue) => {
                     metrics.meanBytes = newValue;
@@ -204,9 +190,7 @@ export interface CommonMetrics {
 }
 
 export interface PublicationMetrics extends CommonMetrics {
-    requestBytes: number,
-    successBytes: number,
-    failureBytes: number,
+    bytes: number,
     meanBytes: number
 }
 
