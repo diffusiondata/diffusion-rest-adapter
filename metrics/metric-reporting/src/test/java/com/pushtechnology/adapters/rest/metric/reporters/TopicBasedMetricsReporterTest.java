@@ -110,6 +110,7 @@ public final class TopicBasedMetricsReporterTest {
         verify(topicControl).addTopic("metrics/poll/requests", INT64);
         verify(topicControl).addTopic("metrics/poll/successes", INT64);
         verify(topicControl).addTopic("metrics/poll/failures", INT64);
+        verify(topicControl).addTopic("metrics/poll/bytes", INT64);
         verify(topicControl).addTopic("metrics/poll/failureThroughput", DOUBLE);
         verify(topicControl).addTopic("metrics/poll/requestThroughput", DOUBLE);
         verify(topicControl).addTopic("metrics/poll/maximumSuccessfulRequestTime", INT64);
@@ -147,6 +148,7 @@ public final class TopicBasedMetricsReporterTest {
         verify(topicControl, times(2)).addTopic("metrics/poll/requests", INT64);
         verify(topicControl, times(2)).addTopic("metrics/poll/successes", INT64);
         verify(topicControl, times(2)).addTopic("metrics/poll/failures", INT64);
+        verify(topicControl, times(2)).addTopic("metrics/poll/bytes", INT64);
         verify(topicControl, times(2)).addTopic("metrics/poll/failureThroughput", DOUBLE);
         verify(topicControl, times(2)).addTopic("metrics/poll/requestThroughput", DOUBLE);
         verify(topicControl, times(2)).addTopic("metrics/poll/maximumSuccessfulRequestTime", INT64);

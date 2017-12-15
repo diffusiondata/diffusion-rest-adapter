@@ -117,6 +117,7 @@ public final class TopicBasedMetricsReporter implements AutoCloseable {
             topicControl.addTopic(rootTopic + "/poll/requests", INT64),
             topicControl.addTopic(rootTopic + "/poll/successes", INT64),
             topicControl.addTopic(rootTopic + "/poll/failures", INT64),
+            topicControl.addTopic(rootTopic + "/poll/bytes", INT64),
             topicControl.addTopic(rootTopic + "/poll/failureThroughput", DOUBLE),
             topicControl.addTopic(rootTopic + "/poll/requestThroughput", DOUBLE),
             topicControl.addTopic(rootTopic + "/poll/maximumSuccessfulRequestTime", INT64),
@@ -211,6 +212,7 @@ public final class TopicBasedMetricsReporter implements AutoCloseable {
         longUpdater.update(rootTopic + "/poll/requests", (long) pollEventCounter.getRequests(), updateCallback);
         longUpdater.update(rootTopic + "/poll/successes", (long) pollEventCounter.getSuccesses(), updateCallback);
         longUpdater.update(rootTopic + "/poll/failures", (long) pollEventCounter.getFailures(), updateCallback);
+        longUpdater.update(rootTopic + "/poll/bytes", pollEventCounter.getResponseBodyLength(), updateCallback);
 
         final OptionalLong requestTime = pollEventQuerier.get90thPercentileSuccessfulRequestTime();
         final BigDecimal failureThroughput = pollEventQuerier.getFailureThroughput();
