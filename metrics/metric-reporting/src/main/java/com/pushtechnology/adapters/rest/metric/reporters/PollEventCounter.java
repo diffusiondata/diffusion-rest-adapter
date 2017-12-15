@@ -15,6 +15,8 @@
 
 package com.pushtechnology.adapters.rest.metric.reporters;
 
+import java.util.concurrent.atomic.AtomicLong;
+
 import com.pushtechnology.adapters.rest.metrics.PollFailedEvent;
 import com.pushtechnology.adapters.rest.metrics.PollRequestEvent;
 import com.pushtechnology.adapters.rest.metrics.PollSuccessEvent;
@@ -26,6 +28,8 @@ import com.pushtechnology.adapters.rest.metrics.event.listeners.PollEventListene
  * @author Push Technology Limited
  */
 public final class PollEventCounter extends AbstractEventCounter implements PollEventListener {
+    private final AtomicLong responseBodyBytes = new AtomicLong();
+
     @Override
     public void onPollRequest(PollRequestEvent event) {
         onRequest();
@@ -34,10 +38,18 @@ public final class PollEventCounter extends AbstractEventCounter implements Poll
     @Override
     public void onPollSuccess(PollSuccessEvent event) {
         onSuccess();
+        responseBodyBytes.addAndGet(event.getResponseLength());
     }
 
     @Override
     public void onPollFailed(PollFailedEvent event) {
         onFailure();
+    }
+
+    /**
+     * @return the total number of bytes in the response bodies received
+     */
+    public long getResponseBodyLength() {
+        return responseBodyBytes.get();
     }
 }

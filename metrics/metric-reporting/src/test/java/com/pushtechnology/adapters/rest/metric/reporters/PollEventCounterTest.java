@@ -19,6 +19,9 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
+import com.pushtechnology.adapters.rest.metrics.PollRequestEvent;
+import com.pushtechnology.adapters.rest.metrics.PollSuccessEvent;
+
 /**
  * Unit tests for {@link PollEventCounter}.
  *
@@ -41,11 +44,13 @@ public final class PollEventCounterTest {
         final PollEventCounter counter = new PollEventCounter();
 
         counter.onPollRequest(null);
-        counter.onPollSuccess(null);
+        counter.onPollSuccess(PollSuccessEvent.Factory.create(PollRequestEvent.Factory.create(""), 200, 10));
 
         assertEquals(1, counter.getRequests());
         assertEquals(1, counter.getSuccesses());
         assertEquals(0, counter.getFailures());
+
+        assertEquals(10, counter.getResponseBodyLength());
     }
 
     @Test
