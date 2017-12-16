@@ -40,9 +40,9 @@ public final class PublicationEventCounterTest {
         assertEquals(0, counter.getSuccesses());
         assertEquals(0, counter.getFailures());
 
-        assertEquals(5, counter.getRequestBytes());
-        assertEquals(0, counter.getSuccessBytes());
-        assertEquals(0, counter.getFailedBytes());
+        assertEquals(5, counter.getTotalRequestBytes());
+        assertEquals(0, counter.getTotalSuccessBytes());
+        assertEquals(0, counter.getTotalFailedBytes());
     }
 
     @Test
@@ -57,9 +57,9 @@ public final class PublicationEventCounterTest {
         assertEquals(1, counter.getSuccesses());
         assertEquals(0, counter.getFailures());
 
-        assertEquals(5, counter.getRequestBytes());
-        assertEquals(5, counter.getSuccessBytes());
-        assertEquals(0, counter.getFailedBytes());
+        assertEquals(5, counter.getTotalRequestBytes());
+        assertEquals(5, counter.getTotalSuccessBytes());
+        assertEquals(0, counter.getTotalFailedBytes());
 
     }
 
@@ -75,8 +75,8 @@ public final class PublicationEventCounterTest {
         assertEquals(0, counter.getSuccesses());
         assertEquals(1, counter.getFailures());
 
-        assertEquals(5, counter.getRequestBytes());
-        assertEquals(0, counter.getSuccessBytes());
-        assertEquals(5, counter.getFailedBytes());
+        assertEquals(5, counter.getTotalRequestBytes());
+        assertEquals(0, counter.getTotalSuccessBytes());
+        assertEquals(5, counter.getTotalFailedBytes());
     }
 }

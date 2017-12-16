@@ -53,21 +53,21 @@ public final class PublicationEventCounter extends AbstractEventCounter implemen
     /**
      * @return the requested publication bytes
      */
-    public int getRequestBytes() {
+    public int getTotalRequestBytes() {
         return requestBytes.get();
     }
 
     /**
      * @return the successful publication bytes
      */
-    public int getSuccessBytes() {
+    public int getTotalSuccessBytes() {
         return successBytes.get();
     }
 
     /**
      * @return the failed publication bytes
      */
-    public int getFailedBytes() {
+    public int getTotalFailedBytes() {
         return failedBytes.get();
     }
 }

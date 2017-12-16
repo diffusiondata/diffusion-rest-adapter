@@ -277,7 +277,7 @@ public final class TopicBasedMetricsReporter implements AutoCloseable {
 
         longUpdater.update(
             rootTopic + "/publication/bytes",
-            (long) publicationEventCounter.getSuccessBytes(),
+            (long) publicationEventCounter.getTotalSuccessBytes(),
             updateCallback);
 
         final OptionalLong requestTime = publicationQuerier.get90thPercentileSuccessfulRequestTime();

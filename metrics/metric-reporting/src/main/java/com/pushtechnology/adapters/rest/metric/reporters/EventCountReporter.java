@@ -88,9 +88,9 @@ public final class EventCountReporter implements AutoCloseable {
                     publicationEventCounter.getRequests(),
                     publicationEventCounter.getSuccesses(),
                     publicationEventCounter.getFailures(),
-                    publicationEventCounter.getRequestBytes(),
-                    publicationEventCounter.getSuccessBytes(),
-                    publicationEventCounter.getFailedBytes());
+                    publicationEventCounter.getTotalRequestBytes(),
+                    publicationEventCounter.getTotalSuccessBytes(),
+                    publicationEventCounter.getTotalFailedBytes());
             },
             1,
             1,
