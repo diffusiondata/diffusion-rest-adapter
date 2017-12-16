@@ -49,7 +49,7 @@ public final class PollEventCounter extends AbstractEventCounter implements Poll
     /**
      * @return the total number of bytes in the response bodies received
      */
-    public long getResponseBodyLength() {
+    public long getTotalPollResponseBytes() {
         return responseBodyBytes.get();
     }
 }

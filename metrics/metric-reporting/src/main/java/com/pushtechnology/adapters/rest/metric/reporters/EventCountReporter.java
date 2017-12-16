@@ -76,7 +76,7 @@ public final class EventCountReporter implements AutoCloseable {
                     pollEventCounter.getRequests(),
                     pollEventCounter.getSuccesses(),
                     pollEventCounter.getFailures(),
-                    pollEventCounter.getResponseBodyLength());
+                    pollEventCounter.getTotalPollResponseBytes());
                 LOG.info(
                     "Topic creation requests {}, successes {}, failures {}",
                     topicCreationEventCounter.getRequests(),

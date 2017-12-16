@@ -50,7 +50,7 @@ public final class PollEventCounterTest {
         assertEquals(1, counter.getSuccesses());
         assertEquals(0, counter.getFailures());
 
-        assertEquals(10, counter.getResponseBodyLength());
+        assertEquals(10, counter.getTotalPollResponseBytes());
     }
 
     @Test
