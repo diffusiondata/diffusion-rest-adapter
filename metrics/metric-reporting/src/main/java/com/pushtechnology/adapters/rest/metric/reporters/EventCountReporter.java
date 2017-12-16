@@ -70,21 +70,28 @@ public final class EventCountReporter implements AutoCloseable {
         }
 
         loggingTask = executor.scheduleAtFixedRate(
-            () -> LOG.info(
-                "Polls {}/{}/{} {} Topic creation {}/{}/{} Updates {}/{}/{} {}/{}/{}",
-                pollEventCounter.getRequests(),
-                pollEventCounter.getSuccesses(),
-                pollEventCounter.getFailures(),
-                pollEventCounter.getResponseBodyLength(),
-                topicCreationEventCounter.getRequests(),
-                topicCreationEventCounter.getSuccesses(),
-                topicCreationEventCounter.getFailures(),
-                publicationEventCounter.getRequests(),
-                publicationEventCounter.getSuccesses(),
-                publicationEventCounter.getFailures(),
-                publicationEventCounter.getRequestBytes(),
-                publicationEventCounter.getSuccessBytes(),
-                publicationEventCounter.getFailedBytes()),
+            () -> {
+                LOG.info(
+                    "Poll requests {}, successes {}, failures {}, received bytes {}",
+                    pollEventCounter.getRequests(),
+                    pollEventCounter.getSuccesses(),
+                    pollEventCounter.getFailures(),
+                    pollEventCounter.getResponseBodyLength());
+                LOG.info(
+                    "Topic creation requests {}, successes {}, failures {}",
+                    topicCreationEventCounter.getRequests(),
+                    topicCreationEventCounter.getSuccesses(),
+                    topicCreationEventCounter.getFailures());
+                LOG.info(
+                    "Update requests {}, successes {}, failures {}, " +
+                        "requested bytes {}, successful bytes {}, failed bytes {}",
+                    publicationEventCounter.getRequests(),
+                    publicationEventCounter.getSuccesses(),
+                    publicationEventCounter.getFailures(),
+                    publicationEventCounter.getRequestBytes(),
+                    publicationEventCounter.getSuccessBytes(),
+                    publicationEventCounter.getFailedBytes());
+            },
             1,
             1,
             MINUTES);
