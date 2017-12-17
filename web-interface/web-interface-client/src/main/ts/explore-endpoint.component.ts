@@ -45,6 +45,22 @@ export class ExploreEndpointComponent implements OnInit, OnDestroy {
                                     this.value = JSON.stringify(newValue.get());
                                 });
                         }
+                        else if (spec.type.id === diffusion.topics.TopicType.STRING.id) {
+                            session
+                                .stream(this.service.topicPathRoot + '/' + this.endpoint.topicPath)
+                                .asType(diffusion.datatypes.string())
+                                .on('value', (path, spec, newValue) => {
+                                    this.value = newValue;
+                                });
+                        }
+                        else if (spec.type.id === diffusion.topics.TopicType.BINARY.id) {
+                            session
+                                .stream(this.service.topicPathRoot + '/' + this.endpoint.topicPath)
+                                .asType(diffusion.datatypes.binary())
+                                .on('value', (path, spec, newValue) => {
+                                    this.value = newValue.get().toString('hex');
+                                });
+                        }
                     });
                 session.subscribe(this.service.topicPathRoot + '/' + this.endpoint.topicPath);
             });

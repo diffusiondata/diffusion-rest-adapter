@@ -12,6 +12,9 @@ declare module "diffusion" {
             BINARY: TopicType;
             RECORD: TopicType;
             SINGLE_VALUE: TopicType;
+            STRING: TopicType;
+            INT64: TopicType;
+            DOBULE: TopicType;
         };
         UnsubscribeReason: {
             REQUESTED: any;
