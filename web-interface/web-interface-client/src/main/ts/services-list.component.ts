@@ -11,7 +11,7 @@ import {MetricsService} from "./metrics.service";
     template: `<div class="col-md-3">
     <div class="panel panel-default">
         <div class="panel-heading">
-            <h3 class="panel-title">Services</h3>
+            <h3 class="panel-title">Manage Services</h3>
         </div>
         <ul class="list-group">
             <li *ngFor="let service of model.services" (click)="onSelect(service)" class="list-group-item"><span class="list-group-item-text">{{service.name}}</span></li>
@@ -20,7 +20,7 @@ import {MetricsService} from "./metrics.service";
     </div>
     <div *ngIf="model.services.length > 0" class="panel panel-default">
         <div class="panel-heading">
-            <h3 class="panel-title">Explore</h3>
+            <h3 class="panel-title">Explore Services</h3>
         </div>
         <ul class="list-group">
             <li *ngFor="let service of model.services" (click)="onExploreSelect(service)" class="list-group-item"><span class="list-group-item-text">{{service.name}}</span></li>
