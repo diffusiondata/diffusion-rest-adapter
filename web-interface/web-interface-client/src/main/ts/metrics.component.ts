@@ -4,7 +4,7 @@ import {MetricsService, MetricsView} from "./metrics.service";
 
 @Component({
     selector: 'metrics',
-    template: `<services-list></services-list>
+    template: `<nav-bar></nav-bar>
 <div class="col-md-8">
     <div class="panel panel-default">
         <div class="panel-heading">

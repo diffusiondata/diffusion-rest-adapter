@@ -4,10 +4,10 @@ import { Router } from '@angular/router';
 import { Model, Service } from './model';
 import { ModelService } from './model.service';
 import { ErrorService } from "./error.service";
-import {MetricsService} from "./metrics.service";
+import { MetricsService } from "./metrics.service";
 
 @Component({
-    selector: 'services-list',
+    selector: 'nav-bar',
     template: `<div class="col-md-3">
     <div class="panel panel-default">
         <div class="panel-heading">

@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 
 @Component({
-  template: `<services-list></services-list>`
+  template: `<nav-bar></nav-bar>`
 })
 export class UnselectedComponent {
 }

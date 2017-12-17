@@ -1,7 +1,7 @@
 
 require('reflect-metadata');
 
-var slc = require('../../../target/js/services-list.component'),
+var slc = require('../../../target/js/nav-bar.component'),
     when = require('saywhen');
 
 describe('Services list component', function() {

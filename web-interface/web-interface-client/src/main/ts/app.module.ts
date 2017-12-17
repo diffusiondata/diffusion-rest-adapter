@@ -4,7 +4,7 @@ import { NgModule, provide } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 
-import { ServicesListComponent } from './services-list.component';
+import { ServicesListComponent } from './nav-bar.component';
 import { CreateServiceComponent } from './create-service.component';
 import { ServiceDetailComponent } from './service-detail.component';
 import { EndpointsListComponent } from './endpoints-list.component';

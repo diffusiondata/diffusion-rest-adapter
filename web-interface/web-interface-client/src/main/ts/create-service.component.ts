@@ -5,7 +5,7 @@ import { ErrorService } from './error.service';
 
 @Component({
   selector: 'create-service',
-  template: `<services-list></services-list>
+  template: `<nav-bar></nav-bar>
 <div class="col-md-8">
     <div class="panel panel-default">
         <div class="panel-heading">
