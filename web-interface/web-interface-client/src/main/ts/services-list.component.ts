@@ -18,6 +18,14 @@ import {MetricsService} from "./metrics.service";
             <li routerLink="/createService" class="list-group-item"><span class="list-group-item-text">Create new service</span></li>
         </ul>
     </div>
+    <div *ngIf="model.services.length > 0" class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">Explore</h3>
+        </div>
+        <ul class="list-group">
+            <li *ngFor="let service of model.services" (click)="onExploreSelect(service)" class="list-group-item"><span class="list-group-item-text">{{service.name}}</span></li>
+        </ul>
+    </div>
     <div *ngIf="hasMetrics" class="panel panel-default">
         <div class="panel-heading">
             <h3 class="panel-title">Metrics</h3>
@@ -52,6 +60,11 @@ export class ServicesListComponent implements OnInit {
 
     onSelect(service: Service): void {
         let link = ['/service', service.name];
+        this.router.navigate(link);
+    }
+
+    onExploreSelect(service: Service): void {
+        let link = ['/explore', service.name];
         this.router.navigate(link);
     }
 

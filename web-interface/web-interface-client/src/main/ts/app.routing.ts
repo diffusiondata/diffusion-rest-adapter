@@ -8,6 +8,7 @@ import { LoginComponent } from './login.component';
 import { MetricsComponent } from "./metrics.component";
 
 import { SessionEstablishmentGuard } from './session-establishment.guard';
+import {ExploreServiceComponent} from "./explore-service.component";
 
 const appRoutes: Routes = [
     {
@@ -31,6 +32,11 @@ const appRoutes: Routes = [
     {
         path: 'service/:name',
         component: ServiceDetailComponent,
+        canActivate: [SessionEstablishmentGuard]
+    },
+    {
+        path: 'explore/:name',
+        component: ExploreServiceComponent,
         canActivate: [SessionEstablishmentGuard]
     },
     {

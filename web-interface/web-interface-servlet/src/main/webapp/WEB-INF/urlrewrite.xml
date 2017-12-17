@@ -20,6 +20,10 @@
         <to type="forward" last="true">/index.html</to>
     </rule>
     <rule>
+        <from>^/explore/.*$</from>
+        <to type="forward" last="true">/index.html</to>
+    </rule>
+    <rule>
         <from>^/metrics$</from>
         <to type="forward" last="true">/index.html</to>
     </rule>

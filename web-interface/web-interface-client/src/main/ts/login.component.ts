@@ -62,7 +62,7 @@ export class LoginComponent {
     constructor(
         private router: Router,
         private diffusionService: DiffusionService,
-        @Inject('diffusion.config') private diffusionConfig: diffusion.Options,
+        @Inject('diffusion.config') private diffusionConfig: diffusion.SessionOptions,
         private stackService: StackService) {
     }
 

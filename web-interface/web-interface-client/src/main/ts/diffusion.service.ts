@@ -4,7 +4,7 @@ import * as diffusion from 'diffusion';
 @Injectable()
 export class DiffusionService {
     private session: Promise<any>;
-    private diffusionConfig: diffusion.Options;
+    private diffusionConfig: diffusion.SessionOptions;
 
     constructor() {
         this.session = Promise
@@ -67,7 +67,7 @@ export class DiffusionService {
         });
     }
 
-    createSession(options: diffusion.Options): Promise<diffusion.Session> {
+    createSession(options: diffusion.SessionOptions): Promise<diffusion.Session> {
         this.diffusionConfig = options;
         this.session = this.immediateAttemptToConnect();
 

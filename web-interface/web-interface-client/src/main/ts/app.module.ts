@@ -25,7 +25,9 @@ import { MetricsComponent } from "./metrics.component";
 
 import { routing } from './app.routing';
 import * as diffusion from 'diffusion';
-const diffusionConfig: diffusion.Options = require('diffusionConfig');
+import {ExploreServiceComponent} from "./explore-service.component";
+import {ExploreEndpointComponent} from "./explore-endpoint.component";
+const diffusionConfig: diffusion.SessionOptions = require('diffusionConfig');
 
 @NgModule({
     imports: [ BrowserModule, FormsModule, routing ],
@@ -51,7 +53,9 @@ const diffusionConfig: diffusion.Options = require('diffusionConfig');
         DisplayErrorComponent,
         RootComponent,
         EndpointTypePipe,
-        MetricsComponent
+        MetricsComponent,
+        ExploreServiceComponent,
+        ExploreEndpointComponent
     ],
     bootstrap: [ RootComponent ]
 })
