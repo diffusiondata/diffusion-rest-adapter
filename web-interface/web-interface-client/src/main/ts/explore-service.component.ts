@@ -8,17 +8,13 @@ import { ErrorService } from './error.service';
 @Component({
     selector: 'explore-service',
     template: `<nav-bar></nav-bar>
-<div class="col-md-8">
-    <div *ngIf="service" class="panel panel-default">
+<div *ngIf="service" class="col-md-8">
+    <div class="panel panel-default">
         <div class="panel-heading">
             <h3 class="panel-title">{{service.name}}</h3>
         </div>
-        <div class="panel-body">
-            <div class="form-horizontal">
-                <explore-endpoint *ngFor="let endpoint of service.endpoints; let endpointIndex = index;" [service]="service" [endpoint]="endpoint" [endpointIndex]="endpointIndex"></explore-endpoint>
-            </div>
-        </div>
     </div>
+    <explore-endpoint *ngFor="let endpoint of service.endpoints; let endpointIndex = index;" [service]="service" [endpoint]="endpoint" [endpointIndex]="endpointIndex"></explore-endpoint>
 </div>`
 })
 export class ExploreServiceComponent implements OnInit {

@@ -6,17 +6,26 @@ import * as diffusion from 'diffusion';
 
 @Component({
     selector: 'explore-endpoint',
-    template: `<div class="form-group">
-    <label class="col-sm-2 control-label">URL</label>
-    <p id="url-{{endpointIndex}}" class="form-control-static col-sm-4">{{endpoint.url}}</p>
-</div>
-<div class="form-group">
-    <label class="col-sm-2 control-label">Topic</label>
-    <p id="topic-{{endpointIndex}}" class="form-control-static col-sm-4">{{service.topicPathRoot}}/{{endpoint.topicPath}}</p>
-</div>
-<div class="form-group">
-    <label class="col-sm-2 control-label">Value</label>
-    <textarea id="value-{{endpointIndex}}" class="form-control-static col-sm-4" readonly="readonly">{{value}}</textarea>
+    template: `<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title">{{endpoint.name}}</h3>
+    </div>
+    <div class="panel-body">
+        <div class="form-horizontal">
+            <div class="form-group">
+                <label class="col-sm-2 control-label">URL</label>
+                <p id="url-{{endpointIndex}}" class="form-control-static col-sm-4">{{endpoint.url}}</p>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label">Topic</label>
+                <p id="topic-{{endpointIndex}}" class="form-control-static col-sm-4">{{service.topicPathRoot}}/{{endpoint.topicPath}}</p>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label">Value</label>
+                <textarea id="value-{{endpointIndex}}" class="form-control-static col-sm-4" readonly="readonly">{{value}}</textarea>
+            </div>
+        </div>
+    </div>
 </div>`
 })
 export class ExploreEndpointComponent implements OnInit, OnDestroy {
