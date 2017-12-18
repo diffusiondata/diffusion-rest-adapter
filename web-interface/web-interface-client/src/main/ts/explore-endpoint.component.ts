@@ -16,7 +16,7 @@ import * as diffusion from 'diffusion';
 </div>
 <div class="form-group">
     <label class="col-sm-2 control-label">Value</label>
-    <p id="value-{{endpointIndex}}" class="form-control-static col-sm-4">{{value}}</p>
+    <textarea id="value-{{endpointIndex}}" class="form-control-static col-sm-4" readonly="readonly">{{value}}</textarea>
 </div>`
 })
 export class ExploreEndpointComponent implements OnInit, OnDestroy {
