@@ -14,7 +14,7 @@ import * as diffusion from 'diffusion';
         <div class="form-horizontal">
             <div class="form-group">
                 <label class="col-sm-2 control-label">URL</label>
-                <p id="url-{{endpointIndex}}" class="form-control-static col-sm-4">{{endpoint.url}}</p>
+                <p id="url-{{endpointIndex}}" class="form-control-static col-sm-4">{{url}}</p>
             </div>
             <div class="form-group">
                 <label class="col-sm-2 control-label">Topic</label>
@@ -35,10 +35,13 @@ export class ExploreEndpointComponent implements OnInit, OnDestroy {
 
     private stream;
     private value: String;
+    private url: String = '';
 
     constructor(private diffusionService: DiffusionService) {}
 
     ngOnInit(): void {
+        this.setUrl();
+
         this
             .diffusionService
             .get()
@@ -78,5 +81,13 @@ export class ExploreEndpointComponent implements OnInit, OnDestroy {
     ngOnDestroy(): void {
         this.stream.close();
         this.diffusionService.get().then(session => session.unsubscribe(this.service.topicPathRoot + '/' + this.endpoint.topicPath));
+    }
+
+    private setUrl() {
+        this.url = this.service.secure ? 'https://' : 'http://';
+        this.url += this.service.host;
+        this.url += this.service.secure && this.service.port !== 443 ? ':' + this.service.port : '';
+        this.url += !this.service.secure && this.service.port !== 80 ? ':' + this.service.port : '';
+        this.url += this.endpoint.url;
     }
 }
