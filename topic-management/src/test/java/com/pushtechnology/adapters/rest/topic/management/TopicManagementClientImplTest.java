@@ -17,6 +17,7 @@ package com.pushtechnology.adapters.rest.topic.management;
 
 import static java.util.Arrays.asList;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -28,17 +29,19 @@ import java.util.concurrent.CompletableFuture;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 
 import com.pushtechnology.adapters.rest.metrics.listeners.TopicCreationListener;
+import com.pushtechnology.adapters.rest.metrics.listeners.TopicCreationListener.TopicCreationCompletionListener;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.diffusion.client.callbacks.Registration;
+import com.pushtechnology.diffusion.client.features.control.topics.TopicAddFailReason;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
+import com.pushtechnology.diffusion.v4.SessionDisconnectedException;
 
 /**
  * Unit tests for {@link TopicManagementClientImpl}.
@@ -56,8 +59,8 @@ public final class TopicManagementClientImplTest {
     private Registration registration;
     @Mock
     private TopicCreationListener topicCreationListener;
-    @Captor
-    private ArgumentCaptor<TopicControl.AddCallback> callbackCaptor;
+    @Mock
+    private TopicCreationCompletionListener topicCreationCompletionListener;
 
     private final EndpointConfig jsonEndpointConfig = EndpointConfig
         .builder()
@@ -98,13 +101,14 @@ public final class TopicManagementClientImplTest {
 
         topicManagementClient = new TopicManagementClientImpl(topicCreationListener, session);
 
+        when(topicCreationListener.onTopicCreationRequest(isNotNull(), isNotNull())).thenReturn(topicCreationCompletionListener);
         when(session.feature(TopicControl.class)).thenReturn(topicControl);
         when(topicControl.removeTopicsWithSession(any())).thenReturn(CompletableFuture.completedFuture(registration));
     }
 
     @After
     public void postConditions() {
-        verifyNoMoreInteractions(topicControl, addCallback, topicCreationListener);
+        verifyNoMoreInteractions(topicControl, addCallback, topicCreationListener, topicCreationCompletionListener);
     }
 
     @Test
@@ -117,40 +121,43 @@ public final class TopicManagementClientImplTest {
     @SuppressWarnings("deprecation")
     @Test
     public void addJSONEndpoint() {
+        when(topicControl.addTopic(isNotNull(), ArgumentMatchers.<TopicType>isNotNull())).thenReturn(cf(new SessionDisconnectedException()));
+
         topicManagementClient.addEndpoint(serviceConfig, jsonEndpointConfig, addCallback);
 
         verify(topicCreationListener).onTopicCreationRequest("service/jsonEndpoint", TopicType.JSON);
-        verify(topicControl).addTopic(eq("service/jsonEndpoint"), eq(TopicType.JSON), callbackCaptor.capture());
-
-        callbackCaptor.getValue().onDiscard();
+        verify(topicControl).addTopic(eq("service/jsonEndpoint"), eq(TopicType.JSON));
 
         verify(addCallback).onDiscard();
+        verify(topicCreationCompletionListener).onTopicCreationFailed(TopicAddFailReason.UNEXPECTED_ERROR);
     }
 
     @SuppressWarnings("deprecation")
     @Test
     public void addBinaryEndpoint() {
+        when(topicControl.addTopic(isNotNull(), ArgumentMatchers.<TopicType>isNotNull())).thenReturn(cf(new SessionDisconnectedException()));
+
         topicManagementClient.addEndpoint(serviceConfig, binaryEndpointConfig, addCallback);
 
         verify(topicCreationListener).onTopicCreationRequest("service/binaryEndpoint", TopicType.BINARY);
-        verify(topicControl).addTopic(eq("service/binaryEndpoint"), eq(TopicType.BINARY), callbackCaptor.capture());
-
-        callbackCaptor.getValue().onDiscard();
+        verify(topicControl).addTopic(eq("service/binaryEndpoint"), eq(TopicType.BINARY));
 
         verify(addCallback).onDiscard();
+        verify(topicCreationCompletionListener).onTopicCreationFailed(TopicAddFailReason.UNEXPECTED_ERROR);
     }
 
     @SuppressWarnings("deprecation")
     @Test
     public void addStringEndpoint() {
+        when(topicControl.addTopic(isNotNull(), ArgumentMatchers.<TopicType>isNotNull())).thenReturn(cf(new SessionDisconnectedException()));
+
         topicManagementClient.addEndpoint(serviceConfig, stringEndpointConfig, addCallback);
 
         verify(topicCreationListener).onTopicCreationRequest("service/stringEndpoint", TopicType.STRING);
-        verify(topicControl).addTopic(eq("service/stringEndpoint"), eq(TopicType.STRING), callbackCaptor.capture());
-
-        callbackCaptor.getValue().onDiscard();
+        verify(topicControl).addTopic(eq("service/stringEndpoint"), eq(TopicType.STRING));
 
         verify(addCallback).onDiscard();
+        verify(topicCreationCompletionListener).onTopicCreationFailed(TopicAddFailReason.UNEXPECTED_ERROR);
     }
 
     @Test
@@ -169,5 +176,11 @@ public final class TopicManagementClientImplTest {
         topicManagementClient.removeService(serviceConfig);
 
         verify(registration).close();
+    }
+
+    private static CompletableFuture<TopicControl.AddTopicResult> cf(Exception exception) {
+        final CompletableFuture<TopicControl.AddTopicResult> result = new CompletableFuture<>();
+        result.completeExceptionally(exception);
+        return result;
     }
 }

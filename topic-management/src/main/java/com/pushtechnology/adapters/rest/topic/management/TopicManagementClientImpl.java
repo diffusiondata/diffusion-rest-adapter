@@ -24,6 +24,7 @@ import com.pushtechnology.adapters.rest.metrics.listeners.TopicCreationListener.
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.diffusion.client.callbacks.Registration;
+import com.pushtechnology.diffusion.client.features.control.topics.TopicAddFailReason;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.AddCallback;
 import com.pushtechnology.diffusion.client.session.Session;
@@ -62,7 +63,6 @@ public final class TopicManagementClientImpl implements TopicManagementClient {
             });
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     public void addEndpoint(
             ServiceConfig serviceConfig,
@@ -79,8 +79,34 @@ public final class TopicManagementClientImpl implements TopicManagementClient {
             .feature(TopicControl.class)
             .addTopic(
                 topicPath,
-                topicType,
-                new TopicSetupCallback(completionListener, callback));
+                topicType)
+                .thenAccept(x -> {
+                    completionListener.onTopicCreated();
+                    callback.onTopicAdded(topicPath);
+                })
+                .exceptionally(t -> {
+                    if (t instanceof TopicControl.InvalidTopicPathException) {
+                        completionListener.onTopicCreationFailed(TopicAddFailReason.INVALID_NAME);
+                        callback.onTopicAddFailed(topicPath, TopicAddFailReason.INVALID_NAME);
+                    }
+                    else if (t instanceof TopicControl.IncompatibleExistingTopicException) {
+                        completionListener.onTopicCreationFailed(TopicAddFailReason.EXISTS_INCOMPATIBLE);
+                        callback.onTopicAddFailed(topicPath, TopicAddFailReason.EXISTS_INCOMPATIBLE);
+                    }
+                    else if (t instanceof TopicControl.TopicLicenseLimitException) {
+                        completionListener.onTopicCreationFailed(TopicAddFailReason.EXCEEDED_LICENSE_LIMIT);
+                        callback.onTopicAddFailed(topicPath, TopicAddFailReason.EXCEEDED_LICENSE_LIMIT);
+                    }
+                    else if (t instanceof TopicControl.InvalidTopicSpecificationException) {
+                        completionListener.onTopicCreationFailed(TopicAddFailReason.INVALID_DETAILS);
+                        callback.onTopicAddFailed(topicPath, TopicAddFailReason.INVALID_DETAILS);
+                    }
+                    else {
+                        completionListener.onTopicCreationFailed(TopicAddFailReason.UNEXPECTED_ERROR);
+                        callback.onDiscard();
+                    }
+                    return null;
+                });
     }
 
     @Override
