@@ -15,9 +15,8 @@
 
 package com.pushtechnology.adapters.rest.metrics.listeners;
 
-import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
-import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicAddFailReason;
+import com.pushtechnology.diffusion.client.topics.details.TopicType;
 
 /**
  * Listener for Diffusion topic creation events.
@@ -28,12 +27,10 @@ public interface TopicCreationListener {
     /**
      * Notified when an attempt to create a Diffusion topic is made and there is no initial value.
      *
-     * @param serviceConfig the service
-     * @param endpointConfig the endpoint
+     * @param path the path
+     * @param topicType the topic type
      */
-    TopicCreationCompletionListener onTopicCreationRequest(
-        ServiceConfig serviceConfig,
-        EndpointConfig endpointConfig);
+    TopicCreationCompletionListener onTopicCreationRequest(String path, TopicType topicType);
 
     /**
      * Listener for the completion of a topic creation request.

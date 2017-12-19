@@ -33,6 +33,7 @@ import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.diffusion.client.callbacks.ErrorReason;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicAddFailReason;
+import com.pushtechnology.diffusion.client.topics.details.TopicType;
 
 import net.jcip.annotations.GuardedBy;
 import net.jcip.annotations.ThreadSafe;
@@ -109,15 +110,13 @@ public final class MetricsDispatcher implements
     }
 
     @Override
-    public TopicCreationCompletionListener onTopicCreationRequest(
-        ServiceConfig serviceConfig,
-        EndpointConfig endpointConfig) {
+    public TopicCreationCompletionListener onTopicCreationRequest(String path, TopicType topicType) {
 
         final Collection<TopicCreationCompletionListener> listeners = new ArrayList<>();
         synchronized (this) {
             topicCreationListeners.forEach(topicCreationListener -> {
                 final TopicCreationCompletionListener completionListener =
-                    topicCreationListener.onTopicCreationRequest(serviceConfig, endpointConfig);
+                    topicCreationListener.onTopicCreationRequest(path, topicType);
                 listeners.add(completionListener);
             });
         }

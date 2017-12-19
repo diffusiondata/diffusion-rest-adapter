@@ -39,8 +39,6 @@ import com.pushtechnology.diffusion.client.callbacks.Registration;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
-import com.pushtechnology.diffusion.datatype.binary.Binary;
-import com.pushtechnology.diffusion.datatype.json.JSON;
 
 /**
  * Unit tests for {@link TopicManagementClientImpl}.
@@ -54,10 +52,6 @@ public final class TopicManagementClientImplTest {
     private TopicControl topicControl;
     @Mock
     private TopicControl.AddCallback addCallback;
-    @Mock
-    private JSON json;
-    @Mock
-    private Binary binary;
     @Mock
     private Registration registration;
     @Mock
@@ -125,7 +119,7 @@ public final class TopicManagementClientImplTest {
     public void addJSONEndpoint() {
         topicManagementClient.addEndpoint(serviceConfig, jsonEndpointConfig, addCallback);
 
-        verify(topicCreationListener).onTopicCreationRequest(serviceConfig, jsonEndpointConfig);
+        verify(topicCreationListener).onTopicCreationRequest("service/jsonEndpoint", TopicType.JSON);
         verify(topicControl).addTopic(eq("service/jsonEndpoint"), eq(TopicType.JSON), callbackCaptor.capture());
 
         callbackCaptor.getValue().onDiscard();
@@ -138,7 +132,7 @@ public final class TopicManagementClientImplTest {
     public void addBinaryEndpoint() {
         topicManagementClient.addEndpoint(serviceConfig, binaryEndpointConfig, addCallback);
 
-        verify(topicCreationListener).onTopicCreationRequest(serviceConfig, binaryEndpointConfig);
+        verify(topicCreationListener).onTopicCreationRequest("service/binaryEndpoint", TopicType.BINARY);
         verify(topicControl).addTopic(eq("service/binaryEndpoint"), eq(TopicType.BINARY), callbackCaptor.capture());
 
         callbackCaptor.getValue().onDiscard();
@@ -151,7 +145,7 @@ public final class TopicManagementClientImplTest {
     public void addStringEndpoint() {
         topicManagementClient.addEndpoint(serviceConfig, stringEndpointConfig, addCallback);
 
-        verify(topicCreationListener).onTopicCreationRequest(serviceConfig, stringEndpointConfig);
+        verify(topicCreationListener).onTopicCreationRequest("service/stringEndpoint", TopicType.STRING);
         verify(topicControl).addTopic(eq("service/stringEndpoint"), eq(TopicType.STRING), callbackCaptor.capture());
 
         callbackCaptor.getValue().onDiscard();

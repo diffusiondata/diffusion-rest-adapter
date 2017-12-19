@@ -74,7 +74,7 @@ public final class TopicManagementClientImpl implements TopicManagementClient {
         final TopicType topicType = EndpointType.from(produces).getTopicType();
 
         final TopicCreationCompletionListener completionListener =
-            topicCreationListener.onTopicCreationRequest(serviceConfig, endpointConfig);
+            topicCreationListener.onTopicCreationRequest(topicPath, topicType);
         session
             .feature(TopicControl.class)
             .addTopic(

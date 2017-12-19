@@ -30,6 +30,7 @@ import com.pushtechnology.adapters.rest.metrics.listeners.TopicCreationListener;
 import com.pushtechnology.adapters.rest.metrics.listeners.TopicCreationListener.TopicCreationCompletionListener;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
+import com.pushtechnology.diffusion.client.topics.details.TopicType;
 import com.pushtechnology.diffusion.datatype.Bytes;
 
 /**
@@ -170,7 +171,7 @@ public final class MetricsDispatcherTest {
         dispatcher.addTopicCreationEventListener(topicCreationEventListener0);
         dispatcher.addTopicCreationEventListener(topicCreationEventListener1);
 
-        final TopicCreationCompletionListener completionListener = dispatcher.onTopicCreationRequest(serviceConfig, endpointConfig);
+        final TopicCreationCompletionListener completionListener = dispatcher.onTopicCreationRequest("topic/a/url/json", TopicType.JSON);
 
         verify(topicCreationEventListener0).onTopicCreationRequest(isNotNull());
         verify(topicCreationEventListener1).onTopicCreationRequest(isNotNull());

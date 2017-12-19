@@ -2,7 +2,6 @@ package com.pushtechnology.adapters.rest.metrics.event.listeners;
 
 import static com.pushtechnology.diffusion.client.features.control.topics.TopicAddFailReason.USER_CODE_ERROR;
 import static com.pushtechnology.diffusion.client.topics.details.TopicType.STRING;
-import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.verify;
@@ -22,8 +21,7 @@ import org.mockito.junit.MockitoRule;
 import com.pushtechnology.adapters.rest.metrics.TopicCreationFailedEvent;
 import com.pushtechnology.adapters.rest.metrics.TopicCreationRequestEvent;
 import com.pushtechnology.adapters.rest.metrics.TopicCreationSuccessEvent;
-import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
-import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
+import com.pushtechnology.diffusion.client.topics.details.TopicType;
 import com.pushtechnology.diffusion.datatype.Bytes;
 
 /**
@@ -46,23 +44,6 @@ public final class TopicCreationEventDispatcherTest {
     @Rule
     public MockitoRule mockitoRule = MockitoJUnit.rule();
 
-    private final EndpointConfig endpointConfig = EndpointConfig
-        .builder()
-        .name("endpoint")
-        .url("endpoint")
-        .topicPath("endpoint")
-        .produces("string")
-        .build();
-    private final ServiceConfig serviceConfig = ServiceConfig
-        .builder()
-        .name("service")
-        .host("localhost")
-        .port(80)
-        .pollPeriod(5000)
-        .topicPathRoot("service")
-        .endpoints(singletonList(endpointConfig))
-        .build();
-
     @Before
     public void setUp() {
         when(bytes.length()).thenReturn(10);
@@ -77,7 +58,7 @@ public final class TopicCreationEventDispatcherTest {
     public void onTopicCreationRequest() throws Exception {
         final TopicCreationEventDispatcher dispatcher = new TopicCreationEventDispatcher(topicCreationEventListener);
 
-        dispatcher.onTopicCreationRequest(serviceConfig, endpointConfig);
+        dispatcher.onTopicCreationRequest("service/endpoint", TopicType.STRING);
 
         verify(topicCreationEventListener).onTopicCreationRequest(requestCaptor.capture());
         final TopicCreationRequestEvent value = requestCaptor.getValue();
@@ -89,7 +70,7 @@ public final class TopicCreationEventDispatcherTest {
     public void onTopicCreationSuccess() throws Exception {
         final TopicCreationEventDispatcher dispatcher = new TopicCreationEventDispatcher(topicCreationEventListener);
 
-        dispatcher.onTopicCreationRequest(serviceConfig, endpointConfig).onTopicCreated();
+        dispatcher.onTopicCreationRequest("service/endpoint", TopicType.STRING).onTopicCreated();
 
         verify(topicCreationEventListener).onTopicCreationRequest(isA(TopicCreationRequestEvent.class));
         verify(topicCreationEventListener).onTopicCreationSuccess(successCaptor.capture());
@@ -102,7 +83,7 @@ public final class TopicCreationEventDispatcherTest {
     public void onTopicCreationFailure() throws Exception {
         final TopicCreationEventDispatcher dispatcher = new TopicCreationEventDispatcher(topicCreationEventListener);
 
-        dispatcher.onTopicCreationRequest(serviceConfig, endpointConfig).onTopicCreationFailed(USER_CODE_ERROR);
+        dispatcher.onTopicCreationRequest("service/endpoint", TopicType.STRING).onTopicCreationFailed(USER_CODE_ERROR);
 
         verify(topicCreationEventListener).onTopicCreationRequest(isA(TopicCreationRequestEvent.class));
         verify(topicCreationEventListener).onTopicCreationFailed(failedCaptor.capture());

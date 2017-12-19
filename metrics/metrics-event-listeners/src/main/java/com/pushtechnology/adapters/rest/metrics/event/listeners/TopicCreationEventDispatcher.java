@@ -15,14 +15,12 @@
 
 package com.pushtechnology.adapters.rest.metrics.event.listeners;
 
-import com.pushtechnology.adapters.rest.endpoints.EndpointType;
 import com.pushtechnology.adapters.rest.metrics.TopicCreationFailedEvent;
 import com.pushtechnology.adapters.rest.metrics.TopicCreationRequestEvent;
 import com.pushtechnology.adapters.rest.metrics.TopicCreationSuccessEvent;
 import com.pushtechnology.adapters.rest.metrics.listeners.TopicCreationListener;
-import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
-import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicAddFailReason;
+import com.pushtechnology.diffusion.client.topics.details.TopicType;
 
 /**
  * Implementation of {@link TopicCreationListener} that notifies a
@@ -41,13 +39,9 @@ public final class TopicCreationEventDispatcher implements TopicCreationListener
     }
 
     @Override
-    public TopicCreationCompletionListener onTopicCreationRequest(
-            ServiceConfig serviceConfig,
-            EndpointConfig endpointConfig) {
+    public TopicCreationCompletionListener onTopicCreationRequest(String path, TopicType topicType) {
 
-        final TopicCreationRequestEvent requestEvent = TopicCreationRequestEvent.Factory.create(
-            serviceConfig.getTopicPathRoot() + "/" + endpointConfig.getTopicPath(),
-            EndpointType.from(endpointConfig.getProduces()).getTopicType());
+        final TopicCreationRequestEvent requestEvent = TopicCreationRequestEvent.Factory.create(path, topicType);
 
         listener.onTopicCreationRequest(requestEvent);
 
