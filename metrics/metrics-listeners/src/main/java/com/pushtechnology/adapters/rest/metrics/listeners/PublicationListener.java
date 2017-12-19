@@ -53,24 +53,5 @@ public interface PublicationListener {
          * @param reason the cause of failure
          */
         void onPublicationFailed(ErrorReason reason);
-
-        /**
-         * Implementation of {@link PublicationCompletionListener} that ignores notifications.
-         */
-        PublicationCompletionListener NULL_LISTENER = new PublicationCompletionListener() {
-            @Override
-            public void onPublication() {
-            }
-
-            @Override
-            public void onPublicationFailed(ErrorReason reason) {
-            }
-        };
     }
-
-    /**
-     * Implementation of {@link PublicationListener} that ignores notifications.
-     */
-    PublicationListener NULL_LISTENER = (PublicationListener) (serviceConfig, endpointConfig, update) ->
-        PublicationCompletionListener.NULL_LISTENER;
 }

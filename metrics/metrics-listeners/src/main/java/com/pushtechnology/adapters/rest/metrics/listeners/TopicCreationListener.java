@@ -50,30 +50,5 @@ public interface TopicCreationListener {
          * @param reason the cause of failure
          */
         void onTopicCreationFailed(TopicAddFailReason reason);
-
-        /**
-         * Implementation of {@link TopicCreationCompletionListener} that ignores notifications.
-         */
-        TopicCreationCompletionListener NULL_LISTENER = new TopicCreationCompletionListener() {
-            @Override
-            public void onTopicCreated() {
-            }
-
-            @Override
-            public void onTopicCreationFailed(TopicAddFailReason reason) {
-            }
-        };
     }
-
-    /**
-     * Implementation of {@link TopicCreationListener} that ignores notifications.
-     */
-    TopicCreationListener NULL_LISTENER = new TopicCreationListener() {
-        @Override
-        public TopicCreationCompletionListener onTopicCreationRequest(
-                ServiceConfig serviceConfig,
-                EndpointConfig endpointConfig) {
-            return TopicCreationCompletionListener.NULL_LISTENER;
-        }
-    };
 }

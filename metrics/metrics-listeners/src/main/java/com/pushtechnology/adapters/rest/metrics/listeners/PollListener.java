@@ -52,23 +52,5 @@ public interface PollListener {
          * @param exception the exception associated with the failure
          */
         void onPollFailure(Exception exception);
-
-        /**
-         * Implementation of {@link PollCompletionListener} that ignores notifications.
-         */
-        PollCompletionListener NULL_LISTENER = new PollCompletionListener() {
-            @Override
-            public void onPollResponse(HttpResponse response) {
-            }
-
-            @Override
-            public void onPollFailure(Exception exception) {
-            }
-        };
     }
-
-    /**
-     * Implementation of {@link PollListener} that ignores notifications.
-     */
-    PollListener NULL_LISTENER = (serviceConfig, endpointConfig) -> PollCompletionListener.NULL_LISTENER;
 }
