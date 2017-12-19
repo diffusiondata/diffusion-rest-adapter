@@ -25,7 +25,7 @@ import com.pushtechnology.diffusion.client.topics.details.TopicType;
  */
 public interface TopicCreationListener {
     /**
-     * Notified when an attempt to create a Diffusion topic is made and there is no initial value.
+     * Notified when an attempt to create a Diffusion topic is made.
      *
      * @param path the path
      * @param topicType the topic type
