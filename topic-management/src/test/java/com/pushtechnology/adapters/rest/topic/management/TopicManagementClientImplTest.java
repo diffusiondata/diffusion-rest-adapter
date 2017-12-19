@@ -25,6 +25,7 @@ import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
 import org.junit.After;
 import org.junit.Before;
@@ -180,7 +181,7 @@ public final class TopicManagementClientImplTest {
 
     private static CompletableFuture<TopicControl.AddTopicResult> cf(Exception exception) {
         final CompletableFuture<TopicControl.AddTopicResult> result = new CompletableFuture<>();
-        result.completeExceptionally(exception);
+        result.completeExceptionally(new CompletionException(exception));
         return result;
     }
 }

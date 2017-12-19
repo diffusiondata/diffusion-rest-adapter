@@ -15,9 +15,12 @@
 
 package com.pushtechnology.adapters.rest.topic.management;
 
+import java.util.concurrent.CompletableFuture;
+
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.AddCallback;
+import com.pushtechnology.diffusion.client.topics.details.TopicType;
 
 /**
  * Topic management client for Diffusion server.
@@ -49,4 +52,12 @@ public interface TopicManagementClient {
      * Stop managing the topics for a REST service.
      */
     void removeService(ServiceConfig serviceConfig);
+
+    /**
+     * Add a topic.
+     * @param path the path
+     * @param topicType the topic type
+     * @return a future representing the completion of adding the topic
+     */
+    CompletableFuture<Void> addTopic(String path, TopicType topicType);
 }

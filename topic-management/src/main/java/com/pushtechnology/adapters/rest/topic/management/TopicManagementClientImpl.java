@@ -17,6 +17,8 @@ package com.pushtechnology.adapters.rest.topic.management;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
 import com.pushtechnology.adapters.rest.endpoints.EndpointType;
 import com.pushtechnology.adapters.rest.metrics.listeners.TopicCreationListener;
@@ -73,40 +75,35 @@ public final class TopicManagementClientImpl implements TopicManagementClient {
         final String topicPath = serviceConfig.getTopicPathRoot() + "/" + endpointConfig.getTopicPath();
         final TopicType topicType = EndpointType.from(produces).getTopicType();
 
-        final TopicCreationCompletionListener completionListener =
-            topicCreationListener.onTopicCreationRequest(topicPath, topicType);
-        session
-            .feature(TopicControl.class)
-            .addTopic(
-                topicPath,
-                topicType)
-                .thenAccept(x -> {
-                    completionListener.onTopicCreated();
-                    callback.onTopicAdded(topicPath);
-                })
-                .exceptionally(t -> {
-                    if (t instanceof TopicControl.InvalidTopicPathException) {
-                        completionListener.onTopicCreationFailed(TopicAddFailReason.INVALID_NAME);
+        addTopic(
+            topicPath,
+            topicType)
+            .thenAccept(x -> {
+                callback.onTopicAdded(topicPath);
+            })
+            .whenComplete((x, t) -> {
+                if (t instanceof CompletionException) {
+                    final Throwable e = t.getCause();
+                    if (e instanceof TopicControl.InvalidTopicPathException) {
                         callback.onTopicAddFailed(topicPath, TopicAddFailReason.INVALID_NAME);
                     }
-                    else if (t instanceof TopicControl.IncompatibleExistingTopicException) {
-                        completionListener.onTopicCreationFailed(TopicAddFailReason.EXISTS_INCOMPATIBLE);
+                    else if (e instanceof TopicControl.IncompatibleExistingTopicException) {
                         callback.onTopicAddFailed(topicPath, TopicAddFailReason.EXISTS_INCOMPATIBLE);
                     }
-                    else if (t instanceof TopicControl.TopicLicenseLimitException) {
-                        completionListener.onTopicCreationFailed(TopicAddFailReason.EXCEEDED_LICENSE_LIMIT);
+                    else if (e instanceof TopicControl.TopicLicenseLimitException) {
                         callback.onTopicAddFailed(topicPath, TopicAddFailReason.EXCEEDED_LICENSE_LIMIT);
                     }
-                    else if (t instanceof TopicControl.InvalidTopicSpecificationException) {
-                        completionListener.onTopicCreationFailed(TopicAddFailReason.INVALID_DETAILS);
+                    else if (e instanceof TopicControl.InvalidTopicSpecificationException) {
                         callback.onTopicAddFailed(topicPath, TopicAddFailReason.INVALID_DETAILS);
                     }
                     else {
-                        completionListener.onTopicCreationFailed(TopicAddFailReason.UNEXPECTED_ERROR);
                         callback.onDiscard();
                     }
-                    return null;
-                });
+                }
+                else {
+                    callback.onDiscard();
+                }
+            });
     }
 
     @Override
@@ -124,5 +121,38 @@ public final class TopicManagementClientImpl implements TopicManagementClient {
                 handle.close();
             }
         }
+    }
+
+    @Override
+    public CompletableFuture<Void> addTopic(String path, TopicType topicType) {
+        final TopicCreationCompletionListener completionListener =
+            topicCreationListener.onTopicCreationRequest(path, topicType);
+        return session
+            .feature(TopicControl.class)
+            .addTopic(path, topicType)
+            .thenAccept(x -> completionListener.onTopicCreated())
+            .whenComplete((x, t) -> {
+                if (t instanceof CompletionException) {
+                    final Throwable e = t.getCause();
+                    if (e instanceof TopicControl.InvalidTopicPathException) {
+                        completionListener.onTopicCreationFailed(TopicAddFailReason.INVALID_NAME);
+                    }
+                    else if (e instanceof TopicControl.IncompatibleExistingTopicException) {
+                        completionListener.onTopicCreationFailed(TopicAddFailReason.EXISTS_INCOMPATIBLE);
+                    }
+                    else if (e instanceof TopicControl.TopicLicenseLimitException) {
+                        completionListener.onTopicCreationFailed(TopicAddFailReason.EXCEEDED_LICENSE_LIMIT);
+                    }
+                    else if (e instanceof TopicControl.InvalidTopicSpecificationException) {
+                        completionListener.onTopicCreationFailed(TopicAddFailReason.INVALID_DETAILS);
+                    }
+                    else {
+                        completionListener.onTopicCreationFailed(TopicAddFailReason.UNEXPECTED_ERROR);
+                    }
+                }
+                else if (t != null) {
+                    completionListener.onTopicCreationFailed(TopicAddFailReason.UNEXPECTED_ERROR);
+                }
+            });
     }
 }
