@@ -15,7 +15,6 @@
 
 package com.pushtechnology.adapters.rest.metric.reporters;
 
-import static com.pushtechnology.diffusion.client.features.control.topics.TopicControl.AddTopicResult.CREATED;
 import static com.pushtechnology.diffusion.client.topics.details.TopicType.DOUBLE;
 import static com.pushtechnology.diffusion.client.topics.details.TopicType.INT64;
 import static java.util.concurrent.CompletableFuture.completedFuture;
@@ -42,6 +41,7 @@ import org.mockito.Mockito;
 import com.pushtechnology.adapters.rest.metrics.event.listeners.BoundedPollEventCollector;
 import com.pushtechnology.adapters.rest.metrics.event.listeners.BoundedPublicationEventCollector;
 import com.pushtechnology.adapters.rest.metrics.event.listeners.BoundedTopicCreationEventCollector;
+import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
 import com.pushtechnology.diffusion.client.callbacks.Registration;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.RemovalCallback;
@@ -67,6 +67,8 @@ public final class TopicBasedMetricsReporterTest {
     private TopicUpdateControl updateControl;
     @Mock
     private Registration registration;
+    @Mock
+    private TopicManagementClient topicManagementClient;
 
     private TopicBasedMetricsReporter reporter;
 
@@ -81,12 +83,13 @@ public final class TopicBasedMetricsReporterTest {
         when(session.feature(TopicControl.class)).thenReturn(topicControl);
         when(session.feature(TopicUpdateControl.class)).thenReturn(updateControl);
 
-        when(topicControl.addTopic(isNotNull(), ArgumentMatchers.<TopicType>isNotNull())).thenReturn(completedFuture(CREATED));
+        when(topicManagementClient.addTopic(isNotNull(), ArgumentMatchers.<TopicType>isNotNull())).thenReturn(completedFuture(null));
 
         when(topicControl.removeTopicsWithSession("metrics")).thenReturn(completedFuture(registration));
 
         reporter = new TopicBasedMetricsReporter(
             session,
+            topicManagementClient,
             new PollEventCounter(),
             new PublicationEventCounter(),
             new TopicCreationEventCounter(),
@@ -99,7 +102,7 @@ public final class TopicBasedMetricsReporterTest {
 
     @After
     public void postConditions() {
-        Mockito.verifyNoMoreInteractions(executor, loggingTask, topicControl, updateControl);
+        Mockito.verifyNoMoreInteractions(executor, loggingTask, topicControl, updateControl, topicManagementClient);
     }
 
     @Test
@@ -107,33 +110,33 @@ public final class TopicBasedMetricsReporterTest {
         reporter.start();
 
         verify(topicControl).removeTopicsWithSession("metrics");
-        verify(topicControl).addTopic("metrics/poll/requests", INT64);
-        verify(topicControl).addTopic("metrics/poll/successes", INT64);
-        verify(topicControl).addTopic("metrics/poll/failures", INT64);
-        verify(topicControl).addTopic("metrics/poll/bytes", INT64);
-        verify(topicControl).addTopic("metrics/poll/failureThroughput", DOUBLE);
-        verify(topicControl).addTopic("metrics/poll/requestThroughput", DOUBLE);
-        verify(topicControl).addTopic("metrics/poll/maximumSuccessfulRequestTime", INT64);
-        verify(topicControl).addTopic("metrics/poll/minimumSuccessfulRequestTime", INT64);
-        verify(topicControl).addTopic("metrics/poll/successfulRequestTimeNinetiethPercentile", INT64);
-        verify(topicControl).addTopic("metrics/publication/requests", INT64);
-        verify(topicControl).addTopic("metrics/publication/successes", INT64);
-        verify(topicControl).addTopic("metrics/publication/failures", INT64);
-        verify(topicControl).addTopic("metrics/publication/bytes", INT64);
-        verify(topicControl).addTopic("metrics/publication/failureThroughput", DOUBLE);
-        verify(topicControl).addTopic("metrics/publication/requestThroughput", DOUBLE);
-        verify(topicControl).addTopic("metrics/publication/meanBytesPerPublication", DOUBLE);
-        verify(topicControl).addTopic("metrics/publication/maximumSuccessfulRequestTime", INT64);
-        verify(topicControl).addTopic("metrics/publication/minimumSuccessfulRequestTime", INT64);
-        verify(topicControl).addTopic("metrics/publication/successfulRequestTimeNinetiethPercentile", INT64);
-        verify(topicControl).addTopic("metrics/topicCreation/requests", INT64);
-        verify(topicControl).addTopic("metrics/topicCreation/successes", INT64);
-        verify(topicControl).addTopic("metrics/topicCreation/failures", INT64);
-        verify(topicControl).addTopic("metrics/topicCreation/failureThroughput", DOUBLE);
-        verify(topicControl).addTopic("metrics/topicCreation/requestThroughput", DOUBLE);
-        verify(topicControl).addTopic("metrics/topicCreation/maximumSuccessfulRequestTime", INT64);
-        verify(topicControl).addTopic("metrics/topicCreation/minimumSuccessfulRequestTime", INT64);
-        verify(topicControl).addTopic("metrics/topicCreation/successfulRequestTimeNinetiethPercentile", INT64);
+        verify(topicManagementClient).addTopic("metrics/poll/requests", INT64);
+        verify(topicManagementClient).addTopic("metrics/poll/successes", INT64);
+        verify(topicManagementClient).addTopic("metrics/poll/failures", INT64);
+        verify(topicManagementClient).addTopic("metrics/poll/bytes", INT64);
+        verify(topicManagementClient).addTopic("metrics/poll/failureThroughput", DOUBLE);
+        verify(topicManagementClient).addTopic("metrics/poll/requestThroughput", DOUBLE);
+        verify(topicManagementClient).addTopic("metrics/poll/maximumSuccessfulRequestTime", INT64);
+        verify(topicManagementClient).addTopic("metrics/poll/minimumSuccessfulRequestTime", INT64);
+        verify(topicManagementClient).addTopic("metrics/poll/successfulRequestTimeNinetiethPercentile", INT64);
+        verify(topicManagementClient).addTopic("metrics/publication/requests", INT64);
+        verify(topicManagementClient).addTopic("metrics/publication/successes", INT64);
+        verify(topicManagementClient).addTopic("metrics/publication/failures", INT64);
+        verify(topicManagementClient).addTopic("metrics/publication/bytes", INT64);
+        verify(topicManagementClient).addTopic("metrics/publication/failureThroughput", DOUBLE);
+        verify(topicManagementClient).addTopic("metrics/publication/requestThroughput", DOUBLE);
+        verify(topicManagementClient).addTopic("metrics/publication/meanBytesPerPublication", DOUBLE);
+        verify(topicManagementClient).addTopic("metrics/publication/maximumSuccessfulRequestTime", INT64);
+        verify(topicManagementClient).addTopic("metrics/publication/minimumSuccessfulRequestTime", INT64);
+        verify(topicManagementClient).addTopic("metrics/publication/successfulRequestTimeNinetiethPercentile", INT64);
+        verify(topicManagementClient).addTopic("metrics/topicCreation/requests", INT64);
+        verify(topicManagementClient).addTopic("metrics/topicCreation/successes", INT64);
+        verify(topicManagementClient).addTopic("metrics/topicCreation/failures", INT64);
+        verify(topicManagementClient).addTopic("metrics/topicCreation/failureThroughput", DOUBLE);
+        verify(topicManagementClient).addTopic("metrics/topicCreation/requestThroughput", DOUBLE);
+        verify(topicManagementClient).addTopic("metrics/topicCreation/maximumSuccessfulRequestTime", INT64);
+        verify(topicManagementClient).addTopic("metrics/topicCreation/minimumSuccessfulRequestTime", INT64);
+        verify(topicManagementClient).addTopic("metrics/topicCreation/successfulRequestTimeNinetiethPercentile", INT64);
 
         verify(executor).scheduleAtFixedRate(isA(Runnable.class), eq(1L), eq(1L), eq(MINUTES));
     }
@@ -145,33 +148,33 @@ public final class TopicBasedMetricsReporterTest {
         reporter.start();
 
         verify(topicControl, times(2)).removeTopicsWithSession("metrics");
-        verify(topicControl, times(2)).addTopic("metrics/poll/requests", INT64);
-        verify(topicControl, times(2)).addTopic("metrics/poll/successes", INT64);
-        verify(topicControl, times(2)).addTopic("metrics/poll/failures", INT64);
-        verify(topicControl, times(2)).addTopic("metrics/poll/bytes", INT64);
-        verify(topicControl, times(2)).addTopic("metrics/poll/failureThroughput", DOUBLE);
-        verify(topicControl, times(2)).addTopic("metrics/poll/requestThroughput", DOUBLE);
-        verify(topicControl, times(2)).addTopic("metrics/poll/maximumSuccessfulRequestTime", INT64);
-        verify(topicControl, times(2)).addTopic("metrics/poll/minimumSuccessfulRequestTime", INT64);
-        verify(topicControl, times(2)).addTopic("metrics/poll/successfulRequestTimeNinetiethPercentile", INT64);
-        verify(topicControl, times(2)).addTopic("metrics/publication/requests", INT64);
-        verify(topicControl, times(2)).addTopic("metrics/publication/successes", INT64);
-        verify(topicControl, times(2)).addTopic("metrics/publication/failures", INT64);
-        verify(topicControl, times(2)).addTopic("metrics/publication/bytes", INT64);
-        verify(topicControl, times(2)).addTopic("metrics/publication/failureThroughput", DOUBLE);
-        verify(topicControl, times(2)).addTopic("metrics/publication/requestThroughput", DOUBLE);
-        verify(topicControl, times(2)).addTopic("metrics/publication/meanBytesPerPublication", DOUBLE);
-        verify(topicControl, times(2)).addTopic("metrics/publication/maximumSuccessfulRequestTime", INT64);
-        verify(topicControl, times(2)).addTopic("metrics/publication/minimumSuccessfulRequestTime", INT64);
-        verify(topicControl, times(2)).addTopic("metrics/publication/successfulRequestTimeNinetiethPercentile", INT64);
-        verify(topicControl, times(2)).addTopic("metrics/topicCreation/requests", INT64);
-        verify(topicControl, times(2)).addTopic("metrics/topicCreation/successes", INT64);
-        verify(topicControl, times(2)).addTopic("metrics/topicCreation/failures", INT64);
-        verify(topicControl, times(2)).addTopic("metrics/topicCreation/failureThroughput", DOUBLE);
-        verify(topicControl, times(2)).addTopic("metrics/topicCreation/requestThroughput", DOUBLE);
-        verify(topicControl, times(2)).addTopic("metrics/topicCreation/maximumSuccessfulRequestTime", INT64);
-        verify(topicControl, times(2)).addTopic("metrics/topicCreation/minimumSuccessfulRequestTime", INT64);
-        verify(topicControl, times(2)).addTopic("metrics/topicCreation/successfulRequestTimeNinetiethPercentile", INT64);
+        verify(topicManagementClient, times(2)).addTopic("metrics/poll/requests", INT64);
+        verify(topicManagementClient, times(2)).addTopic("metrics/poll/successes", INT64);
+        verify(topicManagementClient, times(2)).addTopic("metrics/poll/failures", INT64);
+        verify(topicManagementClient, times(2)).addTopic("metrics/poll/bytes", INT64);
+        verify(topicManagementClient, times(2)).addTopic("metrics/poll/failureThroughput", DOUBLE);
+        verify(topicManagementClient, times(2)).addTopic("metrics/poll/requestThroughput", DOUBLE);
+        verify(topicManagementClient, times(2)).addTopic("metrics/poll/maximumSuccessfulRequestTime", INT64);
+        verify(topicManagementClient, times(2)).addTopic("metrics/poll/minimumSuccessfulRequestTime", INT64);
+        verify(topicManagementClient, times(2)).addTopic("metrics/poll/successfulRequestTimeNinetiethPercentile", INT64);
+        verify(topicManagementClient, times(2)).addTopic("metrics/publication/requests", INT64);
+        verify(topicManagementClient, times(2)).addTopic("metrics/publication/successes", INT64);
+        verify(topicManagementClient, times(2)).addTopic("metrics/publication/failures", INT64);
+        verify(topicManagementClient, times(2)).addTopic("metrics/publication/bytes", INT64);
+        verify(topicManagementClient, times(2)).addTopic("metrics/publication/failureThroughput", DOUBLE);
+        verify(topicManagementClient, times(2)).addTopic("metrics/publication/requestThroughput", DOUBLE);
+        verify(topicManagementClient, times(2)).addTopic("metrics/publication/meanBytesPerPublication", DOUBLE);
+        verify(topicManagementClient, times(2)).addTopic("metrics/publication/maximumSuccessfulRequestTime", INT64);
+        verify(topicManagementClient, times(2)).addTopic("metrics/publication/minimumSuccessfulRequestTime", INT64);
+        verify(topicManagementClient, times(2)).addTopic("metrics/publication/successfulRequestTimeNinetiethPercentile", INT64);
+        verify(topicManagementClient, times(2)).addTopic("metrics/topicCreation/requests", INT64);
+        verify(topicManagementClient, times(2)).addTopic("metrics/topicCreation/successes", INT64);
+        verify(topicManagementClient, times(2)).addTopic("metrics/topicCreation/failures", INT64);
+        verify(topicManagementClient, times(2)).addTopic("metrics/topicCreation/failureThroughput", DOUBLE);
+        verify(topicManagementClient, times(2)).addTopic("metrics/topicCreation/requestThroughput", DOUBLE);
+        verify(topicManagementClient, times(2)).addTopic("metrics/topicCreation/maximumSuccessfulRequestTime", INT64);
+        verify(topicManagementClient, times(2)).addTopic("metrics/topicCreation/minimumSuccessfulRequestTime", INT64);
+        verify(topicManagementClient, times(2)).addTopic("metrics/topicCreation/successfulRequestTimeNinetiethPercentile", INT64);
         verify(executor).scheduleAtFixedRate(isA(Runnable.class), eq(1L), eq(1L), eq(MINUTES));
     }
 

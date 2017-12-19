@@ -18,6 +18,11 @@
         </dependency>
 
         <dependency>
+            <groupId>com.pushtechnology.adapters.rest</groupId>
+            <artifactId>topic-management</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>com.pushtechnology.diffusion</groupId>
             <artifactId>diffusion-client</artifactId>
         </dependency>

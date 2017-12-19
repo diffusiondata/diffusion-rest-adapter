@@ -33,6 +33,7 @@ import javax.annotation.PreDestroy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
 import com.pushtechnology.diffusion.client.callbacks.ErrorReason;
 import com.pushtechnology.diffusion.client.callbacks.Registration;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
@@ -52,6 +53,7 @@ public final class TopicBasedMetricsReporter implements AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(TopicBasedMetricsReporter.class);
     private static final NumberFormat FORMAT;
     private final Session session;
+    private final TopicManagementClient topicManagementClient;
     private final PollEventCounter pollEventCounter;
     private final PublicationEventCounter publicationEventCounter;
     private final TopicCreationEventCounter topicCreationEventCounter;
@@ -79,6 +81,7 @@ public final class TopicBasedMetricsReporter implements AutoCloseable {
     // CHECKSTYLE.OFF: ParameterNumber
     public TopicBasedMetricsReporter(
         Session session,
+        TopicManagementClient topicManagementClient,
         PollEventCounter pollEventCounter,
         PublicationEventCounter publicationEventCounter,
         TopicCreationEventCounter topicCreationEventCounter,
@@ -90,6 +93,7 @@ public final class TopicBasedMetricsReporter implements AutoCloseable {
     // CHECKSTYLE.ON: ParameterNumber
 
         this.session = session;
+        this.topicManagementClient = topicManagementClient;
         this.pollEventCounter = pollEventCounter;
         this.publicationEventCounter = publicationEventCounter;
         this.topicCreationEventCounter = topicCreationEventCounter;
@@ -114,33 +118,34 @@ public final class TopicBasedMetricsReporter implements AutoCloseable {
                         this.registration = registration;
                     }
                 }),
-            topicControl.addTopic(rootTopic + "/poll/requests", INT64),
-            topicControl.addTopic(rootTopic + "/poll/successes", INT64),
-            topicControl.addTopic(rootTopic + "/poll/failures", INT64),
-            topicControl.addTopic(rootTopic + "/poll/bytes", INT64),
-            topicControl.addTopic(rootTopic + "/poll/failureThroughput", DOUBLE),
-            topicControl.addTopic(rootTopic + "/poll/requestThroughput", DOUBLE),
-            topicControl.addTopic(rootTopic + "/poll/maximumSuccessfulRequestTime", INT64),
-            topicControl.addTopic(rootTopic + "/poll/minimumSuccessfulRequestTime", INT64),
-            topicControl.addTopic(rootTopic + "/poll/successfulRequestTimeNinetiethPercentile", INT64),
-            topicControl.addTopic(rootTopic + "/publication/requests", INT64),
-            topicControl.addTopic(rootTopic + "/publication/successes", INT64),
-            topicControl.addTopic(rootTopic + "/publication/failures", INT64),
-            topicControl.addTopic(rootTopic + "/publication/bytes", INT64),
-            topicControl.addTopic(rootTopic + "/publication/failureThroughput", DOUBLE),
-            topicControl.addTopic(rootTopic + "/publication/requestThroughput", DOUBLE),
-            topicControl.addTopic(rootTopic + "/publication/meanBytesPerPublication", DOUBLE),
-            topicControl.addTopic(rootTopic + "/publication/maximumSuccessfulRequestTime", INT64),
-            topicControl.addTopic(rootTopic + "/publication/minimumSuccessfulRequestTime", INT64),
-            topicControl.addTopic(rootTopic + "/publication/successfulRequestTimeNinetiethPercentile", INT64),
-            topicControl.addTopic(rootTopic + "/topicCreation/requests", INT64),
-            topicControl.addTopic(rootTopic + "/topicCreation/successes", INT64),
-            topicControl.addTopic(rootTopic + "/topicCreation/failures", INT64),
-            topicControl.addTopic(rootTopic + "/topicCreation/failureThroughput", DOUBLE),
-            topicControl.addTopic(rootTopic + "/topicCreation/requestThroughput", DOUBLE),
-            topicControl.addTopic(rootTopic + "/topicCreation/maximumSuccessfulRequestTime", INT64),
-            topicControl.addTopic(rootTopic + "/topicCreation/minimumSuccessfulRequestTime", INT64),
-            topicControl.addTopic(rootTopic + "/topicCreation/successfulRequestTimeNinetiethPercentile", INT64))
+            topicManagementClient.addTopic(rootTopic + "/poll/requests", INT64),
+            topicManagementClient.addTopic(rootTopic + "/poll/successes", INT64),
+            topicManagementClient.addTopic(rootTopic + "/poll/failures", INT64),
+            topicManagementClient.addTopic(rootTopic + "/poll/bytes", INT64),
+            topicManagementClient.addTopic(rootTopic + "/poll/failureThroughput", DOUBLE),
+            topicManagementClient.addTopic(rootTopic + "/poll/requestThroughput", DOUBLE),
+            topicManagementClient.addTopic(rootTopic + "/poll/maximumSuccessfulRequestTime", INT64),
+            topicManagementClient.addTopic(rootTopic + "/poll/minimumSuccessfulRequestTime", INT64),
+            topicManagementClient.addTopic(rootTopic + "/poll/successfulRequestTimeNinetiethPercentile", INT64),
+            topicManagementClient.addTopic(rootTopic + "/publication/requests", INT64),
+            topicManagementClient.addTopic(rootTopic + "/publication/successes", INT64),
+            topicManagementClient.addTopic(rootTopic + "/publication/failures", INT64),
+            topicManagementClient.addTopic(rootTopic + "/publication/bytes", INT64),
+            topicManagementClient.addTopic(rootTopic + "/publication/failureThroughput", DOUBLE),
+            topicManagementClient.addTopic(rootTopic + "/publication/requestThroughput", DOUBLE),
+            topicManagementClient.addTopic(rootTopic + "/publication/meanBytesPerPublication", DOUBLE),
+            topicManagementClient.addTopic(rootTopic + "/publication/maximumSuccessfulRequestTime", INT64),
+            topicManagementClient.addTopic(rootTopic + "/publication/minimumSuccessfulRequestTime", INT64),
+            topicManagementClient.addTopic(rootTopic + "/publication/successfulRequestTimeNinetiethPercentile", INT64),
+            topicManagementClient.addTopic(rootTopic + "/topicCreation/requests", INT64),
+            topicManagementClient.addTopic(rootTopic + "/topicCreation/successes", INT64),
+            topicManagementClient.addTopic(rootTopic + "/topicCreation/failures", INT64),
+            topicManagementClient.addTopic(rootTopic + "/topicCreation/failureThroughput", DOUBLE),
+            topicManagementClient.addTopic(rootTopic + "/topicCreation/requestThroughput", DOUBLE),
+            topicManagementClient.addTopic(rootTopic + "/topicCreation/maximumSuccessfulRequestTime", INT64),
+            topicManagementClient.addTopic(rootTopic + "/topicCreation/minimumSuccessfulRequestTime", INT64),
+            topicManagementClient
+                .addTopic(rootTopic + "/topicCreation/successfulRequestTimeNinetiethPercentile", INT64))
             .thenRun(this::beginReporting)
             .exceptionally(e -> {
                 LOG.warn("Failed to create metrics topics", e);

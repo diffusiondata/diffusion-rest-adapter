@@ -15,6 +15,7 @@ import org.mockito.junit.MockitoRule;
 import com.pushtechnology.adapters.rest.model.latest.MetricsConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.SummaryConfig;
+import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
 import com.pushtechnology.diffusion.client.session.Session;
 
 /**
@@ -25,6 +26,8 @@ import com.pushtechnology.diffusion.client.session.Session;
 public final class MetricsProviderFactoryTest {
     @Mock
     private Session session;
+    @Mock
+    private TopicManagementClient topicManagementClient;
     @Mock
     private ScheduledExecutorService executorService;
 
@@ -44,7 +47,7 @@ public final class MetricsProviderFactoryTest {
             .builder()
             .build();
 
-        final MetricsProvider provider = factory.create(session, model, executorService, new MetricsDispatcher());
+        final MetricsProvider provider = factory.create(session, topicManagementClient, model, executorService, new MetricsDispatcher());
 
         assertNotNull(provider);
     }
@@ -61,7 +64,7 @@ public final class MetricsProviderFactoryTest {
                 .build())
             .build();
 
-        final MetricsProvider provider = factory.create(session, model, executorService, new MetricsDispatcher());
+        final MetricsProvider provider = factory.create(session, topicManagementClient, model, executorService, new MetricsDispatcher());
 
         assertNotNull(provider);
     }
@@ -78,7 +81,7 @@ public final class MetricsProviderFactoryTest {
                 .build())
             .build();
 
-        final MetricsProvider provider = factory.create(session, model, executorService, new MetricsDispatcher());
+        final MetricsProvider provider = factory.create(session, topicManagementClient, model, executorService, new MetricsDispatcher());
 
         assertNotNull(provider);
     }
