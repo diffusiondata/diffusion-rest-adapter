@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Push Technology Ltd.
+ * Copyright (C) 2017 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -124,7 +124,7 @@ public final class PublishingClientImpl implements PublishingClient {
                 updater,
                 topicPath,
                 dataType,
-                new ListenerNotifierImpl(publicationListener, serviceConfig, endpointConfig));
+                publicationListener);
             sessionListener.onSessionStateChange(jsonUpdateContext);
             return jsonUpdateContext;
         }
@@ -134,7 +134,7 @@ public final class PublishingClientImpl implements PublishingClient {
                 updater,
                 topicPath,
                 dataType,
-                new ListenerNotifierImpl(publicationListener, serviceConfig, endpointConfig));
+                publicationListener);
             sessionListener.onSessionStateChange(binaryUpdateContext);
             return binaryUpdateContext;
         }
@@ -144,7 +144,7 @@ public final class PublishingClientImpl implements PublishingClient {
                 updater,
                 topicPath,
                 dataType,
-                new ListenerNotifierImpl(publicationListener, serviceConfig, endpointConfig));
+                publicationListener);
             sessionListener.onSessionStateChange(stringUpdateContext);
             return stringUpdateContext;
         }

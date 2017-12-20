@@ -33,6 +33,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 
+import com.pushtechnology.adapters.rest.metrics.listeners.PublicationListener;
 import com.pushtechnology.diffusion.client.content.update.ContentUpdateFactory;
 import com.pushtechnology.diffusion.client.content.update.Update;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
@@ -59,7 +60,7 @@ public final class UpdateContextImplTest {
     @Mock
     private Binary binary;
     @Mock
-    private ListenerNotifier notifier;
+    private PublicationListener publicationListener;
     @Mock
     private DataType<Binary> dataType;
     @Mock
@@ -90,7 +91,7 @@ public final class UpdateContextImplTest {
         when(updateControl.updateFactory(ContentUpdateFactory.class)).thenReturn(updateFactory);
         when(updateFactory.apply(isNotNull())).thenReturn(update);
 
-        updateContext = new UpdateContextImpl<>(session, updater, "a/topic", dataType, notifier);
+        updateContext = new UpdateContextImpl<>(session, updater, "a/topic", dataType, publicationListener);
 
         verify(dataType).deltaType(BinaryDelta.class);
         verify(session).feature(TopicUpdateControl.class);
@@ -98,7 +99,7 @@ public final class UpdateContextImplTest {
 
     @After
     public void postConditions() {
-        verifyNoMoreInteractions(session, updater, notifier, dataType, deltaType);
+        verifyNoMoreInteractions(session, updater, publicationListener, dataType, deltaType);
     }
 
     @Test
@@ -110,7 +111,7 @@ public final class UpdateContextImplTest {
         verify(session).getState();
         verify(dataType).toBytes(binary);
         verify(updater).update(eq("a/topic"), eq(binary), eq("a/topic"), isA(UpdateContextCallback.class));
-        verify(notifier).notifyPublicationRequest(0);
+        verify(publicationListener).onPublicationRequest("a/topic", 0);
     }
 
     @Test
@@ -123,7 +124,7 @@ public final class UpdateContextImplTest {
         verify(session).getState();
         verify(dataType).toBytes(binary);
         verify(updater).update(eq("a/topic"), eq(binary), eq("a/topic"), isA(UpdateContextCallback.class));
-        verify(notifier).notifyPublicationRequest(0);
+        verify(publicationListener).onPublicationRequest("a/topic", 0);
 
         updateContext.publish(binary);
 
@@ -131,7 +132,7 @@ public final class UpdateContextImplTest {
         verify(deltaType).diff(binary, binary);
         verify(deltaType).toBytes(delta);
         verify(updater).update(eq("a/topic"), eq(update), eq("a/topic"), isA(UpdateContextCallback.class));
-        verify(notifier, times(2)).notifyPublicationRequest(0);
+        verify(publicationListener, times(2)).onPublicationRequest("a/topic", 0);
     }
 
     @Test
@@ -144,7 +145,7 @@ public final class UpdateContextImplTest {
         verify(session).getState();
         verify(dataType).toBytes(binary);
         verify(updater).update(eq("a/topic"), eq(binary), eq("a/topic"), isA(UpdateContextCallback.class));
-        verify(notifier).notifyPublicationRequest(0);
+        verify(publicationListener).onPublicationRequest("a/topic", 0);
 
         updateContext.publish(binary);
 
@@ -158,7 +159,7 @@ public final class UpdateContextImplTest {
         when(session.getState()).thenReturn(RECOVERING_RECONNECT);
         updateContext.publish(binary);
         verify(updater, never()).update(eq("a/topic"), eq(binary), eq("a/topic"), isA(UpdateContextCallback.class));
-        verify(notifier).notifyPublicationRequest(0);
+        verify(publicationListener).onPublicationRequest("a/topic", 0);
 
         updateContext.onSessionStateChanged(session, RECOVERING_RECONNECT, CONNECTED_ACTIVE);
 

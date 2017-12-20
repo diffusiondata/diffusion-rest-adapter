@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Push Technology Ltd.
+ * Copyright (C) 2017 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.pushtechnology.adapters.rest.metrics.listeners.PublicationListener;
 import com.pushtechnology.adapters.rest.metrics.listeners.PublicationListener.PublicationCompletionListener;
 import com.pushtechnology.diffusion.client.content.update.Update;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater;
@@ -41,7 +42,7 @@ import com.pushtechnology.diffusion.datatype.DeltaType;
     private static final Logger LOG = LoggerFactory.getLogger(UpdateContextImpl.class);
     private final AtomicReference<CachedRequest<T>> cachedValue = new AtomicReference<>(null);
     private final DataType<T> dataType;
-    private final ListenerNotifier listenerNotifier;
+    private final PublicationListener listenerNotifier;
     private final Updater updater;
     private final Session session;
     private final String topicPath;
@@ -57,7 +58,7 @@ import com.pushtechnology.diffusion.datatype.DeltaType;
             Updater updater,
             String topicPath,
             DataType<T> dataType,
-            ListenerNotifier listenerNotifier) {
+            PublicationListener listenerNotifier) {
         this.session = session;
         this.updater = updater;
         this.topicPath = topicPath;
@@ -94,7 +95,7 @@ import com.pushtechnology.diffusion.datatype.DeltaType;
             LOG.debug("Caching value while in recovery");
             final Bytes bytes = dataType.toBytes(value);
             final PublicationCompletionListener completionListener =
-                listenerNotifier.notifyPublicationRequest(bytes.length());
+                listenerNotifier.onPublicationRequest(topicPath, bytes.length());
             cachedValue.set(new CachedRequest<>(value, bytes, completionListener));
         }
         else {
@@ -115,7 +116,7 @@ import com.pushtechnology.diffusion.datatype.DeltaType;
         final BinaryDelta delta = deltaType.diff(lastPublishedValue, value);
         if (delta.hasChanges()) {
             final PublicationCompletionListener completionListener =
-                listenerNotifier.notifyPublicationRequest(delta.length());
+                listenerNotifier.onPublicationRequest(topicPath, delta.length());
             lastPublishedValue = value;
             updater.update(
                 topicPath,
@@ -128,7 +129,7 @@ import com.pushtechnology.diffusion.datatype.DeltaType;
     private void applyValue(T value) {
         final Bytes bytes = dataType.toBytes(value);
         final PublicationCompletionListener completionListener =
-            listenerNotifier.notifyPublicationRequest(bytes.length());
+            listenerNotifier.onPublicationRequest(topicPath, bytes.length());
         lastPublishedValue = value;
         updater.update(
             topicPath,
