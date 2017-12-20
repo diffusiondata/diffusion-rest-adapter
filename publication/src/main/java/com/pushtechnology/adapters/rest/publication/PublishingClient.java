@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Push Technology Ltd.
+ * Copyright (C) 2017 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ import java.util.concurrent.CompletableFuture;
 
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.diffusion.client.topics.details.TopicType;
 import com.pushtechnology.diffusion.datatype.DataType;
 
 /**
@@ -44,6 +43,5 @@ public interface PublishingClient {
     <T> UpdateContext<T> createUpdateContext(
         ServiceConfig serviceConfig,
         EndpointConfig endpointConfig,
-        TopicType topicType,
         DataType<T> dataType);
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Push Technology Ltd.
+ * Copyright (C) 2017 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,6 @@ package com.pushtechnology.adapters.rest.publication;
 
 import static com.pushtechnology.diffusion.client.session.Session.State.CONNECTED_ACTIVE;
 import static com.pushtechnology.diffusion.client.session.Session.State.RECOVERING_RECONNECT;
-import static com.pushtechnology.diffusion.client.topics.details.TopicType.BINARY;
-import static com.pushtechnology.diffusion.client.topics.details.TopicType.JSON;
-import static com.pushtechnology.diffusion.client.topics.details.TopicType.SINGLE_VALUE;
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -230,7 +227,6 @@ public final class PublishingClientImplTest {
         final UpdateContext<JSON> updateContext = client.createUpdateContext(
             serviceConfig,
             endpointConfig,
-            JSON,
             jsonDataType);
 
         verify(jsonDataType).deltaType(BinaryDelta.class);
@@ -256,7 +252,6 @@ public final class PublishingClientImplTest {
         final UpdateContext<Binary> updateContext = client.createUpdateContext(
             serviceConfig,
             endpointConfig,
-            BINARY,
             binaryDataType);
 
         verify(binaryDataType).deltaType(BinaryDelta.class);
@@ -270,20 +265,9 @@ public final class PublishingClientImplTest {
         verify(rawUpdater).update(eq("a/topic"), eq(binary), eq("a/topic"), isA(UpdateContextCallback.class));
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void singleValueContext() {
-        final EventedUpdateSource source = client.addService(serviceConfig);
-        verify(session).feature(TopicUpdateControl.class);
-        verify(updateControl).registerUpdateSource(eq("a"), updateSourceCaptor.capture());
-
-        updateSourceCaptor.getValue().onActive("a/topic", rawUpdater);
-
-        client.createUpdateContext(serviceConfig, endpointConfig, SINGLE_VALUE, null);
-    }
-
     @Test(expected = IllegalStateException.class)
     public void noUpdater() {
-        client.createUpdateContext(serviceConfig, endpointConfig, JSON, jsonDataType);
+        client.createUpdateContext(serviceConfig, endpointConfig, jsonDataType);
     }
 
     @SuppressWarnings("unchecked")
@@ -300,7 +284,6 @@ public final class PublishingClientImplTest {
         final UpdateContext<JSON> updateContext = client.createUpdateContext(
             serviceConfig,
             endpointConfig,
-            JSON,
             jsonDataType);
 
         verify(session, times(2)).feature(TopicUpdateControl.class);

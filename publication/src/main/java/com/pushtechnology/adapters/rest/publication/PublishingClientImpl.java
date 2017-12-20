@@ -26,7 +26,6 @@ import com.pushtechnology.adapters.rest.session.management.EventedSessionListene
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater;
 import com.pushtechnology.diffusion.client.session.Session;
-import com.pushtechnology.diffusion.client.topics.details.TopicType;
 import com.pushtechnology.diffusion.datatype.DataType;
 
 import net.jcip.annotations.GuardedBy;
@@ -105,11 +104,9 @@ public final class PublishingClientImpl implements PublishingClient {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public <T> UpdateContext<T> createUpdateContext(
             ServiceConfig serviceConfig,
             EndpointConfig endpointConfig,
-            TopicType topicType,
             DataType<T> dataType) {
 
         final Updater updater = updaters.get(serviceConfig);
@@ -118,38 +115,13 @@ public final class PublishingClientImpl implements PublishingClient {
         }
 
         final String topicPath = serviceConfig.getTopicPathRoot() + "/" + endpointConfig.getTopicPath();
-        if (TopicType.JSON.equals(topicType)) {
-            final UpdateContextImpl jsonUpdateContext = new UpdateContextImpl(
-                session,
-                updater,
-                topicPath,
-                dataType,
-                publicationListener);
-            sessionListener.onSessionStateChange(jsonUpdateContext);
-            return jsonUpdateContext;
-        }
-        else if (TopicType.BINARY.equals(topicType)) {
-            final UpdateContextImpl binaryUpdateContext = new UpdateContextImpl(
-                session,
-                updater,
-                topicPath,
-                dataType,
-                publicationListener);
-            sessionListener.onSessionStateChange(binaryUpdateContext);
-            return binaryUpdateContext;
-        }
-        else if (TopicType.STRING.equals(topicType)) {
-            final UpdateContextImpl stringUpdateContext = new UpdateContextImpl(
-                session,
-                updater,
-                topicPath,
-                dataType,
-                publicationListener);
-            sessionListener.onSessionStateChange(stringUpdateContext);
-            return stringUpdateContext;
-        }
-        else {
-            throw new IllegalArgumentException("Unsupported type");
-        }
+        final UpdateContextImpl<T> updateContext = new UpdateContextImpl<>(
+            session,
+            updater,
+            topicPath,
+            dataType,
+            publicationListener);
+        sessionListener.onSessionStateChange(updateContext);
+        return updateContext;
     }
 }
