@@ -38,10 +38,17 @@ public interface PublishingClient {
     CompletableFuture<ServiceConfig> removeService(ServiceConfig serviceConfig);
 
     /**
-     * Create an update context.
+     * Create an update context using an exclusive updater for the service.
      */
     <T> UpdateContext<T> createUpdateContext(
         ServiceConfig serviceConfig,
         EndpointConfig endpointConfig,
+        DataType<T> dataType);
+
+    /**
+     * Create an update context using an non-exclusive updater.
+     */
+    <T> UpdateContext<T> createUpdateContext(
+        String path,
         DataType<T> dataType);
 }

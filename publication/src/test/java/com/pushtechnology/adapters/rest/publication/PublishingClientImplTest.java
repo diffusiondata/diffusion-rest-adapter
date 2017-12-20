@@ -110,6 +110,7 @@ public final class PublishingClientImplTest {
         when(binaryDataType.deltaType(BinaryDelta.class)).thenReturn(binaryDeltaType);
         when(jsonDataType.deltaType(BinaryDelta.class)).thenReturn(jsonDeltaType);
         when(updateControl.updateFactory(ContentUpdateFactory.class)).thenReturn(updateFactory);
+        when(updateControl.updater()).thenReturn(rawUpdater);
 
         endpointConfig = EndpointConfig
             .builder()
@@ -299,6 +300,26 @@ public final class PublishingClientImplTest {
 
         verify(jsonDataType).toBytes(json);
         verify(jsonDataType).deltaType(BinaryDelta.class);
+        verify(rawUpdater).update(eq("a/topic"), eq(json), eq("a/topic"), isA(UpdateContextCallback.class));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void nonExclusiveUpdateContext() {
+        final UpdateContext<JSON> updateContext = client.createUpdateContext(
+            "a/topic",
+            jsonDataType);
+        verify(session, times(2)).feature(TopicUpdateControl.class);
+        verify(updateControl).updater();
+
+        verify(jsonDataType).deltaType(BinaryDelta.class);
+        verify(session, times(2)).feature(TopicUpdateControl.class);
+        verify(updateControl).updateFactory(ContentUpdateFactory.class);
+
+        updateContext.publish(json);
+
+        verify(jsonDataType).toBytes(json);
+        verify(session).getState();
         verify(rawUpdater).update(eq("a/topic"), eq(json), eq("a/topic"), isA(UpdateContextCallback.class));
     }
 }

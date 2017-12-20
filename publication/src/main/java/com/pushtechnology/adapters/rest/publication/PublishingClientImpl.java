@@ -124,4 +124,16 @@ public final class PublishingClientImpl implements PublishingClient {
         sessionListener.onSessionStateChange(updateContext);
         return updateContext;
     }
+
+    @Override
+    public <T> UpdateContext<T> createUpdateContext(String path, DataType<T> dataType) {
+        final UpdateContextImpl<T> updateContext = new UpdateContextImpl<>(
+            session,
+            session.feature(TopicUpdateControl.class).updater(),
+            path,
+            dataType,
+            publicationListener);
+        sessionListener.onSessionStateChange(updateContext);
+        return updateContext;
+    }
 }
