@@ -109,8 +109,8 @@ public final class MetricsDispatcherTest {
     public void setUp() {
         when(pollListener0.onPollRequest(any(), any())).thenReturn(pollCompletionListener0);
         when(pollListener1.onPollRequest(any(), any())).thenReturn(pollCompletionListener1);
-        when(publicationListener0.onPublicationRequest(any(), any(), anyInt())).thenReturn(publicationCompletionListener0);
-        when(publicationListener1.onPublicationRequest(any(), any(), anyInt())).thenReturn(publicationCompletionListener1);
+        when(publicationListener0.onPublicationRequest(any(), anyInt())).thenReturn(publicationCompletionListener0);
+        when(publicationListener1.onPublicationRequest(any(), anyInt())).thenReturn(publicationCompletionListener1);
         when(topicCreationListener0.onTopicCreationRequest(any(), any())).thenReturn(topicCreationCompletionListener0);
         when(topicCreationListener1.onTopicCreationRequest(any(), any())).thenReturn(topicCreationCompletionListener1);
         when(httpResponse.getStatusLine()).thenReturn(statusLine);
@@ -148,7 +148,7 @@ public final class MetricsDispatcherTest {
         dispatcher.addPublicationEventListener(publicationEventListener0);
         dispatcher.addPublicationEventListener(publicationEventListener1);
 
-        final PublicationCompletionListener completionListener = dispatcher.onPublicationRequest(serviceConfig, endpointConfig, 10);
+        final PublicationCompletionListener completionListener = dispatcher.onPublicationRequest("topic/path", 10);
 
         verify(publicationEventListener0).onPublicationRequest(isNotNull());
         verify(publicationEventListener1).onPublicationRequest(isNotNull());

@@ -19,8 +19,6 @@ import com.pushtechnology.adapters.rest.metrics.PublicationFailedEvent;
 import com.pushtechnology.adapters.rest.metrics.PublicationRequestEvent;
 import com.pushtechnology.adapters.rest.metrics.PublicationSuccessEvent;
 import com.pushtechnology.adapters.rest.metrics.listeners.PublicationListener;
-import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
-import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.diffusion.client.callbacks.ErrorReason;
 
 /**
@@ -39,13 +37,8 @@ public final class PublicationEventDispatcher implements PublicationListener {
     }
 
     @Override
-    public PublicationCompletionListener onPublicationRequest(
-            ServiceConfig serviceConfig,
-            EndpointConfig endpointConfig,
-            int size) {
-        final PublicationRequestEvent publicationRequestEvent = PublicationRequestEvent.Factory.create(
-            serviceConfig.getTopicPathRoot() + "/" + endpointConfig.getTopicPath(),
-            size);
+    public PublicationCompletionListener onPublicationRequest(String path, int size) {
+        final PublicationRequestEvent publicationRequestEvent = PublicationRequestEvent.Factory.create(path, size);
 
         publicationEventListener.onPublicationRequest(publicationRequestEvent);
 

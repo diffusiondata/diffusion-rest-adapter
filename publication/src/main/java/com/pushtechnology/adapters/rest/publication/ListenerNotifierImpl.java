@@ -41,6 +41,7 @@ import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 
     @Override
     public PublicationCompletionListener notifyPublicationRequest(int size) {
-        return publicationListener.onPublicationRequest(serviceConfig, endpointConfig, size);
+        return publicationListener
+            .onPublicationRequest(serviceConfig.getTopicPathRoot() + "/" + endpointConfig.getTopicPath(), size);
     }
 }

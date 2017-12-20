@@ -134,16 +134,13 @@ public final class MetricsDispatcher implements
     }
 
     @Override
-    public PublicationCompletionListener onPublicationRequest(
-        ServiceConfig serviceConfig,
-        EndpointConfig endpointConfig,
-        int size) {
+    public PublicationCompletionListener onPublicationRequest(String path, int size) {
 
         final Collection<PublicationCompletionListener> listeners = new ArrayList<>();
         synchronized (this) {
             publicationListeners.forEach(publicationListener -> {
                 final PublicationCompletionListener completionListener =
-                    publicationListener.onPublicationRequest(serviceConfig, endpointConfig, size);
+                    publicationListener.onPublicationRequest(path, size);
                 listeners.add(completionListener);
             });
         }

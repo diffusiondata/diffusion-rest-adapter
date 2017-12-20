@@ -51,7 +51,7 @@ public final class ListenerNotifierTest {
             .topicPathRoot("a")
             .build();
 
-        when(publicationListener.onPublicationRequest(serviceConfig, endpointConfig, 5))
+        when(publicationListener.onPublicationRequest("a/topic", 5))
             .thenReturn(completionListener);
     }
 
@@ -62,6 +62,6 @@ public final class ListenerNotifierTest {
         final PublicationCompletionListener listener = notifier.notifyPublicationRequest(5);
 
         assertEquals(completionListener, listener);
-        verify(publicationListener).onPublicationRequest(serviceConfig, endpointConfig, 5);
+        verify(publicationListener).onPublicationRequest("a/topic", 5);
     }
 }

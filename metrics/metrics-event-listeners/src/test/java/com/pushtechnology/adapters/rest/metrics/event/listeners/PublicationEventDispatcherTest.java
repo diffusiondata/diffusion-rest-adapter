@@ -1,7 +1,6 @@
 package com.pushtechnology.adapters.rest.metrics.event.listeners;
 
 import static com.pushtechnology.diffusion.client.callbacks.ErrorReason.ACCESS_DENIED;
-import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
@@ -17,8 +16,6 @@ import org.mockito.junit.MockitoRule;
 import com.pushtechnology.adapters.rest.metrics.PublicationFailedEvent;
 import com.pushtechnology.adapters.rest.metrics.PublicationRequestEvent;
 import com.pushtechnology.adapters.rest.metrics.PublicationSuccessEvent;
-import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
-import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 
 /**
  * Unit tests for {@link PublicationEventDispatcher}.
@@ -38,23 +35,6 @@ public final class PublicationEventDispatcherTest {
     @Rule
     public MockitoRule mockitoRule = MockitoJUnit.rule();
 
-    private final EndpointConfig endpointConfig = EndpointConfig
-        .builder()
-        .name("endpoint")
-        .url("endpoint")
-        .topicPath("endpoint")
-        .produces("string")
-        .build();
-    private final ServiceConfig serviceConfig = ServiceConfig
-        .builder()
-        .name("service")
-        .host("localhost")
-        .port(80)
-        .pollPeriod(5000)
-        .topicPathRoot("service")
-        .endpoints(singletonList(endpointConfig))
-        .build();
-
     @After
     public void postConditions() {
         verifyNoMoreInteractions(publicationEventListener);
@@ -64,7 +44,7 @@ public final class PublicationEventDispatcherTest {
     public void onPublicationRequest() throws Exception {
         final PublicationEventDispatcher dispatcher = new PublicationEventDispatcher(publicationEventListener);
 
-        dispatcher.onPublicationRequest(serviceConfig, endpointConfig, 10);
+        dispatcher.onPublicationRequest("service/endpoint", 10);
 
         verify(publicationEventListener).onPublicationRequest(requestCaptor.capture());
     }
@@ -73,7 +53,7 @@ public final class PublicationEventDispatcherTest {
     public void onPublication() throws Exception {
         final PublicationEventDispatcher dispatcher = new PublicationEventDispatcher(publicationEventListener);
 
-        dispatcher.onPublicationRequest(serviceConfig, endpointConfig, 10).onPublication();
+        dispatcher.onPublicationRequest("service/endpoint", 10).onPublication();
 
         final PublicationRequestEvent requestEvent =
             PublicationRequestEvent.Factory.create("service/endpoint", 10);
@@ -85,7 +65,7 @@ public final class PublicationEventDispatcherTest {
     public void onPublicationFailed() throws Exception {
         final PublicationEventDispatcher dispatcher = new PublicationEventDispatcher(publicationEventListener);
 
-        dispatcher.onPublicationRequest(serviceConfig, endpointConfig, 10).onPublicationFailed(ACCESS_DENIED);
+        dispatcher.onPublicationRequest("service/endpoint", 10).onPublicationFailed(ACCESS_DENIED);
 
         final PublicationRequestEvent requestEvent =
             PublicationRequestEvent.Factory.create("service/endpoint", 10);
