@@ -249,6 +249,7 @@ public final class InternalRESTAdapter implements RESTAdapterListener, AutoClose
         metricsProvider = metricsProviderFactory.create(
             diffusionSession,
             topicManagementClient,
+            publishingClient,
             currentModel,
             executor,
             metricsDispatcher);

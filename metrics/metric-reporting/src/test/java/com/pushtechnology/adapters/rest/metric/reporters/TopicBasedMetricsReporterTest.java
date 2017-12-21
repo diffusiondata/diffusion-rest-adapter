@@ -19,6 +19,7 @@ import static com.pushtechnology.diffusion.client.topics.details.TopicType.DOUBL
 import static com.pushtechnology.diffusion.client.topics.details.TopicType.INT64;
 import static java.util.concurrent.CompletableFuture.completedFuture;
 import static java.util.concurrent.TimeUnit.MINUTES;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
@@ -41,6 +42,8 @@ import org.mockito.Mockito;
 import com.pushtechnology.adapters.rest.metrics.event.listeners.BoundedPollEventCollector;
 import com.pushtechnology.adapters.rest.metrics.event.listeners.BoundedPublicationEventCollector;
 import com.pushtechnology.adapters.rest.metrics.event.listeners.BoundedTopicCreationEventCollector;
+import com.pushtechnology.adapters.rest.publication.PublishingClient;
+import com.pushtechnology.adapters.rest.publication.UpdateContext;
 import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
 import com.pushtechnology.diffusion.client.callbacks.Registration;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
@@ -69,6 +72,10 @@ public final class TopicBasedMetricsReporterTest {
     private Registration registration;
     @Mock
     private TopicManagementClient topicManagementClient;
+    @Mock
+    private PublishingClient publishingClient;
+    @Mock
+    private UpdateContext updateContext;
 
     private TopicBasedMetricsReporter reporter;
 
@@ -87,9 +94,12 @@ public final class TopicBasedMetricsReporterTest {
 
         when(topicControl.removeTopicsWithSession("metrics")).thenReturn(completedFuture(registration));
 
+        when(publishingClient.createUpdateContext(anyString(), isNotNull())).thenReturn(updateContext);
+
         reporter = new TopicBasedMetricsReporter(
             session,
             topicManagementClient,
+            publishingClient,
             new PollEventCounter(),
             new PublicationEventCounter(),
             new TopicCreationEventCounter(),

@@ -39,6 +39,7 @@ import com.pushtechnology.adapters.rest.metric.reporters.TopicBasedMetricsReport
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.SummaryConfig;
 import com.pushtechnology.adapters.rest.model.latest.TopicConfig;
+import com.pushtechnology.adapters.rest.publication.PublishingClient;
 import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
 import com.pushtechnology.diffusion.client.session.Session;
 
@@ -56,6 +57,7 @@ public final class MetricsProviderFactory {
     public MetricsProvider create(
         Session diffusionSession,
         TopicManagementClient topicManagementClient,
+        PublishingClient publishingClient,
         Model model,
         ScheduledExecutorService executorService,
         MetricsDispatcher metricsDispatcher) {
@@ -101,6 +103,7 @@ public final class MetricsProviderFactory {
             final TopicBasedMetricsReporter reporter = new TopicBasedMetricsReporter(
                 diffusionSession,
                 topicManagementClient,
+                publishingClient,
                 helper.getPollEventCounter(),
                 helper.getPublicationEventCounter(),
                 helper.getTopicCreationEventCounter(),
