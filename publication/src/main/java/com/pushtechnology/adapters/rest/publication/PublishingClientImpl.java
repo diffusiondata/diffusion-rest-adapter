@@ -115,25 +115,39 @@ public final class PublishingClientImpl implements PublishingClient {
         }
 
         final String topicPath = serviceConfig.getTopicPathRoot() + "/" + endpointConfig.getTopicPath();
-        final UpdateContextImpl<T> updateContext = new UpdateContextImpl<>(
-            session,
-            updater,
-            topicPath,
-            dataType,
-            publicationListener);
-        sessionListener.onSessionStateChange(updateContext);
-        return updateContext;
+        return createUpdateContext(topicPath, dataType, updater);
     }
 
     @Override
     public <T> UpdateContext<T> createUpdateContext(String path, DataType<T> dataType) {
-        final UpdateContextImpl<T> updateContext = new UpdateContextImpl<>(
-            session,
-            session.feature(TopicUpdateControl.class).updater(),
-            path,
-            dataType,
-            publicationListener);
-        sessionListener.onSessionStateChange(updateContext);
-        return updateContext;
+        return createUpdateContext(path, dataType, session.feature(TopicUpdateControl.class).updater());
+    }
+
+    private <T> UpdateContext<T> createUpdateContext(String path, DataType<T> dataType, Updater updater) {
+        if (isValueOnlyType(dataType)) {
+            final ValueUpdateContext<T> updateContext = new ValueUpdateContext<>(
+                session,
+                updater,
+                path,
+                dataType,
+                publicationListener);
+            sessionListener.onSessionStateChange(updateContext);
+            return updateContext;
+        }
+        else {
+            final UpdateContextImpl<T> updateContext = new UpdateContextImpl<>(
+                session,
+                updater,
+                path,
+                dataType,
+                publicationListener);
+            sessionListener.onSessionStateChange(updateContext);
+            return updateContext;
+        }
+    }
+
+    private boolean isValueOnlyType(DataType<?> dataType) {
+        final String typeName = dataType.getTypeName();
+        return "int64".equals(typeName) || "double".equals(typeName);
     }
 }

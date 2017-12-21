@@ -111,6 +111,8 @@ public final class PublishingClientImplTest {
         when(jsonDataType.deltaType(BinaryDelta.class)).thenReturn(jsonDeltaType);
         when(updateControl.updateFactory(ContentUpdateFactory.class)).thenReturn(updateFactory);
         when(updateControl.updater()).thenReturn(rawUpdater);
+        when(jsonDataType.getTypeName()).thenReturn("json");
+        when(binaryDataType.getTypeName()).thenReturn("binary");
 
         endpointConfig = EndpointConfig
             .builder()
@@ -230,6 +232,7 @@ public final class PublishingClientImplTest {
             endpointConfig,
             jsonDataType);
 
+        verify(jsonDataType).getTypeName();
         verify(jsonDataType).deltaType(BinaryDelta.class);
         verify(session, times(2)).feature(TopicUpdateControl.class);
         verify(updateControl).updateFactory(ContentUpdateFactory.class);
@@ -255,6 +258,7 @@ public final class PublishingClientImplTest {
             endpointConfig,
             binaryDataType);
 
+        verify(binaryDataType).getTypeName();
         verify(binaryDataType).deltaType(BinaryDelta.class);
         verify(session, times(2)).feature(TopicUpdateControl.class);
         verify(updateControl).updateFactory(ContentUpdateFactory.class);
@@ -287,6 +291,7 @@ public final class PublishingClientImplTest {
             endpointConfig,
             jsonDataType);
 
+        verify(jsonDataType).getTypeName();
         verify(session, times(2)).feature(TopicUpdateControl.class);
         verify(updateControl).updateFactory(ContentUpdateFactory.class);
 
@@ -312,6 +317,7 @@ public final class PublishingClientImplTest {
         verify(session, times(2)).feature(TopicUpdateControl.class);
         verify(updateControl).updater();
 
+        verify(jsonDataType).getTypeName();
         verify(jsonDataType).deltaType(BinaryDelta.class);
         verify(session, times(2)).feature(TopicUpdateControl.class);
         verify(updateControl).updateFactory(ContentUpdateFactory.class);
