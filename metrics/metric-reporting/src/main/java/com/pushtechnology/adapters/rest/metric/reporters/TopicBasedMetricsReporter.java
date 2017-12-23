@@ -15,6 +15,7 @@
 
 package com.pushtechnology.adapters.rest.metric.reporters;
 
+import static com.pushtechnology.diffusion.client.Diffusion.dataTypes;
 import static com.pushtechnology.diffusion.client.topics.details.TopicType.DOUBLE;
 import static com.pushtechnology.diffusion.client.topics.details.TopicType.INT64;
 import static java.math.RoundingMode.HALF_UP;
@@ -23,7 +24,9 @@ import static java.util.concurrent.TimeUnit.MINUTES;
 
 import java.math.BigDecimal;
 import java.text.NumberFormat;
+import java.util.Map;
 import java.util.OptionalLong;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -34,14 +37,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.adapters.rest.publication.PublishingClient;
+import com.pushtechnology.adapters.rest.publication.UpdateContext;
 import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
-import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.callbacks.ErrorReason;
 import com.pushtechnology.diffusion.client.callbacks.Registration;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.RemovalCallback;
 import com.pushtechnology.diffusion.client.session.Session;
-import com.pushtechnology.diffusion.datatype.DataType;
 
 import net.jcip.annotations.GuardedBy;
 
@@ -53,6 +55,8 @@ import net.jcip.annotations.GuardedBy;
 public final class TopicBasedMetricsReporter implements AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(TopicBasedMetricsReporter.class);
     private static final NumberFormat FORMAT;
+    private final Map<String, UpdateContext<Long>> int64UpdateContexts;
+    private final Map<String, UpdateContext<Double>> doubleUpdateContexts;
     private final Session session;
     private final TopicManagementClient topicManagementClient;
     private final PublishingClient publishingClient;
@@ -106,6 +110,8 @@ public final class TopicBasedMetricsReporter implements AutoCloseable {
         this.publicationQuerier = publicationQuerier;
         this.topicCreationQuerier = topicCreationQuerier;
         this.rootTopic = rootTopic;
+        int64UpdateContexts = new ConcurrentHashMap<>(32, 1, 1);
+        doubleUpdateContexts = new ConcurrentHashMap<>(32, 1, 1);
     }
 
     /**
@@ -198,140 +204,113 @@ public final class TopicBasedMetricsReporter implements AutoCloseable {
     }
 
     private void reportPollEvents() {
-        final DataType<Long> int64 = Diffusion.dataTypes().int64();
-        publishingClient
-            .createUpdateContext(rootTopic + "/poll/requests", int64)
-            .publish((long) pollEventCounter.getRequests());
-        publishingClient
-            .createUpdateContext(rootTopic + "/poll/successes", int64)
-            .publish((long) pollEventCounter.getSuccesses());
-        publishingClient
-            .createUpdateContext(rootTopic + "/poll/failures", int64)
-            .publish((long) pollEventCounter.getFailures());
-        publishingClient
-            .createUpdateContext(rootTopic + "/poll/bytes", int64)
-            .publish(pollEventCounter.getTotalPollResponseBytes());
+        getInt64UpdateContext(rootTopic + "/poll/requests").publish((long) pollEventCounter.getRequests());
+        getInt64UpdateContext(rootTopic + "/poll/successes").publish((long) pollEventCounter.getSuccesses());
+        getInt64UpdateContext(rootTopic + "/poll/failures").publish((long) pollEventCounter.getFailures());
+        getInt64UpdateContext(rootTopic + "/poll/bytes").publish(pollEventCounter.getTotalPollResponseBytes());
 
         final BigDecimal failureThroughput = pollEventQuerier.getFailureThroughput();
         final BigDecimal requestThroughput = pollEventQuerier.getRequestThroughput();
 
-        final DataType<Double> doubleFloat = Diffusion.dataTypes().doubleFloat();
-        publishingClient
-            .createUpdateContext(rootTopic + "/poll/failureThroughput", doubleFloat)
-            .publish(failureThroughput.doubleValue());
-        publishingClient
-            .createUpdateContext(rootTopic + "/poll/requestThroughput", doubleFloat)
-            .publish(requestThroughput.doubleValue());
+        getDoubleUpdateContext(rootTopic + "/poll/failureThroughput").publish(failureThroughput.doubleValue());
+        getDoubleUpdateContext(rootTopic + "/poll/requestThroughput").publish(requestThroughput.doubleValue());
 
         final OptionalLong requestTime = pollEventQuerier.get90thPercentileSuccessfulRequestTime();
         final OptionalLong maximumSuccessfulRequestTime = pollEventQuerier.getMaximumSuccessfulRequestTime();
         final OptionalLong minimumSuccessfulRequestTime = pollEventQuerier.getMinimumSuccessfulRequestTime();
         if (requestTime.isPresent()) {
-            publishingClient
-                .createUpdateContext(rootTopic + "/poll/successfulRequestTimeNinetiethPercentile", int64)
+            getInt64UpdateContext(rootTopic + "/poll/successfulRequestTimeNinetiethPercentile")
                 .publish(requestTime.getAsLong());
         }
         if (maximumSuccessfulRequestTime.isPresent()) {
-            publishingClient
-                .createUpdateContext(rootTopic + "/poll/maximumSuccessfulRequestTime", int64)
+            getInt64UpdateContext(rootTopic + "/poll/maximumSuccessfulRequestTime")
                 .publish(maximumSuccessfulRequestTime.getAsLong());
         }
         if (minimumSuccessfulRequestTime.isPresent()) {
-            publishingClient
-                .createUpdateContext(rootTopic + "/poll/minimumSuccessfulRequestTime", int64)
+            getInt64UpdateContext(rootTopic + "/poll/minimumSuccessfulRequestTime")
                 .publish(minimumSuccessfulRequestTime.getAsLong());
         }
     }
 
     private void reportPublicationEvents() {
-        final DataType<Long> int64 = Diffusion.dataTypes().int64();
-        publishingClient
-            .createUpdateContext(rootTopic + "/publication/requests", int64)
+        getInt64UpdateContext(rootTopic + "/publication/requests")
             .publish((long) publicationEventCounter.getRequests());
-        publishingClient
-            .createUpdateContext(rootTopic + "/publication/successes", int64)
+        getInt64UpdateContext(rootTopic + "/publication/successes")
             .publish((long) publicationEventCounter.getSuccesses());
-        publishingClient
-            .createUpdateContext(rootTopic + "/publication/failures", int64)
+        getInt64UpdateContext(rootTopic + "/publication/failures")
             .publish((long) publicationEventCounter.getFailures());
-        publishingClient
-            .createUpdateContext(rootTopic + "/publication/bytes", int64)
+        getInt64UpdateContext(rootTopic + "/publication/bytes")
             .publish((long) publicationEventCounter.getTotalSuccessBytes());
 
         final BigDecimal failureThroughput = publicationQuerier.getFailureThroughput();
         final BigDecimal requestThroughput = publicationQuerier.getRequestThroughput();
 
-        final DataType<Double> doubleFloat = Diffusion.dataTypes().doubleFloat();
-        publishingClient
-            .createUpdateContext(rootTopic + "/publication/failureThroughput", doubleFloat)
+        getDoubleUpdateContext(rootTopic + "/publication/failureThroughput")
             .publish(failureThroughput.doubleValue());
-        publishingClient
-            .createUpdateContext(rootTopic + "/publication/requestThroughput", doubleFloat)
+        getDoubleUpdateContext(rootTopic + "/publication/requestThroughput")
             .publish(requestThroughput.doubleValue());
-        publishingClient
-            .createUpdateContext(rootTopic + "/publication/meanBytesPerPublication", doubleFloat)
+        getDoubleUpdateContext(rootTopic + "/publication/meanBytesPerPublication")
             .publish(publicationQuerier.getMeanPublicationSize().doubleValue());
 
         final OptionalLong requestTime = publicationQuerier.get90thPercentileSuccessfulRequestTime();
         final OptionalLong maximumSuccessfulRequestTime = publicationQuerier.getMaximumSuccessfulRequestTime();
         final OptionalLong minimumSuccessfulRequestTime = publicationQuerier.getMinimumSuccessfulRequestTime();
         if (requestTime.isPresent()) {
-            publishingClient
-                .createUpdateContext(rootTopic + "/publication/successfulRequestTimeNinetiethPercentile", int64)
+            getInt64UpdateContext(rootTopic + "/publication/successfulRequestTimeNinetiethPercentile")
                 .publish(requestTime.getAsLong());
         }
         if (maximumSuccessfulRequestTime.isPresent()) {
-            publishingClient
-                .createUpdateContext(rootTopic + "/publication/maximumSuccessfulRequestTime", int64)
+            getInt64UpdateContext(rootTopic + "/publication/maximumSuccessfulRequestTime")
                 .publish(maximumSuccessfulRequestTime.getAsLong());
         }
         if (minimumSuccessfulRequestTime.isPresent()) {
-            publishingClient
-                .createUpdateContext(rootTopic + "/publication/minimumSuccessfulRequestTime", int64)
+            getInt64UpdateContext(rootTopic + "/publication/minimumSuccessfulRequestTime")
                 .publish(minimumSuccessfulRequestTime.getAsLong());
         }
     }
 
     private void reportTopicCreationEvents() {
-        final DataType<Long> int64 = Diffusion.dataTypes().int64();
-        publishingClient
-            .createUpdateContext(rootTopic + "/topicCreation/requests", int64)
+        getInt64UpdateContext(rootTopic + "/topicCreation/requests")
             .publish((long) topicCreationEventCounter.getRequests());
-        publishingClient
-            .createUpdateContext(rootTopic + "/topicCreation/successes", int64)
+        getInt64UpdateContext(rootTopic + "/topicCreation/successes")
             .publish((long) topicCreationEventCounter.getSuccesses());
-        publishingClient
-            .createUpdateContext(rootTopic + "/topicCreation/failures", int64)
+        getInt64UpdateContext(rootTopic + "/topicCreation/failures")
             .publish((long) topicCreationEventCounter.getFailures());
 
         final BigDecimal failureThroughput = topicCreationQuerier.getFailureThroughput();
         final BigDecimal requestThroughput = topicCreationQuerier.getRequestThroughput();
 
-        final DataType<Double> doubleFloat = Diffusion.dataTypes().doubleFloat();
-        publishingClient
-            .createUpdateContext(rootTopic + "/topicCreation/failureThroughput", doubleFloat)
+        getDoubleUpdateContext(rootTopic + "/topicCreation/failureThroughput")
             .publish(failureThroughput.doubleValue());
-        publishingClient
-            .createUpdateContext(rootTopic + "/topicCreation/requestThroughput", doubleFloat)
+        getDoubleUpdateContext(rootTopic + "/topicCreation/requestThroughput")
             .publish(requestThroughput.doubleValue());
 
         final OptionalLong requestTime = topicCreationQuerier.get90thPercentileSuccessfulRequestTime();
         final OptionalLong maximumSuccessfulRequestTime = topicCreationQuerier.getMaximumSuccessfulRequestTime();
         final OptionalLong minimumSuccessfulRequestTime = topicCreationQuerier.getMinimumSuccessfulRequestTime();
         if (requestTime.isPresent()) {
-            publishingClient
-                .createUpdateContext(rootTopic + "/topicCreation/successfulRequestTimeNinetiethPercentile", int64)
+            getInt64UpdateContext(rootTopic + "/topicCreation/successfulRequestTimeNinetiethPercentile")
                 .publish(requestTime.getAsLong());
         }
         if (maximumSuccessfulRequestTime.isPresent()) {
-            publishingClient
-                .createUpdateContext(rootTopic + "/topicCreation/maximumSuccessfulRequestTime", int64)
+            getInt64UpdateContext(rootTopic + "/topicCreation/maximumSuccessfulRequestTime")
                 .publish(maximumSuccessfulRequestTime.getAsLong());
         }
         if (minimumSuccessfulRequestTime.isPresent()) {
-            publishingClient
-                .createUpdateContext(rootTopic + "/topicCreation/minimumSuccessfulRequestTime", int64)
+            getInt64UpdateContext(rootTopic + "/topicCreation/minimumSuccessfulRequestTime")
                 .publish(minimumSuccessfulRequestTime.getAsLong());
         }
+    }
+
+    private UpdateContext<Long> getInt64UpdateContext(String path) {
+        return int64UpdateContexts.computeIfAbsent(
+            path,
+            k -> publishingClient.createUpdateContext(path, dataTypes().int64()));
+    }
+
+    private UpdateContext<Double> getDoubleUpdateContext(String path) {
+        return doubleUpdateContexts.computeIfAbsent(
+            path,
+            k -> publishingClient.createUpdateContext(path, dataTypes().doubleFloat()));
     }
 }
