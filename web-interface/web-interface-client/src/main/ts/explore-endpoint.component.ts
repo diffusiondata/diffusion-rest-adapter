@@ -3,6 +3,7 @@ import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {Endpoint, Service} from './model';
 import {DiffusionService} from "./diffusion.service";
 import * as diffusion from 'diffusion';
+import {Stream} from "diffusion";
 
 @Component({
     selector: 'explore-endpoint',
@@ -33,9 +34,9 @@ export class ExploreEndpointComponent implements OnInit, OnDestroy {
     @Input() endpoint: Endpoint;
     @Input() endpointIndex: Number;
 
-    private stream;
     private value: String;
     private url: String = '';
+    private streams: Stream[] = [];
 
     constructor(private diffusionService: DiffusionService) {}
 
@@ -46,41 +47,41 @@ export class ExploreEndpointComponent implements OnInit, OnDestroy {
             .diffusionService
             .get()
             .then(session => {
-                this.stream = session
+                this.streams.push(session
                     .stream(this.service.topicPathRoot + '/' + this.endpoint.topicPath)
                     .on('subscribe', spec => {
                         if (spec.type.id === diffusion.topics.TopicType.JSON.id) {
-                            session
+                            this.streams.push(session
                                 .stream(this.service.topicPathRoot + '/' + this.endpoint.topicPath)
                                 .asType(diffusion.datatypes.json())
-                                .on('value', (path, spec, newValue) => {
+                                .on('value', (path, spec, newValue, oldValue) => {
                                     this.value = JSON.stringify(newValue.get());
-                                });
+                                }));
                         }
                         else if (spec.type.id === diffusion.topics.TopicType.STRING.id) {
-                            session
+                            this.streams.push(session
                                 .stream(this.service.topicPathRoot + '/' + this.endpoint.topicPath)
                                 .asType(diffusion.datatypes.string())
                                 .on('value', (path, spec, newValue) => {
                                     this.value = newValue;
-                                });
+                                }));
                         }
                         else if (spec.type.id === diffusion.topics.TopicType.BINARY.id) {
-                            session
+                            this.streams.push(session
                                 .stream(this.service.topicPathRoot + '/' + this.endpoint.topicPath)
                                 .asType(diffusion.datatypes.binary())
                                 .on('value', (path, spec, newValue) => {
                                     this.value = newValue.get().toString('hex');
-                                });
+                                }));
                         }
-                    });
+                    }));
                 session.subscribe(this.service.topicPathRoot + '/' + this.endpoint.topicPath);
             });
     }
 
     ngOnDestroy(): void {
-        this.stream.close();
         this.diffusionService.get().then(session => session.unsubscribe(this.service.topicPathRoot + '/' + this.endpoint.topicPath));
+        this.streams.forEach(stream => stream.close());
     }
 
     private setUrl() {
