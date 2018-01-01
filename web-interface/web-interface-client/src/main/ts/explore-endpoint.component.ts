@@ -1,4 +1,4 @@
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, NgZone, OnDestroy, OnInit} from '@angular/core';
 
 import {Endpoint, Service} from './model';
 import {DiffusionService} from "./diffusion.service";
@@ -27,7 +27,8 @@ import {Stream} from "diffusion";
             </div>
         </div>
     </div>
-</div>`
+</div>`,
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ExploreEndpointComponent implements OnInit, OnDestroy {
     @Input() service: Service;
@@ -38,7 +39,7 @@ export class ExploreEndpointComponent implements OnInit, OnDestroy {
     private url: String = '';
     private streams: Stream[] = [];
 
-    constructor(private diffusionService: DiffusionService) {}
+    constructor(private diffusionService: DiffusionService, private cdr: ChangeDetectorRef, private zone: NgZone) {}
 
     ngOnInit(): void {
         this.setUrl();
@@ -56,6 +57,7 @@ export class ExploreEndpointComponent implements OnInit, OnDestroy {
                                 .asType(diffusion.datatypes.json())
                                 .on('value', (path, spec, newValue, oldValue) => {
                                     this.value = JSON.stringify(newValue.get());
+                                    this.zone.run(() => this.cdr.markForCheck());
                                 }));
                         }
                         else if (spec.type.id === diffusion.topics.TopicType.STRING.id) {
@@ -64,6 +66,7 @@ export class ExploreEndpointComponent implements OnInit, OnDestroy {
                                 .asType(diffusion.datatypes.string())
                                 .on('value', (path, spec, newValue) => {
                                     this.value = newValue;
+                                    this.zone.run(() => this.cdr.markForCheck());
                                 }));
                         }
                         else if (spec.type.id === diffusion.topics.TopicType.BINARY.id) {
@@ -72,11 +75,14 @@ export class ExploreEndpointComponent implements OnInit, OnDestroy {
                                 .asType(diffusion.datatypes.binary())
                                 .on('value', (path, spec, newValue) => {
                                     this.value = newValue.get().toString('hex');
+                                    this.zone.run(() => this.cdr.markForCheck());
                                 }));
                         }
                     }));
                 session.subscribe(this.service.topicPathRoot + '/' + this.endpoint.topicPath);
             });
+
+        this.zone.run(() => this.cdr.markForCheck());
     }
 
     ngOnDestroy(): void {
