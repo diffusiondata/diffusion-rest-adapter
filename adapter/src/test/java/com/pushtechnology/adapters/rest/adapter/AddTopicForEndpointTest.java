@@ -27,6 +27,7 @@ import org.mockito.Mock;
 
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
+import com.pushtechnology.adapters.rest.publication.UpdateContext;
 import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 import com.pushtechnology.diffusion.datatype.json.JSON;
@@ -40,6 +41,8 @@ public final class AddTopicForEndpointTest {
 
     @Mock
     private TopicManagementClient topicManagementClient;
+    @Mock
+    private UpdateContext<JSON> updateContext;
     @Mock
     private JSON response;
     @Mock
@@ -70,12 +73,13 @@ public final class AddTopicForEndpointTest {
             topicManagementClient,
             serviceConfig,
             endpointConfig,
+            updateContext,
             callback);
     }
 
     @After
     public void postConditions() {
-        verifyNoMoreInteractions(topicManagementClient, response, callback);
+        verifyNoMoreInteractions(topicManagementClient, response, callback, updateContext);
     }
 
     @Test
@@ -83,6 +87,7 @@ public final class AddTopicForEndpointTest {
         handler.completed(response);
 
         verify(topicManagementClient).addEndpoint(serviceConfig, endpointConfig, callback);
+        verify(updateContext).publish(response);
     }
 
     @Test

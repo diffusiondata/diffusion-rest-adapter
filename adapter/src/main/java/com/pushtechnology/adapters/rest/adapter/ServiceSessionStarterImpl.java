@@ -68,6 +68,7 @@ public final class ServiceSessionStarterImpl implements ServiceSessionStarter {
                     .forEach(new InitialiseEndpoint(
                         endpointClient,
                         topicManagementClient,
+                        publishingClient,
                         serviceConfig,
                         serviceSession));
                 serviceSession.start();

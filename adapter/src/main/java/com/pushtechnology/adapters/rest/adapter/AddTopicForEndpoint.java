@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
+import com.pushtechnology.adapters.rest.publication.UpdateContext;
 import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 
@@ -33,6 +34,7 @@ import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 /*package*/ final class AddTopicForEndpoint<T> implements FutureCallback<T> {
     private static final Logger LOG = LoggerFactory.getLogger(AddTopicForEndpoint.class);
     private final TopicManagementClient topicManagementClient;
+    private final UpdateContext<T> updateContext;
     private final ServiceConfig service;
     private final EndpointConfig endpoint;
     private final TopicControl.AddCallback callback;
@@ -44,9 +46,11 @@ import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
             TopicManagementClient topicManagementClient,
             ServiceConfig service,
             EndpointConfig endpoint,
+            UpdateContext<T> updateContext,
             TopicControl.AddCallback callback) {
 
         this.topicManagementClient = topicManagementClient;
+        this.updateContext = updateContext;
         this.service = service;
         this.endpoint = endpoint;
         this.callback = callback;
@@ -55,6 +59,7 @@ import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
     @Override
     public void completed(T value) {
         topicManagementClient.addEndpoint(service, endpoint, callback);
+        updateContext.publish(value);
     }
 
     @Override

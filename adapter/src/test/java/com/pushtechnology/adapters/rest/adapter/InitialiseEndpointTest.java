@@ -16,6 +16,7 @@
 package com.pushtechnology.adapters.rest.adapter;
 
 import static java.util.Collections.emptyList;
+import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.isA;
 import static org.mockito.Mockito.times;
@@ -39,6 +40,8 @@ import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.polling.EndpointClient;
 import com.pushtechnology.adapters.rest.polling.EndpointResponse;
+import com.pushtechnology.adapters.rest.publication.PublishingClient;
+import com.pushtechnology.adapters.rest.publication.UpdateContext;
 import com.pushtechnology.adapters.rest.services.ServiceSession;
 import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.AddCallback;
@@ -53,6 +56,10 @@ public final class InitialiseEndpointTest {
     private EndpointClient endpointClient;
     @Mock
     private TopicManagementClient topicManagementClient;
+    @Mock
+    private PublishingClient publishingClient;
+    @Mock
+    private UpdateContext updateContext;
     @Mock
     private ServiceSession serviceSession;
     @Mock
@@ -84,23 +91,26 @@ public final class InitialiseEndpointTest {
 
     private InitialiseEndpoint initialiseEndpoint;
 
+    @SuppressWarnings("unchecked")
     @Before
     public void setUp() throws IOException {
         initMocks(this);
 
         when(response.getHeader("content-type")).thenReturn("application/json; charset=utf-8");
         when(response.getResponse()).thenReturn("{}".getBytes(Charset.forName("UTF-8")));
+        when(publishingClient.createUpdateContext(eq(serviceConfig), eq(endpointConfig), isNotNull())).thenReturn(updateContext);
 
         initialiseEndpoint = new InitialiseEndpoint(
             endpointClient,
             topicManagementClient,
+            publishingClient,
             serviceConfig,
             serviceSession);
     }
 
     @After
     public void postConditions() {
-        verifyNoMoreInteractions(endpointClient, topicManagementClient, serviceSession, response);
+        verifyNoMoreInteractions(endpointClient, topicManagementClient, serviceSession, response, publishingClient, updateContext);
     }
 
     @SuppressWarnings("unchecked")
@@ -111,6 +121,7 @@ public final class InitialiseEndpointTest {
         verify(endpointClient).request(eq(serviceConfig), eq(endpointConfig), isA(FutureCallback.class));
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void acceptInfer() throws IOException {
         initialiseEndpoint.accept(inferEndpointConfig);
@@ -127,5 +138,7 @@ public final class InitialiseEndpointTest {
             eq(serviceConfig),
             eq(endpointConfig),
             isA(AddCallback.class));
+        verify(publishingClient).createUpdateContext(eq(serviceConfig), eq(endpointConfig), isNotNull());
+        verify(updateContext).publish(isNotNull());
     }
 }

@@ -26,6 +26,7 @@ import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.polling.EndpointClient;
 import com.pushtechnology.adapters.rest.polling.EndpointResponse;
+import com.pushtechnology.adapters.rest.publication.PublishingClient;
 import com.pushtechnology.adapters.rest.services.ServiceSession;
 import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
 
@@ -38,6 +39,7 @@ import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
     private static final Logger LOG = LoggerFactory.getLogger(InitialiseEndpoint.class);
     private final EndpointClient endpointClient;
     private final TopicManagementClient topicManagementClient;
+    private final PublishingClient publishingClient;
     private final ServiceConfig service;
     private final ServiceSession serviceSession;
 
@@ -47,11 +49,13 @@ import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
     /*package*/ InitialiseEndpoint(
             EndpointClient endpointClient,
             TopicManagementClient topicManagementClient,
+            PublishingClient publishingClient,
             ServiceConfig service,
             ServiceSession serviceSession) {
 
         this.endpointClient = endpointClient;
         this.topicManagementClient = topicManagementClient;
+        this.publishingClient = publishingClient;
         this.service = service;
         this.serviceSession = serviceSession;
     }
@@ -81,21 +85,17 @@ import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
                                     topicManagementClient,
                                     service,
                                     inferredEndpointConfig,
+                                    publishingClient.createUpdateContext(
+                                        service,
+                                        inferredEndpointConfig,
+                                        endpointType.getDataType()),
                                     new AddEndpointToServiceSession(inferredEndpointConfig, serviceSession)));
                         })
                             .completed(result);
                     }
                     else {
-                        new ValidateContentType(
-                            endpointConfig,
-                            new TransformingHandler<>(
-                                EndpointType.from(produces).getParser(),
-                                new AddTopicForEndpoint<>(
-                                    topicManagementClient,
-                                    service,
-                                    endpointConfig,
-                                    new AddEndpointToServiceSession(endpointConfig, serviceSession))))
-                            .completed(result);
+                        final EndpointType<?> endpointType = EndpointType.from(produces);
+                        validateContentTypeAndInitialise(result, endpointType, endpointConfig);
                     }
                 }
 
@@ -109,5 +109,22 @@ import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
                     LOG.warn("Endpoint {} not initialised. First request cancelled.", endpointConfig);
                 }
             });
+    }
+
+    private <T> void validateContentTypeAndInitialise(
+        EndpointResponse result,
+        EndpointType<T> endpointType,
+        EndpointConfig endpointConfig) {
+        new ValidateContentType(
+            endpointConfig,
+            new TransformingHandler<>(
+                endpointType.getParser(),
+                new AddTopicForEndpoint<>(
+                    topicManagementClient,
+                    service,
+                    endpointConfig,
+                    publishingClient.createUpdateContext(service, endpointConfig, endpointType.getDataType()),
+                    new AddEndpointToServiceSession(endpointConfig, serviceSession))))
+            .completed(result);
     }
 }
