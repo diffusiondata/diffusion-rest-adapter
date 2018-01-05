@@ -71,9 +71,7 @@ import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
                 @Override
                 public void completed(EndpointResponse result) {
                     if ("auto".equals(produces)) {
-                        new InferTopicType((endpointType) -> {
-                            return createTransformingHandler(endpointType, endpointConfig);
-                        })
+                        new InferTopicType(endpointType -> inferEndpointAndCreateHandler(endpointType, endpointConfig))
                             .completed(result);
                     }
                     else {
@@ -94,27 +92,14 @@ import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
             });
     }
 
-    private <T> FutureCallback<EndpointResponse> createTransformingHandler(
-            EndpointType<T> endpointType,
-            EndpointConfig endpointConfig) {
-        final EndpointConfig inferredEndpointConfig = EndpointConfig
+    private EndpointConfig inferEndpointConfig(EndpointType<?> endpointType, EndpointConfig endpointConfig) {
+        return EndpointConfig
             .builder()
             .name(endpointConfig.getName())
             .topicPath(endpointConfig.getTopicPath())
             .url(endpointConfig.getUrl())
             .produces(endpointType.getIdentifier())
             .build();
-        return new TransformingHandler<>(
-            endpointType.getParser(),
-            new AddTopicForEndpoint<>(
-                topicManagementClient,
-                service,
-                inferredEndpointConfig,
-                publishingClient.createUpdateContext(
-                    service,
-                    inferredEndpointConfig,
-                    endpointType.getDataType()),
-                new AddEndpointToServiceSession(inferredEndpointConfig, serviceSession)));
     }
 
     private <T> void validateContentTypeAndInitialise(
@@ -123,14 +108,29 @@ import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
         EndpointConfig endpointConfig) {
         new ValidateContentType(
             endpointConfig,
-            new TransformingHandler<>(
-                endpointType.getParser(),
-                new AddTopicForEndpoint<>(
-                    topicManagementClient,
+            createTransformingHandler(endpointType, endpointConfig))
+            .completed(result);
+    }
+
+    private <T> TransformingHandler<EndpointResponse, T> createTransformingHandler(
+        EndpointType<T> endpointType,
+        EndpointConfig endpointConfig) {
+        return new TransformingHandler<>(
+            endpointType.getParser(),
+            new AddTopicForEndpoint<>(
+                topicManagementClient,
+                service,
+                endpointConfig,
+                publishingClient.createUpdateContext(
                     service,
                     endpointConfig,
-                    publishingClient.createUpdateContext(service, endpointConfig, endpointType.getDataType()),
-                    new AddEndpointToServiceSession(endpointConfig, serviceSession))))
-            .completed(result);
+                    endpointType.getDataType()),
+                new AddEndpointToServiceSession(endpointConfig, serviceSession)));
+    }
+
+    private <T> TransformingHandler<EndpointResponse, T> inferEndpointAndCreateHandler(
+            EndpointType<T> endpointType,
+            EndpointConfig endpointConfig) {
+        return createTransformingHandler(endpointType, inferEndpointConfig(endpointType, endpointConfig));
     }
 }
