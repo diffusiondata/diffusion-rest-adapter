@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Push Technology Ltd.
+ * Copyright (C) 2017 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,19 +28,19 @@ import com.pushtechnology.adapters.rest.polling.EndpointResponse;
  * @author Push Technology Limited
  */
 public final class InferTopicType implements FutureCallback<EndpointResponse> {
-    private final Function<EndpointType, FutureCallback<EndpointResponse>> factory;
+    private final Function<EndpointType<?>, FutureCallback<EndpointResponse>> factory;
 
     /**
      * Constructor.
      */
-    public InferTopicType(Function<EndpointType, FutureCallback<EndpointResponse>> factory) {
+    public InferTopicType(Function<EndpointType<?>, FutureCallback<EndpointResponse>> factory) {
         this.factory = factory;
     }
 
     @Override
     public void completed(EndpointResponse result) {
         final String contentType = result.getHeader("content-type");
-        final EndpointType type = EndpointType.inferFromContentType(contentType);
+        final EndpointType<?> type = EndpointType.inferFromContentType(contentType);
 
         factory.apply(type).completed(result);
     }

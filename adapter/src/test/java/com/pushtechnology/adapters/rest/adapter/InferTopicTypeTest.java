@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Push Technology Ltd.
+ * Copyright (C) 2017 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ public final class InferTopicTypeTest {
     @Mock
     private EndpointResponse endpointResponse;
     @Mock
-    private Function<EndpointType, FutureCallback<EndpointResponse>> factory;
+    private Function<EndpointType<?>, FutureCallback<EndpointResponse>> factory;
 
     private InferTopicType inferTopicType;
 

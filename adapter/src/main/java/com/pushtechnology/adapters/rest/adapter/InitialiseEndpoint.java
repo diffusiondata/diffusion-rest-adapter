@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Push Technology Ltd.
+ * Copyright (C) 2017 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,24 +72,7 @@ import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
                 public void completed(EndpointResponse result) {
                     if ("auto".equals(produces)) {
                         new InferTopicType((endpointType) -> {
-                            final EndpointConfig inferredEndpointConfig = EndpointConfig
-                                .builder()
-                                .name(endpointConfig.getName())
-                                .topicPath(endpointConfig.getTopicPath())
-                                .url(endpointConfig.getUrl())
-                                .produces(endpointType.getIdentifier())
-                                .build();
-                            return new TransformingHandler<>(
-                                endpointType.getParser(),
-                                new AddTopicForEndpoint<>(
-                                    topicManagementClient,
-                                    service,
-                                    inferredEndpointConfig,
-                                    publishingClient.createUpdateContext(
-                                        service,
-                                        inferredEndpointConfig,
-                                        endpointType.getDataType()),
-                                    new AddEndpointToServiceSession(inferredEndpointConfig, serviceSession)));
+                            return createTransformingHandler(endpointType, endpointConfig);
                         })
                             .completed(result);
                     }
@@ -109,6 +92,29 @@ import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
                     LOG.warn("Endpoint {} not initialised. First request cancelled.", endpointConfig);
                 }
             });
+    }
+
+    private <T> FutureCallback<EndpointResponse> createTransformingHandler(
+            EndpointType<T> endpointType,
+            EndpointConfig endpointConfig) {
+        final EndpointConfig inferredEndpointConfig = EndpointConfig
+            .builder()
+            .name(endpointConfig.getName())
+            .topicPath(endpointConfig.getTopicPath())
+            .url(endpointConfig.getUrl())
+            .produces(endpointType.getIdentifier())
+            .build();
+        return new TransformingHandler<>(
+            endpointType.getParser(),
+            new AddTopicForEndpoint<>(
+                topicManagementClient,
+                service,
+                inferredEndpointConfig,
+                publishingClient.createUpdateContext(
+                    service,
+                    inferredEndpointConfig,
+                    endpointType.getDataType()),
+                new AddEndpointToServiceSession(inferredEndpointConfig, serviceSession)));
     }
 
     private <T> void validateContentTypeAndInitialise(
