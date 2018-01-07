@@ -71,12 +71,16 @@ import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
                 @Override
                 public void completed(EndpointResponse result) {
                     if ("auto".equals(produces)) {
-                        new InferTopicType(endpointType -> inferEndpointAndCreateHandler(endpointType, endpointConfig))
+                        new InferTopicType(endpointType ->
+                            createTransformingHandler(endpointType, inferEndpointConfig(endpointType, endpointConfig)))
                             .completed(result);
                     }
                     else {
                         final EndpointType<?> endpointType = EndpointType.from(produces);
-                        validateContentTypeAndInitialise(result, endpointType, endpointConfig);
+                        new ValidateContentType(
+                            endpointConfig,
+                            createTransformingHandler(endpointType, endpointConfig))
+                            .completed(result);
                     }
                 }
 
@@ -102,19 +106,9 @@ import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
             .build();
     }
 
-    private <T> void validateContentTypeAndInitialise(
-        EndpointResponse result,
-        EndpointType<T> endpointType,
-        EndpointConfig endpointConfig) {
-        new ValidateContentType(
-            endpointConfig,
-            createTransformingHandler(endpointType, endpointConfig))
-            .completed(result);
-    }
-
     private <T> TransformingHandler<EndpointResponse, T> createTransformingHandler(
-        EndpointType<T> endpointType,
-        EndpointConfig endpointConfig) {
+            EndpointType<T> endpointType,
+            EndpointConfig endpointConfig) {
         return new TransformingHandler<>(
             endpointType.getParser(),
             new AddTopicForEndpoint<>(
@@ -126,11 +120,5 @@ import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
                     endpointConfig,
                     endpointType.getDataType()),
                 new AddEndpointToServiceSession(endpointConfig, serviceSession)));
-    }
-
-    private <T> TransformingHandler<EndpointResponse, T> inferEndpointAndCreateHandler(
-            EndpointType<T> endpointType,
-            EndpointConfig endpointConfig) {
-        return createTransformingHandler(endpointType, inferEndpointConfig(endpointType, endpointConfig));
     }
 }
