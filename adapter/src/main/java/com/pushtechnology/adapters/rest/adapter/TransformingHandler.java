@@ -15,49 +15,38 @@
 
 package com.pushtechnology.adapters.rest.adapter;
 
-import org.apache.http.concurrent.FutureCallback;
+import java.util.function.BiConsumer;
 
 import com.pushtechnology.diffusion.transform.transformer.UnsafeTransformer;
 
 /**
- * A {@link FutureCallback} that applies a transformer and delegates to another {@link FutureCallback}.
+ * A {@link BiConsumer} that applies a transformer and delegates to another {@link BiConsumer}.
  *
  * @param <S> the type to transform from
  * @param <T> the type to transform to
  * @author Push Technology Limited
  */
-/*package*/ final class TransformingHandler<S, T> implements FutureCallback<S> {
+/*package*/ final class TransformingHandler<S, T> implements BiConsumer<S, Throwable> {
     private final UnsafeTransformer<S, T> transformer;
-    private final FutureCallback<T> delegate;
+    private final BiConsumer<T, Throwable> delegate;
 
     /**
      * Constructor.
      */
-    public TransformingHandler(UnsafeTransformer<S, T> transformer, FutureCallback<T> delegate) {
+    public TransformingHandler(UnsafeTransformer<S, T> transformer, BiConsumer<T, Throwable> delegate) {
         this.transformer = transformer;
         this.delegate = delegate;
     }
 
     @Override
-    public void completed(S result) {
+    public void accept(S result, Throwable throwable) {
         try {
-            final T transformedResult = transformer.transform(result);
-            delegate.completed(transformedResult);
+            delegate.accept(result != null ? transformer.transform(result) : null, throwable);
         }
         // CHECKSTYLE.OFF: IllegalCatch
         catch (Exception e) {
-            delegate.failed(e);
+            delegate.accept(null, e);
         }
         // CHECKSTYLE.ON: IllegalCatch
-    }
-
-    @Override
-    public void failed(Exception ex) {
-        delegate.failed(ex);
-    }
-
-    @Override
-    public void cancelled() {
-        delegate.cancelled();
     }
 }

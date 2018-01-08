@@ -15,7 +15,8 @@
 
 package com.pushtechnology.adapters.rest.adapter;
 
-import org.apache.http.concurrent.FutureCallback;
+import java.util.function.BiConsumer;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +32,7 @@ import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
  * @param <T> the value type of the topic to add
  * @author Push Technology Limited
  */
-/*package*/ final class AddTopicForEndpoint<T> implements FutureCallback<T> {
+/*package*/ final class AddTopicForEndpoint<T> implements BiConsumer<T, Throwable> {
     private static final Logger LOG = LoggerFactory.getLogger(AddTopicForEndpoint.class);
     private final TopicManagementClient topicManagementClient;
     private final UpdateContext<T> updateContext;
@@ -57,18 +58,13 @@ import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
     }
 
     @Override
-    public void completed(T value) {
-        topicManagementClient.addEndpoint(service, endpoint, callback);
-        updateContext.publish(value);
-    }
-
-    @Override
-    public void failed(Exception ex) {
-        LOG.warn("Initial request to {} failed", endpoint, ex);
-    }
-
-    @Override
-    public void cancelled() {
-        LOG.warn("Initial request to {} cancelled", endpoint);
+    public void accept(T value, Throwable throwable) {
+        if (throwable != null) {
+            LOG.warn("Initial request to {} failed", endpoint, throwable);
+        }
+        else {
+            topicManagementClient.addEndpoint(service, endpoint, callback);
+            updateContext.publish(value);
+        }
     }
 }

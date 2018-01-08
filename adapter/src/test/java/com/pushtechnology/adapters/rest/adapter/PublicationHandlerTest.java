@@ -4,6 +4,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.MockitoAnnotations.initMocks;
 
+import java.util.concurrent.CancellationException;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,18 +50,18 @@ public final class PublicationHandlerTest {
 
     @Test
     public void completed() {
-        pollHandler.completed(json);
+        pollHandler.accept(json, null);
 
         verify(updateContext).publish(json);
     }
 
     @Test
     public void failed() {
-        pollHandler.failed(new Exception("Intentional for test"));
+        pollHandler.accept(null, new Exception("Intentional for test"));
     }
 
     @Test
     public void cancelled() {
-        pollHandler.cancelled();
+        pollHandler.accept(null, new CancellationException());
     }
 }

@@ -18,7 +18,8 @@ package com.pushtechnology.adapters.rest.adapter;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-import org.apache.http.concurrent.FutureCallback;
+import java.util.function.BiConsumer;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -32,7 +33,7 @@ import com.pushtechnology.diffusion.transform.transformer.TransformationExceptio
  */
 public final class TransformingHandlerTest {
     @Mock
-    private FutureCallback<String> delegate;
+    private BiConsumer<String, Throwable> delegate;
 
     private TransformingHandler<String, String> handler;
 
@@ -45,25 +46,18 @@ public final class TransformingHandlerTest {
 
     @Test
     public void completed() {
-        handler.completed("a");
+        handler.accept("a", null);
 
-        verify(delegate).completed("a");
+        verify(delegate).accept("a", null);
     }
 
     @Test
     public void failed() {
         final Exception e = new Exception("Intentionally created for test");
 
-        handler.failed(e);
+        handler.accept(null, e);
 
-        verify(delegate).failed(e);
-    }
-
-    @Test
-    public void cancelled() {
-        handler.cancelled();
-
-        verify(delegate).cancelled();
+        verify(delegate).accept(null, e);
     }
 
     @Test
@@ -76,8 +70,8 @@ public final class TransformingHandlerTest {
             },
             delegate);
 
-        handler.completed("a");
+        handler.accept("a", null);
 
-        verify(delegate).failed(e);
+        verify(delegate).accept(null, e);
     }
 }

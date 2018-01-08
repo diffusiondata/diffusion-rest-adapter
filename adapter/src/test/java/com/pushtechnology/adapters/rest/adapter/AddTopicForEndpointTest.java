@@ -84,7 +84,7 @@ public final class AddTopicForEndpointTest {
 
     @Test
     public void completed() {
-        handler.completed(response);
+        handler.accept(response, null);
 
         verify(topicManagementClient).addEndpoint(serviceConfig, endpointConfig, callback);
         verify(updateContext).publish(response);
@@ -93,11 +93,6 @@ public final class AddTopicForEndpointTest {
     @Test
     public void failed() {
         final Exception ex = new Exception("Intentional for test");
-        handler.failed(ex);
-    }
-
-    @Test
-    public void cancelled() {
-        handler.cancelled();
+        handler.accept(null, ex);
     }
 }

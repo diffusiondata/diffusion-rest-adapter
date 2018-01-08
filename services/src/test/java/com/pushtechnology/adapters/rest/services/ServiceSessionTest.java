@@ -16,22 +16,23 @@
 package com.pushtechnology.adapters.rest.services;
 
 import static java.util.Collections.singletonList;
+import static java.util.concurrent.CompletableFuture.completedFuture;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.isA;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-import java.util.concurrent.Future;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiConsumer;
 
-import org.apache.http.concurrent.FutureCallback;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -63,17 +64,15 @@ public final class ServiceSessionTest {
     @Mock
     private ScheduledFuture taskFuture;
     @Mock
-    private Future pollFuture0;
+    private CompletableFuture pollFuture0;
     @Mock
-    private Future pollFuture1;
+    private CompletableFuture pollFuture1;
     @Mock
-    private FutureCallback<EndpointResponse> handler;
+    private BiConsumer<EndpointResponse, Throwable> handler;
     @Mock
     private TopicManagementClient topicManagementClient;
     @Captor
     private ArgumentCaptor<Runnable> runnableCaptor;
-    @Captor
-    private ArgumentCaptor<FutureCallback<EndpointResponse>> callbackCaptor;
 
     private final EndpointConfig endpointConfig = EndpointConfig
         .builder()
@@ -104,7 +103,7 @@ public final class ServiceSessionTest {
             .scheduleWithFixedDelay(isA(Runnable.class), isA(Long.class), isA(Long.class), isA(TimeUnit.class)))
             .thenReturn(taskFuture);
         when(endpointClient
-            .request(isA(ServiceConfig.class), isA(EndpointConfig.class), isA(FutureCallback.class)))
+            .request(isA(ServiceConfig.class), isA(EndpointConfig.class)))
             .thenReturn(pollFuture0, pollFuture1);
         when(handlerFactory.create(serviceConfig, endpointConfig)).thenReturn(handler);
     }
@@ -116,6 +115,8 @@ public final class ServiceSessionTest {
 
     @Test
     public void startSuccessfulPoll() {
+        when(endpointClient.request(eq(serviceConfig), eq(endpointConfig))).thenReturn(completedFuture(endpointResponse));
+
         serviceSession.start();
         serviceSession.addEndpoint(endpointConfig);
         verify(handlerFactory).create(serviceConfig, endpointConfig);
@@ -126,17 +127,17 @@ public final class ServiceSessionTest {
 
         runnable.run();
 
-        verify(endpointClient).request(eq(serviceConfig), eq(endpointConfig), callbackCaptor.capture());
-
-        final FutureCallback<EndpointResponse> callback = callbackCaptor.getValue();
-
-        callback.completed(endpointResponse);
-
-        verify(handler).completed(endpointResponse);
+        verify(endpointClient).request(eq(serviceConfig), eq(endpointConfig));
+        verify(handler).accept(endpointResponse, null);
     }
 
     @Test
     public void startFailedPoll() {
+        final Exception ex = new Exception("Intentional exception");
+        final CompletableFuture<EndpointResponse> future = new CompletableFuture<>();
+        future.completeExceptionally(ex);
+        when(endpointClient.request(eq(serviceConfig), eq(endpointConfig))).thenReturn(future);
+
         serviceSession.start();
         serviceSession.addEndpoint(endpointConfig);
         verify(handlerFactory).create(serviceConfig, endpointConfig);
@@ -147,14 +148,8 @@ public final class ServiceSessionTest {
 
         runnable.run();
 
-        verify(endpointClient).request(eq(serviceConfig), eq(endpointConfig), callbackCaptor.capture());
-
-        final FutureCallback<EndpointResponse> callback = callbackCaptor.getValue();
-
-        final Exception ex = new Exception("Intentional exception");
-        callback.failed(ex);
-
-        verify(handler).failed(ex);
+        verify(endpointClient).request(eq(serviceConfig), eq(endpointConfig));
+        verify(handler).accept(null, ex);
     }
 
     @Test
@@ -183,13 +178,13 @@ public final class ServiceSessionTest {
 
         runnable.run();
 
-        verify(endpointClient).request(eq(serviceConfig), eq(endpointConfig), callbackCaptor.capture());
+        verify(endpointClient).request(eq(serviceConfig), eq(endpointConfig));
 
         serviceSession.stop();
 
         verify(topicManagementClient).removeEndpoint(serviceConfig, endpointConfig);
         verify(taskFuture).cancel(false);
-        verify(pollFuture0).cancel(false);
+        verify(pollFuture0).whenComplete(isNotNull());
     }
 
     @Test
@@ -204,21 +199,24 @@ public final class ServiceSessionTest {
 
         runnable.run();
 
-        verify(endpointClient).request(eq(serviceConfig), eq(endpointConfig), callbackCaptor.capture());
+        verify(endpointClient).request(eq(serviceConfig), eq(endpointConfig));
 
         runnable.run();
 
-        verify(endpointClient, times(2)).request(eq(serviceConfig), eq(endpointConfig), callbackCaptor.capture());
+        verify(endpointClient, times(2)).request(eq(serviceConfig), eq(endpointConfig));
 
         serviceSession.stop();
 
         verify(topicManagementClient).removeEndpoint(serviceConfig, endpointConfig);
         verify(taskFuture).cancel(false);
-        verify(pollFuture1).cancel(false);
+        verify(pollFuture1).whenComplete(isNotNull());
     }
 
     @Test
     public void stopDuringPoll() {
+        final CompletableFuture<EndpointResponse> future = new CompletableFuture<>();
+        when(endpointClient.request(eq(serviceConfig), eq(endpointConfig))).thenReturn(future);
+
         serviceSession.start();
         serviceSession.addEndpoint(endpointConfig);
         verify(handlerFactory).create(serviceConfig, endpointConfig);
@@ -229,16 +227,12 @@ public final class ServiceSessionTest {
 
         runnable.run();
 
-        verify(endpointClient).request(eq(serviceConfig), eq(endpointConfig), callbackCaptor.capture());
-
-        final FutureCallback<EndpointResponse> callback = callbackCaptor.getValue();
+        verify(endpointClient).request(eq(serviceConfig), eq(endpointConfig));
 
         serviceSession.stop();
         verify(topicManagementClient).removeEndpoint(serviceConfig, endpointConfig);
         verify(taskFuture).cancel(false);
 
-        callback.completed(endpointResponse);
-
-        verify(handler, never()).completed(endpointResponse);
+        future.complete(endpointResponse);
     }
 }

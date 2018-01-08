@@ -28,8 +28,8 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiConsumer;
 
-import org.apache.http.concurrent.FutureCallback;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -57,7 +57,7 @@ public final class ServiceSessionFactoryImplTest {
     @Mock
     private ScheduledFuture taskFuture;
     @Mock
-    private FutureCallback<EndpointResponse> handler;
+    private BiConsumer<EndpointResponse, Throwable> handler;
     @Mock
     private TopicManagementClient topicManagementClient;
 

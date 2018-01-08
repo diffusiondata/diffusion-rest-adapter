@@ -15,12 +15,10 @@
 
 package com.pushtechnology.adapters.rest.polling;
 
-import java.util.concurrent.Future;
+import java.util.concurrent.CompletableFuture;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-
-import org.apache.http.concurrent.FutureCallback;
 
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
@@ -35,14 +33,12 @@ public interface EndpointClient extends AutoCloseable {
      * Poll an endpoint using the client.
      * @param serviceConfig the service
      * @param endpointConfig the endpoint
-     * @param callback handler for the response
      * @return handle to asynchronous request
      * @throws IllegalStateException if the client is not running
      */
-    Future<?> request(
+    CompletableFuture<EndpointResponse> request(
         ServiceConfig serviceConfig,
-        EndpointConfig endpointConfig,
-        FutureCallback<EndpointResponse> callback);
+        EndpointConfig endpointConfig);
 
     /**
      * Start component.

@@ -15,7 +15,7 @@
 
 package com.pushtechnology.adapters.rest.adapter;
 
-import org.apache.http.concurrent.FutureCallback;
+import java.util.function.BiConsumer;
 
 import com.pushtechnology.adapters.rest.endpoints.EndpointType;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
@@ -40,12 +40,12 @@ public final class EndpointPollHandlerFactoryImpl implements EndpointPollHandler
     }
 
     @Override
-    public FutureCallback<EndpointResponse> create(ServiceConfig serviceConfig, EndpointConfig endpointConfig) {
+    public BiConsumer<EndpointResponse, Throwable> create(ServiceConfig serviceConfig, EndpointConfig endpointConfig) {
         final EndpointType<?> endpointType = EndpointType.from(endpointConfig.getProduces());
         return create(serviceConfig, endpointConfig, endpointType);
     }
 
-    private <T> FutureCallback<EndpointResponse> create(
+    private <T> BiConsumer<EndpointResponse, Throwable> create(
             ServiceConfig serviceConfig,
             EndpointConfig endpointConfig,
             EndpointType<T> endpointType) {

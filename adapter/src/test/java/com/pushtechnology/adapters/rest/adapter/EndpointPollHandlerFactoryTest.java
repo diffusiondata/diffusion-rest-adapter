@@ -22,7 +22,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-import org.apache.http.concurrent.FutureCallback;
+import java.util.function.BiConsumer;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -97,7 +98,7 @@ public final class EndpointPollHandlerFactoryTest {
 
     @Test
     public void createJson() {
-        final FutureCallback<EndpointResponse> callback = pollHandlerFactory.create(serviceConfig, jsonEndpoint);
+        final BiConsumer<EndpointResponse, Throwable> callback = pollHandlerFactory.create(serviceConfig, jsonEndpoint);
 
         assertTrue(callback instanceof TransformingHandler);
         verify(publishingClient).createUpdateContext(serviceConfig, jsonEndpoint, dataTypes().json());
@@ -105,7 +106,7 @@ public final class EndpointPollHandlerFactoryTest {
 
     @Test
     public void createBinary() {
-        final FutureCallback<EndpointResponse> callback = pollHandlerFactory.create(serviceConfig, binaryEndpoint);
+        final BiConsumer<EndpointResponse, Throwable> callback = pollHandlerFactory.create(serviceConfig, binaryEndpoint);
 
         assertTrue(callback instanceof TransformingHandler);
         verify(publishingClient).createUpdateContext(serviceConfig, binaryEndpoint, dataTypes().binary());
@@ -113,7 +114,7 @@ public final class EndpointPollHandlerFactoryTest {
 
     @Test
     public void createPlainText() {
-        final FutureCallback<EndpointResponse> callback = pollHandlerFactory.create(serviceConfig, plainTextEndpoint);
+        final BiConsumer<EndpointResponse, Throwable> callback = pollHandlerFactory.create(serviceConfig, plainTextEndpoint);
 
         assertTrue(callback instanceof TransformingHandler);
         verify(publishingClient).createUpdateContext(serviceConfig, plainTextEndpoint, dataTypes().string());

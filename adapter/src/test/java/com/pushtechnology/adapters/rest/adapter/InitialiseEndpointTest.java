@@ -16,6 +16,7 @@
 package com.pushtechnology.adapters.rest.adapter;
 
 import static java.util.Collections.emptyList;
+import static java.util.concurrent.CompletableFuture.completedFuture;
 import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.isA;
@@ -28,12 +29,9 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
-import org.apache.http.concurrent.FutureCallback;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
@@ -64,8 +62,6 @@ public final class InitialiseEndpointTest {
     private ServiceSession serviceSession;
     @Mock
     private EndpointResponse response;
-    @Captor
-    private ArgumentCaptor<FutureCallback<EndpointResponse>> callbackCaptor;
 
     private final EndpointConfig endpointConfig = EndpointConfig
         .builder()
@@ -115,21 +111,31 @@ public final class InitialiseEndpointTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void accept() {
+    public void accept() throws IOException {
+        when(endpointClient.request(eq(serviceConfig), eq(endpointConfig))).thenReturn(completedFuture(response));
+
         initialiseEndpoint.accept(endpointConfig);
 
-        verify(endpointClient).request(eq(serviceConfig), eq(endpointConfig), isA(FutureCallback.class));
+        verify(endpointClient).request(eq(serviceConfig), eq(endpointConfig));
+
+        verify(response, times(2)).getHeader("content-type");
+        verify(response).getResponse();
+        verify(topicManagementClient).addEndpoint(
+            eq(serviceConfig),
+            eq(endpointConfig),
+            isA(AddCallback.class));
+        verify(publishingClient).createUpdateContext(eq(serviceConfig), eq(endpointConfig), isNotNull());
+        verify(updateContext).publish(isNotNull());
     }
 
     @SuppressWarnings("unchecked")
     @Test
     public void acceptInfer() throws IOException {
+        when(endpointClient.request(eq(serviceConfig), eq(inferEndpointConfig))).thenReturn(completedFuture(response));
+
         initialiseEndpoint.accept(inferEndpointConfig);
 
-        verify(endpointClient).request(eq(serviceConfig), eq(inferEndpointConfig), callbackCaptor.capture());
-
-        final FutureCallback<EndpointResponse> callback = callbackCaptor.getValue();
-        callback.completed(response);
+        verify(endpointClient).request(eq(serviceConfig), eq(inferEndpointConfig));
 
         verify(response, times(2)).getHeader("content-type");
         verify(response).getResponse();

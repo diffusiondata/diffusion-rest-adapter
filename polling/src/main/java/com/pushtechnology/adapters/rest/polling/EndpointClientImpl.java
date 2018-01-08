@@ -16,7 +16,7 @@
 package com.pushtechnology.adapters.rest.polling;
 
 import java.io.IOException;
-import java.util.concurrent.Future;
+import java.util.concurrent.CompletableFuture;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -68,10 +68,9 @@ public final class EndpointClientImpl implements EndpointClient {
     }
 
     @Override
-    public Future<?> request(
+    public CompletableFuture<EndpointResponse> request(
             ServiceConfig serviceConfig,
-            EndpointConfig endpointConfig,
-            final FutureCallback<EndpointResponse> callback) {
+            EndpointConfig endpointConfig) {
 
         if (client == null) {
             throw new IllegalStateException("Client not running");
@@ -79,7 +78,8 @@ public final class EndpointClientImpl implements EndpointClient {
 
         final PollCompletionListener completionListener = pollListener.onPollRequest(serviceConfig, endpointConfig);
 
-        return client.execute(
+        final CompletableFuture<EndpointResponse> result = new CompletableFuture<>();
+        client.execute(
             new HttpHost(serviceConfig.getHost(), serviceConfig.getPort(), serviceConfig.isSecure() ? "https" : "http"),
             new HttpGet(endpointConfig.getUrl()),
             new FutureCallback<HttpResponse>() {
@@ -87,25 +87,26 @@ public final class EndpointClientImpl implements EndpointClient {
                 public void completed(HttpResponse httpResponse) {
                     final StatusLine statusLine = httpResponse.getStatusLine();
                     if (statusLine.getStatusCode() >= 400) {
-                        callback.failed(new Exception("Received response " + statusLine));
+                        result.completeExceptionally(new Exception("Received response " + statusLine));
                         return;
                     }
 
                     completionListener.onPollResponse(httpResponse);
-                    callback.completed(new EndpointResponseImpl(httpResponse));
+                    result.complete(new EndpointResponseImpl(httpResponse));
                 }
 
                 @Override
                 public void failed(Exception e) {
                     completionListener.onPollFailure(e);
-                    callback.failed(e);
+                    result.completeExceptionally(e);
                 }
 
                 @Override
                 public void cancelled() {
-                    callback.cancelled();
+                    result.cancel(false);
                 }
             });
+        return result;
     }
 
     @PostConstruct

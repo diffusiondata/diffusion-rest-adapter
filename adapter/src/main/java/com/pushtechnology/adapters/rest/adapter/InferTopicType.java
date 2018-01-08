@@ -15,9 +15,8 @@
 
 package com.pushtechnology.adapters.rest.adapter;
 
+import java.util.function.BiConsumer;
 import java.util.function.Function;
-
-import org.apache.http.concurrent.FutureCallback;
 
 import com.pushtechnology.adapters.rest.endpoints.EndpointType;
 import com.pushtechnology.adapters.rest.polling.EndpointResponse;
@@ -27,31 +26,26 @@ import com.pushtechnology.adapters.rest.polling.EndpointResponse;
  *
  * @author Push Technology Limited
  */
-public final class InferTopicType implements FutureCallback<EndpointResponse> {
-    private final Function<EndpointType<?>, FutureCallback<EndpointResponse>> factory;
+public final class InferTopicType implements BiConsumer<EndpointResponse, Throwable> {
+    private final Function<EndpointType<?>, BiConsumer<EndpointResponse, Throwable>> factory;
 
     /**
      * Constructor.
      */
-    public InferTopicType(Function<EndpointType<?>, FutureCallback<EndpointResponse>> factory) {
+    public InferTopicType(Function<EndpointType<?>, BiConsumer<EndpointResponse, Throwable>> factory) {
         this.factory = factory;
     }
 
     @Override
-    public void completed(EndpointResponse result) {
-        final String contentType = result.getHeader("content-type");
-        final EndpointType<?> type = EndpointType.inferFromContentType(contentType);
+    public void accept(EndpointResponse result, Throwable throwable) {
+        if (throwable != null) {
+            factory.apply(EndpointType.BINARY_ENDPOINT_TYPE).accept(null, throwable);
+        }
+        else {
+            final String contentType = result.getHeader("content-type");
+            final EndpointType<?> type = EndpointType.inferFromContentType(contentType);
 
-        factory.apply(type).completed(result);
-    }
-
-    @Override
-    public void failed(Exception ex) {
-        factory.apply(EndpointType.BINARY_ENDPOINT_TYPE).failed(ex);
-    }
-
-    @Override
-    public void cancelled() {
-        factory.apply(EndpointType.BINARY_ENDPOINT_TYPE).cancelled();
+            factory.apply(type).accept(result, null);
+        }
     }
 }

@@ -15,7 +15,8 @@
 
 package com.pushtechnology.adapters.rest.adapter;
 
-import org.apache.http.concurrent.FutureCallback;
+import java.util.function.BiConsumer;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +29,7 @@ import com.pushtechnology.adapters.rest.publication.UpdateContext;
  * @param <T> the type of values it publishes
  * @author Push Technology Limited
  */
-/*package*/ final class PublicationHandler<T> implements FutureCallback<T> {
+/*package*/ final class PublicationHandler<T> implements BiConsumer<T, Throwable> {
     private static final Logger LOG = LoggerFactory.getLogger(PublicationHandler.class);
     private final EndpointConfig endpointConfig;
     private final UpdateContext<T> updateContext;
@@ -42,17 +43,12 @@ import com.pushtechnology.adapters.rest.publication.UpdateContext;
     }
 
     @Override
-    public void completed(T result) {
-        updateContext.publish(result);
-    }
-
-    @Override
-    public void failed(Exception ex) {
-        LOG.warn("Failed to poll endpoint {}", endpointConfig, ex);
-    }
-
-    @Override
-    public void cancelled() {
-        LOG.debug("Polling cancelled for endpoint {}", endpointConfig);
+    public void accept(T result, Throwable ex) {
+        if (ex != null) {
+            LOG.warn("Failed to poll endpoint {}", endpointConfig, ex);
+        }
+        else {
+            updateContext.publish(result);
+        }
     }
 }

@@ -15,7 +15,7 @@
 
 package com.pushtechnology.adapters.rest.polling;
 
-import org.apache.http.concurrent.FutureCallback;
+import java.util.function.BiConsumer;
 
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
@@ -26,5 +26,5 @@ import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
  */
 public interface EndpointPollHandlerFactory extends PollHandlerFactory<EndpointResponse> {
     @Override
-    FutureCallback<EndpointResponse> create(ServiceConfig serviceConfig, EndpointConfig endpointConfig);
+    BiConsumer<EndpointResponse, Throwable> create(ServiceConfig serviceConfig, EndpointConfig endpointConfig);
 }

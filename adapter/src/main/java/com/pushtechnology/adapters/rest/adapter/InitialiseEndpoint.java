@@ -17,7 +17,6 @@ package com.pushtechnology.adapters.rest.adapter;
 
 import java.util.function.Consumer;
 
-import org.apache.http.concurrent.FutureCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,34 +65,23 @@ import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
 
         endpointClient.request(
             service,
-            endpointConfig,
-            new FutureCallback<EndpointResponse>() {
-                @Override
-                public void completed(EndpointResponse result) {
-                    if ("auto".equals(produces)) {
-                        new InferTopicType(endpointType ->
-                            createTransformingHandler(endpointType, inferEndpointConfig(endpointType, endpointConfig)))
-                            .completed(result);
-                    }
-                    else {
-                        final EndpointType<?> endpointType = EndpointType.from(produces);
-                        new ValidateContentType(
-                            endpointConfig,
-                            createTransformingHandler(endpointType, endpointConfig))
-                            .completed(result);
-                    }
-                }
-
-                @Override
-                public void failed(Exception ex) {
-                    LOG.warn("Endpoint {} not initialised. First request failed.", endpointConfig);
-                }
-
-                @Override
-                public void cancelled() {
-                    LOG.warn("Endpoint {} not initialised. First request cancelled.", endpointConfig);
-                }
-            });
+            endpointConfig).thenAccept(result -> {
+            if ("auto".equals(produces)) {
+                new InferTopicType(endpointType ->
+                    createTransformingHandler(endpointType, inferEndpointConfig(endpointType, endpointConfig)))
+                    .accept(result, null);
+            }
+            else {
+                final EndpointType<?> endpointType = EndpointType.from(produces);
+                new ValidateContentType(
+                    endpointConfig,
+                    createTransformingHandler(endpointType, endpointConfig))
+                    .accept(result, null);
+            }
+        }).exceptionally(e -> {
+            LOG.warn("Endpoint {} not initialised. First request failed.", endpointConfig);
+            return null;
+        });
     }
 
     private EndpointConfig inferEndpointConfig(EndpointType<?> endpointType, EndpointConfig endpointConfig) {

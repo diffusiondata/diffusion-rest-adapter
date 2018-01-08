@@ -21,9 +21,10 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
+import java.util.concurrent.CancellationException;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-import org.apache.http.concurrent.FutureCallback;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -39,11 +40,11 @@ import com.pushtechnology.adapters.rest.polling.EndpointResponse;
  */
 public final class InferTopicTypeTest {
     @Mock
-    private FutureCallback<EndpointResponse> delegate;
+    private BiConsumer<EndpointResponse, Throwable> delegate;
     @Mock
     private EndpointResponse endpointResponse;
     @Mock
-    private Function<EndpointType<?>, FutureCallback<EndpointResponse>> factory;
+    private Function<EndpointType<?>, BiConsumer<EndpointResponse, Throwable>> factory;
 
     private InferTopicType inferTopicType;
 
@@ -63,67 +64,68 @@ public final class InferTopicTypeTest {
 
     @Test
     public void unknownContentType() {
-        inferTopicType.completed(endpointResponse);
+        inferTopicType.accept(endpointResponse, null);
 
         verify(endpointResponse).getHeader("content-type");
         verify(factory).apply(EndpointType.BINARY_ENDPOINT_TYPE);
-        verify(delegate).completed(endpointResponse);
+        verify(delegate).accept(endpointResponse, null);
     }
 
     @Test
     public void jsonContentType() {
         when(endpointResponse.getHeader("content-type")).thenReturn("application/json");
-        inferTopicType.completed(endpointResponse);
+        inferTopicType.accept(endpointResponse, null);
 
         verify(endpointResponse).getHeader("content-type");
         verify(factory).apply(EndpointType.JSON_ENDPOINT_TYPE);
-        verify(delegate).completed(endpointResponse);
+        verify(delegate).accept(endpointResponse, null);
     }
 
     @Test
     public void plainContentType() {
         when(endpointResponse.getHeader("content-type")).thenReturn("text/plain");
-        inferTopicType.completed(endpointResponse);
+        inferTopicType.accept(endpointResponse, null);
 
         verify(endpointResponse).getHeader("content-type");
         verify(factory).apply(EndpointType.PLAIN_TEXT_ENDPOINT_TYPE);
-        verify(delegate).completed(endpointResponse);
+        verify(delegate).accept(endpointResponse, null);
     }
 
     @Test
     public void binaryContentType() {
         when(endpointResponse.getHeader("content-type")).thenReturn("application/octet-stream");
-        inferTopicType.completed(endpointResponse);
+        inferTopicType.accept(endpointResponse, null);
 
         verify(endpointResponse).getHeader("content-type");
         verify(factory).apply(EndpointType.BINARY_ENDPOINT_TYPE);
-        verify(delegate).completed(endpointResponse);
+        verify(delegate).accept(endpointResponse, null);
     }
 
     @Test
     public void weirdContentType() {
         when(endpointResponse.getHeader("content-type")).thenReturn("who/knows");
-        inferTopicType.completed(endpointResponse);
+        inferTopicType.accept(endpointResponse, null);
 
         verify(endpointResponse).getHeader("content-type");
         verify(factory).apply(EndpointType.BINARY_ENDPOINT_TYPE);
-        verify(delegate).completed(endpointResponse);
+        verify(delegate).accept(endpointResponse, null);
     }
 
     @Test
     public void cancelled() {
-        inferTopicType.cancelled();
+        final CancellationException exception = new CancellationException();
+        inferTopicType.accept(null, exception);
 
         verify(factory).apply(EndpointType.BINARY_ENDPOINT_TYPE);
-        verify(delegate).cancelled();
+        verify(delegate).accept(null, exception);
     }
 
     @Test
     public void failed() {
         final Exception exception = new Exception("Intentional for test");
-        inferTopicType.failed(exception);
+        inferTopicType.accept(null, exception);
 
         verify(factory).apply(EndpointType.BINARY_ENDPOINT_TYPE);
-        verify(delegate).failed(exception);
+        verify(delegate).accept(null, exception);
     }
 }

@@ -22,8 +22,8 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.function.BiConsumer;
 
-import org.apache.http.concurrent.FutureCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -92,7 +92,8 @@ public final class ServiceSessionImpl implements ServiceSession {
     private PollHandle startEndpoint(EndpointConfig endpointConfig) {
         assert endpointPollers.get(endpointConfig) == null : "The endpoint has already been started";
 
-        final PollResultHandler handler = new PollResultHandler(handlerFactory.create(serviceConfig, endpointConfig));
+        final BiConsumer<EndpointResponse, Throwable> handler =
+            new PollResultHandler(handlerFactory.create(serviceConfig, endpointConfig));
 
         final Future<?> future;
         if (serviceConfig.getPollPeriod() > 0) {
@@ -136,9 +137,9 @@ public final class ServiceSessionImpl implements ServiceSession {
      */
     private final class PollingTask implements Runnable {
         private final EndpointConfig endpointConfig;
-        private final PollResultHandler handler;
+        private final BiConsumer<EndpointResponse, Throwable> handler;
 
-        public PollingTask(EndpointConfig endpointConfig, PollResultHandler handler) {
+        public PollingTask(EndpointConfig endpointConfig, BiConsumer<EndpointResponse, Throwable> handler) {
             this.endpointConfig = endpointConfig;
             this.handler = handler;
         }
@@ -146,10 +147,13 @@ public final class ServiceSessionImpl implements ServiceSession {
         @Override
         public void run() {
             synchronized (ServiceSessionImpl.this) {
-                endpointPollers.get(endpointConfig).currentPollHandle = endpointClient.request(
-                    serviceConfig,
-                    endpointConfig,
-                    handler);
+                endpointPollers
+                    .get(endpointConfig)
+                    .currentPollHandle = endpointClient
+                    .request(
+                        serviceConfig,
+                        endpointConfig)
+                    .whenComplete(handler);
             }
         }
     }
@@ -157,30 +161,20 @@ public final class ServiceSessionImpl implements ServiceSession {
     /**
      * The handler for the polling result. Notifies the publishing client of the new data.
      */
-    private final class PollResultHandler implements FutureCallback<EndpointResponse> {
-        private final FutureCallback<EndpointResponse> delegate;
+    private final class PollResultHandler implements BiConsumer<EndpointResponse, Throwable> {
+        private final BiConsumer<EndpointResponse, Throwable> delegate;
 
-        private PollResultHandler(FutureCallback<EndpointResponse> delegate) {
+        private PollResultHandler(BiConsumer<EndpointResponse, Throwable> delegate) {
             this.delegate = delegate;
         }
 
         @Override
-        public void completed(EndpointResponse response) {
+        public void accept(EndpointResponse response, Throwable throwable) {
             synchronized (ServiceSessionImpl.this) {
                 if (isRunning) {
-                    delegate.completed(response);
+                    delegate.accept(response, throwable);
                 }
             }
-        }
-
-        @Override
-        public void failed(Exception e) {
-            delegate.failed(e);
-        }
-
-        @Override
-        public void cancelled() {
-            delegate.cancelled();
         }
     }
 
