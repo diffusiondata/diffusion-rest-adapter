@@ -15,6 +15,9 @@
 
 package com.pushtechnology.adapters.rest.adapter;
 
+import static com.pushtechnology.adapters.rest.endpoints.EndpointType.from;
+import static com.pushtechnology.adapters.rest.endpoints.EndpointType.inferFromContentType;
+
 import java.util.function.Consumer;
 
 import org.slf4j.Logger;
@@ -61,27 +64,28 @@ import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
 
     @Override
     public void accept(EndpointConfig endpointConfig) {
-        final String produces = endpointConfig.getProduces();
-
         endpointClient.request(
             service,
             endpointConfig).thenAccept(result -> {
-            if ("auto".equals(produces)) {
-                new InferTopicType(endpointType ->
-                    createTransformingHandler(endpointType, inferEndpointConfig(endpointType, endpointConfig)))
-                    .accept(result, null);
-            }
-            else {
-                final EndpointType<?> endpointType = EndpointType.from(produces);
+                final EndpointConfig resolvedConfig = resolveEndpointConfig(endpointConfig, result);
                 new ValidateContentType(
-                    endpointConfig,
-                    createTransformingHandler(endpointType, endpointConfig))
+                    resolvedConfig,
+                    createTransformingHandler(from(resolvedConfig.getProduces()), resolvedConfig))
                     .accept(result, null);
-            }
-        }).exceptionally(e -> {
-            LOG.warn("Endpoint {} not initialised. First request failed.", endpointConfig);
-            return null;
-        });
+            }).exceptionally(e -> {
+                LOG.warn("Endpoint {} not initialised. First request failed.", endpointConfig);
+                return null;
+            });
+    }
+
+    private EndpointConfig resolveEndpointConfig(EndpointConfig endpointConfig, EndpointResponse response) {
+        final String produces = endpointConfig.getProduces();
+        if ("auto".equals(produces)) {
+            return inferEndpointConfig(inferFromContentType(response.getHeader("content-type")), endpointConfig);
+        }
+        else {
+            return endpointConfig;
+        }
     }
 
     private EndpointConfig inferEndpointConfig(EndpointType<?> endpointType, EndpointConfig endpointConfig) {

@@ -118,7 +118,7 @@ public final class InitialiseEndpointTest {
 
         verify(endpointClient).request(eq(serviceConfig), eq(endpointConfig));
 
-        verify(response, times(2)).getHeader("content-type");
+        verify(response,times(2)).getHeader("content-type");
         verify(response).getResponse();
         verify(topicManagementClient).addEndpoint(
             eq(serviceConfig),
@@ -137,7 +137,7 @@ public final class InitialiseEndpointTest {
 
         verify(endpointClient).request(eq(serviceConfig), eq(inferEndpointConfig));
 
-        verify(response, times(2)).getHeader("content-type");
+        verify(response, times(3)).getHeader("content-type");
         verify(response).getResponse();
 
         verify(topicManagementClient).addEndpoint(
