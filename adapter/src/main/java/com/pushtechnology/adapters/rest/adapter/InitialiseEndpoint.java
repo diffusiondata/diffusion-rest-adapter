@@ -64,12 +64,12 @@ import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
 
     @Override
     public void accept(EndpointConfig endpointConfig) {
-        endpointClient.request(
-            service,
-            endpointConfig).thenAccept(result -> {
+        endpointClient
+            .request(service, endpointConfig)
+            .thenAccept(result -> {
                 final EndpointConfig resolvedConfig = resolveEndpointConfig(endpointConfig, result);
                 final EndpointResponse response = new ValidateContentType().apply(result, resolvedConfig);
-                createHandler(from(resolvedConfig.getProduces()), resolvedConfig).accept(response);
+                handleResponse(from(resolvedConfig.getProduces()), resolvedConfig, response);
             }).exceptionally(e -> {
                 LOG.warn("Endpoint {} not initialised. First request failed.", endpointConfig);
                 return null;
@@ -96,26 +96,25 @@ import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
             .build();
     }
 
-    private <T> Consumer<EndpointResponse> createHandler(
+    private <T> void handleResponse(
             EndpointType<T> endpointType,
-            EndpointConfig endpointConfig) {
-        return response -> {
-            final AddTopicForEndpoint<T> handler = new AddTopicForEndpoint<>(
-                topicManagementClient,
+            EndpointConfig endpointConfig,
+            EndpointResponse response) {
+        final AddTopicForEndpoint<T> handler = new AddTopicForEndpoint<>(
+            topicManagementClient,
+            service,
+            endpointConfig,
+            publishingClient.createUpdateContext(
                 service,
                 endpointConfig,
-                publishingClient.createUpdateContext(
-                    service,
-                    endpointConfig,
-                    endpointType.getDataType()),
-                new AddEndpointToServiceSession(endpointConfig, serviceSession));
+                endpointType.getDataType()),
+            new AddEndpointToServiceSession(endpointConfig, serviceSession));
 
-            try {
-                handler.accept(endpointType.getParser().transform(response), null);
-            }
-            catch (Exception e) {
-                handler.accept(null, e);
-            }
-        };
+        try {
+            handler.accept(endpointType.getParser().transform(response), null);
+        }
+        catch (Exception e) {
+            handler.accept(null, e);
+        }
     }
 }
