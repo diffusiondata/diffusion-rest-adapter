@@ -117,8 +117,10 @@ import kotlin.Pair;
         try {
             handler.accept(endpointType.getParser().transform(response), null);
         }
+        // CHECKSTYLE.OFF: IllegalCatch
         catch (Exception e) {
             handler.accept(null, e);
         }
+        // CHECKSTYLE.ON: IllegalCatch
     }
 }
