@@ -68,10 +68,7 @@ import kotlin.Pair;
     public void accept(EndpointConfig endpointConfig) {
         endpointClient
             .request(service, endpointConfig)
-            .thenApply(result -> {
-                final EndpointConfig resolvedConfig = resolveEndpointConfig(endpointConfig, result);
-                return new Pair<>(resolvedConfig, result);
-            })
+            .thenApply(result -> new Pair<>(resolveEndpointConfig(endpointConfig, result), result))
             .thenApply(new ValidateContentType())
             .thenAccept(configAndResult -> handleResponse(
                 from(configAndResult.getFirst().getProduces()),
