@@ -68,8 +68,8 @@ import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
             service,
             endpointConfig).thenAccept(result -> {
                 final EndpointConfig resolvedConfig = resolveEndpointConfig(endpointConfig, result);
-                createTransformingHandler(from(resolvedConfig.getProduces()), resolvedConfig)
-                    .accept(new ValidateContentType().apply(result, resolvedConfig), null);
+                final EndpointResponse response = new ValidateContentType().apply(result, resolvedConfig);
+                createHandler(from(resolvedConfig.getProduces()), resolvedConfig).accept(response);
             }).exceptionally(e -> {
                 LOG.warn("Endpoint {} not initialised. First request failed.", endpointConfig);
                 return null;
@@ -96,12 +96,11 @@ import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
             .build();
     }
 
-    private <T> TransformingHandler<EndpointResponse, T> createTransformingHandler(
+    private <T> Consumer<EndpointResponse> createHandler(
             EndpointType<T> endpointType,
             EndpointConfig endpointConfig) {
-        return new TransformingHandler<>(
-            endpointType.getParser(),
-            new AddTopicForEndpoint<>(
+        return response -> {
+            final AddTopicForEndpoint<T> handler = new AddTopicForEndpoint<>(
                 topicManagementClient,
                 service,
                 endpointConfig,
@@ -109,6 +108,14 @@ import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
                     service,
                     endpointConfig,
                     endpointType.getDataType()),
-                new AddEndpointToServiceSession(endpointConfig, serviceSession)));
+                new AddEndpointToServiceSession(endpointConfig, serviceSession));
+
+            try {
+                handler.accept(endpointType.getParser().transform(response), null);
+            }
+            catch (Exception e) {
+                handler.accept(null, e);
+            }
+        };
     }
 }
