@@ -15,7 +15,6 @@
 
 package com.pushtechnology.adapters.rest.adapter;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -28,6 +27,8 @@ import org.mockito.Mock;
 
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.polling.EndpointResponse;
+
+import kotlin.Pair;
 
 /**
  * Unit tests for {@link ValidateContentType}.
@@ -76,21 +77,21 @@ public final class ValidateContentTypeTest {
 
     @Test
     public void unknownContentTypeJson() {
-        assertEquals(endpointResponse, validate.apply(endpointResponse, jsonEndpoint));
+        validate.apply(new Pair<>(jsonEndpoint, endpointResponse));
 
         verify(endpointResponse).getHeader("content-type");
     }
 
     @Test
     public void unknownContentTypePlain() {
-        assertEquals(endpointResponse, validate.apply(endpointResponse, plainEndpoint));
+        validate.apply(new Pair<>(plainEndpoint, endpointResponse));
 
         verify(endpointResponse).getHeader("content-type");
     }
 
     @Test
     public void unknownContentTypeBinary() {
-        assertEquals(endpointResponse, validate.apply(endpointResponse, binaryEndpoint));
+        validate.apply(new Pair<>(binaryEndpoint, endpointResponse));
 
         verify(endpointResponse).getHeader("content-type");
     }
@@ -98,7 +99,7 @@ public final class ValidateContentTypeTest {
     @Test
     public void jsonContentTypeJson() {
         when(endpointResponse.getHeader("content-type")).thenReturn("application/json");
-        assertEquals(endpointResponse, validate.apply(endpointResponse, jsonEndpoint));
+        validate.apply(new Pair<>(jsonEndpoint, endpointResponse));
 
         verify(endpointResponse).getHeader("content-type");
     }
@@ -106,7 +107,7 @@ public final class ValidateContentTypeTest {
     @Test
     public void jsonContentTypePlain() {
         when(endpointResponse.getHeader("content-type")).thenReturn("application/json");
-        assertEquals(endpointResponse, validate.apply(endpointResponse, plainEndpoint));
+        validate.apply(new Pair<>(plainEndpoint, endpointResponse));
 
         verify(endpointResponse).getHeader("content-type");
     }
@@ -114,7 +115,7 @@ public final class ValidateContentTypeTest {
     @Test
     public void jsonContentTypeBinary() {
         when(endpointResponse.getHeader("content-type")).thenReturn("application/json");
-        assertEquals(endpointResponse, validate.apply(endpointResponse, binaryEndpoint));
+        validate.apply(new Pair<>(binaryEndpoint, endpointResponse));
 
         verify(endpointResponse).getHeader("content-type");
     }
@@ -123,7 +124,7 @@ public final class ValidateContentTypeTest {
     public void plainContentTypeJson() {
         when(endpointResponse.getHeader("content-type")).thenReturn("text/plain");
         try {
-            validate.apply(endpointResponse, jsonEndpoint);
+            validate.apply(new Pair<>(jsonEndpoint, endpointResponse));
         }
         finally {
             verify(endpointResponse).getHeader("content-type");
@@ -133,7 +134,7 @@ public final class ValidateContentTypeTest {
     @Test
     public void plainContentTypePlain() {
         when(endpointResponse.getHeader("content-type")).thenReturn("text/plain");
-        assertEquals(endpointResponse, validate.apply(endpointResponse, plainEndpoint));
+        validate.apply(new Pair<>(plainEndpoint, endpointResponse));
 
         verify(endpointResponse).getHeader("content-type");
     }
@@ -141,7 +142,7 @@ public final class ValidateContentTypeTest {
     @Test
     public void plainContentTypeBinary() {
         when(endpointResponse.getHeader("content-type")).thenReturn("text/plain");
-        assertEquals(endpointResponse, validate.apply(endpointResponse, binaryEndpoint));
+        validate.apply(new Pair<>(binaryEndpoint, endpointResponse));
 
         verify(endpointResponse).getHeader("content-type");
     }

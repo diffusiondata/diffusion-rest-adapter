@@ -15,18 +15,21 @@
 
 package com.pushtechnology.adapters.rest.adapter;
 
-import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import com.pushtechnology.adapters.rest.endpoints.EndpointType;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.polling.EndpointResponse;
+
+import kotlin.Pair;
 
 /**
  * Validate the content type of a response for an endpoint.
  *
  * @author Push Technology Limited
  */
-public final class ValidateContentType implements BiFunction<EndpointResponse, EndpointConfig, EndpointResponse> {
+public final class ValidateContentType
+        implements Function<Pair<EndpointConfig, EndpointResponse>, Pair<EndpointConfig, EndpointResponse>> {
     /**
      * Constructor.
      */
@@ -34,23 +37,23 @@ public final class ValidateContentType implements BiFunction<EndpointResponse, E
     }
 
     @Override
-    public EndpointResponse apply(EndpointResponse result, EndpointConfig endpointConfig) {
-        final String contentType = result.getHeader("content-type");
+    public Pair<EndpointConfig, EndpointResponse> apply(Pair<EndpointConfig, EndpointResponse> configAndResult) {
+        final String contentType = configAndResult.getSecond().getHeader("content-type");
         if (contentType == null) {
             // Assume correct when no content type provided
-            return result;
+            return configAndResult;
         }
 
-        final EndpointType<?> type = EndpointType.from(endpointConfig.getProduces());
+        final EndpointType<?> type = EndpointType.from(configAndResult.getFirst().getProduces());
 
         if (type.canHandle(contentType)) {
-            return result;
+            return configAndResult;
         }
 
         throw new IllegalArgumentException(
             "The content type of the response " +
                 contentType +
                 " is not suitable for the endpoint " +
-                endpointConfig);
+                configAndResult.getFirst());
     }
 }
