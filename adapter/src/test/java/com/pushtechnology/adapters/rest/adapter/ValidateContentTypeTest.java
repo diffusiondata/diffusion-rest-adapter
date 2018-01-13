@@ -15,15 +15,11 @@
 
 package com.pushtechnology.adapters.rest.adapter;
 
-import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.isA;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
-
-import java.util.concurrent.CancellationException;
-import java.util.function.BiConsumer;
 
 import org.junit.After;
 import org.junit.Before;
@@ -39,8 +35,6 @@ import com.pushtechnology.adapters.rest.polling.EndpointResponse;
  * @author Push Technology Limited
  */
 public final class ValidateContentTypeTest {
-    @Mock
-    private BiConsumer<EndpointResponse, Throwable> delegate;
     @Mock
     private EndpointResponse endpointResponse;
 
@@ -66,115 +60,89 @@ public final class ValidateContentTypeTest {
         .produces("binary")
         .build();
 
-    private ValidateContentType validateJson;
-    private ValidateContentType validatePlain;
-    private ValidateContentType validateBinary;
+    private ValidateContentType validate;
 
     @Before
     public void setUp() {
         initMocks(this);
 
-        validateJson = new ValidateContentType(jsonEndpoint, delegate);
-        validatePlain = new ValidateContentType(plainEndpoint, delegate);
-        validateBinary = new ValidateContentType(binaryEndpoint, delegate);
+        validate = new ValidateContentType();
     }
 
     @After
     public void postConditions() {
-        verifyNoMoreInteractions(delegate, endpointResponse);
+        verifyNoMoreInteractions(endpointResponse);
     }
 
     @Test
     public void unknownContentTypeJson() {
-        validateJson.accept(endpointResponse, null);
+        assertEquals(endpointResponse, validate.apply(endpointResponse, jsonEndpoint));
 
         verify(endpointResponse).getHeader("content-type");
-        verify(delegate).accept(endpointResponse, null);
     }
 
     @Test
     public void unknownContentTypePlain() {
-        validateJson.accept(endpointResponse, null);
+        assertEquals(endpointResponse, validate.apply(endpointResponse, plainEndpoint));
 
         verify(endpointResponse).getHeader("content-type");
-        verify(delegate).accept(endpointResponse, null);
     }
 
     @Test
     public void unknownContentTypeBinary() {
-        validateJson.accept(endpointResponse, null);
+        assertEquals(endpointResponse, validate.apply(endpointResponse, binaryEndpoint));
 
         verify(endpointResponse).getHeader("content-type");
-        verify(delegate).accept(endpointResponse, null);
     }
 
     @Test
     public void jsonContentTypeJson() {
         when(endpointResponse.getHeader("content-type")).thenReturn("application/json");
-        validateJson.accept(endpointResponse, null);
+        assertEquals(endpointResponse, validate.apply(endpointResponse, jsonEndpoint));
 
         verify(endpointResponse).getHeader("content-type");
-        verify(delegate).accept(endpointResponse, null);
     }
 
     @Test
     public void jsonContentTypePlain() {
         when(endpointResponse.getHeader("content-type")).thenReturn("application/json");
-        validatePlain.accept(endpointResponse, null);
+        assertEquals(endpointResponse, validate.apply(endpointResponse, plainEndpoint));
 
         verify(endpointResponse).getHeader("content-type");
-        verify(delegate).accept(endpointResponse, null);
     }
 
     @Test
     public void jsonContentTypeBinary() {
         when(endpointResponse.getHeader("content-type")).thenReturn("application/json");
-        validateBinary.accept(endpointResponse, null);
+        assertEquals(endpointResponse, validate.apply(endpointResponse, binaryEndpoint));
 
         verify(endpointResponse).getHeader("content-type");
-        verify(delegate).accept(endpointResponse, null);
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void plainContentTypeJson() {
         when(endpointResponse.getHeader("content-type")).thenReturn("text/plain");
-        validateJson.accept(endpointResponse, null);
-
-        verify(endpointResponse).getHeader("content-type");
-        verify(delegate).accept(isNull(), isA(Exception.class));
+        try {
+            validate.apply(endpointResponse, jsonEndpoint);
+        }
+        finally {
+            verify(endpointResponse).getHeader("content-type");
+        }
     }
 
     @Test
     public void plainContentTypePlain() {
         when(endpointResponse.getHeader("content-type")).thenReturn("text/plain");
-        validatePlain.accept(endpointResponse, null);
+        assertEquals(endpointResponse, validate.apply(endpointResponse, plainEndpoint));
 
         verify(endpointResponse).getHeader("content-type");
-        verify(delegate).accept(endpointResponse, null);
     }
 
     @Test
     public void plainContentTypeBinary() {
         when(endpointResponse.getHeader("content-type")).thenReturn("text/plain");
-        validateBinary.accept(endpointResponse, null);
+        assertEquals(endpointResponse, validate.apply(endpointResponse, binaryEndpoint));
 
         verify(endpointResponse).getHeader("content-type");
-        verify(delegate).accept(endpointResponse, null);
-    }
-
-    @Test
-    public void cancelled() {
-        final Exception exception = new CancellationException();
-        validateBinary.accept(null, exception);
-
-        verify(delegate).accept(null, exception);
-    }
-
-    @Test
-    public void failed() {
-        final Exception exception = new Exception("Intentional for test");
-        validateBinary.accept(null, exception);
-
-        verify(delegate).accept(null, exception);
     }
 }

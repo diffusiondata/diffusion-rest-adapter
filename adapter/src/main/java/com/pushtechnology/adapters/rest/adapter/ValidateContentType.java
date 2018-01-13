@@ -15,7 +15,7 @@
 
 package com.pushtechnology.adapters.rest.adapter;
 
-import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 
 import com.pushtechnology.adapters.rest.endpoints.EndpointType;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
@@ -26,43 +26,31 @@ import com.pushtechnology.adapters.rest.polling.EndpointResponse;
  *
  * @author Push Technology Limited
  */
-public final class ValidateContentType implements BiConsumer<EndpointResponse, Throwable> {
-    private final EndpointConfig endpointConfig;
-    private final BiConsumer<EndpointResponse, Throwable> delegate;
-
+public final class ValidateContentType implements BiFunction<EndpointResponse, EndpointConfig, EndpointResponse> {
     /**
      * Constructor.
      */
-    public ValidateContentType(EndpointConfig endpointConfig, BiConsumer<EndpointResponse, Throwable> delegate) {
-        this.endpointConfig = endpointConfig;
-        this.delegate = delegate;
+    public ValidateContentType() {
     }
 
     @Override
-    public void accept(EndpointResponse result, Throwable throwable) {
-        if (throwable != null) {
-            delegate.accept(null, throwable);
+    public EndpointResponse apply(EndpointResponse result, EndpointConfig endpointConfig) {
+        final String contentType = result.getHeader("content-type");
+        if (contentType == null) {
+            // Assume correct when no content type provided
+            return result;
         }
-        else {
-            final String contentType = result.getHeader("content-type");
-            if (contentType == null) {
-                // Assume correct when no content type provided
-                delegate.accept(result, null);
-                return;
-            }
 
-            final EndpointType<?> type = EndpointType.from(endpointConfig.getProduces());
+        final EndpointType<?> type = EndpointType.from(endpointConfig.getProduces());
 
-            if (type.canHandle(contentType)) {
-                delegate.accept(result, null);
-                return;
-            }
-
-            delegate.accept(null, new IllegalArgumentException(
-                "The content type of the response " +
-                    contentType +
-                    " is not suitable for the endpoint " +
-                    endpointConfig));
+        if (type.canHandle(contentType)) {
+            return result;
         }
+
+        throw new IllegalArgumentException(
+            "The content type of the response " +
+                contentType +
+                " is not suitable for the endpoint " +
+                endpointConfig);
     }
 }

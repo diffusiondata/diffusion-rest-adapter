@@ -68,10 +68,8 @@ import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
             service,
             endpointConfig).thenAccept(result -> {
                 final EndpointConfig resolvedConfig = resolveEndpointConfig(endpointConfig, result);
-                new ValidateContentType(
-                    resolvedConfig,
-                    createTransformingHandler(from(resolvedConfig.getProduces()), resolvedConfig))
-                    .accept(result, null);
+                createTransformingHandler(from(resolvedConfig.getProduces()), resolvedConfig)
+                    .accept(new ValidateContentType().apply(result, resolvedConfig), null);
             }).exceptionally(e -> {
                 LOG.warn("Endpoint {} not initialised. First request failed.", endpointConfig);
                 return null;
