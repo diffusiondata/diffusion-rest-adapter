@@ -32,6 +32,8 @@ import com.pushtechnology.adapters.rest.publication.PublishingClient;
 import com.pushtechnology.adapters.rest.services.ServiceSession;
 import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
 
+import kotlin.Pair;
+
 /**
  * Initialise the endpoint for a service.
  *
@@ -66,11 +68,19 @@ import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
     public void accept(EndpointConfig endpointConfig) {
         endpointClient
             .request(service, endpointConfig)
-            .thenAccept(result -> {
+            .thenApply(result -> {
                 final EndpointConfig resolvedConfig = resolveEndpointConfig(endpointConfig, result);
-                final EndpointResponse response = new ValidateContentType().apply(result, resolvedConfig);
-                handleResponse(from(resolvedConfig.getProduces()), resolvedConfig, response);
-            }).exceptionally(e -> {
+                return new Pair<>(resolvedConfig, result);
+            })
+            .thenApply(configAndResult -> {
+                new ValidateContentType().apply(configAndResult.getSecond(), configAndResult.getFirst());
+                return configAndResult;
+            })
+            .thenAccept(configAndResult -> handleResponse(
+                from(configAndResult.getFirst().getProduces()),
+                configAndResult.getFirst(),
+                configAndResult.getSecond()))
+            .exceptionally(e -> {
                 LOG.warn("Endpoint {} not initialised. First request failed.", endpointConfig);
                 return null;
             });
