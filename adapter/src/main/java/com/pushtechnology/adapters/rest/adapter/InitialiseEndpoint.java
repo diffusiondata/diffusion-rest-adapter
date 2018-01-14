@@ -15,6 +15,7 @@
 
 package com.pushtechnology.adapters.rest.adapter;
 
+import static com.pushtechnology.adapters.rest.adapter.AsyncFunction.consume;
 import static com.pushtechnology.adapters.rest.endpoints.EndpointType.from;
 import static com.pushtechnology.adapters.rest.endpoints.EndpointType.inferFromContentType;
 
@@ -70,10 +71,10 @@ import kotlin.Pair;
             .request(service, endpointConfig)
             .thenApply(result -> new Pair<>(resolveEndpointConfig(endpointConfig, result), result))
             .thenApply(new ValidateContentType())
-            .thenAccept(configAndResult -> handleResponse(
+            .thenCompose(consume(configAndResult -> handleResponse(
                 from(configAndResult.getFirst().getProduces()),
                 configAndResult.getFirst(),
-                configAndResult.getSecond()))
+                configAndResult.getSecond())))
             .exceptionally(e -> {
                 LOG.warn("Endpoint {} not initialised. First request failed.", endpointConfig);
                 return null;
@@ -103,7 +104,9 @@ import kotlin.Pair;
     private <T> void handleResponse(
             EndpointType<T> endpointType,
             EndpointConfig endpointConfig,
-            EndpointResponse response) {
+            EndpointResponse response) throws Exception {
+
+        final T value = endpointType.getParser().transform(response);
         final AddTopicForEndpoint<T> handler = new AddTopicForEndpoint<>(
             topicManagementClient,
             service,
@@ -114,13 +117,6 @@ import kotlin.Pair;
                 endpointType.getDataType()),
             new AddEndpointToServiceSession(endpointConfig, serviceSession));
 
-        try {
-            handler.accept(endpointType.getParser().transform(response), null);
-        }
-        // CHECKSTYLE.OFF: IllegalCatch
-        catch (Exception e) {
-            handler.accept(null, e);
-        }
-        // CHECKSTYLE.ON: IllegalCatch
+        handler.accept(value, null);
     }
 }

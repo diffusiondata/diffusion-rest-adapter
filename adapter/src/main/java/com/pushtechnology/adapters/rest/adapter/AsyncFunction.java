@@ -21,22 +21,45 @@ import java.util.function.Function;
 /**
  * A deferred function that may complete asynchronously.
  *
+ * @param <T> the value type
+ * @param <T> the result type
  * @author Matt Champion 14/01/2018
  */
 public interface AsyncFunction<T, U> extends Function<T, CompletableFuture<U>> {
     /**
-     * Create an asyn function from an exceptional function.
+     * Create an async function from an exceptional function.
      */
     static <T, U, E extends Exception> AsyncFunction<T, U> create(ExceptionalFunction<T, U, E> func) {
         return value -> {
             try {
                 return CompletableFuture.completedFuture(func.apply(value));
             }
+            // CHECKSTYLE.OFF: IllegalCatch
             catch (Exception e) {
                 final CompletableFuture<U> future = new CompletableFuture<>();
                 future.completeExceptionally(e);
                 return future;
             }
+            // CHECKSTYLE.ON: IllegalCatch
+        };
+    }
+
+    /**
+     * Create an async function from an exceptional consumer.
+     */
+    static <T, E extends Exception> AsyncFunction<T, Void> consume(ExceptionalConsumer<T, E> func) {
+        return value -> {
+            try {
+                func.accept(value);
+                return CompletableFuture.completedFuture(null);
+            }
+            // CHECKSTYLE.OFF: IllegalCatch
+            catch (Exception e) {
+                final CompletableFuture<Void> future = new CompletableFuture<>();
+                future.completeExceptionally(e);
+                return future;
+            }
+            // CHECKSTYLE.ON: IllegalCatch
         };
     }
 
@@ -51,5 +74,17 @@ public interface AsyncFunction<T, U> extends Function<T, CompletableFuture<U>> {
          * @throws E an exception if the function cannot be applied
          */
         U apply(T value) throws E;
+    }
+
+    /**
+     * A consumer that can fail to be applied.
+     */
+    interface ExceptionalConsumer<T, E extends Exception> {
+        /**
+         * Accept a value.
+         * @param value the value to apply the function to
+         * @throws E an exception if the function cannot be applied
+         */
+        void accept(T value) throws E;
     }
 }
