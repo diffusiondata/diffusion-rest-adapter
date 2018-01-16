@@ -22,7 +22,7 @@ import java.util.function.Function;
  * A deferred function that may complete asynchronously.
  *
  * @param <T> the value type
- * @param <T> the result type
+ * @param <U> the result type
  * @author Matt Champion 14/01/2018
  */
 public interface AsyncFunction<T, U> extends Function<T, CompletableFuture<U>> {

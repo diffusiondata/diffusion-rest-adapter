@@ -101,6 +101,7 @@ import kotlin.Pair;
             .build();
     }
 
+    @SuppressWarnings("PMD.SignatureDeclareThrowsException")
     private <T> void handleResponse(
             EndpointType<T> endpointType,
             EndpointConfig endpointConfig,
