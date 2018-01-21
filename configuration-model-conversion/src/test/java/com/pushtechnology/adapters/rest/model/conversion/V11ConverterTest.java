@@ -97,11 +97,11 @@ public final class V11ConverterTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testUnknownModel() {
-        final ModelConverter converter = V3Converter.INSTANCE;
+        final ModelConverter converter = V11Converter.INSTANCE;
 
-        converter.convert(com.pushtechnology.adapters.rest.model.v1.Model
+        converter.convert(com.pushtechnology.adapters.rest.model.v12.Model
             .builder()
-            .services(Collections.<com.pushtechnology.adapters.rest.model.v1.ServiceConfig>emptyList())
+            .services(Collections.emptyList())
             .build());
     }
 }

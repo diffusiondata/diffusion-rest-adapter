@@ -30,23 +30,6 @@ public final class ConversionContextTest {
         assertEquals(0, model.getServices().size());
     }
 
-    @Test
-    public void testConvertFromV0() {
-        final Model model = FULL_CONTEXT.convert(com.pushtechnology.adapters.rest.model.v0.Model.builder().build());
-
-        assertEquals(0, model.getServices().size());
-    }
-
-    @Test
-    public void testModelVersion0() {
-        assertEquals(com.pushtechnology.adapters.rest.model.v0.Model.class, FULL_CONTEXT.modelVersion(0));
-    }
-
-    @Test
-    public void testModelVersion1() {
-        assertEquals(com.pushtechnology.adapters.rest.model.v1.Model.class, FULL_CONTEXT.modelVersion(1));
-    }
-
     @Test(expected = IllegalArgumentException.class)
     public void testUnknownModel() {
         FULL_CONTEXT.convert(new AnyModel() { });
