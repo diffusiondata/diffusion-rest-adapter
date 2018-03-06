@@ -143,7 +143,7 @@ gulp.task('unit-test', ['instrument'], function(done) {
 });
 
 gulp.task('doc', function() {
-    return gulp.src(['src/main/ts/*.ts'])
+    return gulp.src(['src/main/ts/*.ts', 'node_modules/diffusion/src/typescript/diffusion-web.d.ts'])
         .pipe(tsdoc({
             target : 'ES5',
             module : 'commonjs',
