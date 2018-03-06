@@ -7,54 +7,14 @@ declare module "diffusion" {
     export var selectors: TopicSelectors;
     export var metadata: Metadata;
     export var topics: {
-        TopicType: {
-            JSON: TopicType;
-            BINARY: TopicType;
-            RECORD: TopicType;
-            SINGLE_VALUE: TopicType;
-            STRING: TopicType;
-            INT64: TopicType;
-            DOBULE: TopicType;
-        };
-        UnsubscribeReason: {
-            REQUESTED: any;
-            CONTROL: any;
-            REMOVED: any;
-            AUTHORIZATION: any;
-        };
-        TopicAddFailReason: {
-            EXISTS: TopicAddFailReason,
-            EXISTS_MISMATCH: TopicAddFailReason,
-            INVALID_PATH: TopicAddFailReason,
-            INVALID_DETAILS: TopicAddFailReason,
-            USER_CODE_ERROR: TopicAddFailReason,
-            TOPIC_NOT_FOUND: TopicAddFailReason,
-            PERMISSIONS_FAILURE: TopicAddFailReason,
-            INITIALISE_ERROR: TopicAddFailReason,
-            UNEXPECTED_ERROR: TopicAddFailReason,
-            CLUSTER_REPARTITION: TopicAddFailReason
-        };
+        TopicType: TopicTypeEnum;
+        UnsubscribeReason: UnsubscribeReasonEnum;
+        TopicAddFailReason: TopicAddFailReasonEnum;
     };
     export var errorReport: ErrorReport;
     export var clients: {
-        PropertyKeys: {
-            ALL_FIXED_PROPERTIES: any;
-            ALL_USER_PROPERTIES: any;
-            ALL_PROPERTIES: any;
-        },
-        CloseReason: {
-            CLOSED_BY_CLIENT: CloseReason,
-            CLOSED_BY_SERVER: CloseReason,
-            RECONNECT_ABORTED: CloseReason,
-            CONNECTION_TIMEOUT: CloseReason,
-            HANDSHAKE_REJECTED: CloseReason,
-            HANDSHAKE_ERROR: CloseReason,
-            TRANSPORT_ERROR: CloseReason,
-            CONNECTION_ERROR: CloseReason,
-            IDLE_CONNECTED: CloseReason,
-            LOST_MESSAGES: CloseReason,
-            ACCESS_DENIED: CloseReason
-        }
+        PropertyKeys: PropertyKeysEnum,
+        CloseReason: CloseReasonEnum
     };
     export interface ErrorReport {
         message: string;
@@ -227,10 +187,65 @@ declare module "diffusion" {
         schemaBuilder: () => SchemaBuilder;
     }
     export interface StringDataType extends DataType < string > {}
+    export interface CloseReasonEnum {
+        CLOSED_BY_CLIENT: CloseReason,
+            CLOSED_BY_SERVER: CloseReason,
+            RECONNECT_ABORTED: CloseReason,
+            CONNECTION_TIMEOUT: CloseReason,
+            HANDSHAKE_REJECTED: CloseReason,
+            HANDSHAKE_ERROR: CloseReason,
+            TRANSPORT_ERROR: CloseReason,
+            CONNECTION_ERROR: CloseReason,
+            IDLE_CONNECTED: CloseReason,
+            LOST_MESSAGES: CloseReason,
+            ACCESS_DENIED: CloseReason
+    }
+    export interface PropertyKeysEnum {
+        ALL_FIXED_PROPERTIES: any;
+        ALL_USER_PROPERTIES: any;
+        ALL_PROPERTIES: any;
+    }
+    export interface TopicAddFailReasonEnum {
+        EXISTS: TopicAddFailReason,
+            EXISTS_MISMATCH: TopicAddFailReason,
+            INVALID_PATH: TopicAddFailReason,
+            INVALID_DETAILS: TopicAddFailReason,
+            USER_CODE_ERROR: TopicAddFailReason,
+            TOPIC_NOT_FOUND: TopicAddFailReason,
+            PERMISSIONS_FAILURE: TopicAddFailReason,
+            INITIALISE_ERROR: TopicAddFailReason,
+            UNEXPECTED_ERROR: TopicAddFailReason,
+            CLUSTER_REPARTITION: TopicAddFailReason
+    }
+    export interface TopicTypeEnum {
+        STATELESS: TopicType;
+        SINGLE_VALUE: TopicType;
+        RECORD: TopicType;
+        SLAVE: TopicType;
+        ROUTING: TopicType;
+        BINARY: TopicType;
+        JSON: TopicType;
+        STRING: TopicType;
+        INT64: TopicType;
+        DOUBLE: TopicType;
+        TIME_SERIES: TopicType;
+        RECORD_V2: TopicType;
+    }
+    export interface UnsubscribeReasonEnum {
+        REQUESTED: any;
+        CONTROL: any;
+        REMOVED: any;
+        AUTHORIZATION: any;
+    }
     export interface FetchStream extends Stream {}
     export interface Result < T, E > {
         then < TResult,
         TE > (fulfilled: (value: T) => TResult | Result < TResult, TE > , rejected ? : (reason: any) => void): Result < TResult,
+        E > ;
+    }
+    export interface SessionPropertiesResult < T, E > {
+        then < TResult,
+        TE > (fulfilled: (session: string, properties: string[]) => TResult | SessionPropertiesResult < TResult, TE > , rejected ? : (reason: any) => void): SessionPropertiesResult < TResult,
         E > ;
     }
     export interface Stream {
@@ -252,7 +267,9 @@ declare module "diffusion" {
      * @deprecated since 6.0
      */
     export type TypedSubscription = ValueStream;
-    export interface ValueStream extends Subscription {}
+    export interface ValueStream extends Stream {
+        selector: string;
+    }
     export interface View extends Stream {
         get: () => any;
     }
@@ -260,10 +277,8 @@ declare module "diffusion" {
         close: (sessionID: string) => Result < void, any > ;
         subscribe: (session: string, selector: string) => Result < number, any > ;
         unsubscribe: (session: string, selector: string) => Result < number, any > ;
-        getSessionProperties: (sessionID: string | Object, requiredProperties: string[]) => Result < SessionProperties, any > ;
+        getSessionProperties: (sessionID: string, requiredProperties: string[]) => SessionPropertiesResult < any, any > ;
         setSessionPropertiesListener: (requiredProperties: string[], listener: SessionPropertiesListener) => Result < void, any > ;
-        setSessionProperties: (sessionID: string | Object, sessionProperties: SessionProperties) => Result < SessionProperties, any > ;
-        setSessionPropertiesByFilter: (filter: string, sessionProperties: SessionProperties) => Result < void, any > ;
         SessionEventType: {
             UPDATED: number;
             RECONNECTED: number;
@@ -277,9 +292,6 @@ declare module "diffusion" {
         onSessionOpen: (session: Object, properties: any) => void;
         onSessionEvent: (session: Object, SessionEventType: number, properties: any, previous: any) => void;
         onSessionClose: (session: Object, properties: any, reason: any) => void;
-    }
-    export interface SessionProperties {
-        [key: string]: string;
     }
     export interface Messages {
         send(path: string, message: any, sessionID ? : string | Object): Result < SendResult, any > ;
