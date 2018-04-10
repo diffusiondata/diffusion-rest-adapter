@@ -1,6 +1,6 @@
 
 import 'reflect-metadata';
-import { NgModule, provide } from '@angular/core';
+import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 
@@ -33,9 +33,7 @@ const diffusionConfig: SessionOptions = require('diffusionConfig');
 @NgModule({
     imports: [ BrowserModule, FormsModule, routing ],
     providers: [
-        provide('diffusion.config', {
-            useValue: diffusionConfig
-        }),
+        {provide: 'diffusion.config', useValue: diffusionConfig},
         DiffusionService,
         MetricsService,
         ModelService,
