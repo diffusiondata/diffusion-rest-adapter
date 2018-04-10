@@ -102,15 +102,8 @@ gulp.task('generate-dist-debug', ['generate-javascript'], function(done) {
 
 gulp.task('checks', function() {
     return gulp.src(['src/main/ts/*.ts', '!src/main/ts/*.d.ts'])
-        .pipe(tslint({
-            configuration : {
-                rules : {
-                    'class-name' : true,
-                    'no-consecutive-blank-lines' : true
-                }
-            }
-        }))
-        .pipe(tslint.report('verbose'));
+        .pipe(tslint())
+        .pipe(tslint.report());
 });
 
 gulp.task('instrument', ['generate-javascript'], function() {
