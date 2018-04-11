@@ -27,7 +27,8 @@ import { routing } from './app.routing';
 import * as diffusion from 'diffusion';
 import {ExploreServiceComponent} from "./explore-service.component";
 import {ExploreEndpointComponent} from "./explore-endpoint.component";
-const diffusionConfig: diffusion.SessionOptions = require('diffusionConfig');
+import {SessionOptions} from "diffusion/src/typescript/options";
+const diffusionConfig: SessionOptions = require('diffusionConfig');
 
 @NgModule({
     imports: [ BrowserModule, FormsModule, routing ],

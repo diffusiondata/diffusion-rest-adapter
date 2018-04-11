@@ -1,8 +1,9 @@
-import { Component, Input, Inject } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { DiffusionService } from './diffusion.service';
 import { Router } from '@angular/router';
 import { StackService } from './stack.service';
 import * as diffusion from 'diffusion';
+import {SessionOptions} from "diffusion/src/typescript/options";
 
 @Component({
   template: `<div class="col-md-10">
@@ -62,7 +63,7 @@ export class LoginComponent {
     constructor(
         private router: Router,
         private diffusionService: DiffusionService,
-        @Inject('diffusion.config') private diffusionConfig: diffusion.SessionOptions,
+        @Inject('diffusion.config') private diffusionConfig: SessionOptions,
         private stackService: StackService) {
     }
 

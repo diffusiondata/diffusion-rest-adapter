@@ -1,10 +1,12 @@
 import { Injectable } from '@angular/core';
 import * as diffusion from 'diffusion';
+import {SessionOptions} from "diffusion/src/typescript/options";
+import {Session} from "diffusion/src/typescript/session";
 
 @Injectable()
 export class DiffusionService {
     private session: Promise<any>;
-    private diffusionConfig: diffusion.SessionOptions;
+    private diffusionConfig: SessionOptions;
 
     constructor() {
         this.session = Promise
@@ -12,7 +14,7 @@ export class DiffusionService {
             .then(() => {}, (e) => { return e; });
     }
 
-    private immediateAttemptToConnect(): Promise<diffusion.Session> {
+    private immediateAttemptToConnect(): Promise<Session> {
         return new Promise((resolve, reject) => {
             diffusion
                 .connect(this.diffusionConfig)
@@ -27,7 +29,7 @@ export class DiffusionService {
         });
     }
 
-    private deferAttemptToConnect(): Promise<diffusion.Session> {
+    private deferAttemptToConnect(): Promise<Session> {
         return new Promise((resolve, reject) => {
             setTimeout(() => {
                 diffusion
@@ -44,19 +46,19 @@ export class DiffusionService {
         });
     }
 
-    private deferCreateSession(): Promise<diffusion.Session> {
+    private deferCreateSession(): Promise<Session> {
         return this.deferAttemptToConnect().catch(() => {
             return this.deferCreateSession();
         });
     }
 
-    private internalCreateSession(): Promise<diffusion.Session> {
+    private internalCreateSession(): Promise<Session> {
         return this.immediateAttemptToConnect().catch(() => {
             return this.deferCreateSession();
         });
     }
 
-    private checkSession(promise: Promise<diffusion.Session>) {
+    private checkSession(promise: Promise<Session>) {
         return promise.then((session) => {
             if (session.isConnected()) {
                 return session;
@@ -67,14 +69,14 @@ export class DiffusionService {
         });
     }
 
-    createSession(options: diffusion.SessionOptions): Promise<diffusion.Session> {
+    createSession(options: SessionOptions): Promise<Session> {
         this.diffusionConfig = options;
         this.session = this.immediateAttemptToConnect();
 
         return this.session;
     }
 
-    get(): Promise<diffusion.Session> {
+    get(): Promise<Session> {
         if (!this.session) {
             this.session = this.checkSession(this.internalCreateSession());
         }
