@@ -2,7 +2,7 @@
 
 A web interface for managing the REST adapter configuration can be deployed as part of the application.
 It allows you to add and remove services and endpoints dynamically.
-It is deployed as part of the `diffusion-rest-adapter-integrated-server` and `cloudfoundry` artifacts.
+It is deployed as part of the `diffusion-rest-adapter-integrated-server` artifact.
 
 The web interface uses Diffusion to communicate with the REST adapter.
 The REST adapter holds the configuration model in memory.

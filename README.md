@@ -8,7 +8,6 @@
 | [Endpoints](documentation/Endpoints.md) |
 | [ServiceSessions](documentation/ServiceSessions.md) |
 | [Web Interface](documentation/WebInterface.md) |
-| [CloudFoundry](documentation/CloudFoundry.md) |
 
 ## Building
 
@@ -48,32 +47,6 @@ The `diffusion-rest-adapter-integrated-server` module creates an integrated appl
 It is used to deploy an instance of the Diffusion REST Adapter with a web front end as a single executable.
 The configuration model is provided through the web interface.
 
-### diffusion-rest-adapter-cf-integrated-server
-
-The `diffusion-rest-adapter-cf-integrated-server` module provides an artifact that can be deployed as a CloudFoundry
-application.
-It deploys an instance of the `diffusion-rest-adapter-integrated-server` that connects to a
-[Diffusion Cloud](https://docs.pushtechnology.com/cloud/latest/) service bound to the application.
-It can be deployed to [IBM Bluemix](https://www.ibm.com/cloud-computing/bluemix/).
-
-### cloudfoundry-rest-adapter
-
-The `cloudfoundry-rest-adapter` module provides an artifact that can be deployed as a CloudFoundry
-application.
-It deploys an instance of the `adapter-client` with the `client-controlled-model-store` that connects to a
-[Diffusion Cloud](https://docs.pushtechnology.com/cloud/latest/) service bound to the application.
-It can be deployed to [IBM Bluemix](https://www.ibm.com/cloud-computing/bluemix/).
-The `cloudfoundry-web-interface` should also be deployed along with it.
-
-### cloudfoundry-web-interface
-
-The `cloudfoundry-web-interface` module provides an artifact that can be deployed as a CloudFoundry
-application.
-It deploys an instance of the web interface that connects to a
-[Diffusion Cloud](https://docs.pushtechnology.com/cloud/latest/) service bound to the application.
-It can be deployed to [IBM Bluemix](https://www.ibm.com/cloud-computing/bluemix/).
-The `cloudfoundry-rest-adapter` should also be deployed along with it.
-
 ## Connecting to Diffusion
 
 The session will require the `register_handler`, `modify_topic` and `update_topic` permissions to function correctly.
@@ -109,7 +82,3 @@ If there is no other client configured with the service the topics associated wi
 ## Licensing
 
 This project is licensed under the [Apache Licence, v. 2](https://www.apache.org/licenses/LICENSE-2.0).
-
-The CloudFoundry artifacts include a copy of the
-[Mozilla CA certificate store](https://www.mozilla.org/en-US/about/governance/policies/security-group/certs/) in JKS
-format. This is licensed under [Mozilla Public License, v. 2](http://mozilla.org/MPL/2.0/).

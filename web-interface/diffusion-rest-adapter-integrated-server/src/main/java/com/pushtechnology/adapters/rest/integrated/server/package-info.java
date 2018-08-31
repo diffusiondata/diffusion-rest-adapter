@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Push Technology Ltd.
+ * Copyright (C) 2018 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 
 /**
  * Package for the Diffusion REST Adapter Integrated Server. Combines the web front end and the HTTP client in a single
- * process. Integrating the components together allows them to be to Bluemix as a single application.
+ * process. Integrating the components together allows simple deployment as a single application.
  *
  * @author Push Technology Limited
  */
