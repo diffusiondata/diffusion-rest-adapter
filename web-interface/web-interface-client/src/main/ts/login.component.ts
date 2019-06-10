@@ -3,7 +3,7 @@ import { DiffusionService } from './diffusion.service';
 import { Router } from '@angular/router';
 import { StackService } from './stack.service';
 import * as diffusion from 'diffusion';
-import {SessionOptions} from "diffusion/src/typescript/options";
+import {SessionOptions} from 'diffusion';
 
 @Component({
   template: `<div class="col-md-10">
