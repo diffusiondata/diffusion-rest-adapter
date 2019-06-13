@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Push Technology Ltd.
+ * Copyright (C) 2019 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.isA;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -45,16 +44,13 @@ import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.session.management.EventedSessionListener;
 import com.pushtechnology.diffusion.client.callbacks.ErrorReason;
 import com.pushtechnology.diffusion.client.callbacks.Registration;
-import com.pushtechnology.diffusion.client.content.update.ContentUpdateFactory;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.UpdateSource;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater.UpdateContextCallback;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.session.SessionFactory;
-import com.pushtechnology.diffusion.datatype.BinaryDelta;
 import com.pushtechnology.diffusion.datatype.DataType;
-import com.pushtechnology.diffusion.datatype.DeltaType;
 import com.pushtechnology.diffusion.datatype.binary.Binary;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
@@ -70,8 +66,6 @@ public final class PublishingClientImplTest {
     @Mock
     private TopicUpdateControl updateControl;
     @Mock
-    private ContentUpdateFactory updateFactory;
-    @Mock
     private Registration registration;
     @Mock
     private Updater rawUpdater;
@@ -85,10 +79,6 @@ public final class PublishingClientImplTest {
     private DataType<Binary> binaryDataType;
     @Mock
     private DataType<JSON> jsonDataType;
-    @Mock
-    private DeltaType<Binary, BinaryDelta> binaryDeltaType;
-    @Mock
-    private DeltaType<JSON, BinaryDelta> jsonDeltaType;
     @Captor
     private ArgumentCaptor<UpdateSource> updateSourceCaptor;
 
@@ -107,9 +97,6 @@ public final class PublishingClientImplTest {
         when(session.getState()).thenReturn(CONNECTED_ACTIVE);
         when(binaryDataType.toBytes(binary)).thenReturn(binary);
         when(jsonDataType.toBytes(json)).thenReturn(json);
-        when(binaryDataType.deltaType(BinaryDelta.class)).thenReturn(binaryDeltaType);
-        when(jsonDataType.deltaType(BinaryDelta.class)).thenReturn(jsonDeltaType);
-        when(updateControl.updateFactory(ContentUpdateFactory.class)).thenReturn(updateFactory);
         when(updateControl.updater()).thenReturn(rawUpdater);
         when(jsonDataType.getTypeName()).thenReturn("json");
         when(binaryDataType.getTypeName()).thenReturn("binary");
@@ -151,11 +138,8 @@ public final class PublishingClientImplTest {
             updateControl,
             rawUpdater,
             registration,
-            updateFactory,
             binaryDataType,
-            jsonDataType,
-            binaryDeltaType,
-            jsonDeltaType);
+            jsonDataType);
     }
 
     @Test
@@ -232,10 +216,7 @@ public final class PublishingClientImplTest {
             endpointConfig,
             jsonDataType);
 
-        verify(jsonDataType).getTypeName();
-        verify(jsonDataType).deltaType(BinaryDelta.class);
-        verify(session, times(2)).feature(TopicUpdateControl.class);
-        verify(updateControl).updateFactory(ContentUpdateFactory.class);
+        verify(session).feature(TopicUpdateControl.class);
 
         updateContext.publish(json);
 
@@ -258,10 +239,7 @@ public final class PublishingClientImplTest {
             endpointConfig,
             binaryDataType);
 
-        verify(binaryDataType).getTypeName();
-        verify(binaryDataType).deltaType(BinaryDelta.class);
-        verify(session, times(2)).feature(TopicUpdateControl.class);
-        verify(updateControl).updateFactory(ContentUpdateFactory.class);
+        verify(session).feature(TopicUpdateControl.class);
 
         updateContext.publish(binary);
 
@@ -291,9 +269,7 @@ public final class PublishingClientImplTest {
             endpointConfig,
             jsonDataType);
 
-        verify(jsonDataType).getTypeName();
-        verify(session, times(2)).feature(TopicUpdateControl.class);
-        verify(updateControl).updateFactory(ContentUpdateFactory.class);
+        verify(session).feature(TopicUpdateControl.class);
 
         updateContext.publish(json);
 
@@ -304,7 +280,6 @@ public final class PublishingClientImplTest {
         sessionListener.onSessionStateChanged(session, RECOVERING_RECONNECT, CONNECTED_ACTIVE);
 
         verify(jsonDataType).toBytes(json);
-        verify(jsonDataType).deltaType(BinaryDelta.class);
         verify(rawUpdater).update(eq("a/topic"), eq(json), eq("a/topic"), isA(UpdateContextCallback.class));
     }
 
@@ -314,13 +289,10 @@ public final class PublishingClientImplTest {
         final UpdateContext<JSON> updateContext = client.createUpdateContext(
             "a/topic",
             jsonDataType);
-        verify(session, times(2)).feature(TopicUpdateControl.class);
+        verify(session).feature(TopicUpdateControl.class);
         verify(updateControl).updater();
 
-        verify(jsonDataType).getTypeName();
-        verify(jsonDataType).deltaType(BinaryDelta.class);
-        verify(session, times(2)).feature(TopicUpdateControl.class);
-        verify(updateControl).updateFactory(ContentUpdateFactory.class);
+        verify(session).feature(TopicUpdateControl.class);
 
         updateContext.publish(json);
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Push Technology Ltd.
+ * Copyright (C) 2019 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -124,30 +124,13 @@ public final class PublishingClientImpl implements PublishingClient {
     }
 
     private <T> UpdateContext<T> createUpdateContext(String path, DataType<T> dataType, Updater updater) {
-        if (isValueOnlyType(dataType)) {
-            final ValueUpdateContext<T> updateContext = new ValueUpdateContext<>(
-                session,
-                updater,
-                path,
-                dataType,
-                publicationListener);
-            sessionListener.onSessionStateChange(updateContext);
-            return updateContext;
-        }
-        else {
-            final UpdateContextImpl<T> updateContext = new UpdateContextImpl<>(
-                session,
-                updater,
-                path,
-                dataType,
-                publicationListener);
-            sessionListener.onSessionStateChange(updateContext);
-            return updateContext;
-        }
-    }
-
-    private boolean isValueOnlyType(DataType<?> dataType) {
-        final String typeName = dataType.getTypeName();
-        return "int64".equals(typeName) || "double".equals(typeName);
+        final ValueUpdateContext<T> updateContext = new ValueUpdateContext<>(
+            session,
+            updater,
+            path,
+            dataType,
+            publicationListener);
+        sessionListener.onSessionStateChange(updateContext);
+        return updateContext;
     }
 }
