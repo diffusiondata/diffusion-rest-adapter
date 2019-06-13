@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Push Technology Ltd.
+ * Copyright (C) 2019 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,7 +94,7 @@ public final class TopicBasedMetricsReporterTest {
 
         when(topicControl.removeTopicsWithSession("metrics")).thenReturn(completedFuture(registration));
 
-        when(publishingClient.createUpdateContext(anyString(), isNotNull())).thenReturn(updateContext);
+        when(publishingClient.createUpdateContext(anyString(), isNotNull(), isNotNull())).thenReturn(updateContext);
 
         reporter = new TopicBasedMetricsReporter(
             session,

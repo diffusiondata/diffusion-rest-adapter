@@ -107,6 +107,7 @@ public final class PublishingClientImpl implements PublishingClient {
     public <T> UpdateContext<T> createUpdateContext(
             ServiceConfig serviceConfig,
             EndpointConfig endpointConfig,
+            Class<T> valueType,
             DataType<T> dataType) {
 
         final Updater updater = updaters.get(serviceConfig);
@@ -115,19 +116,24 @@ public final class PublishingClientImpl implements PublishingClient {
         }
 
         final String topicPath = serviceConfig.getTopicPathRoot() + "/" + endpointConfig.getTopicPath();
-        return createUpdateContext(topicPath, dataType, updater);
+        return createUpdateContext(topicPath, valueType, dataType, updater);
     }
 
     @Override
-    public <T> UpdateContext<T> createUpdateContext(String path, DataType<T> dataType) {
-        return createUpdateContext(path, dataType, session.feature(TopicUpdateControl.class).updater());
+    public <T> UpdateContext<T> createUpdateContext(String path, Class<T> valueType, DataType<T> dataType) {
+        return createUpdateContext(path, valueType, dataType, session.feature(TopicUpdateControl.class).updater());
     }
 
-    private <T> UpdateContext<T> createUpdateContext(String path, DataType<T> dataType, Updater updater) {
+    private <T> UpdateContext<T> createUpdateContext(
+            String path,
+            Class<T> valueType,
+            DataType<T> dataType,
+            Updater updater) {
         final ValueUpdateContext<T> updateContext = new ValueUpdateContext<>(
             session,
             updater,
             path,
+            valueType,
             dataType,
             publicationListener);
         sessionListener.onSessionStateChange(updateContext);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Push Technology Ltd.
+ * Copyright (C) 2019 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,7 +94,7 @@ public final class InitialiseEndpointTest {
 
         when(response.getHeader("content-type")).thenReturn("application/json; charset=utf-8");
         when(response.getResponse()).thenReturn("{}".getBytes(Charset.forName("UTF-8")));
-        when(publishingClient.createUpdateContext(eq(serviceConfig), eq(endpointConfig), isNotNull())).thenReturn(updateContext);
+        when(publishingClient.createUpdateContext(eq(serviceConfig), eq(endpointConfig), isNotNull(), isNotNull())).thenReturn(updateContext);
 
         initialiseEndpoint = new InitialiseEndpoint(
             endpointClient,
@@ -124,7 +124,7 @@ public final class InitialiseEndpointTest {
             eq(serviceConfig),
             eq(endpointConfig),
             isA(AddCallback.class));
-        verify(publishingClient).createUpdateContext(eq(serviceConfig), eq(endpointConfig), isNotNull());
+        verify(publishingClient).createUpdateContext(eq(serviceConfig), eq(endpointConfig), isNotNull(), isNotNull());
         verify(updateContext).publish(isNotNull());
     }
 
@@ -144,7 +144,7 @@ public final class InitialiseEndpointTest {
             eq(serviceConfig),
             eq(endpointConfig),
             isA(AddCallback.class));
-        verify(publishingClient).createUpdateContext(eq(serviceConfig), eq(endpointConfig), isNotNull());
+        verify(publishingClient).createUpdateContext(eq(serviceConfig), eq(endpointConfig), isNotNull(), isNotNull());
         verify(updateContext).publish(isNotNull());
     }
 }

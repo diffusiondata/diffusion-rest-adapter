@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Push Technology Ltd.
+ * Copyright (C) 2019 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -305,12 +305,12 @@ public final class TopicBasedMetricsReporter implements AutoCloseable {
     private UpdateContext<Long> getInt64UpdateContext(String path) {
         return int64UpdateContexts.computeIfAbsent(
             path,
-            k -> publishingClient.createUpdateContext(path, dataTypes().int64()));
+            k -> publishingClient.createUpdateContext(path, Long.class, dataTypes().int64()));
     }
 
     private UpdateContext<Double> getDoubleUpdateContext(String path) {
         return doubleUpdateContexts.computeIfAbsent(
             path,
-            k -> publishingClient.createUpdateContext(path, dataTypes().doubleFloat()));
+            k -> publishingClient.createUpdateContext(path, Double.class, dataTypes().doubleFloat()));
     }
 }

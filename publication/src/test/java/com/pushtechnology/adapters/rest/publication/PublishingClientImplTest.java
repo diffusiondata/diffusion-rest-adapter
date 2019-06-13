@@ -48,6 +48,7 @@ import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateCo
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.UpdateSource;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater.UpdateContextCallback;
+import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.ValueUpdater;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.session.SessionFactory;
 import com.pushtechnology.diffusion.datatype.DataType;
@@ -69,6 +70,10 @@ public final class PublishingClientImplTest {
     private Registration registration;
     @Mock
     private Updater rawUpdater;
+    @Mock
+    private ValueUpdater<JSON> jsonValueUpdater;
+    @Mock
+    private ValueUpdater<Binary> binaryValueUpdater;
     @Mock
     private JSON json;
     @Mock
@@ -100,6 +105,8 @@ public final class PublishingClientImplTest {
         when(updateControl.updater()).thenReturn(rawUpdater);
         when(jsonDataType.getTypeName()).thenReturn("json");
         when(binaryDataType.getTypeName()).thenReturn("binary");
+        when(rawUpdater.valueUpdater(JSON.class)).thenReturn(jsonValueUpdater);
+        when(rawUpdater.valueUpdater(Binary.class)).thenReturn(binaryValueUpdater);
 
         endpointConfig = EndpointConfig
             .builder()
@@ -137,6 +144,8 @@ public final class PublishingClientImplTest {
             session,
             updateControl,
             rawUpdater,
+            jsonValueUpdater,
+            binaryValueUpdater,
             registration,
             binaryDataType,
             jsonDataType);
@@ -214,6 +223,7 @@ public final class PublishingClientImplTest {
         final UpdateContext<JSON> updateContext = client.createUpdateContext(
             serviceConfig,
             endpointConfig,
+            JSON.class,
             jsonDataType);
 
         verify(session).feature(TopicUpdateControl.class);
@@ -222,7 +232,8 @@ public final class PublishingClientImplTest {
 
         verify(jsonDataType).toBytes(json);
         verify(session).getState();
-        verify(rawUpdater).update(eq("a/topic"), eq(json), eq("a/topic"), isA(UpdateContextCallback.class));
+        verify(rawUpdater).valueUpdater(JSON.class);
+        verify(jsonValueUpdater).update(eq("a/topic"), eq(json), eq("a/topic"), isA(UpdateContextCallback.class));
     }
 
     @SuppressWarnings("unchecked")
@@ -237,6 +248,7 @@ public final class PublishingClientImplTest {
         final UpdateContext<Binary> updateContext = client.createUpdateContext(
             serviceConfig,
             endpointConfig,
+            Binary.class,
             binaryDataType);
 
         verify(session).feature(TopicUpdateControl.class);
@@ -245,12 +257,13 @@ public final class PublishingClientImplTest {
 
         verify(binaryDataType).toBytes(binary);
         verify(session).getState();
-        verify(rawUpdater).update(eq("a/topic"), eq(binary), eq("a/topic"), isA(UpdateContextCallback.class));
+        verify(rawUpdater).valueUpdater(Binary.class);
+        verify(binaryValueUpdater).update(eq("a/topic"), eq(binary), eq("a/topic"), isA(UpdateContextCallback.class));
     }
 
     @Test(expected = IllegalStateException.class)
     public void noUpdater() {
-        client.createUpdateContext(serviceConfig, endpointConfig, jsonDataType);
+        client.createUpdateContext(serviceConfig, endpointConfig, JSON.class, jsonDataType);
     }
 
     @SuppressWarnings("unchecked")
@@ -267,6 +280,7 @@ public final class PublishingClientImplTest {
         final UpdateContext<JSON> updateContext = client.createUpdateContext(
             serviceConfig,
             endpointConfig,
+            JSON.class,
             jsonDataType);
 
         verify(session).feature(TopicUpdateControl.class);
@@ -275,12 +289,13 @@ public final class PublishingClientImplTest {
 
         verify(jsonDataType).toBytes(json);
         verify(session).getState();
-        verify(rawUpdater, never()).update(eq("a/topic"), eq(json), eq("a/topic"), isA(UpdateContextCallback.class));
+        verify(jsonValueUpdater, never()).update(eq("a/topic"), eq(json), eq("a/topic"), isA(UpdateContextCallback.class));
 
         sessionListener.onSessionStateChanged(session, RECOVERING_RECONNECT, CONNECTED_ACTIVE);
 
         verify(jsonDataType).toBytes(json);
-        verify(rawUpdater).update(eq("a/topic"), eq(json), eq("a/topic"), isA(UpdateContextCallback.class));
+        verify(rawUpdater).valueUpdater(JSON.class);
+        verify(jsonValueUpdater).update(eq("a/topic"), eq(json), eq("a/topic"), isA(UpdateContextCallback.class));
     }
 
     @SuppressWarnings("unchecked")
@@ -288,6 +303,7 @@ public final class PublishingClientImplTest {
     public void nonExclusiveUpdateContext() {
         final UpdateContext<JSON> updateContext = client.createUpdateContext(
             "a/topic",
+            JSON.class,
             jsonDataType);
         verify(session).feature(TopicUpdateControl.class);
         verify(updateControl).updater();
@@ -298,6 +314,7 @@ public final class PublishingClientImplTest {
 
         verify(jsonDataType).toBytes(json);
         verify(session).getState();
-        verify(rawUpdater).update(eq("a/topic"), eq(json), eq("a/topic"), isA(UpdateContextCallback.class));
+        verify(rawUpdater).valueUpdater(JSON.class);
+        verify(jsonValueUpdater).update(eq("a/topic"), eq(json), eq("a/topic"), isA(UpdateContextCallback.class));
     }
 }

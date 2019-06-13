@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Push Technology Ltd.
+ * Copyright (C) 2019 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,8 @@ import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.polling.EndpointResponse;
 import com.pushtechnology.adapters.rest.polling.PollHandlerFactory;
 import com.pushtechnology.adapters.rest.publication.PublishingClient;
+import com.pushtechnology.diffusion.datatype.binary.Binary;
+import com.pushtechnology.diffusion.datatype.json.JSON;
 
 /**
  * Unit tests for {@link EndpointPollHandlerFactoryImpl}.
@@ -101,7 +103,7 @@ public final class EndpointPollHandlerFactoryTest {
         final BiConsumer<EndpointResponse, Throwable> callback = pollHandlerFactory.create(serviceConfig, jsonEndpoint);
 
         assertTrue(callback instanceof TransformingHandler);
-        verify(publishingClient).createUpdateContext(serviceConfig, jsonEndpoint, dataTypes().json());
+        verify(publishingClient).createUpdateContext(serviceConfig, jsonEndpoint, JSON.class, dataTypes().json());
     }
 
     @Test
@@ -109,7 +111,7 @@ public final class EndpointPollHandlerFactoryTest {
         final BiConsumer<EndpointResponse, Throwable> callback = pollHandlerFactory.create(serviceConfig, binaryEndpoint);
 
         assertTrue(callback instanceof TransformingHandler);
-        verify(publishingClient).createUpdateContext(serviceConfig, binaryEndpoint, dataTypes().binary());
+        verify(publishingClient).createUpdateContext(serviceConfig, binaryEndpoint, Binary.class, dataTypes().binary());
     }
 
     @Test
@@ -117,7 +119,7 @@ public final class EndpointPollHandlerFactoryTest {
         final BiConsumer<EndpointResponse, Throwable> callback = pollHandlerFactory.create(serviceConfig, plainTextEndpoint);
 
         assertTrue(callback instanceof TransformingHandler);
-        verify(publishingClient).createUpdateContext(serviceConfig, plainTextEndpoint, dataTypes().string());
+        verify(publishingClient).createUpdateContext(serviceConfig, plainTextEndpoint, String.class, dataTypes().string());
     }
 
     @Test(expected = IllegalArgumentException.class)

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Push Technology Ltd.
+ * Copyright (C) 2019 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,6 +56,7 @@ public final class EndpointPollHandlerFactoryImpl implements EndpointPollHandler
                 publishingClient.createUpdateContext(
                     serviceConfig,
                     endpointConfig,
+                    endpointType.getValueType(),
                     endpointType.getDataType())));
     }
 }
