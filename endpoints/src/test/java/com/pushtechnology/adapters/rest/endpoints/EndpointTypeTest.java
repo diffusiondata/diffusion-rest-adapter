@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Push Technology Ltd.
+ * Copyright (C) 2019 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
+import com.pushtechnology.diffusion.datatype.binary.Binary;
+import com.pushtechnology.diffusion.datatype.json.JSON;
 
 /**
  * Unit tests for {@link EndpointType}.
@@ -32,6 +34,7 @@ public final class EndpointTypeTest {
     @Test
     public void json() {
         assertEquals(TopicType.JSON, EndpointType.JSON_ENDPOINT_TYPE.getTopicType());
+        assertEquals(JSON.class, EndpointType.JSON_ENDPOINT_TYPE.getValueType());
         assertTrue(EndpointType.JSON_ENDPOINT_TYPE.canHandle("text/json"));
         assertTrue(EndpointType.JSON_ENDPOINT_TYPE.canHandle("application/json"));
         assertFalse(EndpointType.JSON_ENDPOINT_TYPE.canHandle("text/plain"));
@@ -41,6 +44,7 @@ public final class EndpointTypeTest {
     @Test
     public void binary() {
         assertEquals(TopicType.BINARY, EndpointType.BINARY_ENDPOINT_TYPE.getTopicType());
+        assertEquals(Binary.class, EndpointType.BINARY_ENDPOINT_TYPE.getValueType());
         assertTrue(EndpointType.BINARY_ENDPOINT_TYPE.canHandle("text/json"));
         assertTrue(EndpointType.BINARY_ENDPOINT_TYPE.canHandle("application/json"));
         assertTrue(EndpointType.BINARY_ENDPOINT_TYPE.canHandle("text/plain"));
@@ -51,6 +55,7 @@ public final class EndpointTypeTest {
     @Test
     public void plainText() {
         assertEquals(TopicType.STRING, EndpointType.PLAIN_TEXT_ENDPOINT_TYPE.getTopicType());
+        assertEquals(String.class, EndpointType.PLAIN_TEXT_ENDPOINT_TYPE.getValueType());
         assertTrue(EndpointType.PLAIN_TEXT_ENDPOINT_TYPE.canHandle("text/json"));
         assertTrue(EndpointType.PLAIN_TEXT_ENDPOINT_TYPE.canHandle("application/json"));
         assertTrue(EndpointType.PLAIN_TEXT_ENDPOINT_TYPE.canHandle("text/plain"));

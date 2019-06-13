@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Push Technology Ltd.
+ * Copyright (C) 2019 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,7 @@ public final class EndpointType<T> {
     public static final EndpointType<JSON> JSON_ENDPOINT_TYPE = new EndpointType<>(
         asList("json", "application/json", "text/json"),
         TopicType.JSON,
+        JSON.class,
         Diffusion.dataTypes().json(),
         Transformers
             .builder(EndpointResponse.class)
@@ -60,6 +61,7 @@ public final class EndpointType<T> {
     public static final EndpointType<String> PLAIN_TEXT_ENDPOINT_TYPE = new EndpointType<>(
         asList("string", "text/plain"),
         TopicType.STRING,
+        String.class,
         Diffusion.dataTypes().string(),
         Transformers
             .builder(EndpointResponse.class)
@@ -73,6 +75,7 @@ public final class EndpointType<T> {
     public static final EndpointType<Binary> BINARY_ENDPOINT_TYPE = new EndpointType<>(
         asList("binary", "application/octet-stream"),
         TopicType.BINARY,
+        Binary.class,
         Diffusion.dataTypes().binary(),
         Transformers
             .builder(EndpointResponse.class)
@@ -98,6 +101,7 @@ public final class EndpointType<T> {
 
     private final Collection<String> identifiers;
     private final TopicType topicType;
+    private final Class<T> valueType;
     private final DataType<T> dataType;
     private final UnsafeTransformer<EndpointResponse, T> parser;
     private final Predicate<String> canHandle;
@@ -108,12 +112,14 @@ public final class EndpointType<T> {
     private EndpointType(
         Collection<String> identifiers,
         TopicType topicType,
+        Class<T> valueType,
         DataType<T> dataType,
         UnsafeTransformer<EndpointResponse, T> parser,
         Predicate<String> canHandle) {
 
         this.identifiers = identifiers;
         this.topicType = topicType;
+        this.valueType = valueType;
         this.dataType = dataType;
         this.parser = parser;
         this.canHandle = canHandle;
@@ -131,6 +137,13 @@ public final class EndpointType<T> {
      */
     public DataType<T> getDataType() {
         return dataType;
+    }
+
+    /**
+     * @return the value type for the endpoint type
+     */
+    public Class<T> getValueType() {
+        return valueType;
     }
 
     /**
