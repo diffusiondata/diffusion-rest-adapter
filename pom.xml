@@ -415,6 +415,18 @@
                         </dependency>
                     </dependencies>
                 </plugin>
+
+                <plugin>
+                    <groupId>com.pushtechnology.diffusion.maven.plugin</groupId>
+                    <artifactId>diffusion-maven-plugin</artifactId>
+                    <version>1.0.3</version>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <version>2.22.2</version>
+                </plugin>
             </plugins>
         </pluginManagement>
 
