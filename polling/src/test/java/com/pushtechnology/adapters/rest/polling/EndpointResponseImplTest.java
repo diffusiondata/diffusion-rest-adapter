@@ -40,24 +40,24 @@ public final class EndpointResponseImplTest {
     }
 
     @Test
-    public void getHeader() {
+    public void getHeader() throws IOException {
         final EndpointResponse response = createResponse();
         assertEquals("text/plain", response.getHeader("Content-Type"));
     }
 
     @Test
-    public void getStatusCode() {
+    public void getStatusCode() throws IOException {
         final EndpointResponse response = createResponse();
         assertEquals(200, response.getStatusCode());
     }
 
-    private EndpointResponse createResponse() {
+    private EndpointResponse createResponse() throws IOException {
         final ProtocolVersion protocolVersion = new ProtocolVersion("HTTP", 1, 1);
         final BasicHttpResponse httpResponse = new BasicHttpResponse(protocolVersion, 200, "OK");
         final BasicHttpEntity httpEntity = new BasicHttpEntity();
         httpEntity.setContent(new ByteArrayInputStream("Hello, world!".getBytes()));
         httpResponse.setEntity(httpEntity);
         httpResponse.addHeader("Content-Type", "text/plain");
-        return new EndpointResponseImpl(httpResponse);
+        return EndpointResponseImpl.create(httpResponse);
     }
 }

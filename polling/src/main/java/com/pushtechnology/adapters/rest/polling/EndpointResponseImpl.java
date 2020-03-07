@@ -18,27 +18,44 @@ package com.pushtechnology.adapters.rest.polling;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 
-import net.jcip.annotations.ThreadSafe;
+import net.jcip.annotations.Immutable;
 
 /**
  * Implementation of {@link EndpointResponse} for {@link HttpResponse}.
  *
  * @author Push Technology Limited
  */
-@ThreadSafe
+@Immutable
 public final class EndpointResponseImpl implements EndpointResponse {
     private final HttpResponse httpResponse;
-    private volatile byte[] content = null;
+    private final byte[] content;
 
     /**
-     * Constructor.
+     * Factory method.
      */
-    public EndpointResponseImpl(HttpResponse httpResponse) {
+    public static EndpointResponse create(HttpResponse httpResponse) throws IOException {
+        final HttpEntity entity = httpResponse.getEntity();
+
+        final InputStream contentStream = entity.getContent();
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+        int next = contentStream.read();
+        while (next != -1) {
+            baos.write(next);
+            next = contentStream.read();
+        }
+
+        return new EndpointResponseImpl(httpResponse, baos.toByteArray());
+    }
+
+    private EndpointResponseImpl(HttpResponse httpResponse, byte[] content) {
         this.httpResponse = httpResponse;
+        this.content = content;
     }
 
     @Override
@@ -52,34 +69,7 @@ public final class EndpointResponseImpl implements EndpointResponse {
     }
 
     @Override
-    public byte[] getResponse() throws IOException {
-        final byte[] currentContent = content;
-
-        if (currentContent != null) {
-            return currentContent;
-        }
-        else {
-            synchronized (this) {
-                if (content == null) {
-                    final HttpEntity entity = httpResponse.getEntity();
-
-                    final InputStream contentStream = entity.getContent();
-                    final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-                    int next = contentStream.read();
-                    while (next != -1) {
-                        baos.write(next);
-                        next = contentStream.read();
-                    }
-
-                    final byte[] newContent = baos.toByteArray();
-                    content = newContent;
-                    return newContent;
-                }
-                else {
-                    return content;
-                }
-            }
-        }
+    public byte[] getResponse() {
+        return Arrays.copyOf(content, content.length);
     }
 }

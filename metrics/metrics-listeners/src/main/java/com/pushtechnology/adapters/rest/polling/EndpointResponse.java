@@ -15,8 +15,6 @@
 
 package com.pushtechnology.adapters.rest.polling;
 
-import java.io.IOException;
-
 /**
  * Response to a request to an endpoint.
  * @author Push Technology Limited
@@ -35,5 +33,5 @@ public interface EndpointResponse {
     /**
      * @return the response body
      */
-    byte[] getResponse() throws IOException;
+    byte[] getResponse();
 }
