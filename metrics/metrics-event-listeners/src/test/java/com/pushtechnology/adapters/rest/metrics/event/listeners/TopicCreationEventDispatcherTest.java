@@ -1,6 +1,6 @@
 package com.pushtechnology.adapters.rest.metrics.event.listeners;
 
-import static com.pushtechnology.diffusion.client.features.control.topics.TopicAddFailReason.USER_CODE_ERROR;
+import static com.pushtechnology.diffusion.client.features.control.topics.TopicAddFailReason.CLUSTER_REPARTITION;
 import static com.pushtechnology.diffusion.client.topics.details.TopicType.STRING;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.isA;
@@ -83,13 +83,13 @@ public final class TopicCreationEventDispatcherTest {
     public void onTopicCreationFailure() throws Exception {
         final TopicCreationEventDispatcher dispatcher = new TopicCreationEventDispatcher(topicCreationEventListener);
 
-        dispatcher.onTopicCreationRequest("service/endpoint", TopicType.STRING).onTopicCreationFailed(USER_CODE_ERROR);
+        dispatcher.onTopicCreationRequest("service/endpoint", TopicType.STRING).onTopicCreationFailed(CLUSTER_REPARTITION);
 
         verify(topicCreationEventListener).onTopicCreationRequest(isA(TopicCreationRequestEvent.class));
         verify(topicCreationEventListener).onTopicCreationFailed(failedCaptor.capture());
         final TopicCreationFailedEvent value = failedCaptor.getValue();
         assertEquals("service/endpoint", value.getRequestEvent().getPath());
         assertEquals(STRING, value.getRequestEvent().getTopicType());
-        assertEquals(USER_CODE_ERROR, value.getFailReason());
+        assertEquals(CLUSTER_REPARTITION, value.getFailReason());
     }
 }

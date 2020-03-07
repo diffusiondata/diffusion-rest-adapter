@@ -63,10 +63,10 @@ public final class TopicSetupCallbackTest {
 
     @Test
     public void onTopicAddFailed() {
-        callback.onTopicAddFailed("a/topic", TopicAddFailReason.TOPIC_NOT_FOUND);
+        callback.onTopicAddFailed("a/topic", TopicAddFailReason.CLUSTER_REPARTITION);
 
-        verify(delegate).onTopicAddFailed("a/topic", TopicAddFailReason.TOPIC_NOT_FOUND);
-        verify(completionListener).onTopicCreationFailed(TopicAddFailReason.TOPIC_NOT_FOUND);
+        verify(delegate).onTopicAddFailed("a/topic", TopicAddFailReason.CLUSTER_REPARTITION);
+        verify(completionListener).onTopicCreationFailed(TopicAddFailReason.CLUSTER_REPARTITION);
     }
 
     @Test
