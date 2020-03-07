@@ -72,4 +72,9 @@ public final class EndpointResponseImpl implements EndpointResponse {
     public byte[] getResponse() {
         return Arrays.copyOf(content, content.length);
     }
+
+    @Override
+    public int getResponseLength() {
+        return content.length;
+    }
 }

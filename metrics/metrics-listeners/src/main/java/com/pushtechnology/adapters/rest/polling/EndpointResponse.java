@@ -34,4 +34,9 @@ public interface EndpointResponse {
      * @return the response body
      */
     byte[] getResponse();
+
+    /**
+     * @return the response length
+     */
+    int getResponseLength();
 }

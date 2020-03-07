@@ -33,6 +33,12 @@ import org.junit.Test;
  */
 public final class EndpointResponseImplTest {
     @Test
+    public void getResponseLength() throws IOException {
+        final EndpointResponse response = createResponse();
+        assertEquals(13, response.getResponseLength());
+    }
+
+    @Test
     public void getResponse() throws IOException {
         final EndpointResponse response = createResponse();
         assertEquals("Hello, world!", new String(response.getResponse(), StandardCharsets.UTF_8));
