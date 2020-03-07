@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Push Technology Ltd.
+ * Copyright (C) 2020 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 package com.pushtechnology.adapters.rest.endpoints;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -38,11 +40,11 @@ import com.pushtechnology.diffusion.transform.transformer.UnsafeTransformer;
     }
 
     @Override
-    public String transform(EndpointResponse response) throws Exception {
+    public String transform(EndpointResponse response) throws UnsupportedCharsetException {
         return new String(response.getResponse(), getResponseCharset(response));
     }
 
-    private Charset getResponseCharset(EndpointResponse response) {
+    private Charset getResponseCharset(EndpointResponse response) throws UnsupportedCharsetException {
         final String contentType = response.getHeader("content-type");
         if (contentType != null) {
             final Matcher matcher = CHARSET_PATTERN.matcher(contentType);
@@ -53,6 +55,6 @@ import com.pushtechnology.diffusion.transform.transformer.UnsafeTransformer;
             }
         }
 
-        return Charset.forName("ISO-8859-1");
+        return StandardCharsets.ISO_8859_1;
     }
 }

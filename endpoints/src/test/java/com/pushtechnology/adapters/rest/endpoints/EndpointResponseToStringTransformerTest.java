@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Push Technology Ltd.
+ * Copyright (C) 2020 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.charset.UnsupportedCharsetException;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -47,7 +49,7 @@ public final class EndpointResponseToStringTransformerTest {
     @Test
     public void testTransformation() throws Exception {
         when(endpointResponse.getHeader("content-type")).thenReturn("text/plain; charset=UTF-8");
-        when(endpointResponse.getResponse()).thenReturn("{\"foo\":\"bar\"}".getBytes("UTF-8"));
+        when(endpointResponse.getResponse()).thenReturn("{\"foo\":\"bar\"}".getBytes(StandardCharsets.UTF_8));
         final String value = INSTANCE.transform(endpointResponse);
         assertEquals("{\"foo\":\"bar\"}", value);
     }
@@ -55,14 +57,15 @@ public final class EndpointResponseToStringTransformerTest {
     @Test
     public void testTransformationCharsetMissing() throws Exception {
         when(endpointResponse.getHeader("content-type")).thenReturn("text/plain");
-        when(endpointResponse.getResponse()).thenReturn("{\"foo\":\"bar\"}".getBytes("ISO-8859-1"));
+        when(endpointResponse.getResponse()).thenReturn("{\"foo\":\"bar\"}".getBytes(StandardCharsets.ISO_8859_1));
         final String value = INSTANCE.transform(endpointResponse);
         assertEquals("{\"foo\":\"bar\"}", value);
     }
 
-    @Test(expected = IOException.class)
+    @Test(expected = UnsupportedCharsetException.class)
     public void testException() throws Exception {
-        doThrow(new IOException("Intentionally thrown by test")).when(endpointResponse).getResponse();
+        when(endpointResponse.getHeader("content-type")).thenReturn("text/plain; charset=badcharset");
+        when(endpointResponse.getResponse()).thenReturn("{\"foo\":\"bar\"}".getBytes(StandardCharsets.UTF_8));
         INSTANCE.transform(endpointResponse);
     }
 }
