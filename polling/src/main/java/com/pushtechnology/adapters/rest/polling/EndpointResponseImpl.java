@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Push Technology Ltd.
+ * Copyright (C) 2020 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,13 +22,17 @@ import java.io.InputStream;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 
+import net.jcip.annotations.ThreadSafe;
+
 /**
  * Implementation of {@link EndpointResponse} for {@link HttpResponse}.
  *
  * @author Push Technology Limited
  */
+@ThreadSafe
 public final class EndpointResponseImpl implements EndpointResponse {
     private final HttpResponse httpResponse;
+    private volatile byte[] content = null;
 
     /**
      * Constructor.
@@ -44,17 +48,33 @@ public final class EndpointResponseImpl implements EndpointResponse {
 
     @Override
     public byte[] getResponse() throws IOException {
-        final HttpEntity entity = httpResponse.getEntity();
+        final byte[] currentContent = content;
 
-        final InputStream content = entity.getContent();
-        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-        int next = content.read();
-        while (next != -1) {
-            baos.write(next);
-            next = content.read();
+        if (currentContent != null) {
+            return currentContent;
         }
+        else {
+            synchronized (this) {
+                if (content == null) {
+                    final HttpEntity entity = httpResponse.getEntity();
 
-        return baos.toByteArray();
+                    final InputStream contentStream = entity.getContent();
+                    final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+                    int next = contentStream.read();
+                    while (next != -1) {
+                        baos.write(next);
+                        next = contentStream.read();
+                    }
+
+                    final byte[] newContent = baos.toByteArray();
+                    content = newContent;
+                    return newContent;
+                }
+                else {
+                    return content;
+                }
+            }
+        }
     }
 }
