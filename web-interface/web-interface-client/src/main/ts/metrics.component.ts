@@ -90,11 +90,11 @@ import {MetricsService, MetricsView} from "./metrics.service";
                     <p id="publication-90" class="form-control-static col-sm-6">{{view.publicationMetrics.successfulRequestTimeNinetiethPercentile}} ms</p>
                 </div>
                 <div class="form-group col-sm-4">
-                    <label for="publication-bytes" class="col-sm-6 control-label">Published bytes</label>
+                    <label for="publication-bytes" class="col-sm-6 control-label">Published value size</label>
                     <p id="publication-bytes" class="form-control-static col-sm-6">{{view.publicationMetrics.bytes}}</p>
                 </div>
                 <div class="form-group col-sm-4">
-                    <label for="publication-mean-bytes" class="col-sm-6 control-label">Mean bytes per publication</label>
+                    <label for="publication-mean-bytes" class="col-sm-6 control-label">Mean value size</label>
                     <p id="publication-mean-bytes" class="form-control-static col-sm-6">{{view.publicationMetrics.meanBytes}}</p>
                 </div>
             </div>
