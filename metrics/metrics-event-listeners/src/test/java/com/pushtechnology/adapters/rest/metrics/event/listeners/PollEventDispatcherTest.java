@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright (C) 2020 Push Technology Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
+
 package com.pushtechnology.adapters.rest.metrics.event.listeners;
 
 import static java.util.Collections.singletonList;
@@ -6,9 +21,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.StatusLine;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -24,6 +36,7 @@ import com.pushtechnology.adapters.rest.metrics.PollRequestEvent;
 import com.pushtechnology.adapters.rest.metrics.PollSuccessEvent;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
+import com.pushtechnology.adapters.rest.polling.EndpointResponse;
 
 /**
  * Unit tests for {@link PollEventDispatcher}.
@@ -34,11 +47,7 @@ public final class PollEventDispatcherTest {
     @Mock
     private PollEventListener pollEventListener;
     @Mock
-    private HttpResponse httpResponse;
-    @Mock
-    private StatusLine statusLine;
-    @Mock
-    private HttpEntity entity;
+    private EndpointResponse endpointResponse;
     @Captor
     private ArgumentCaptor<PollRequestEvent> requestCaptor;
     @Captor
@@ -67,15 +76,13 @@ public final class PollEventDispatcherTest {
 
     @Before
     public void setUp() {
-        when(httpResponse.getStatusLine()).thenReturn(statusLine);
-        when(httpResponse.getEntity()).thenReturn(entity);
-        when(statusLine.getStatusCode()).thenReturn(200);
-        when(entity.getContentLength()).thenReturn(10L);
+        when(endpointResponse.getStatusCode()).thenReturn(200);
+        when(endpointResponse.getResponseLength()).thenReturn(10);
     }
 
     @After
     public void postConditions() {
-        verifyNoMoreInteractions(pollEventListener, httpResponse);
+        verifyNoMoreInteractions(pollEventListener, endpointResponse);
     }
 
     @Test
@@ -93,14 +100,12 @@ public final class PollEventDispatcherTest {
     public void onPollResponse() throws Exception {
         final PollEventDispatcher dispatcher = new PollEventDispatcher(pollEventListener);
 
-        dispatcher.onPollRequest(serviceConfig, endpointConfig).onPollResponse(httpResponse);
+        dispatcher.onPollRequest(serviceConfig, endpointConfig).onPollResponse(endpointResponse);
 
         verify(pollEventListener).onPollRequest(requestCaptor.capture());
         verify(pollEventListener).onPollSuccess(successCaptor.capture());
-        verify(httpResponse).getEntity();
-        verify(httpResponse).getStatusLine();
-        verify(statusLine).getStatusCode();
-        verify(entity).getContentLength();
+        verify(endpointResponse).getStatusCode();
+        verify(endpointResponse).getResponseLength();
         final PollSuccessEvent value = successCaptor.getValue();
         assertEquals(200, value.getStatusCode());
         assertEquals(10, value.getResponseLength());

@@ -91,9 +91,10 @@ public final class EndpointClientImpl implements EndpointClient {
                         return;
                     }
 
-                    completionListener.onPollResponse(httpResponse);
                     try {
-                        result.complete(EndpointResponseImpl.create(httpResponse));
+                        final EndpointResponse response = EndpointResponseImpl.create(httpResponse);
+                        completionListener.onPollResponse(response);
+                        result.complete(response);
                     }
                     catch (IOException e) {
                         completionListener.onPollFailure(e);

@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright (C) 2020 Push Technology Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
+
 package com.pushtechnology.adapters.rest.adapter;
 
 import static com.pushtechnology.diffusion.client.callbacks.ErrorReason.ACCESS_DENIED;
@@ -9,9 +24,6 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.StatusLine;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -30,8 +42,8 @@ import com.pushtechnology.adapters.rest.metrics.listeners.TopicCreationListener;
 import com.pushtechnology.adapters.rest.metrics.listeners.TopicCreationListener.TopicCreationCompletionListener;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
+import com.pushtechnology.adapters.rest.polling.EndpointResponse;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
-import com.pushtechnology.diffusion.datatype.Bytes;
 
 /**
  * Unit tests for {@link MetricsDispatcher}.
@@ -80,13 +92,7 @@ public final class MetricsDispatcherTest {
     @Mock
     private TopicCreationEventListener topicCreationEventListener1;
     @Mock
-    private Bytes bytes;
-    @Mock
-    private HttpResponse httpResponse;
-    @Mock
-    private StatusLine statusLine;
-    @Mock
-    private HttpEntity entity;
+    private EndpointResponse endpointResponse;
 
     private final EndpointConfig endpointConfig = EndpointConfig
         .builder()
@@ -113,8 +119,6 @@ public final class MetricsDispatcherTest {
         when(publicationListener1.onPublicationRequest(any(), anyInt())).thenReturn(publicationCompletionListener1);
         when(topicCreationListener0.onTopicCreationRequest(any(), any())).thenReturn(topicCreationCompletionListener0);
         when(topicCreationListener1.onTopicCreationRequest(any(), any())).thenReturn(topicCreationCompletionListener1);
-        when(httpResponse.getStatusLine()).thenReturn(statusLine);
-        when(httpResponse.getEntity()).thenReturn(entity);
     }
 
     @Test
@@ -129,7 +133,7 @@ public final class MetricsDispatcherTest {
         verify(pollEventListener0).onPollRequest(isNotNull());
         verify(pollEventListener1).onPollRequest(isNotNull());
 
-        completionListener.onPollResponse(httpResponse);
+        completionListener.onPollResponse(endpointResponse);
 
         verify(pollEventListener0).onPollSuccess(isNotNull());
         verify(pollEventListener1).onPollSuccess(isNotNull());

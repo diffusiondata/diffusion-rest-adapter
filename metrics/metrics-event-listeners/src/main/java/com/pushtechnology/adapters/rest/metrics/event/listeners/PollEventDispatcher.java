@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Push Technology Ltd.
+ * Copyright (C) 2020 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,13 @@
 
 package com.pushtechnology.adapters.rest.metrics.event.listeners;
 
-import org.apache.http.HttpResponse;
-
 import com.pushtechnology.adapters.rest.metrics.PollFailedEvent;
 import com.pushtechnology.adapters.rest.metrics.PollRequestEvent;
 import com.pushtechnology.adapters.rest.metrics.PollSuccessEvent;
 import com.pushtechnology.adapters.rest.metrics.listeners.PollListener;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
+import com.pushtechnology.adapters.rest.polling.EndpointResponse;
 
 /**
  * Listener for events about polling.
@@ -67,11 +66,11 @@ public final class PollEventDispatcher implements PollListener {
         }
 
         @Override
-        public void onPollResponse(HttpResponse response) {
+        public void onPollResponse(EndpointResponse response) {
             pollEventListener.onPollSuccess(PollSuccessEvent.Factory.create(
                 pollRequestEvent,
-                response.getStatusLine().getStatusCode(),
-                response.getEntity().getContentLength()));
+                response.getStatusCode(),
+                response.getResponseLength()));
         }
 
         @Override

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Push Technology Ltd.
+ * Copyright (C) 2020 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,9 @@
 
 package com.pushtechnology.adapters.rest.metrics.listeners;
 
-import org.apache.http.HttpResponse;
-
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
+import com.pushtechnology.adapters.rest.polling.EndpointResponse;
 
 /**
  * Listener for endpoint poll events.
@@ -44,7 +43,7 @@ public interface PollListener {
          *
          * @param response the response from the endpoint
          */
-        void onPollResponse(HttpResponse response);
+        void onPollResponse(EndpointResponse response);
 
         /**
          * Notified when an attempt to poll an endpoint fails.

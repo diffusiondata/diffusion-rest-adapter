@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Push Technology Ltd.
+ * Copyright (C) 2020 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,6 @@ package com.pushtechnology.adapters.rest.adapter;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.apache.http.HttpResponse;
-
 import com.pushtechnology.adapters.rest.metrics.event.listeners.PollEventDispatcher;
 import com.pushtechnology.adapters.rest.metrics.event.listeners.PollEventListener;
 import com.pushtechnology.adapters.rest.metrics.event.listeners.PublicationEventDispatcher;
@@ -31,6 +29,7 @@ import com.pushtechnology.adapters.rest.metrics.listeners.PublicationListener;
 import com.pushtechnology.adapters.rest.metrics.listeners.TopicCreationListener;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
+import com.pushtechnology.adapters.rest.polling.EndpointResponse;
 import com.pushtechnology.diffusion.client.callbacks.ErrorReason;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicAddFailReason;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
@@ -98,7 +97,7 @@ public final class MetricsDispatcher implements
         }
         return new PollCompletionListener() {
             @Override
-            public void onPollResponse(HttpResponse response) {
+            public void onPollResponse(EndpointResponse response) {
                 listeners.forEach(listener -> listener.onPollResponse(response));
             }
 

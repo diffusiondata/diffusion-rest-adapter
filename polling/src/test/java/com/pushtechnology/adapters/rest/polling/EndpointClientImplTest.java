@@ -1,9 +1,25 @@
+/*******************************************************************************
+ * Copyright (C) 2020 Push Technology Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
+
 package com.pushtechnology.adapters.rest.polling;
 
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Mockito.isA;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -164,8 +180,8 @@ public final class EndpointClientImplTest {
         final FutureCallback<HttpResponse> responseCallback = callbackCaptor.getValue();
 
         responseCallback.completed(response);
-        verify(completionListener).onPollResponse(response);
         final EndpointResponse endpointResponse = handle.get(1, TimeUnit.SECONDS);
+        verify(completionListener).onPollResponse(endpointResponse);
         final byte[] response = endpointResponse.getResponse();
         assertArrayEquals("{}".getBytes("UTF-8"), response);
     }
