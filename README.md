@@ -79,6 +79,15 @@ When a client with `active` services closes one client with the service in `stan
 over.
 If there is no other client configured with the service the topics associated with the service will be removed.
 
+## Client Versions
+
+| Adapter Version | Client Version |
+| --- | --- |
+| 1.0.x | 5.9.1 |
+| 1.1.x | 5.9.1 |
+| 2.0.x | 6.0.3 - 6.1.x |
+| 3.0.x | 6.0.3 - 6.1.x |
+
 ## Licensing
 
 This project is licensed under the [Apache Licence, v. 2](https://www.apache.org/licenses/LICENSE-2.0).
