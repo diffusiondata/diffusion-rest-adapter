@@ -42,6 +42,11 @@ public final class EndpointResponseImpl implements EndpointResponse {
     }
 
     @Override
+    public int getStatusCode() {
+        return httpResponse.getStatusLine().getStatusCode();
+    }
+
+    @Override
     public String getHeader(String headerName) {
         return httpResponse.getFirstHeader(headerName).getValue();
     }

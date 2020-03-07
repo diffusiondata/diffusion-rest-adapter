@@ -45,6 +45,12 @@ public final class EndpointResponseImplTest {
         assertEquals("text/plain", response.getHeader("Content-Type"));
     }
 
+    @Test
+    public void getStatusCode() {
+        final EndpointResponse response = createResponse();
+        assertEquals(200, response.getStatusCode());
+    }
+
     private EndpointResponse createResponse() {
         final ProtocolVersion protocolVersion = new ProtocolVersion("HTTP", 1, 1);
         final BasicHttpResponse httpResponse = new BasicHttpResponse(protocolVersion, 200, "OK");

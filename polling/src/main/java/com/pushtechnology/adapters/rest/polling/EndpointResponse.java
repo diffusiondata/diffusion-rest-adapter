@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Push Technology Ltd.
+ * Copyright (C) 2020 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,11 @@ import java.io.IOException;
  * @author Push Technology Limited
  */
 public interface EndpointResponse {
+    /**
+     * @return the HTTP status code of the response
+     */
+    int getStatusCode();
+
     /**
      * @return an HTTP response header value
      */
