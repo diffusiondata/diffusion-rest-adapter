@@ -42,6 +42,7 @@ import java.util.stream.Stream;
 import org.eclipse.jetty.security.ConstraintMapping;
 import org.eclipse.jetty.security.ConstraintSecurityHandler;
 import org.eclipse.jetty.security.HashLoginService;
+import org.eclipse.jetty.security.UserStore;
 import org.eclipse.jetty.security.authentication.BasicAuthenticator;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.HttpConfiguration;
@@ -347,8 +348,10 @@ public final class BasicIT {
         constraintMapping.setConstraint(constraint);
         constraintMapping.setPathSpec("/*");
 
+        final UserStore userStore = new UserStore();
+        userStore.addUser("principal", Credential.getCredential("credential"), new String[]{ "test" });
         final HashLoginService loginService = new HashLoginService("login-service-0");
-        loginService.putUser("principal", Credential.getCredential("credential"), new String[]{ "test" });
+        loginService.setUserStore(userStore);
 
         final ConstraintSecurityHandler securityHandler = new ConstraintSecurityHandler();
         securityHandler.setAuthenticator(new BasicAuthenticator());
