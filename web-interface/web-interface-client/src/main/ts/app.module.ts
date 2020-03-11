@@ -24,10 +24,9 @@ import { DisplayErrorComponent } from "./display-error.component";
 import { MetricsComponent } from "./metrics.component";
 
 import { routing } from './app.routing';
-import * as diffusion from 'diffusion';
 import {ExploreServiceComponent} from "./explore-service.component";
 import {ExploreEndpointComponent} from "./explore-endpoint.component";
-import {SessionOptions} from "diffusion/src/typescript/options";
+import {SessionOptions} from "diffusion";
 const diffusionConfig: SessionOptions = require('diffusionConfig');
 
 @NgModule({

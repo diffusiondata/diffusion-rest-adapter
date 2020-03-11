@@ -44,17 +44,44 @@
             </activation>
             <build>
                 <plugins>
-                    <!-- Build the client with gulp-->
                     <plugin>
                         <groupId>com.github.eirslett</groupId>
                         <artifactId>frontend-maven-plugin</artifactId>
                         <executions>
+                            <!-- Compile the TypeScript-->
                             <execution>
-                                <id>generate client</id>
-                                <phase>package</phase>
+                                <id>compile client</id>
+                                <phase>compile</phase>
                                 <goals>
-                                    <goal>gulp</goal>
+                                    <goal>npm</goal>
                                 </goals>
+                                <configuration>
+                                    <arguments>run compile</arguments>
+                                </configuration>
+                            </execution>
+
+                            <!-- Run the tests -->
+                            <execution>
+                                <id>test client</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>npm</goal>
+                                </goals>
+                                <configuration>
+                                    <arguments>run test</arguments>
+                                </configuration>
+                            </execution>
+
+                            <!-- Bundle the JavaScript -->
+                            <execution>
+                                <id>bundle client</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>npm</goal>
+                                </goals>
+                                <configuration>
+                                    <arguments>run bundle</arguments>
+                                </configuration>
                             </execution>
                         </executions>
                     </plugin>
@@ -72,54 +99,6 @@
                                 <configuration>
                                     <descriptors>
                                         <descriptor>src/assembly/bundle.xml</descriptor>
-                                    </descriptors>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <profile>
-            <id>debug</id>
-            <activation>
-                <property>
-                    <name>debug</name>
-                </property>
-            </activation>
-            <build>
-                <plugins>
-                    <!-- Build the debug client with gulp-->
-                    <plugin>
-                        <groupId>com.github.eirslett</groupId>
-                        <artifactId>frontend-maven-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>generate client</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>gulp</goal>
-                                </goals>
-                                <configuration>
-                                    <arguments>debug</arguments>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-
-                    <!-- Package the debug client in a zip -->
-                    <plugin>
-                        <artifactId>maven-assembly-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>distribution-package</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>single</goal>
-                                </goals>
-                                <configuration>
-                                    <descriptors>
-                                        <descriptor>src/assembly/bundle-debug.xml</descriptor>
                                     </descriptors>
                                 </configuration>
                             </execution>

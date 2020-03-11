@@ -3,7 +3,7 @@ import {ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, NgZone, On
 import {Endpoint, Service} from './model';
 import {DiffusionService} from "./diffusion.service";
 import * as diffusion from 'diffusion';
-import {Stream} from "diffusion/src/typescript/events/stream";
+import {Stream} from "diffusion";
 
 @Component({
     selector: 'explore-endpoint',

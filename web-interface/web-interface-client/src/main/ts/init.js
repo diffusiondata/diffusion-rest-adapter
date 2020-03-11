@@ -5,5 +5,5 @@
     var reflect = require('reflect-metadata');
     var zone = require('zone.js');
     // Pull in Angular 2 application
-    var main = require('main');
+    var main = require('./main');
 })();

@@ -5,6 +5,40 @@
     "diffusion": "global:diffusion",
     "diffusionConfig": "global:diffusionConfig"
   },
+  "browserify": {
+    "transform": [
+      "browserify-shim"
+    ]
+  },
+  "scripts": {
+    "compile": "tsc",
+    "test": "nyc ./node_modules/.bin/jasmine",
+    "bundle": "browserify -e target/js/init.js -o target/client.js"
+  },
+  "nyc": {
+    "check-coverage": true,
+    "per-file": true,
+    "include": [
+      "src/main/ts/**/*.ts"
+    ],
+    "reporter": [
+      "cobertura",
+      "html",
+      "text"
+    ],
+    "extension": [
+      ".ts"
+    ],
+    "require": [
+      "ts-node/register"
+    ],
+    "all": true,
+    "report-dir": "./target/coverage",
+    "lines": 0,
+    "statements": 0,
+    "functions": 0,
+    "branches": 0
+  },
   "dependencies": {
     "@angular/common": "5.2.9",
     "@angular/compiler": "5.2.9",
@@ -16,37 +50,21 @@
     "when": "3.7.8",
     "reflect-metadata": "0.1.12",
     "zone.js": "0.8.26",
-    "rxjs": "5.5.8"
+    "rxjs": "5.5.8",
+    "typescript": "3.5.2"
   },
   "devDependencies": {
+    "@types/jasmine": "2.8.7",
+    "@types/mockery": "1.4.29",
+    "@types/node": "10.14.22",
+    "@types/saywhen": "1.1.0",
     "browserify": "13.1.0",
     "browserify-shim": "3.8.12",
     "diffusion": "6.1.6",
-    "globby": "6.0.0",
-    "gulp": "3.9.1",
-    "gulp-istanbul": "^1.1.3",
-    "gulp-jasmine": "2.4.2",
-    "gulp-jsdoc": "0.1.5",
-    "gulp-jshint": "^2.1.0",
-    "gulp-rename": "1.2.2",
-    "gulp-tslint": "8.1.3",
-    "gulp-typedoc": "2.2.0",
-    "gulp-typescript": "4.0.2",
-    "gulp-typings": "2.0.4",
-    "gulp-uglify": "2.0.0",
-    "jasmine-reporters": "2.2.0",
-    "jasmine-terminal-reporter": "1.0.2",
-    "jshint": "2.10.2",
-    "jshint-stylish": "2.2.1",
-    "merge-stream": "1.0.0",
-    "mockery": "1.4.0",
+    "jasmine": "3.1.0",
+    "mockery": "2.1.0",
+    "nyc": "14.1.1",
     "saywhen": "1.1.0",
-    "tslint": "5.9.1",
-    "typedoc": "0.14.2",
-    "typings": "2.1.1",
-    "typings-core": "2.3.3",
-    "typings-global": "1.0.28",
-    "vinyl-buffer": "1.0.0",
-    "vinyl-source-stream": "1.1.0"
+    "ts-node": "6.0.3"
   }
 }

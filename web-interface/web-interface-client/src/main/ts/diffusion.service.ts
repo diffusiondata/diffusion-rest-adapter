@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import * as diffusion from 'diffusion';
-import {SessionOptions} from "diffusion/src/typescript/options";
-import {Session} from "diffusion/src/typescript/session";
+import {Session, SessionOptions} from "diffusion";
 
 @Injectable()
 export class DiffusionService {

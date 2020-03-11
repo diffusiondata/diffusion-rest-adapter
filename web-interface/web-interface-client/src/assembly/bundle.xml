@@ -8,9 +8,11 @@
     </formats>
     <fileSets>
         <fileSet>
-            <directory>target/dist/js</directory>
+            <directory>target</directory>
+            <includes>
+                <include>client.js</include>
+            </includes>
             <outputDirectory>.</outputDirectory>
-            <filtered>true</filtered>
         </fileSet>
     </fileSets>
 </assembly>
