@@ -49,7 +49,7 @@
         <url>https://github.com/pushtechnology/diffusion-rest-adapter</url>
         <connection>scm:git:https://github.com/pushtechnology/diffusion-rest-adapter</connection>
         <developerConnection>scm:git:ssh://git@github.com/pushtechnology/diffusion-rest-adapter.git</developerConnection>
-        <tag>rest-adapter-2.0.0</tag>
+        <tag>rest-adapter-${project.version}</tag>
     </scm>
 
     <distributionManagement>
