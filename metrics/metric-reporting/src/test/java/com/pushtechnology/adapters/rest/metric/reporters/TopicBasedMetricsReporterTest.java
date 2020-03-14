@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2019 Push Technology Ltd.
+ * Copyright (C) 2020 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,6 @@ import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.RemovalCallback;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
 import com.pushtechnology.diffusion.client.session.Session;
-import com.pushtechnology.diffusion.client.topics.details.TopicType;
 
 /**
  * Unit tests for {@link TopicBasedMetricsReporter}.
@@ -61,7 +60,7 @@ public final class TopicBasedMetricsReporterTest {
     @Mock
     private ScheduledExecutorService executor;
     @Mock
-    private ScheduledFuture loggingTask;
+    private ScheduledFuture reportingTask;
     @Mock
     private Session session;
     @Mock
@@ -85,12 +84,12 @@ public final class TopicBasedMetricsReporterTest {
         initMocks(this);
 
         when(executor.scheduleAtFixedRate(isA(Runnable.class), isA(Long.class), isA(Long.class), isA(TimeUnit.class)))
-            .thenReturn(loggingTask);
+            .thenReturn(reportingTask);
 
         when(session.feature(TopicControl.class)).thenReturn(topicControl);
         when(session.feature(TopicUpdateControl.class)).thenReturn(updateControl);
 
-        when(topicManagementClient.addTopic(isNotNull(), ArgumentMatchers.<TopicType>isNotNull())).thenReturn(completedFuture(null));
+        when(topicManagementClient.addTopic(isNotNull(), ArgumentMatchers.isNotNull())).thenReturn(completedFuture(null));
 
         when(topicControl.removeTopicsWithSession("metrics")).thenReturn(completedFuture(registration));
 
@@ -112,7 +111,7 @@ public final class TopicBasedMetricsReporterTest {
 
     @After
     public void postConditions() {
-        Mockito.verifyNoMoreInteractions(executor, loggingTask, topicControl, updateControl, topicManagementClient);
+        Mockito.verifyNoMoreInteractions(executor, reportingTask, topicControl, updateControl, topicManagementClient);
     }
 
     @Test
@@ -196,7 +195,7 @@ public final class TopicBasedMetricsReporterTest {
 
         verify(registration).close();
         verify(topicControl).remove(eq("?metrics/"), isA(RemovalCallback.class));
-        verify(loggingTask).cancel(false);
+        verify(reportingTask).cancel(false);
     }
 
     @Test

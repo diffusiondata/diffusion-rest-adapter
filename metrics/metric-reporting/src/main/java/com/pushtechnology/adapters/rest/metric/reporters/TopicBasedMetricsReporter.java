@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2019 Push Technology Ltd.
+ * Copyright (C) 2020 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,7 +69,7 @@ public final class TopicBasedMetricsReporter implements AutoCloseable {
     private final TopicCreationEventQuerier topicCreationQuerier;
     private final String rootTopic;
     @GuardedBy("this")
-    private Future<?> loggingTask;
+    private Future<?> reportingTask;
     @GuardedBy("this")
     private Registration registration;
 
@@ -181,18 +181,18 @@ public final class TopicBasedMetricsReporter implements AutoCloseable {
             }
         });
 
-        if (loggingTask != null) {
-            loggingTask.cancel(false);
-            loggingTask = null;
+        if (reportingTask != null) {
+            reportingTask.cancel(false);
+            reportingTask = null;
         }
     }
 
     private void beginReporting() {
-        if (loggingTask != null) {
+        if (reportingTask != null) {
             return;
         }
 
-        loggingTask = executor.scheduleAtFixedRate(
+        reportingTask = executor.scheduleAtFixedRate(
             () -> {
                 reportPollEvents();
                 reportPublicationEvents();
