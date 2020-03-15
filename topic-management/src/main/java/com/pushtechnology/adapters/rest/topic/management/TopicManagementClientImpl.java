@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Push Technology Ltd.
+ * Copyright (C) 2020 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import com.pushtechnology.diffusion.client.features.control.topics.TopicAddFailR
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.AddCallback;
 import com.pushtechnology.diffusion.client.session.Session;
+import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
 
 import net.jcip.annotations.GuardedBy;
@@ -75,12 +76,8 @@ public final class TopicManagementClientImpl implements TopicManagementClient {
         final String topicPath = serviceConfig.getTopicPathRoot() + "/" + endpointConfig.getTopicPath();
         final TopicType topicType = EndpointType.from(produces).getTopicType();
 
-        addTopic(
-            topicPath,
-            topicType)
-            .thenAccept(x -> {
-                callback.onTopicAdded(topicPath);
-            })
+        addTopic(topicPath, session.feature(TopicControl.class).newSpecification(topicType))
+            .thenAccept(x -> callback.onTopicAdded(topicPath))
             .whenComplete((x, t) -> {
                 if (t instanceof CompletionException) {
                     final Throwable e = t.getCause();
@@ -125,11 +122,15 @@ public final class TopicManagementClientImpl implements TopicManagementClient {
 
     @Override
     public CompletableFuture<Void> addTopic(String path, TopicType topicType) {
+        return addTopic(path, session.feature(TopicControl.class).newSpecification(topicType));
+    }
+
+    private CompletableFuture<Void> addTopic(String path, TopicSpecification specification) {
         final TopicCreationCompletionListener completionListener =
-            topicCreationListener.onTopicCreationRequest(path, topicType);
+            topicCreationListener.onTopicCreationRequest(path, specification.getType());
         return session
             .feature(TopicControl.class)
-            .addTopic(path, topicType)
+            .addTopic(path, specification)
             .thenAccept(x -> completionListener.onTopicCreated())
             .whenComplete((x, t) -> {
                 if (t instanceof CompletionException) {

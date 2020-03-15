@@ -37,10 +37,12 @@ import com.pushtechnology.adapters.rest.metrics.listeners.TopicCreationListener;
 import com.pushtechnology.adapters.rest.metrics.listeners.TopicCreationListener.TopicCreationCompletionListener;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
+import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.callbacks.Registration;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicAddFailReason;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 import com.pushtechnology.diffusion.client.session.Session;
+import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
 import com.pushtechnology.diffusion.v4.SessionDisconnectedException;
 
@@ -62,6 +64,8 @@ public final class TopicManagementClientImplTest {
     private TopicCreationListener topicCreationListener;
     @Mock
     private TopicCreationCompletionListener topicCreationCompletionListener;
+    @Mock
+    private TopicSpecification specification;
 
     private final EndpointConfig jsonEndpointConfig = EndpointConfig
         .builder()
@@ -104,6 +108,8 @@ public final class TopicManagementClientImplTest {
 
         when(topicCreationListener.onTopicCreationRequest(isNotNull(), isNotNull())).thenReturn(topicCreationCompletionListener);
         when(session.feature(TopicControl.class)).thenReturn(topicControl);
+        when(topicControl.newSpecification(any())).thenReturn(specification);
+        when(specification.withProperty(any(), any())).thenReturn(specification);
         when(topicControl.removeTopicsWithSession(any())).thenReturn(CompletableFuture.completedFuture(registration));
     }
 
@@ -122,12 +128,15 @@ public final class TopicManagementClientImplTest {
     @SuppressWarnings("deprecation")
     @Test
     public void addJSONEndpoint() {
-        when(topicControl.addTopic(isNotNull(), ArgumentMatchers.<TopicType>isNotNull())).thenReturn(cf(new SessionDisconnectedException()));
+        when(specification.getType()).thenReturn(TopicType.JSON);
+        when(topicControl.addTopic(isNotNull(), ArgumentMatchers.<TopicSpecification>isNotNull())).thenReturn(cf(new SessionDisconnectedException()));
 
         topicManagementClient.addEndpoint(serviceConfig, jsonEndpointConfig, addCallback);
 
         verify(topicCreationListener).onTopicCreationRequest("service/jsonEndpoint", TopicType.JSON);
-        verify(topicControl).addTopic(eq("service/jsonEndpoint"), eq(TopicType.JSON));
+        verify(topicControl).newSpecification(TopicType.JSON);
+        verify(topicControl).addTopic("service/jsonEndpoint", specification);
+        verify(specification).getType();
 
         verify(addCallback).onDiscard();
         verify(topicCreationCompletionListener).onTopicCreationFailed(TopicAddFailReason.UNEXPECTED_ERROR);
@@ -136,12 +145,15 @@ public final class TopicManagementClientImplTest {
     @SuppressWarnings("deprecation")
     @Test
     public void addBinaryEndpoint() {
-        when(topicControl.addTopic(isNotNull(), ArgumentMatchers.<TopicType>isNotNull())).thenReturn(cf(new SessionDisconnectedException()));
+        when(specification.getType()).thenReturn(TopicType.BINARY);
+        when(topicControl.addTopic(isNotNull(), ArgumentMatchers.<TopicSpecification>isNotNull())).thenReturn(cf(new SessionDisconnectedException()));
 
         topicManagementClient.addEndpoint(serviceConfig, binaryEndpointConfig, addCallback);
 
         verify(topicCreationListener).onTopicCreationRequest("service/binaryEndpoint", TopicType.BINARY);
-        verify(topicControl).addTopic(eq("service/binaryEndpoint"), eq(TopicType.BINARY));
+        verify(topicControl).newSpecification(TopicType.BINARY);
+        verify(topicControl).addTopic("service/binaryEndpoint", specification);
+        verify(specification).getType();
 
         verify(addCallback).onDiscard();
         verify(topicCreationCompletionListener).onTopicCreationFailed(TopicAddFailReason.UNEXPECTED_ERROR);
@@ -150,12 +162,15 @@ public final class TopicManagementClientImplTest {
     @SuppressWarnings("deprecation")
     @Test
     public void addStringEndpoint() {
-        when(topicControl.addTopic(isNotNull(), ArgumentMatchers.<TopicType>isNotNull())).thenReturn(cf(new SessionDisconnectedException()));
+        when(specification.getType()).thenReturn(TopicType.STRING);
+        when(topicControl.addTopic(isNotNull(), ArgumentMatchers.<TopicSpecification>isNotNull())).thenReturn(cf(new SessionDisconnectedException()));
 
         topicManagementClient.addEndpoint(serviceConfig, stringEndpointConfig, addCallback);
 
         verify(topicCreationListener).onTopicCreationRequest("service/stringEndpoint", TopicType.STRING);
-        verify(topicControl).addTopic(eq("service/stringEndpoint"), eq(TopicType.STRING));
+        verify(topicControl).newSpecification(TopicType.STRING);
+        verify(topicControl).addTopic("service/stringEndpoint", specification);
+        verify(specification).getType();
 
         verify(addCallback).onDiscard();
         verify(topicCreationCompletionListener).onTopicCreationFailed(TopicAddFailReason.UNEXPECTED_ERROR);
