@@ -26,9 +26,12 @@ import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.util.Map;
 import java.util.OptionalLong;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeoutException;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -39,11 +42,10 @@ import org.slf4j.LoggerFactory;
 import com.pushtechnology.adapters.rest.publication.PublishingClient;
 import com.pushtechnology.adapters.rest.publication.UpdateContext;
 import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
-import com.pushtechnology.diffusion.client.callbacks.ErrorReason;
 import com.pushtechnology.diffusion.client.callbacks.Registration;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.RemovalCallback;
 import com.pushtechnology.diffusion.client.session.Session;
+import com.pushtechnology.diffusion.client.session.SessionException;
 
 import net.jcip.annotations.GuardedBy;
 
@@ -167,23 +169,37 @@ public final class TopicBasedMetricsReporter implements AutoCloseable {
     @PreDestroy
     @Override
     public synchronized void close() {
-        if (registration != null) {
-            registration.close();
-        }
-        session.feature(TopicControl.class).remove("?" + rootTopic + "/", new RemovalCallback() {
-            @Override
-            public void onTopicsRemoved() {
-            }
-
-            @Override
-            public void onError(ErrorReason errorReason) {
-                LOG.warn("Failed to remove metrics reporting topics: {}", errorReason);
-            }
-        });
-
         if (reportingTask != null) {
             reportingTask.cancel(false);
             reportingTask = null;
+        }
+
+        if (registration != null) {
+            registration.close();
+        }
+
+        try {
+            session
+                .feature(TopicControl.class)
+                .removeTopics("?" + rootTopic + "/")
+                .whenComplete((v, e) -> {
+                    if (e instanceof CompletionException) {
+                        final Throwable cause = e.getCause();
+                        if (cause instanceof SessionException) {
+                            LOG.warn("Failed to remove metrics reporting topics: {}", cause.getMessage());
+                        }
+                        else {
+                            LOG.warn("Failed to remove metrics reporting topics", e);
+                        }
+                    }
+                    else if (e != null) {
+                        LOG.warn("Failed to remove metrics reporting topics", e);
+                    }
+                })
+                .get(5, MINUTES);
+        }
+        catch (TimeoutException | InterruptedException | ExecutionException e) {
+            LOG.warn("Failed to remove metrics reporting topics", e);
         }
     }
 

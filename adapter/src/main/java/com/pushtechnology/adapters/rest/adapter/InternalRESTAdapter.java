@@ -197,8 +197,8 @@ public final class InternalRESTAdapter implements RESTAdapterListener, AutoClose
                 diffusionSession,
                 eventedSessionListener,
                 metricsDispatcher);
-            state = State.STANDBY;
             reconfigureMetricsReporting();
+            state = State.STANDBY;
         }
         else {
             diffusionSession = session;
@@ -335,6 +335,9 @@ public final class InternalRESTAdapter implements RESTAdapterListener, AutoClose
         }
 
         if (state == State.ACTIVE || state == State.STANDBY) {
+            if (metricsProvider != null) {
+                metricsProvider.close();
+            }
             diffusionSession.close();
         }
 

@@ -28,6 +28,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -89,11 +90,13 @@ public final class TopicBasedMetricsReporterTest {
         when(session.feature(TopicControl.class)).thenReturn(topicControl);
         when(session.feature(TopicUpdateControl.class)).thenReturn(updateControl);
 
-        when(topicManagementClient.addTopic(isNotNull(), ArgumentMatchers.isNotNull())).thenReturn(completedFuture(null));
+        when(topicManagementClient.addTopic(isNotNull(), isNotNull())).thenReturn(completedFuture(null));
 
         when(topicControl.removeTopicsWithSession("metrics")).thenReturn(completedFuture(registration));
+        when(topicControl.removeTopics(ArgumentMatchers.<String>isNotNull())).thenReturn(CompletableFuture.completedFuture(null));
 
         when(publishingClient.createUpdateContext(anyString(), isNotNull(), isNotNull())).thenReturn(updateContext);
+
 
         reporter = new TopicBasedMetricsReporter(
             session,
@@ -194,7 +197,7 @@ public final class TopicBasedMetricsReporterTest {
         reporter.close();
 
         verify(registration).close();
-        verify(topicControl).remove(eq("?metrics/"), isA(RemovalCallback.class));
+        verify(topicControl).removeTopics("?metrics/");
         verify(reportingTask).cancel(false);
     }
 
@@ -202,6 +205,6 @@ public final class TopicBasedMetricsReporterTest {
     public void closeBeforeStart() throws Exception {
         reporter.close();
 
-        verify(topicControl).remove(eq("?metrics/"), isA(RemovalCallback.class));
+        verify(topicControl).removeTopics("?metrics/");
     }
 }
