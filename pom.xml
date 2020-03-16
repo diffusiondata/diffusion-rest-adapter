@@ -59,10 +59,6 @@
             <url>scp://download.pushtechnology.com</url>
             <layout>default</layout>
         </repository>
-        <site>
-            <id>website</id>
-            <url>https://pushtechnology.github.io/diffusion-transform/</url>
-        </site>
     </distributionManagement>
 
     <dependencyManagement>
