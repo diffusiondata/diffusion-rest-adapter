@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Push Technology Ltd.
+ * Copyright (C) 2020 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,8 @@ public interface TopicManagementClient {
      * Add a topic.
      * @param path the path
      * @param topicType the topic type
+     * @param keepAlive the number of seconds the topic should be kept alive without updates
      * @return a future representing the completion of adding the topic
      */
-    CompletableFuture<Void> addTopic(String path, TopicType topicType);
+    CompletableFuture<Void> addTopic(String path, TopicType topicType, int keepAlive);
 }

@@ -15,6 +15,8 @@
 
 package com.pushtechnology.adapters.rest.topic.management;
 
+import static java.lang.String.format;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -121,8 +123,12 @@ public final class TopicManagementClientImpl implements TopicManagementClient {
     }
 
     @Override
-    public CompletableFuture<Void> addTopic(String path, TopicType topicType) {
-        return addTopic(path, session.feature(TopicControl.class).newSpecification(topicType));
+    public CompletableFuture<Void> addTopic(String path, TopicType topicType, int keepAlive) {
+        final TopicSpecification specification = session
+            .feature(TopicControl.class)
+            .newSpecification(topicType)
+            .withProperty(TopicSpecification.REMOVAL, format("when no updates for %ds", keepAlive));
+        return addTopic(path, specification);
     }
 
     private CompletableFuture<Void> addTopic(String path, TopicSpecification specification) {
