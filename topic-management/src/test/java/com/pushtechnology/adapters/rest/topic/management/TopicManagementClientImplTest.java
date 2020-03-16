@@ -15,9 +15,9 @@
 
 package com.pushtechnology.adapters.rest.topic.management;
 
+import static com.pushtechnology.diffusion.client.topics.details.TopicSpecification.REMOVAL;
 import static java.util.Arrays.asList;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -37,8 +37,6 @@ import com.pushtechnology.adapters.rest.metrics.listeners.TopicCreationListener;
 import com.pushtechnology.adapters.rest.metrics.listeners.TopicCreationListener.TopicCreationCompletionListener;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.diffusion.client.Diffusion;
-import com.pushtechnology.diffusion.client.callbacks.Registration;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicAddFailReason;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 import com.pushtechnology.diffusion.client.session.Session;
@@ -58,8 +56,6 @@ public final class TopicManagementClientImplTest {
     private TopicControl topicControl;
     @Mock
     private TopicControl.AddCallback addCallback;
-    @Mock
-    private Registration registration;
     @Mock
     private TopicCreationListener topicCreationListener;
     @Mock
@@ -110,19 +106,16 @@ public final class TopicManagementClientImplTest {
         when(session.feature(TopicControl.class)).thenReturn(topicControl);
         when(topicControl.newSpecification(any())).thenReturn(specification);
         when(specification.withProperty(any(), any())).thenReturn(specification);
-        when(topicControl.removeTopicsWithSession(any())).thenReturn(CompletableFuture.completedFuture(registration));
     }
 
     @After
     public void postConditions() {
-        verifyNoMoreInteractions(topicControl, addCallback, topicCreationListener, topicCreationCompletionListener);
+        verifyNoMoreInteractions(topicControl, addCallback, topicCreationListener, topicCreationCompletionListener, specification);
     }
 
     @Test
     public void addService() {
         topicManagementClient.addService(serviceConfig);
-
-        verify(topicControl).removeTopicsWithSession(eq("service"));
     }
 
     @SuppressWarnings("deprecation")
@@ -136,6 +129,7 @@ public final class TopicManagementClientImplTest {
         verify(topicCreationListener).onTopicCreationRequest("service/jsonEndpoint", TopicType.JSON);
         verify(topicControl).newSpecification(TopicType.JSON);
         verify(topicControl).addTopic("service/jsonEndpoint", specification);
+        verify(specification).withProperty(REMOVAL, "when no updates for 10s");
         verify(specification).getType();
 
         verify(addCallback).onDiscard();
@@ -153,6 +147,7 @@ public final class TopicManagementClientImplTest {
         verify(topicCreationListener).onTopicCreationRequest("service/binaryEndpoint", TopicType.BINARY);
         verify(topicControl).newSpecification(TopicType.BINARY);
         verify(topicControl).addTopic("service/binaryEndpoint", specification);
+        verify(specification).withProperty(REMOVAL, "when no updates for 10s");
         verify(specification).getType();
 
         verify(addCallback).onDiscard();
@@ -170,6 +165,7 @@ public final class TopicManagementClientImplTest {
         verify(topicCreationListener).onTopicCreationRequest("service/stringEndpoint", TopicType.STRING);
         verify(topicControl).newSpecification(TopicType.STRING);
         verify(topicControl).addTopic("service/stringEndpoint", specification);
+        verify(specification).withProperty(REMOVAL, "when no updates for 10s");
         verify(specification).getType();
 
         verify(addCallback).onDiscard();
@@ -190,8 +186,6 @@ public final class TopicManagementClientImplTest {
         addService();
 
         topicManagementClient.removeService(serviceConfig);
-
-        verify(registration).close();
     }
 
     private static CompletableFuture<TopicControl.AddTopicResult> cf(Exception exception) {

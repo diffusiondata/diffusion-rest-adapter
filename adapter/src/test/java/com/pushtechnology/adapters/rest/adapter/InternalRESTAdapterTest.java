@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Push Technology Ltd.
+ * Copyright (C) 2020 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,8 +83,6 @@ public final class InternalRESTAdapterTest {
     private TopicUpdateControl updateControl;
     @Mock
     private Runnable shutdownHandler;
-    @Mock
-    private Registration registration;
 
     private final DiffusionConfig diffusionConfig = DiffusionConfig
         .builder()
@@ -183,7 +181,6 @@ public final class InternalRESTAdapterTest {
 
         when(session.feature(TopicControl.class)).thenReturn(topicControl);
         when(session.feature(TopicUpdateControl.class)).thenReturn(updateControl);
-        when(topicControl.removeTopicsWithSession(anyString())).thenReturn(completedFuture(registration));
 
         restAdapter = new InternalRESTAdapter(
             executorService,
@@ -208,8 +205,7 @@ public final class InternalRESTAdapterTest {
             httpClientFactory,
             topicControl,
             updateControl,
-            shutdownHandler,
-            registration);
+            shutdownHandler);
     }
 
     @Test
@@ -234,9 +230,7 @@ public final class InternalRESTAdapterTest {
         verify(httpClientFactory).create(model0, null);
         verify(httpClient).start();
 
-        verify(session).feature(TopicControl.class);
         verify(session).feature(TopicUpdateControl.class);
-        verify(topicControl).removeTopicsWithSession(eq("root"));
         verify(updateControl).registerUpdateSource(eq("root"), isNotNull());
 
         restAdapter.onReconfiguration(inactiveModel);
@@ -298,9 +292,7 @@ public final class InternalRESTAdapterTest {
         verify(httpClientFactory).create(model0, null);
         verify(httpClient).start();
 
-        verify(session).feature(TopicControl.class);
         verify(session).feature(TopicUpdateControl.class);
-        verify(topicControl).removeTopicsWithSession(eq("root"));
         verify(updateControl).registerUpdateSource(eq("root"), isNotNull());
 
         restAdapter.onReconfiguration(model1);
@@ -308,9 +300,7 @@ public final class InternalRESTAdapterTest {
         verify(httpClientFactory).create(model1, null);
         verify(httpClient, times(2)).start();
 
-        verify(session, times(2)).feature(TopicControl.class);
         verify(session, times(2)).feature(TopicUpdateControl.class);
-        verify(topicControl).removeTopicsWithSession(eq("root2"));
         verify(updateControl).registerUpdateSource(eq("root2"), isNotNull());
     }
 
@@ -343,9 +333,7 @@ public final class InternalRESTAdapterTest {
         verify(httpClientFactory).create(model1, null);
         verify(httpClient).start();
 
-        verify(session).feature(TopicControl.class);
         verify(session).feature(TopicUpdateControl.class);
-        verify(topicControl).removeTopicsWithSession(eq("root2"));
         verify(updateControl).registerUpdateSource(eq("root2"), isNotNull());
     }
 
@@ -391,9 +379,7 @@ public final class InternalRESTAdapterTest {
         verify(httpClientFactory).create(model0, null);
         verify(httpClient).start();
 
-        verify(session).feature(TopicControl.class);
         verify(session).feature(TopicUpdateControl.class);
-        verify(topicControl).removeTopicsWithSession(eq("root"));
         verify(updateControl).registerUpdateSource(eq("root"), isNotNull());
 
         restAdapter.onReconfiguration(model2);
@@ -450,9 +436,7 @@ public final class InternalRESTAdapterTest {
         verify(httpClientFactory).create(model0, null);
         verify(httpClient).start();
 
-        verify(session).feature(TopicControl.class);
         verify(session).feature(TopicUpdateControl.class);
-        verify(topicControl).removeTopicsWithSession(eq("root"));
         verify(updateControl).registerUpdateSource(eq("root"), isNotNull());
 
         restAdapter.close();

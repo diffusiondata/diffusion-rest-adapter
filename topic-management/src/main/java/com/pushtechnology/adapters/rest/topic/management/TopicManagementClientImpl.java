@@ -17,8 +17,6 @@ package com.pushtechnology.adapters.rest.topic.management;
 
 import static java.lang.String.format;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
@@ -27,7 +25,6 @@ import com.pushtechnology.adapters.rest.metrics.listeners.TopicCreationListener;
 import com.pushtechnology.adapters.rest.metrics.listeners.TopicCreationListener.TopicCreationCompletionListener;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.diffusion.client.callbacks.Registration;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicAddFailReason;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.AddCallback;
@@ -35,16 +32,12 @@ import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
 
-import net.jcip.annotations.GuardedBy;
-
 /**
  * Topic management client to control Diffusion topic tree.
  *
  * @author Push Technology Limited
  */
 public final class TopicManagementClientImpl implements TopicManagementClient {
-    @GuardedBy("this")
-    private final Map<ServiceConfig, Registration> handles = new HashMap<>();
     private final TopicCreationListener topicCreationListener;
     private final Session session;
 
@@ -58,14 +51,6 @@ public final class TopicManagementClientImpl implements TopicManagementClient {
 
     @Override
     public void addService(ServiceConfig serviceConfig) {
-        session
-            .feature(TopicControl.class)
-            .removeTopicsWithSession(serviceConfig.getTopicPathRoot())
-            .thenAccept(handle -> {
-                synchronized (this) {
-                    handles.put(serviceConfig, handle);
-                }
-            });
     }
 
     @Override
@@ -78,7 +63,12 @@ public final class TopicManagementClientImpl implements TopicManagementClient {
         final String topicPath = serviceConfig.getTopicPathRoot() + "/" + endpointConfig.getTopicPath();
         final TopicType topicType = EndpointType.from(produces).getTopicType();
 
-        addTopic(topicPath, session.feature(TopicControl.class).newSpecification(topicType))
+        final long pollPeriodInSeconds = serviceConfig.getPollPeriod() / 1000;
+        final TopicSpecification specification = session
+            .feature(TopicControl.class)
+            .newSpecification(topicType)
+            .withProperty(TopicSpecification.REMOVAL, format("when no updates for %ds", pollPeriodInSeconds * 2));
+        addTopic(topicPath, specification)
             .thenAccept(x -> callback.onTopicAdded(topicPath))
             .whenComplete((x, t) -> {
                 if (t instanceof CompletionException) {
@@ -114,12 +104,6 @@ public final class TopicManagementClientImpl implements TopicManagementClient {
 
     @Override
     public void removeService(ServiceConfig serviceConfig) {
-        synchronized (this) {
-            final Registration handle = handles.remove(serviceConfig);
-            if (handle != null) {
-                handle.close();
-            }
-        }
     }
 
     @Override
