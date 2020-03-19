@@ -118,7 +118,6 @@ public final class TopicManagementClientImplTest {
         topicManagementClient.addService(serviceConfig);
     }
 
-    @SuppressWarnings("deprecation")
     @Test
     public void addJSONEndpoint() {
         when(specification.getType()).thenReturn(TopicType.JSON);
@@ -136,7 +135,6 @@ public final class TopicManagementClientImplTest {
         verify(topicCreationCompletionListener).onTopicCreationFailed(TopicAddFailReason.UNEXPECTED_ERROR);
     }
 
-    @SuppressWarnings("deprecation")
     @Test
     public void addBinaryEndpoint() {
         when(specification.getType()).thenReturn(TopicType.BINARY);
@@ -154,7 +152,6 @@ public final class TopicManagementClientImplTest {
         verify(topicCreationCompletionListener).onTopicCreationFailed(TopicAddFailReason.UNEXPECTED_ERROR);
     }
 
-    @SuppressWarnings("deprecation")
     @Test
     public void addStringEndpoint() {
         when(specification.getType()).thenReturn(TopicType.STRING);
