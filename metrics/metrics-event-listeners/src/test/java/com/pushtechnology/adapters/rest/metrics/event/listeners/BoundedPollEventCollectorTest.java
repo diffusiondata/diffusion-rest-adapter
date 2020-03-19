@@ -15,9 +15,9 @@
 
 package com.pushtechnology.adapters.rest.metrics.event.listeners;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
 
 import org.junit.Before;
 import org.junit.Test;
