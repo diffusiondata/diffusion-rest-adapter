@@ -18,9 +18,9 @@ package com.pushtechnology.adapters.rest.adapter;
 import static com.pushtechnology.diffusion.client.callbacks.ErrorReason.ACCESS_DENIED;
 import static com.pushtechnology.diffusion.client.features.control.topics.TopicAddFailReason.INVALID_DETAILS;
 import static java.util.Collections.singletonList;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.isNotNull;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 

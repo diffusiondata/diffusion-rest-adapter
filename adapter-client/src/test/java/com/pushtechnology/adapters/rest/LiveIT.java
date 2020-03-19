@@ -20,9 +20,9 @@ import static com.pushtechnology.diffusion.client.session.Session.State.CONNECTE
 import static com.pushtechnology.diffusion.client.session.Session.State.CONNECTING;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.isA;
-import static org.mockito.Matchers.isNull;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -144,7 +144,7 @@ public final class LiveIT {
         verify(callback, timed()).onComplete();
         verify(stream, timed()).onSubscription(eq("icndb/random"), isA(TopicSpecification.class));
 
-        verify(stream, timed()).onValue(eq("icndb/random"), isA(TopicSpecification.class), isNull(JSON.class), isA(JSON.class));
+        verify(stream, timed()).onValue(eq("icndb/random"), isA(TopicSpecification.class), isNull(), isA(JSON.class));
 
         stopSession(session);
         client.close();
