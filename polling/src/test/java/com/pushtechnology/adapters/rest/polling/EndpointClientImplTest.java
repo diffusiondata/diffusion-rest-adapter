@@ -19,7 +19,7 @@ import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
-import static org.mockito.ArgumentMatchers.isNotNull;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.isA;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -43,12 +43,9 @@ import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
 import org.apache.http.concurrent.FutureCallback;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
-import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -67,9 +64,6 @@ import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
  * @author Push Technology Limited
  */
 public final class EndpointClientImplTest {
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
     @Mock
     private HttpClientFactory clientFactory;
     @Mock
@@ -204,8 +198,10 @@ public final class EndpointClientImplTest {
         final Exception exception = new Exception("Intentional for test");
         responseCallback.failed(exception);
         verify(completionListener).onPollFailure(exception);
-        expectedException.expectCause(Matchers.equalTo(exception));
-        handle.get(1, TimeUnit.SECONDS);
+        final ExecutionException thrown = assertThrows(
+            ExecutionException.class,
+            () -> handle.get(1, TimeUnit.SECONDS));
+        assertEquals(thrown.getCause(), exception);
     }
 
     @Test
@@ -224,8 +220,9 @@ public final class EndpointClientImplTest {
         final FutureCallback<HttpResponse> responseCallback = callbackCaptor.getValue();
 
         responseCallback.cancelled();
-        expectedException.expect(Matchers.isA(CancellationException.class));
-        handle.get(1, TimeUnit.SECONDS);
+        assertThrows(
+            CancellationException.class,
+            () -> handle.get(1, TimeUnit.SECONDS));
     }
 
     @Test(expected = IllegalStateException.class)
