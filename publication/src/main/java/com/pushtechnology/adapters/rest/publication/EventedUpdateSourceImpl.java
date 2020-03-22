@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Push Technology Ltd.
+ * Copyright (C) 2020 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,15 @@ package com.pushtechnology.adapters.rest.publication;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.function.Consumer;
 
 import com.pushtechnology.diffusion.client.callbacks.ErrorReason;
-import com.pushtechnology.diffusion.client.callbacks.Registration;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater;
+import com.pushtechnology.diffusion.client.session.Session;
+import com.pushtechnology.diffusion.client.session.Session.SessionLock;
+import com.pushtechnology.diffusion.client.session.SessionClosedException;
 
 import net.jcip.annotations.GuardedBy;
 import net.jcip.annotations.ThreadSafe;
@@ -35,11 +38,10 @@ import net.jcip.annotations.ThreadSafe;
 @ThreadSafe
 public final class EventedUpdateSourceImpl implements EventedUpdateSource {
     private final Object mutex = new Object();
-    private final InvertedUpdateSource updateSource = new InvertedUpdateSource();
     private final String registeredTopicPath;
 
     @GuardedBy("mutex")
-    private final List<Consumer<Updater>> onActiveEventHandlers = new ArrayList<>();
+    private final List<Consumer<SessionLock>> onActiveEventHandlers = new ArrayList<>();
     @GuardedBy("mutex")
     private final List<Consumer<ErrorReason>> onErrorEventHandlers = new ArrayList<>();
     @GuardedBy("mutex")
@@ -50,9 +52,9 @@ public final class EventedUpdateSourceImpl implements EventedUpdateSource {
     @GuardedBy("mutex")
     private State state = State.UNREGISTERED;
     @GuardedBy("mutex")
-    private Registration registration;
+    private CompletableFuture<?> registration;
     @GuardedBy("mutex")
-    private Updater currentUpdater;
+    private SessionLock currentLock;
     @GuardedBy("mutex")
     private ErrorReason currentErrorReason;
 
@@ -64,11 +66,11 @@ public final class EventedUpdateSourceImpl implements EventedUpdateSource {
     }
 
     @Override
-    public EventedUpdateSource onActive(Consumer<Updater> eventHandler) {
+    public EventedUpdateSource onActive(Consumer<SessionLock> eventHandler) {
         synchronized (mutex) {
             onActiveEventHandlers.add(eventHandler);
             if (state == State.ACTIVE) {
-                eventHandler.accept(currentUpdater);
+                eventHandler.accept(currentLock);
             }
         }
         return this;
@@ -108,15 +110,53 @@ public final class EventedUpdateSourceImpl implements EventedUpdateSource {
     }
 
     @Override
-    public EventedUpdateSource register(TopicUpdateControl updateControl) {
+    public EventedUpdateSource register(Session session) {
         synchronized (mutex) {
             if (state != State.UNREGISTERED) {
                 throw new IllegalStateException("An EventedUpdateSource cannot be registered twice");
             }
+
             state = State.STANDBY;
             onStandbyEventHandlers.forEach(Runnable::run);
 
-            updateControl.registerUpdateSource(registeredTopicPath, updateSource);
+            registration = session
+                .lock(registeredTopicPath, Session.SessionLockScope.UNLOCK_ON_CONNECTION_LOSS)
+                .whenComplete((lock, exception) -> {
+                    synchronized (mutex) {
+                        if (exception == null) {
+                            if (state == State.STANDBY) {
+                                state = State.ACTIVE;
+                                currentLock = lock;
+                                onActiveEventHandlers.forEach(handler -> handler.accept(lock));
+                            }
+                            else if (state == State.CLOSING) {
+                                state = State.CLOSED;
+                                onCloseEventHandlers.forEach(Runnable::run);
+                            }
+                        }
+                        else if (exception instanceof CompletionException) {
+                            final Throwable cause = exception.getCause();
+                            if (cause instanceof SessionClosedException) {
+                                state = State.CLOSED;
+                                onCloseEventHandlers.forEach(Runnable::run);
+                            }
+                            else if (cause instanceof CancellationException) {
+                                state = State.CLOSED;
+                                onCloseEventHandlers.forEach(Runnable::run);
+                            }
+                            else {
+                                state = State.ERRORED;
+                                currentErrorReason = ErrorReason.COMMUNICATION_FAILURE;
+                                onErrorEventHandlers.forEach(handler -> handler.accept(currentErrorReason));
+                            }
+                        }
+                        else {
+                            state = State.ERRORED;
+                            currentErrorReason = ErrorReason.COMMUNICATION_FAILURE;
+                            onErrorEventHandlers.forEach(handler -> handler.accept(currentErrorReason));
+                        }
+                    }
+                });
         }
         return this;
     }
@@ -124,67 +164,17 @@ public final class EventedUpdateSourceImpl implements EventedUpdateSource {
     @Override
     public void close() {
         synchronized (mutex) {
-            if (registration != null) {
-                registration.close();
-            }
-            state = State.CLOSING;
-        }
-    }
-
-    private final class InvertedUpdateSource implements TopicUpdateControl.UpdateSource {
-        @Override
-        public void onActive(String topicPath, Updater updater) {
-            synchronized (mutex) {
-                if (state == State.STANDBY) {
-                    state = State.ACTIVE;
-                    currentUpdater = updater;
-                    onActiveEventHandlers.forEach(handler -> handler.accept(updater));
-                }
-            }
-        }
-
-        @Override
-        public void onStandby(String topicPath) {
-            synchronized (mutex) {
-                if (state == State.ACTIVE) {
-                    state = State.STANDBY;
-                    onStandbyEventHandlers.forEach(Runnable::run);
-                }
-            }
-        }
-
-        @Override
-        public void onRegistered(String topicPath, Registration newRegistration) {
-            synchronized (mutex) {
-                if (state == State.CLOSING) {
-                    newRegistration.close();
-                }
-                else {
-                    registration = newRegistration;
-                }
-            }
-        }
-
-        @Override
-        public void onClose(String topicPath) {
-            synchronized (mutex) {
+            if (currentLock != null) {
+                currentLock.unlock();
                 state = State.CLOSED;
                 onCloseEventHandlers.forEach(Runnable::run);
             }
-        }
-
-        @Override
-        public void onError(String topicPath, ErrorReason errorReason) {
-            synchronized (mutex) {
-                if (errorReason == ErrorReason.SESSION_CLOSED) {
-                    state = State.CLOSED;
-                    onCloseEventHandlers.forEach(Runnable::run);
-                }
-                else {
-                    state = State.ERRORED;
-                    currentErrorReason = errorReason;
-                    onErrorEventHandlers.forEach(handler -> handler.accept(errorReason));
-                }
+            else if (registration != null) {
+                registration.cancel(false);
+                state = State.CLOSING;
+            }
+            else {
+                state = State.CLOSED;
             }
         }
     }

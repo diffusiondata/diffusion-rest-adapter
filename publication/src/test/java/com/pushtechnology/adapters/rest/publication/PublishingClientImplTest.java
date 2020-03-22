@@ -15,37 +15,48 @@
 
 package com.pushtechnology.adapters.rest.publication;
 
+import static com.pushtechnology.diffusion.client.Diffusion.updateConstraints;
+import static com.pushtechnology.diffusion.client.features.TopicCreationResult.EXISTS;
+import static com.pushtechnology.diffusion.client.session.Session.SessionLockScope.UNLOCK_ON_CONNECTION_LOSS;
 import static com.pushtechnology.diffusion.client.session.Session.State.CONNECTED_ACTIVE;
 import static com.pushtechnology.diffusion.client.session.Session.State.RECOVERING_RECONNECT;
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Mockito.isA;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.function.BiConsumer;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.mockito.AdditionalAnswers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import com.pushtechnology.adapters.rest.metrics.listeners.PublicationListener;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.session.management.EventedSessionListener;
-import com.pushtechnology.diffusion.client.callbacks.ErrorReason;
-import com.pushtechnology.diffusion.client.callbacks.Registration;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.UpdateSource;
+import com.pushtechnology.diffusion.client.features.TopicCreationResult;
+import com.pushtechnology.diffusion.client.features.TopicUpdate;
+import com.pushtechnology.diffusion.client.features.UpdateStream;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater.UpdateContextCallback;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.ValueUpdater;
@@ -61,18 +72,17 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
  * @author Push Technology Limited
  */
 public final class PublishingClientImplTest {
+    @Rule
+    public MockitoRule mockitoRule = MockitoJUnit.rule();
+
     @Mock
     private Session session;
     @Mock
-    private TopicUpdateControl updateControl;
+    private TopicUpdate topicUpdate;
     @Mock
-    private Registration registration;
+    private Session.SessionLock sessionLock;
     @Mock
-    private Updater rawUpdater;
-    @Mock
-    private ValueUpdater<JSON> jsonValueUpdater;
-    @Mock
-    private ValueUpdater<Binary> binaryValueUpdater;
+    private CompletableFuture<Session.SessionLock> registration;
     @Mock
     private JSON json;
     @Mock
@@ -80,11 +90,19 @@ public final class PublishingClientImplTest {
     @Mock
     private PublicationListener publicationListener;
     @Mock
+    private PublicationListener.PublicationCompletionListener completionListener;
+    @Mock
     private DataType<Binary> binaryDataType;
     @Mock
     private DataType<JSON> jsonDataType;
+    @Mock
+    private UpdateStream<JSON> jsonStream;
+    @Mock
+    private UpdateStream<Binary> binaryStream;
+    @Mock
+    private CompletableFuture<TopicCreationResult> setFuture;
     @Captor
-    private ArgumentCaptor<UpdateSource> updateSourceCaptor;
+    private ArgumentCaptor<BiConsumer<Session.SessionLock, Throwable>> registrationHandler;
 
     private Session.Listener sessionListener;
     private EventedSessionListener eventedListener;
@@ -95,17 +113,28 @@ public final class PublishingClientImplTest {
 
     @Before
     public void setUp() {
-        initMocks(this);
-
-        when(session.feature(TopicUpdateControl.class)).thenReturn(updateControl);
         when(session.getState()).thenReturn(CONNECTED_ACTIVE);
+        when(session.feature(TopicUpdate.class)).thenReturn(topicUpdate);
         when(binaryDataType.toBytes(binary)).thenReturn(binary);
         when(jsonDataType.toBytes(json)).thenReturn(json);
-        when(updateControl.updater()).thenReturn(rawUpdater);
+        when(session.lock(isNotNull(), isNotNull())).thenReturn(registration);
+        when(registration.whenComplete(isNotNull())).thenReturn(registration);
         when(jsonDataType.getTypeName()).thenReturn("json");
         when(binaryDataType.getTypeName()).thenReturn("binary");
-        when(rawUpdater.valueUpdater(JSON.class)).thenReturn(jsonValueUpdater);
-        when(rawUpdater.valueUpdater(Binary.class)).thenReturn(binaryValueUpdater);
+        when(topicUpdate.createUpdateStream(isNotNull(), eq(JSON.class))).thenReturn(jsonStream);
+        when(topicUpdate.createUpdateStream(isNotNull(), eq(JSON.class), isNotNull())).thenReturn(jsonStream);
+        when(jsonStream.set(isNotNull())).thenReturn(setFuture);
+        when(topicUpdate.createUpdateStream(isNotNull(), eq(Binary.class))).thenReturn(binaryStream);
+        when(topicUpdate.createUpdateStream(isNotNull(), eq(Binary.class), isNotNull())).thenReturn(binaryStream);
+        when(binaryStream.set(isNotNull())).thenReturn(setFuture);
+        when(setFuture.whenComplete(isNotNull())).then(AdditionalAnswers.answer((BiConsumer<TopicCreationResult, Throwable> consumer) -> {
+            consumer.accept(EXISTS, null);
+            return null;
+        }));
+        when(publicationListener.onPublicationRequest(isNotNull(), anyInt())).thenReturn(completionListener);
+        when(sessionLock.getName()).thenReturn("lock");
+        when(sessionLock.getScope()).thenReturn(UNLOCK_ON_CONNECTION_LOSS);
+        when(sessionLock.getSequence()).thenReturn(1L);
 
         endpointConfig = EndpointConfig
             .builder()
@@ -141,10 +170,7 @@ public final class PublishingClientImplTest {
     public void postConditions() {
         verifyNoMoreInteractions(
             session,
-            updateControl,
-            rawUpdater,
-            jsonValueUpdater,
-            binaryValueUpdater,
+            topicUpdate,
             registration,
             binaryDataType,
             jsonDataType);
@@ -154,40 +180,30 @@ public final class PublishingClientImplTest {
     public void addService() {
         client.addService(serviceConfig);
 
-        verify(session).feature(TopicUpdateControl.class);
-        verify(updateControl).registerUpdateSource(eq("a"), isA(UpdateSource.class));
+        verify(session).lock("a", UNLOCK_ON_CONNECTION_LOSS);
+        verify(registration).whenComplete(isNotNull());
     }
 
     @Test
     public void addServiceStandby() {
         client.addService(serviceConfig);
 
-        verify(session).feature(TopicUpdateControl.class);
-        verify(updateControl).registerUpdateSource(eq("a"), updateSourceCaptor.capture());
-
-        final UpdateSource updateSource = updateSourceCaptor.getValue();
-        updateSource.onRegistered("a", registration);
-
-        updateSource.onStandby("a");
+        verify(session).lock("a", UNLOCK_ON_CONNECTION_LOSS);
+        verify(registration).whenComplete(isNotNull());
     }
 
     @Test
     public void removeService() {
         client.addService(serviceConfig);
 
-        verify(session).feature(TopicUpdateControl.class);
-        verify(updateControl).registerUpdateSource(eq("a"), updateSourceCaptor.capture());
-
-        final UpdateSource updateSource = updateSourceCaptor.getValue();
-
-        updateSource.onRegistered("a", registration);
-        updateSource.onStandby("a");
+        verify(session).lock("a", UNLOCK_ON_CONNECTION_LOSS);
 
         final CompletableFuture<?> future = client.removeService(serviceConfig);
         assertFalse(future.isDone());
 
-        verify(registration).close();
-        updateSource.onClose("a");
+        verify(registration).cancel(false);
+        verify(registration).whenComplete(registrationHandler.capture());
+        registrationHandler.getValue().accept(null, new CompletionException(new CancellationException()));
         assertTrue(future.isDone());
     }
 
@@ -195,12 +211,10 @@ public final class PublishingClientImplTest {
     public void failToRegister() {
         client.addService(serviceConfig);
 
-        verify(session).feature(TopicUpdateControl.class);
-        verify(updateControl).registerUpdateSource(eq("a"), updateSourceCaptor.capture());
+        verify(session).lock("a", UNLOCK_ON_CONNECTION_LOSS);
 
-        final UpdateSource updateSource = updateSourceCaptor.getValue();
-
-        updateSource.onError("a", ErrorReason.COMMUNICATION_FAILURE);
+        verify(registration).whenComplete(registrationHandler.capture());
+        registrationHandler.getValue().accept(sessionLock, new Exception("test exception"));
     }
 
     @Test
@@ -210,14 +224,12 @@ public final class PublishingClientImplTest {
         assertTrue(future.isDone());
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void jsonContext() {
         final EventedUpdateSource source = client.addService(serviceConfig);
-        verify(session).feature(TopicUpdateControl.class);
-        verify(updateControl).registerUpdateSource(eq("a"), updateSourceCaptor.capture());
-
-        updateSourceCaptor.getValue().onActive("a/topic", rawUpdater);
+        verify(session).lock("a", UNLOCK_ON_CONNECTION_LOSS);
+        verify(registration).whenComplete(registrationHandler.capture());
+        registrationHandler.getValue().accept(sessionLock, null);
 
         final UpdateContext<JSON> updateContext = client.createUpdateContext(
             serviceConfig,
@@ -225,24 +237,22 @@ public final class PublishingClientImplTest {
             JSON.class,
             jsonDataType);
 
-        verify(session).feature(TopicUpdateControl.class);
+        verify(session).feature(TopicUpdate.class);
+        verify(topicUpdate).createUpdateStream("a/topic", JSON.class, updateConstraints().locked(sessionLock));
 
         updateContext.publish(json);
 
         verify(jsonDataType).toBytes(json);
         verify(session).getState();
-        verify(rawUpdater).valueUpdater(JSON.class);
-        verify(jsonValueUpdater).update(eq("a/topic"), eq(json), eq("a/topic"), isA(UpdateContextCallback.class));
+        verify(jsonStream).set(json);
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void binaryContext() {
         final EventedUpdateSource source = client.addService(serviceConfig);
-        verify(session).feature(TopicUpdateControl.class);
-        verify(updateControl).registerUpdateSource(eq("a"), updateSourceCaptor.capture());
-
-        updateSourceCaptor.getValue().onActive("a/topic", rawUpdater);
+        verify(session).lock("a", UNLOCK_ON_CONNECTION_LOSS);
+        verify(registration).whenComplete(registrationHandler.capture());
+        registrationHandler.getValue().accept(sessionLock, null);
 
         final UpdateContext<Binary> updateContext = client.createUpdateContext(
             serviceConfig,
@@ -250,29 +260,29 @@ public final class PublishingClientImplTest {
             Binary.class,
             binaryDataType);
 
-        verify(session).feature(TopicUpdateControl.class);
+        verify(session).feature(TopicUpdate.class);
+        verify(topicUpdate).createUpdateStream("a/topic", Binary.class, updateConstraints().locked(sessionLock));
 
         updateContext.publish(binary);
 
         verify(binaryDataType).toBytes(binary);
         verify(session).getState();
-        verify(rawUpdater).valueUpdater(Binary.class);
-        verify(binaryValueUpdater).update(eq("a/topic"), eq(binary), eq("a/topic"), isA(UpdateContextCallback.class));
+        verify(binaryStream).set(binary);
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void noUpdater() {
-        client.createUpdateContext(serviceConfig, endpointConfig, JSON.class, jsonDataType);
+        assertThrows(
+            IllegalStateException.class,
+            () -> client.createUpdateContext(serviceConfig, endpointConfig, JSON.class, jsonDataType));
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void contextRecovery() {
         final EventedUpdateSource source = client.addService(serviceConfig);
-        verify(session).feature(TopicUpdateControl.class);
-        verify(updateControl).registerUpdateSource(eq("a"), updateSourceCaptor.capture());
-
-        updateSourceCaptor.getValue().onActive("a/topic", rawUpdater);
+        verify(session).lock("a", UNLOCK_ON_CONNECTION_LOSS);
+        verify(registration).whenComplete(registrationHandler.capture());
+        registrationHandler.getValue().accept(sessionLock, null);
 
         when(session.getState()).thenReturn(RECOVERING_RECONNECT);
 
@@ -282,38 +292,34 @@ public final class PublishingClientImplTest {
             JSON.class,
             jsonDataType);
 
-        verify(session).feature(TopicUpdateControl.class);
+        verify(session).feature(TopicUpdate.class);
+        verify(topicUpdate).createUpdateStream("a/topic", JSON.class, updateConstraints().locked(sessionLock));
 
         updateContext.publish(json);
 
         verify(jsonDataType).toBytes(json);
         verify(session).getState();
-        verify(jsonValueUpdater, never()).update(eq("a/topic"), eq(json), eq("a/topic"), isA(UpdateContextCallback.class));
+        verify(jsonStream, never()).set(json);
 
         sessionListener.onSessionStateChanged(session, RECOVERING_RECONNECT, CONNECTED_ACTIVE);
 
         verify(jsonDataType).toBytes(json);
-        verify(rawUpdater).valueUpdater(JSON.class);
-        verify(jsonValueUpdater).update(eq("a/topic"), eq(json), eq("a/topic"), isA(UpdateContextCallback.class));
+        verify(jsonStream).set(json);
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void nonExclusiveUpdateContext() {
         final UpdateContext<JSON> updateContext = client.createUpdateContext(
             "a/topic",
             JSON.class,
             jsonDataType);
-        verify(session).feature(TopicUpdateControl.class);
-        verify(updateControl).updater();
-
-        verify(session).feature(TopicUpdateControl.class);
+        verify(session).feature(TopicUpdate.class);
+        verify(topicUpdate).createUpdateStream("a/topic", JSON.class);
 
         updateContext.publish(json);
 
         verify(jsonDataType).toBytes(json);
         verify(session).getState();
-        verify(rawUpdater).valueUpdater(JSON.class);
-        verify(jsonValueUpdater).update(eq("a/topic"), eq(json), eq("a/topic"), isA(UpdateContextCallback.class));
+        verify(jsonStream).set(json);
     }
 }

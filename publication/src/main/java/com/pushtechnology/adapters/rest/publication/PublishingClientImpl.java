@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2019 Push Technology Ltd.
+ * Copyright (C) 2020 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,9 +23,8 @@ import com.pushtechnology.adapters.rest.metrics.listeners.PublicationListener;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.session.management.EventedSessionListener;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater;
 import com.pushtechnology.diffusion.client.session.Session;
+import com.pushtechnology.diffusion.client.session.Session.SessionLock;
 import com.pushtechnology.diffusion.datatype.DataType;
 
 import net.jcip.annotations.GuardedBy;
@@ -46,7 +45,7 @@ public final class PublishingClientImpl implements PublishingClient {
     @GuardedBy("this")
     private Map<ServiceConfig, EventedUpdateSource> updaterSources = new HashMap<>();
     @GuardedBy("this")
-    private Map<ServiceConfig, Updater> updaters = new HashMap<>();
+    private Map<ServiceConfig, SessionLock> locks = new HashMap<>();
 
     /**
      * Constructor.
@@ -64,26 +63,26 @@ public final class PublishingClientImpl implements PublishingClient {
     public synchronized EventedUpdateSource addService(ServiceConfig serviceConfig) {
 
         final EventedUpdateSource source = new EventedUpdateSourceImpl(serviceConfig.getTopicPathRoot())
-            .onActive(updater -> {
+            .onActive(sessionLock -> {
                 synchronized (PublishingClientImpl.this) {
-                    updaters.put(serviceConfig, updater);
+                    locks.put(serviceConfig, sessionLock);
                 }
             })
             .onClose(() -> {
                 synchronized (PublishingClientImpl.this) {
                     updaterSources.remove(serviceConfig);
-                    updaters.remove(serviceConfig);
+                    locks.remove(serviceConfig);
                 }
             })
             .onError(errorReason -> {
                 synchronized (PublishingClientImpl.this) {
                     updaterSources.remove(serviceConfig);
-                    updaters.remove(serviceConfig);
+                    locks.remove(serviceConfig);
                 }
             });
 
         updaterSources.put(serviceConfig, source);
-        source.register(session.feature(TopicUpdateControl.class));
+        source.register(session);
 
         return source;
     }
@@ -110,28 +109,27 @@ public final class PublishingClientImpl implements PublishingClient {
             Class<T> valueType,
             DataType<T> dataType) {
 
-        final Updater updater = updaters.get(serviceConfig);
-        if (updater == null) {
+        final SessionLock sessionLock = locks.get(serviceConfig);
+        if (sessionLock == null) {
             throw new IllegalStateException("The service has not been added or is not active, no updater found");
         }
 
-        final String topicPath = serviceConfig.getTopicPathRoot() + "/" + endpointConfig.getTopicPath();
-        return createUpdateContext(topicPath, valueType, dataType, updater);
+        final String path = serviceConfig.getTopicPathRoot() + "/" + endpointConfig.getTopicPath();
+        final ValueUpdateContext<T> updateContext = new ValueUpdateContext<>(
+            session,
+            sessionLock,
+            path,
+            valueType,
+            dataType,
+            publicationListener);
+        sessionListener.onSessionStateChange(updateContext);
+        return updateContext;
     }
 
     @Override
     public <T> UpdateContext<T> createUpdateContext(String path, Class<T> valueType, DataType<T> dataType) {
-        return createUpdateContext(path, valueType, dataType, session.feature(TopicUpdateControl.class).updater());
-    }
-
-    private <T> UpdateContext<T> createUpdateContext(
-            String path,
-            Class<T> valueType,
-            DataType<T> dataType,
-            Updater updater) {
         final ValueUpdateContext<T> updateContext = new ValueUpdateContext<>(
             session,
-            updater,
             path,
             valueType,
             dataType,

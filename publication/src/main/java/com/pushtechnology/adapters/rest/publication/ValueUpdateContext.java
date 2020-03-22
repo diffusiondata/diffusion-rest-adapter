@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2019 Push Technology Ltd.
+ * Copyright (C) 2020 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,18 @@
 
 package com.pushtechnology.adapters.rest.publication;
 
+import static com.pushtechnology.diffusion.client.Diffusion.updateConstraints;
+
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.adapters.rest.metrics.listeners.PublicationListener;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.ValueUpdater;
+import com.pushtechnology.adapters.rest.metrics.listeners.PublicationListener.PublicationCompletionListener;
+import com.pushtechnology.diffusion.client.callbacks.ErrorReason;
+import com.pushtechnology.diffusion.client.features.TopicUpdate;
+import com.pushtechnology.diffusion.client.features.UpdateStream;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.datatype.Bytes;
 import com.pushtechnology.diffusion.datatype.DataType;
@@ -38,7 +42,7 @@ import com.pushtechnology.diffusion.datatype.DataType;
     private final AtomicReference<ValueUpdateContext.CachedRequest<T>> cachedValue = new AtomicReference<>(null);
     private final DataType<T> dataType;
     private final PublicationListener listener;
-    private final ValueUpdater<T> updater;
+    private final UpdateStream<T> updater;
     private final Session session;
     private final String path;
 
@@ -47,14 +51,34 @@ import com.pushtechnology.diffusion.datatype.DataType;
      */
     ValueUpdateContext(
             Session session,
-            TopicUpdateControl.Updater updater,
+            Session.SessionLock sessionLock,
             String path,
             Class<T> valueClass,
             DataType<T> dataType,
             PublicationListener listener) {
         this.dataType = dataType;
         this.listener = listener;
-        this.updater = updater.valueUpdater(valueClass);
+        this.updater = session
+            .feature(TopicUpdate.class)
+            .createUpdateStream(path, valueClass, updateConstraints().locked(sessionLock));
+        this.session = session;
+        this.path = path;
+    }
+
+    /**
+     * Constructor.
+     */
+    ValueUpdateContext(
+        Session session,
+        String path,
+        Class<T> valueClass,
+        DataType<T> dataType,
+        PublicationListener listener) {
+        this.dataType = dataType;
+        this.listener = listener;
+        this.updater = session
+            .feature(TopicUpdate.class)
+            .createUpdateStream(path, valueClass);
         this.session = session;
         this.path = path;
     }
@@ -65,11 +89,8 @@ import com.pushtechnology.diffusion.datatype.DataType;
             final ValueUpdateContext.CachedRequest<T> cachedRequest = cachedValue.getAndSet(null);
             if (cachedRequest != null) {
                 LOG.debug("Publishing cached value on recovery");
-                updater.update(
-                    path,
-                    cachedRequest.value,
-                    path,
-                    new UpdateTopicCallback(cachedRequest.completionListener));
+
+                set(cachedRequest.value, cachedRequest.completionListener);
             }
         }
     }
@@ -83,7 +104,7 @@ import com.pushtechnology.diffusion.datatype.DataType;
         else if (state.isRecovering()) {
             LOG.debug("Caching value while in recovery");
             final Bytes bytes = dataType.toBytes(value);
-            final PublicationListener.PublicationCompletionListener completionListener =
+            final PublicationCompletionListener completionListener =
                 listener.onPublicationRequest(path, bytes.length());
             cachedValue.set(new ValueUpdateContext.CachedRequest<>(value, completionListener));
         }
@@ -94,22 +115,30 @@ import com.pushtechnology.diffusion.datatype.DataType;
 
     private void applyValue(T value) {
         final Bytes bytes = dataType.toBytes(value);
-        final PublicationListener.PublicationCompletionListener completionListener =
+        final PublicationCompletionListener completionListener =
             listener.onPublicationRequest(path, bytes.length());
-        updater.update(
-            path,
-            value,
-            path,
-            new UpdateTopicCallback(completionListener));
+
+        set(value, completionListener);
+    }
+
+    private void set(T value, PublicationCompletionListener completionListener) {
+        updater.set(value).whenComplete((result, exception) -> {
+            if (exception == null) {
+                completionListener.onPublication();
+            }
+            else {
+                completionListener.onPublicationFailed(ErrorReason.COMMUNICATION_FAILURE);
+            }
+        });
     }
 
     private static final class CachedRequest<T> {
         private final T value;
-        private final PublicationListener.PublicationCompletionListener completionListener;
+        private final PublicationCompletionListener completionListener;
 
         private CachedRequest(
             T value,
-            PublicationListener.PublicationCompletionListener completionListener) {
+            PublicationCompletionListener completionListener) {
 
             this.value = value;
             this.completionListener = completionListener;

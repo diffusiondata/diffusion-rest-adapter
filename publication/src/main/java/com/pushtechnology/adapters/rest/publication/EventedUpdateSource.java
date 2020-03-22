@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Push Technology Ltd.
+ * Copyright (C) 2020 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,8 @@ package com.pushtechnology.adapters.rest.publication;
 import java.util.function.Consumer;
 
 import com.pushtechnology.diffusion.client.callbacks.ErrorReason;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
+import com.pushtechnology.diffusion.client.session.Session;
+import com.pushtechnology.diffusion.client.session.Session.SessionLock;
 
 /**
  * Update source that emits events.
@@ -32,7 +33,7 @@ public interface EventedUpdateSource extends AutoCloseable {
     /**
      * Add an event handler for active events.
      */
-    EventedUpdateSource onActive(Consumer<TopicUpdateControl.Updater> eventHandler);
+    EventedUpdateSource onActive(Consumer<SessionLock> eventHandler);
 
     /**
      * Add an event handler for standby events.
@@ -52,7 +53,7 @@ public interface EventedUpdateSource extends AutoCloseable {
     /**
      * Register the update source. An update source can only be registered once.
      */
-    EventedUpdateSource register(TopicUpdateControl updateControl);
+    EventedUpdateSource register(Session session);
 
     /**
      * Close the update source.

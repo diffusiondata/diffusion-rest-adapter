@@ -15,6 +15,7 @@
 
 package com.pushtechnology.adapters.rest.adapter;
 
+import static com.pushtechnology.diffusion.client.session.Session.SessionLockScope.UNLOCK_ON_CONNECTION_LOSS;
 import static com.pushtechnology.diffusion.client.session.SessionAttributes.Transport.WEBSOCKET;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -22,7 +23,6 @@ import static java.util.concurrent.CompletableFuture.completedFuture;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Mockito.times;
@@ -49,7 +49,7 @@ import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.polling.HttpClientFactory;
 import com.pushtechnology.adapters.rest.session.management.SessionLossHandler;
-import com.pushtechnology.diffusion.client.callbacks.Registration;
+import com.pushtechnology.diffusion.client.features.TopicUpdate;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
 import com.pushtechnology.diffusion.client.session.Session;
@@ -73,6 +73,12 @@ public final class InternalRESTAdapterTest {
     private SessionFactory sessionFactory;
     @Mock
     private Session session;
+    @Mock
+    private TopicUpdate topicUpdate;
+    @Mock
+    private CompletableFuture<Session.SessionLock> registration;
+    @Mock
+    private Session.SessionLock sessionLock;
     @Mock
     private HttpClientFactory httpClientFactory;
     @Mock
@@ -180,7 +186,8 @@ public final class InternalRESTAdapterTest {
         when(httpClientFactory.create(isNotNull(), any())).thenReturn(httpClient);
 
         when(session.feature(TopicControl.class)).thenReturn(topicControl);
-        when(session.feature(TopicUpdateControl.class)).thenReturn(updateControl);
+        when(session.feature(TopicUpdate.class)).thenReturn(topicUpdate);
+        when(session.lock(isNotNull(), isNotNull())).thenReturn(registration);
 
         restAdapter = new InternalRESTAdapter(
             executorService,
@@ -230,9 +237,8 @@ public final class InternalRESTAdapterTest {
         verify(httpClientFactory).create(model0, null);
         verify(httpClient).start();
 
+        verify(session).lock("root", UNLOCK_ON_CONNECTION_LOSS);
         verify(serviceListener).onStandby(model0.getServices().get(0));
-        verify(session).feature(TopicUpdateControl.class);
-        verify(updateControl).registerUpdateSource(eq("root"), isNotNull());
 
         restAdapter.onReconfiguration(inactiveModel);
 
@@ -293,18 +299,16 @@ public final class InternalRESTAdapterTest {
         verify(httpClientFactory).create(model0, null);
         verify(httpClient).start();
 
+        verify(session).lock("root", UNLOCK_ON_CONNECTION_LOSS);
         verify(serviceListener).onStandby(model0.getServices().get(0));
-        verify(session).feature(TopicUpdateControl.class);
-        verify(updateControl).registerUpdateSource(eq("root"), isNotNull());
 
         restAdapter.onReconfiguration(model1);
 
         verify(httpClientFactory).create(model1, null);
         verify(httpClient, times(2)).start();
 
+        verify(session).lock("root2", UNLOCK_ON_CONNECTION_LOSS);
         verify(serviceListener).onStandby(model1.getServices().get(0));
-        verify(session, times(2)).feature(TopicUpdateControl.class);
-        verify(updateControl).registerUpdateSource(eq("root2"), isNotNull());
     }
 
     @Test
@@ -336,9 +340,8 @@ public final class InternalRESTAdapterTest {
         verify(httpClientFactory).create(model1, null);
         verify(httpClient).start();
 
+        verify(session).lock("root2", UNLOCK_ON_CONNECTION_LOSS);
         verify(serviceListener).onStandby(model1.getServices().get(0));
-        verify(session).feature(TopicUpdateControl.class);
-        verify(updateControl).registerUpdateSource(eq("root2"), isNotNull());
     }
 
     @Test
@@ -383,9 +386,8 @@ public final class InternalRESTAdapterTest {
         verify(httpClientFactory).create(model0, null);
         verify(httpClient).start();
 
+        verify(session).lock("root", UNLOCK_ON_CONNECTION_LOSS);
         verify(serviceListener).onStandby(model0.getServices().get(0));
-        verify(session).feature(TopicUpdateControl.class);
-        verify(updateControl).registerUpdateSource(eq("root"), isNotNull());
 
         restAdapter.onReconfiguration(model2);
 
@@ -441,9 +443,8 @@ public final class InternalRESTAdapterTest {
         verify(httpClientFactory).create(model0, null);
         verify(httpClient).start();
 
+        verify(session).lock("root", UNLOCK_ON_CONNECTION_LOSS);
         verify(serviceListener).onStandby(model0.getServices().get(0));
-        verify(session).feature(TopicUpdateControl.class);
-        verify(updateControl).registerUpdateSource(eq("root"), isNotNull());
 
         restAdapter.close();
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Push Technology Ltd.
+ * Copyright (C) 2020 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,27 +15,33 @@
 
 package com.pushtechnology.adapters.rest.publication;
 
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.isA;
+import static org.junit.Assert.assertThrows;
+import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.mockito.Mockito.when;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import com.pushtechnology.diffusion.client.callbacks.ErrorReason;
-import com.pushtechnology.diffusion.client.callbacks.Registration;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.UpdateSource;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater;
+import com.pushtechnology.diffusion.client.session.Session;
+import com.pushtechnology.diffusion.client.session.Session.SessionLock;
+import com.pushtechnology.diffusion.client.session.SessionClosedException;
 
 /**
  * Unit tests for {@link EventedUpdateSourceImpl}.
@@ -43,33 +49,37 @@ import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateCo
  * @author Push Technology Limited
  */
 public final class EventedUpdateSourceTest {
+    @Rule
+    public MockitoRule mockitoRule = MockitoJUnit.rule();
+
     @Mock
-    private TopicUpdateControl updateControl;
+    private Session session;
     @Mock
-    private Updater updater;
+    private SessionLock sessionLock;
     @Mock
-    private Registration registration;
+    private CompletableFuture<SessionLock> registration;
     @Mock
     private Runnable standbyEventHandler;
     @Mock
     private Runnable closeEventHandler;
     @Mock
-    private Consumer<Updater> activeEventHandler;
+    private Consumer<SessionLock> activeEventHandler;
     @Mock
     private Consumer<ErrorReason> errorEventHandler;
     @Captor
-    private ArgumentCaptor<UpdateSource> updateSourceCaptor;
+    private ArgumentCaptor<BiConsumer<SessionLock, Throwable>> registrationHandler;
 
     @Before
     public void setUp() {
-        initMocks(this);
+        when(session.lock(isNotNull(), isNotNull())).thenReturn(registration);
+        when(registration.whenComplete(isNotNull())).thenReturn(registration);
     }
 
     @After
     public void postConditions() {
         verifyNoMoreInteractions(
-            updateControl,
-            updater,
+            session,
+            sessionLock,
             registration,
             standbyEventHandler,
             closeEventHandler,
@@ -84,14 +94,17 @@ public final class EventedUpdateSourceTest {
             .onStandby(standbyEventHandler)
             .onClose(closeEventHandler)
             .onError(errorEventHandler)
-            .register(updateControl);
+            .register(session);
 
-        verify(updateControl).registerUpdateSource(eq("a/cromulent/topic"), updateSourceCaptor.capture());
+        verify(session).lock("a/cromulent/topic", Session.SessionLockScope.UNLOCK_ON_CONNECTION_LOSS);
         verify(standbyEventHandler).run();
-        updateSourceCaptor.getValue().onRegistered("a/cromulent/topic", registration);
+        verify(registration).whenComplete(registrationHandler.capture());
+        registrationHandler.getValue().accept(sessionLock, null);
+        verify(activeEventHandler).accept(sessionLock);
 
         source.close();
-        verify(registration).close();
+        verify(sessionLock).unlock();
+        verify(closeEventHandler).run();
     }
 
     @Test
@@ -101,17 +114,15 @@ public final class EventedUpdateSourceTest {
             .onStandby(standbyEventHandler)
             .onClose(closeEventHandler)
             .onError(errorEventHandler)
-            .register(updateControl);
+            .register(session);
 
-        verify(updateControl).registerUpdateSource(eq("a/cromulent/topic"), updateSourceCaptor.capture());
+        verify(session).lock("a/cromulent/topic", Session.SessionLockScope.UNLOCK_ON_CONNECTION_LOSS);
         verify(standbyEventHandler).run();
+        verify(registration).whenComplete(isNotNull());
 
         source.close();
-        verify(registration, never()).close();
 
-        updateSourceCaptor.getValue().onRegistered("a/cromulent/topic", registration);
-
-        verify(registration).close();
+        verify(registration).cancel(false);
     }
 
     @Test
@@ -121,14 +132,15 @@ public final class EventedUpdateSourceTest {
             .onStandby(standbyEventHandler)
             .onClose(closeEventHandler)
             .onError(errorEventHandler)
-            .register(updateControl);
+            .register(session);
 
-        verify(updateControl).registerUpdateSource(eq("a/cromulent/topic"), updateSourceCaptor.capture());
+        verify(session).lock("a/cromulent/topic", Session.SessionLockScope.UNLOCK_ON_CONNECTION_LOSS);
+        verify(registration).whenComplete(registrationHandler.capture());
         verify(standbyEventHandler).run();
-        updateSourceCaptor.getValue().onRegistered("a/cromulent/topic", registration);
 
-        updateSourceCaptor.getValue().onActive("a/cromulent/topic", updater);
-        verify(activeEventHandler).accept(updater);
+        registrationHandler.getValue().accept(sessionLock, null);
+
+        verify(activeEventHandler).accept(sessionLock);
     }
 
     @Test
@@ -137,17 +149,17 @@ public final class EventedUpdateSourceTest {
             .onStandby(standbyEventHandler)
             .onClose(closeEventHandler)
             .onError(errorEventHandler)
-            .register(updateControl);
+            .register(session);
 
-        verify(updateControl).registerUpdateSource(eq("a/cromulent/topic"), updateSourceCaptor.capture());
+        verify(session).lock("a/cromulent/topic", Session.SessionLockScope.UNLOCK_ON_CONNECTION_LOSS);
         verify(standbyEventHandler).run();
-        updateSourceCaptor.getValue().onRegistered("a/cromulent/topic", registration);
+        verify(registration).whenComplete(registrationHandler.capture());
+        registrationHandler.getValue().accept(sessionLock, null);
 
-        updateSourceCaptor.getValue().onActive("a/cromulent/topic", updater);
-        verify(activeEventHandler, never()).accept(updater);
+        verify(activeEventHandler, never()).accept(sessionLock);
 
         source.onActive(activeEventHandler);
-        verify(activeEventHandler).accept(updater);
+        verify(activeEventHandler).accept(sessionLock);
     }
 
     @Test
@@ -157,14 +169,11 @@ public final class EventedUpdateSourceTest {
             .onStandby(standbyEventHandler)
             .onClose(closeEventHandler)
             .onError(errorEventHandler)
-            .register(updateControl);
+            .register(session);
 
-        verify(updateControl).registerUpdateSource(eq("a/cromulent/topic"), updateSourceCaptor.capture());
+        verify(session).lock("a/cromulent/topic", Session.SessionLockScope.UNLOCK_ON_CONNECTION_LOSS);
         verify(standbyEventHandler).run();
-        updateSourceCaptor.getValue().onRegistered("a/cromulent/topic", registration);
-
-        updateSourceCaptor.getValue().onStandby("a/cromulent/topic");
-        verify(standbyEventHandler).run();
+        verify(registration).whenComplete(isNotNull());
     }
 
     @Test
@@ -173,12 +182,11 @@ public final class EventedUpdateSourceTest {
             .onActive(activeEventHandler)
             .onClose(closeEventHandler)
             .onError(errorEventHandler)
-            .register(updateControl);
+            .register(session);
 
-        verify(updateControl).registerUpdateSource(eq("a/cromulent/topic"), updateSourceCaptor.capture());
-        updateSourceCaptor.getValue().onRegistered("a/cromulent/topic", registration);
+        verify(session).lock("a/cromulent/topic", Session.SessionLockScope.UNLOCK_ON_CONNECTION_LOSS);
+        verify(registration).whenComplete(isNotNull());
 
-        updateSourceCaptor.getValue().onStandby("a/cromulent/topic");
         verify(standbyEventHandler, never()).run();
 
         source.onStandby(standbyEventHandler);
@@ -192,20 +200,16 @@ public final class EventedUpdateSourceTest {
             .onStandby(standbyEventHandler)
             .onClose(closeEventHandler)
             .onError(errorEventHandler)
-            .register(updateControl);
+            .register(session);
 
-        verify(updateControl).registerUpdateSource(eq("a/cromulent/topic"), updateSourceCaptor.capture());
+        verify(session).lock("a/cromulent/topic", Session.SessionLockScope.UNLOCK_ON_CONNECTION_LOSS);
         verify(standbyEventHandler).run();
-        updateSourceCaptor.getValue().onRegistered("a/cromulent/topic", registration);
-
-        updateSourceCaptor.getValue().onStandby("a/cromulent/topic");
-        verify(standbyEventHandler).run();
+        verify(registration).whenComplete(registrationHandler.capture());
+        registrationHandler.getValue().accept(sessionLock, null);
+        verify(activeEventHandler).accept(sessionLock);
 
         source.close();
-        verify(registration).close();
-        verify(closeEventHandler, never()).run();
-
-        updateSourceCaptor.getValue().onClose("a/cromulent/topic");
+        verify(sessionLock).unlock();
         verify(closeEventHandler).run();
     }
 
@@ -215,18 +219,17 @@ public final class EventedUpdateSourceTest {
             .onActive(activeEventHandler)
             .onStandby(standbyEventHandler)
             .onError(errorEventHandler)
-            .register(updateControl);
+            .register(session);
 
-        verify(updateControl).registerUpdateSource(eq("a/cromulent/topic"), updateSourceCaptor.capture());
-        updateSourceCaptor.getValue().onRegistered("a/cromulent/topic", registration);
-
-        updateSourceCaptor.getValue().onStandby("a/cromulent/topic");
+        verify(session).lock("a/cromulent/topic", Session.SessionLockScope.UNLOCK_ON_CONNECTION_LOSS);
         verify(standbyEventHandler).run();
+        verify(registration).whenComplete(registrationHandler.capture());
+        registrationHandler.getValue().accept(sessionLock, null);
+        verify(activeEventHandler).accept(sessionLock);
 
         source.close();
-        verify(registration).close();
+        verify(sessionLock).unlock();
 
-        updateSourceCaptor.getValue().onClose("a/cromulent/topic");
         verify(closeEventHandler, never()).run();
 
         source.onClose(closeEventHandler);
@@ -240,13 +243,12 @@ public final class EventedUpdateSourceTest {
             .onStandby(standbyEventHandler)
             .onClose(closeEventHandler)
             .onError(errorEventHandler)
-            .register(updateControl);
+            .register(session);
 
-        verify(updateControl).registerUpdateSource(eq("a/cromulent/topic"), updateSourceCaptor.capture());
+        verify(session).lock("a/cromulent/topic", Session.SessionLockScope.UNLOCK_ON_CONNECTION_LOSS);
         verify(standbyEventHandler).run();
-        updateSourceCaptor.getValue().onRegistered("a/cromulent/topic", registration);
-
-        updateSourceCaptor.getValue().onError("a/cromulent/topic", ErrorReason.COMMUNICATION_FAILURE);
+        verify(registration).whenComplete(registrationHandler.capture());
+        registrationHandler.getValue().accept(sessionLock, new Exception("test exception"));
 
         verify(errorEventHandler).accept(ErrorReason.COMMUNICATION_FAILURE);
     }
@@ -258,13 +260,12 @@ public final class EventedUpdateSourceTest {
             .onStandby(standbyEventHandler)
             .onClose(closeEventHandler)
             .onError(errorEventHandler)
-            .register(updateControl);
+            .register(session);
 
-        verify(updateControl).registerUpdateSource(eq("a/cromulent/topic"), updateSourceCaptor.capture());
+        verify(session).lock("a/cromulent/topic", Session.SessionLockScope.UNLOCK_ON_CONNECTION_LOSS);
         verify(standbyEventHandler).run();
-        updateSourceCaptor.getValue().onRegistered("a/cromulent/topic", registration);
-
-        updateSourceCaptor.getValue().onError("a/cromulent/topic", ErrorReason.SESSION_CLOSED);
+        verify(registration).whenComplete(registrationHandler.capture());
+        registrationHandler.getValue().accept(sessionLock, new CompletionException(new SessionClosedException()));
 
         verify(closeEventHandler).run();
     }
@@ -275,13 +276,12 @@ public final class EventedUpdateSourceTest {
             .onActive(activeEventHandler)
             .onStandby(standbyEventHandler)
             .onClose(closeEventHandler)
-            .register(updateControl);
+            .register(session);
 
-        verify(updateControl).registerUpdateSource(eq("a/cromulent/topic"), updateSourceCaptor.capture());
+        verify(session).lock("a/cromulent/topic", Session.SessionLockScope.UNLOCK_ON_CONNECTION_LOSS);
         verify(standbyEventHandler).run();
-        updateSourceCaptor.getValue().onRegistered("a/cromulent/topic", registration);
-
-        updateSourceCaptor.getValue().onError("a/cromulent/topic", ErrorReason.COMMUNICATION_FAILURE);
+        verify(registration).whenComplete(registrationHandler.capture());
+        registrationHandler.getValue().accept(sessionLock, new Exception("test exception"));
 
         verify(errorEventHandler, never()).accept(ErrorReason.COMMUNICATION_FAILURE);
 
@@ -290,21 +290,21 @@ public final class EventedUpdateSourceTest {
         verify(errorEventHandler).accept(ErrorReason.COMMUNICATION_FAILURE);
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void registerTwice() {
-        try {
-            new EventedUpdateSourceImpl("a/cromulent/topic")
+        assertThrows(
+            IllegalStateException.class,
+            () -> new EventedUpdateSourceImpl("a/cromulent/topic")
                 .onActive(activeEventHandler)
                 .onStandby(standbyEventHandler)
                 .onClose(closeEventHandler)
                 .onError(errorEventHandler)
-                .register(updateControl)
-                .register(updateControl);
-        }
-        finally {
-            verify(updateControl).registerUpdateSource(eq("a/cromulent/topic"), isA(UpdateSource.class));
-            verify(standbyEventHandler).run();
-        }
+                .register(session)
+                .register(session));
+
+        verify(session).lock("a/cromulent/topic", Session.SessionLockScope.UNLOCK_ON_CONNECTION_LOSS);
+        verify(registration).whenComplete(isNotNull());
+        verify(standbyEventHandler).run();
     }
 
     @Test
@@ -324,11 +324,13 @@ public final class EventedUpdateSourceTest {
             .onStandby(standbyEventHandler)
             .onClose(closeEventHandler)
             .onError(errorEventHandler)
-            .register(updateControl);
+            .register(session);
         source.close();
         source.close();
-        verify(updateControl).registerUpdateSource(eq("a/cromulent/topic"), isA(UpdateSource.class));
+        verify(session).lock("a/cromulent/topic", Session.SessionLockScope.UNLOCK_ON_CONNECTION_LOSS);
+        verify(registration).whenComplete(isNotNull());
         verify(standbyEventHandler).run();
+        verify(registration, times(2)).cancel(false);
     }
 
     @Test
@@ -338,16 +340,16 @@ public final class EventedUpdateSourceTest {
             .onStandby(standbyEventHandler)
             .onClose(closeEventHandler)
             .onError(errorEventHandler)
-            .register(updateControl);
+            .register(session);
 
-        verify(updateControl).registerUpdateSource(eq("a/cromulent/topic"), updateSourceCaptor.capture());
+        verify(session).lock("a/cromulent/topic", Session.SessionLockScope.UNLOCK_ON_CONNECTION_LOSS);
         verify(standbyEventHandler).run();
-        updateSourceCaptor.getValue().onRegistered("a/cromulent/topic", registration);
+        verify(registration).whenComplete(registrationHandler.capture());
 
         source.close();
-        verify(registration).close();
-        updateSourceCaptor.getValue().onStandby("a/cromulent/topic");
-        updateSourceCaptor.getValue().onClose("a/cromulent/topic");
+
+        verify(registration).cancel(false);
+        registrationHandler.getValue().accept(sessionLock, null);
 
         verify(closeEventHandler).run();
     }
@@ -359,16 +361,12 @@ public final class EventedUpdateSourceTest {
             .onStandby(standbyEventHandler)
             .onClose(closeEventHandler)
             .onError(errorEventHandler)
-            .register(updateControl);
+            .register(session);
 
-        verify(updateControl).registerUpdateSource(eq("a/cromulent/topic"), updateSourceCaptor.capture());
+        verify(session).lock("a/cromulent/topic", Session.SessionLockScope.UNLOCK_ON_CONNECTION_LOSS);
+        verify(registration).whenComplete(registrationHandler.capture());
+        registrationHandler.getValue().accept(sessionLock, null);
         verify(standbyEventHandler).run();
-        updateSourceCaptor.getValue().onRegistered("a/cromulent/topic", registration);
-
-        updateSourceCaptor.getValue().onStandby("a/cromulent/topic");
-        verify(standbyEventHandler).run();
-
-        updateSourceCaptor.getValue().onActive("a/cromulent/topic", updater);
-        verify(activeEventHandler).accept(updater);
+        verify(activeEventHandler).accept(sessionLock);
     }
 }
