@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Push Technology Ltd.
+ * Copyright (C) 2020 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -140,6 +140,7 @@ public final class InternalRESTAdapter implements RESTAdapterListener, AutoClose
             }
 
             currentModel = model;
+            state = State.ACTIVE;
             reconfigureServiceManager();
         }
         else if (haveMetricsChanged(model)) {
@@ -351,12 +352,19 @@ public final class InternalRESTAdapter implements RESTAdapterListener, AutoClose
     }
 
     private enum State {
+        // The adapter has been created but not yet configured
         INIT,
-        STANDBY,
+        // The adapter is connecting to the Diffusion server
         CONNECTING_TO_DIFFUSION,
+        // The adapter has connected to Diffusion but has no endpoints to poll
+        STANDBY,
+        // The adapter has connected to Diffusion and is polling endpoints
         ACTIVE,
+        // The adapter has lost it's connection to Diffusion and is recovering
         RECOVERING,
+        // The adapter has started to shutdown
         STOPPING,
+        // The adapter has finished shutting down
         STOPPED
     }
 }
