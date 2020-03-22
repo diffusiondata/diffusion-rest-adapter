@@ -426,6 +426,8 @@ public final class BasicIT {
         modelStore.setModel(modelWith(INSECURE_SERVICE, SECURE_SERVICE));
         final RESTAdapterClient client = startClient();
 
+        verify(serviceListener, timed()).onStandby(SECURE_SERVICE);
+        verify(serviceListener, timed()).onStandby(INSECURE_SERVICE);
         verify(serviceListener, timed()).onActive(SECURE_SERVICE);
         verify(serviceListener, timed()).onActive(INSECURE_SERVICE);
 
@@ -559,6 +561,8 @@ public final class BasicIT {
 
         modelStore.setModel(modelWith(INSECURE_SERVICE, SECURE_SERVICE));
 
+        verify(serviceListener, timed()).onStandby(SECURE_SERVICE);
+        verify(serviceListener, timed()).onStandby(INSECURE_SERVICE);
         verify(serviceListener, timed()).onActive(SECURE_SERVICE);
         verify(serviceListener, timed()).onActive(INSECURE_SERVICE);
 
@@ -600,6 +604,7 @@ public final class BasicIT {
         verify(callback, timed().times(2)).onComplete();
 
         modelStore.setModel(modelWith(INSECURE_SERVICE));
+        verify(serviceListener, timed()).onStandby(INSECURE_SERVICE);
         verify(serviceListener, timed()).onActive(INSECURE_SERVICE);
 
         verify(stream, timed()).onSubscription(eq("rest/json/timestamp"), isNotNull());
@@ -618,6 +623,7 @@ public final class BasicIT {
     public void testReconfigurationFromInsecureToDiffusionOnly() throws IOException {
         modelStore.setModel(modelWith(INSECURE_SERVICE));
         final RESTAdapterClient client = startClient();
+        verify(serviceListener, timed()).onStandby(INSECURE_SERVICE);
         verify(serviceListener, timed()).onActive(INSECURE_SERVICE);
         final Session session = startSession();
 
@@ -653,6 +659,7 @@ public final class BasicIT {
     public void testReconfigurationAddingAServiceToExisting() throws IOException {
         modelStore.setModel(modelWith(INSECURE_SERVICE));
         final RESTAdapterClient client = startClient();
+        verify(serviceListener, timed()).onStandby(INSECURE_SERVICE);
         verify(serviceListener, timed()).onActive(INSECURE_SERVICE);
         final Session session = startSession();
 
@@ -698,6 +705,7 @@ public final class BasicIT {
         modelStore.setModel(modelWith(INSECURE_SERVICE));
         final RESTAdapterClient client0 = startClient();
 
+        verify(serviceListener, timed()).onStandby(INSECURE_SERVICE);
         verify(serviceListener, timed()).onActive(INSECURE_SERVICE);
 
         final RESTAdapterClient client1 = startClient(backupServiceListener);
@@ -743,6 +751,7 @@ public final class BasicIT {
         modelStore.setModel(modelWith(INFERRED_SERVICE));
         final RESTAdapterClient client = startClient();
 
+        verify(serviceListener, timed()).onStandby(INFERRED_SERVICE);
         verify(serviceListener, timed()).onActive(INFERRED_SERVICE);
 
         final Session session = startSession();
@@ -774,6 +783,7 @@ public final class BasicIT {
         modelStore.setModel(modelWith(CONSTANT_JSON_SERVICE));
         final RESTAdapterClient client = startClient();
 
+        verify(serviceListener, timed()).onStandby(CONSTANT_JSON_SERVICE);
         verify(serviceListener, timed()).onActive(CONSTANT_JSON_SERVICE);
 
         final Session session = startSession();
@@ -802,6 +812,7 @@ public final class BasicIT {
         modelStore.setModel(modelWith(CONSTANT_BINARY_SERVICE));
         final RESTAdapterClient client = startClient();
 
+        verify(serviceListener, timed()).onStandby(CONSTANT_BINARY_SERVICE);
         verify(serviceListener, timed()).onActive(CONSTANT_BINARY_SERVICE);
 
         final Session session = startSession();
@@ -830,6 +841,7 @@ public final class BasicIT {
         modelStore.setModel(modelWith(CONSTANT_STRING_SERVICE));
         final RESTAdapterClient client = startClient();
 
+        verify(serviceListener, timed()).onStandby(CONSTANT_STRING_SERVICE);
         verify(serviceListener, timed()).onActive(CONSTANT_STRING_SERVICE);
 
         final Session session = startSession();

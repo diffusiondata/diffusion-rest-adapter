@@ -87,6 +87,7 @@ public final class EventedUpdateSourceTest {
             .register(updateControl);
 
         verify(updateControl).registerUpdateSource(eq("a/cromulent/topic"), updateSourceCaptor.capture());
+        verify(standbyEventHandler).run();
         updateSourceCaptor.getValue().onRegistered("a/cromulent/topic", registration);
 
         source.close();
@@ -103,6 +104,7 @@ public final class EventedUpdateSourceTest {
             .register(updateControl);
 
         verify(updateControl).registerUpdateSource(eq("a/cromulent/topic"), updateSourceCaptor.capture());
+        verify(standbyEventHandler).run();
 
         source.close();
         verify(registration, never()).close();
@@ -122,6 +124,7 @@ public final class EventedUpdateSourceTest {
             .register(updateControl);
 
         verify(updateControl).registerUpdateSource(eq("a/cromulent/topic"), updateSourceCaptor.capture());
+        verify(standbyEventHandler).run();
         updateSourceCaptor.getValue().onRegistered("a/cromulent/topic", registration);
 
         updateSourceCaptor.getValue().onActive("a/cromulent/topic", updater);
@@ -137,6 +140,7 @@ public final class EventedUpdateSourceTest {
             .register(updateControl);
 
         verify(updateControl).registerUpdateSource(eq("a/cromulent/topic"), updateSourceCaptor.capture());
+        verify(standbyEventHandler).run();
         updateSourceCaptor.getValue().onRegistered("a/cromulent/topic", registration);
 
         updateSourceCaptor.getValue().onActive("a/cromulent/topic", updater);
@@ -156,6 +160,7 @@ public final class EventedUpdateSourceTest {
             .register(updateControl);
 
         verify(updateControl).registerUpdateSource(eq("a/cromulent/topic"), updateSourceCaptor.capture());
+        verify(standbyEventHandler).run();
         updateSourceCaptor.getValue().onRegistered("a/cromulent/topic", registration);
 
         updateSourceCaptor.getValue().onStandby("a/cromulent/topic");
@@ -190,6 +195,7 @@ public final class EventedUpdateSourceTest {
             .register(updateControl);
 
         verify(updateControl).registerUpdateSource(eq("a/cromulent/topic"), updateSourceCaptor.capture());
+        verify(standbyEventHandler).run();
         updateSourceCaptor.getValue().onRegistered("a/cromulent/topic", registration);
 
         updateSourceCaptor.getValue().onStandby("a/cromulent/topic");
@@ -237,6 +243,7 @@ public final class EventedUpdateSourceTest {
             .register(updateControl);
 
         verify(updateControl).registerUpdateSource(eq("a/cromulent/topic"), updateSourceCaptor.capture());
+        verify(standbyEventHandler).run();
         updateSourceCaptor.getValue().onRegistered("a/cromulent/topic", registration);
 
         updateSourceCaptor.getValue().onError("a/cromulent/topic", ErrorReason.COMMUNICATION_FAILURE);
@@ -254,6 +261,7 @@ public final class EventedUpdateSourceTest {
             .register(updateControl);
 
         verify(updateControl).registerUpdateSource(eq("a/cromulent/topic"), updateSourceCaptor.capture());
+        verify(standbyEventHandler).run();
         updateSourceCaptor.getValue().onRegistered("a/cromulent/topic", registration);
 
         updateSourceCaptor.getValue().onError("a/cromulent/topic", ErrorReason.SESSION_CLOSED);
@@ -270,6 +278,7 @@ public final class EventedUpdateSourceTest {
             .register(updateControl);
 
         verify(updateControl).registerUpdateSource(eq("a/cromulent/topic"), updateSourceCaptor.capture());
+        verify(standbyEventHandler).run();
         updateSourceCaptor.getValue().onRegistered("a/cromulent/topic", registration);
 
         updateSourceCaptor.getValue().onError("a/cromulent/topic", ErrorReason.COMMUNICATION_FAILURE);
@@ -294,6 +303,7 @@ public final class EventedUpdateSourceTest {
         }
         finally {
             verify(updateControl).registerUpdateSource(eq("a/cromulent/topic"), isA(UpdateSource.class));
+            verify(standbyEventHandler).run();
         }
     }
 
@@ -318,6 +328,7 @@ public final class EventedUpdateSourceTest {
         source.close();
         source.close();
         verify(updateControl).registerUpdateSource(eq("a/cromulent/topic"), isA(UpdateSource.class));
+        verify(standbyEventHandler).run();
     }
 
     @Test
@@ -330,6 +341,7 @@ public final class EventedUpdateSourceTest {
             .register(updateControl);
 
         verify(updateControl).registerUpdateSource(eq("a/cromulent/topic"), updateSourceCaptor.capture());
+        verify(standbyEventHandler).run();
         updateSourceCaptor.getValue().onRegistered("a/cromulent/topic", registration);
 
         source.close();
@@ -350,6 +362,7 @@ public final class EventedUpdateSourceTest {
             .register(updateControl);
 
         verify(updateControl).registerUpdateSource(eq("a/cromulent/topic"), updateSourceCaptor.capture());
+        verify(standbyEventHandler).run();
         updateSourceCaptor.getValue().onRegistered("a/cromulent/topic", registration);
 
         updateSourceCaptor.getValue().onStandby("a/cromulent/topic");

@@ -230,6 +230,7 @@ public final class InternalRESTAdapterTest {
         verify(httpClientFactory).create(model0, null);
         verify(httpClient).start();
 
+        verify(serviceListener).onStandby(model0.getServices().get(0));
         verify(session).feature(TopicUpdateControl.class);
         verify(updateControl).registerUpdateSource(eq("root"), isNotNull());
 
@@ -292,6 +293,7 @@ public final class InternalRESTAdapterTest {
         verify(httpClientFactory).create(model0, null);
         verify(httpClient).start();
 
+        verify(serviceListener).onStandby(model0.getServices().get(0));
         verify(session).feature(TopicUpdateControl.class);
         verify(updateControl).registerUpdateSource(eq("root"), isNotNull());
 
@@ -300,6 +302,7 @@ public final class InternalRESTAdapterTest {
         verify(httpClientFactory).create(model1, null);
         verify(httpClient, times(2)).start();
 
+        verify(serviceListener).onStandby(model1.getServices().get(0));
         verify(session, times(2)).feature(TopicUpdateControl.class);
         verify(updateControl).registerUpdateSource(eq("root2"), isNotNull());
     }
@@ -333,6 +336,7 @@ public final class InternalRESTAdapterTest {
         verify(httpClientFactory).create(model1, null);
         verify(httpClient).start();
 
+        verify(serviceListener).onStandby(model1.getServices().get(0));
         verify(session).feature(TopicUpdateControl.class);
         verify(updateControl).registerUpdateSource(eq("root2"), isNotNull());
     }
@@ -379,6 +383,7 @@ public final class InternalRESTAdapterTest {
         verify(httpClientFactory).create(model0, null);
         verify(httpClient).start();
 
+        verify(serviceListener).onStandby(model0.getServices().get(0));
         verify(session).feature(TopicUpdateControl.class);
         verify(updateControl).registerUpdateSource(eq("root"), isNotNull());
 
@@ -436,6 +441,7 @@ public final class InternalRESTAdapterTest {
         verify(httpClientFactory).create(model0, null);
         verify(httpClient).start();
 
+        verify(serviceListener).onStandby(model0.getServices().get(0));
         verify(session).feature(TopicUpdateControl.class);
         verify(updateControl).registerUpdateSource(eq("root"), isNotNull());
 

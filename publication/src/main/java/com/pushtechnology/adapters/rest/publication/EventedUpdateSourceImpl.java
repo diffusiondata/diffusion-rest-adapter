@@ -113,7 +113,8 @@ public final class EventedUpdateSourceImpl implements EventedUpdateSource {
             if (state != State.UNREGISTERED) {
                 throw new IllegalStateException("An EventedUpdateSource cannot be registered twice");
             }
-            state = State.REGISTERING;
+            state = State.STANDBY;
+            onStandbyEventHandlers.forEach(Runnable::run);
 
             updateControl.registerUpdateSource(registeredTopicPath, updateSource);
         }
@@ -134,7 +135,7 @@ public final class EventedUpdateSourceImpl implements EventedUpdateSource {
         @Override
         public void onActive(String topicPath, Updater updater) {
             synchronized (mutex) {
-                if (state == State.REGISTERING || state == State.STANDBY) {
+                if (state == State.STANDBY) {
                     state = State.ACTIVE;
                     currentUpdater = updater;
                     onActiveEventHandlers.forEach(handler -> handler.accept(updater));
@@ -145,7 +146,7 @@ public final class EventedUpdateSourceImpl implements EventedUpdateSource {
         @Override
         public void onStandby(String topicPath) {
             synchronized (mutex) {
-                if (state == State.REGISTERING || state == State.ACTIVE) {
+                if (state == State.ACTIVE) {
                     state = State.STANDBY;
                     onStandbyEventHandlers.forEach(Runnable::run);
                 }
@@ -190,7 +191,6 @@ public final class EventedUpdateSourceImpl implements EventedUpdateSource {
 
     private enum State {
         UNREGISTERED,
-        REGISTERING,
         CLOSING,
         CLOSED,
         ACTIVE,

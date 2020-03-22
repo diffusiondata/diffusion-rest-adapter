@@ -133,6 +133,7 @@ public final class LiveIT {
             .build());
         final RESTAdapterClient client = startClient();
 
+        verify(serviceListener, timed()).onStandby(icndb);
         verify(serviceListener, timed()).onActive(icndb);
 
         final Session session = startSession();
