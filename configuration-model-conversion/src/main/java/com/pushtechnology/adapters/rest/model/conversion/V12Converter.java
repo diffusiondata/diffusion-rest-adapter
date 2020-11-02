@@ -71,16 +71,18 @@ public final class V12Converter
                         .collect(toList()))
                     .pollPeriod(oldService.getPollPeriod())
                     .topicPathRoot(oldService.getTopicRoot())
-                    .security(SecurityConfig
-                        .builder()
-                        .basic(oldService.getSecurity().getBasic() == null ?
-                            null :
-                            BasicAuthenticationConfig
-                                .builder()
-                                .userid(oldService.getSecurity().getBasic().getPrincipal())
-                                .password(oldService.getSecurity().getBasic().getCredential())
-                                .build())
-                        .build())
+                    .security(oldService.getSecurity() == null ?
+                        SecurityConfig.builder().build() :
+                        SecurityConfig
+                            .builder()
+                            .basic(oldService.getSecurity().getBasic() == null ?
+                                null :
+                                BasicAuthenticationConfig
+                                    .builder()
+                                    .userid(oldService.getSecurity().getBasic().getPrincipal())
+                                    .password(oldService.getSecurity().getBasic().getCredential())
+                                    .build())
+                            .build())
                     .build())
                 .collect(toList()))
             .diffusion(DiffusionConfig
