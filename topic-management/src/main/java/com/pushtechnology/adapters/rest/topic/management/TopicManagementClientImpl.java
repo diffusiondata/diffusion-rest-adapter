@@ -89,7 +89,7 @@ public final class TopicManagementClientImpl implements TopicManagementClient {
                         callback.onDiscard();
                     }
                 }
-                else {
+                else if (t != null) {
                     callback.onDiscard();
                 }
             });
