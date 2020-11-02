@@ -88,9 +88,13 @@ public final class FileSystemPersistence implements Persistence {
 
     private <T extends AnyModel> T loadModel(Class<T> modelVersion) throws IOException {
         try (InputStream inputStream = newInputStream(configFilePath, READ)) {
-            try (JsonParser parser = jsonFactory.createParser(inputStream)) {
-                return objectMapper.readValue(parser, modelVersion);
-            }
+            return loadModel(inputStream, modelVersion);
+        }
+    }
+
+    /*package*/ <T extends AnyModel> T loadModel(InputStream inputStream, Class<T> modelVersion) throws IOException {
+        try (JsonParser parser = jsonFactory.createParser(inputStream)) {
+            return objectMapper.readValue(parser, modelVersion);
         }
     }
 

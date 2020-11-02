@@ -19,6 +19,12 @@
             <groupId>com.pushtechnology.adapters.rest</groupId>
             <artifactId>configuration-model-conversion</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>

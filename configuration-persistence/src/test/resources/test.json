@@ -1,0 +1,23 @@
+{
+  "active" : true,
+  "diffusion" : {
+    "host" : "localhost",
+    "port" : 8080,
+    "secure" : false,
+    "principal" : "control",
+    "password" : "password",
+    "connectionTimeout" : 2000,
+    "reconnectionTimeout" : 60000,
+    "maximumMessageSize" : 32768,
+    "inputBufferSize" : 131072,
+    "outputBufferSize" : 131072,
+    "recoveryBufferSize" : 128
+  },
+  "services" : [],
+  "metrics" : {
+    "counting" : false,
+    "summary" : null,
+    "topic" : null
+  },
+  "truststore" : null
+}
