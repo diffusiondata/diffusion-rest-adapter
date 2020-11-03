@@ -7,7 +7,6 @@
 | [Services](documentation/Services.md) |
 | [Endpoints](documentation/Endpoints.md) |
 | [ServiceSessions](documentation/ServiceSessions.md) |
-| [Web Interface](documentation/WebInterface.md) |
 
 ## Building
 
@@ -40,12 +39,6 @@ If the client is closed the JVM process will be terminated.
 
 The `adapter` module is more suitable for embedding the adapter in other applications.
 It expects to be notified of changes to the model instead of reading from the file system.
-
-### diffusion-rest-adapter-integrated-server
-
-The `diffusion-rest-adapter-integrated-server` module creates an integrated application server and `adapter-client`.
-It is used to deploy an instance of the Diffusion REST Adapter with a web front end as a single executable.
-The configuration model is provided through the web interface.
 
 ## Connecting to Diffusion
 

@@ -28,7 +28,6 @@
         <module>services</module>
         <module>session-management</module>
         <module>topic-management</module>
-        <module>web-interface</module>
     </modules>
 
     <properties>
@@ -77,12 +76,6 @@
 
             <dependency>
                 <groupId>com.pushtechnology.adapters.rest</groupId>
-                <artifactId>client-controlled-model-store</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.pushtechnology.adapters.rest</groupId>
                 <artifactId>configuration-model</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -102,12 +95,6 @@
             <dependency>
                 <groupId>com.pushtechnology.adapters.rest</groupId>
                 <artifactId>configuration-store</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.pushtechnology.adapters.rest</groupId>
-                <artifactId>diffusion-rest-adapter-integrated-server</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
@@ -167,41 +154,8 @@
 
             <dependency>
                 <groupId>com.pushtechnology.adapters.rest</groupId>
-                <artifactId>topic-based-metrics-reporting</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.pushtechnology.adapters.rest</groupId>
                 <artifactId>topic-management</artifactId>
                 <version>${project.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.pushtechnology.adapters.rest</groupId>
-                <artifactId>vcap-parsing</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.pushtechnology.adapters.rest</groupId>
-                <artifactId>web-interface</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.pushtechnology.adapters.rest</groupId>
-                <artifactId>web-interface-client</artifactId>
-                <version>${project.version}</version>
-                <type>zip</type>
-                <classifier>bundle</classifier>
-            </dependency>
-
-            <dependency>
-                <groupId>com.pushtechnology.adapters.rest</groupId>
-                <artifactId>web-interface-servlet</artifactId>
-                <version>${project.version}</version>
-                <type>war</type>
             </dependency>
 
             <dependency>
@@ -268,42 +222,6 @@
                 <groupId>com.fasterxml.jackson.dataformat</groupId>
                 <artifactId>jackson-dataformat-cbor</artifactId>
                 <version>${jackson.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-jndi</artifactId>
-                <version>${jetty.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-plus</artifactId>
-                <version>${jetty.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>javax.servlet</groupId>
-                <artifactId>javax.servlet-api</artifactId>
-                <version>3.1.0</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-server</artifactId>
-                <version>${jetty.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-servlet</artifactId>
-                <version>${jetty.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.tuckey</groupId>
-                <artifactId>urlrewritefilter</artifactId>
-                <version>4.0.4</version>
             </dependency>
 
             <dependency>
@@ -379,6 +297,13 @@
                 <groupId>org.glassfish.jersey.inject</groupId>
                 <artifactId>jersey-hk2</artifactId>
                 <version>${jersey.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-servlet</artifactId>
+                <version>${jetty.version}</version>
                 <scope>test</scope>
             </dependency>
         </dependencies>
