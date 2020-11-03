@@ -100,6 +100,73 @@ public final class V13ConverterTest {
         assertFalse(model.getMetrics().isCounting());
     }
 
+    @Test
+    public void testConvertWithoutSecurity() {
+        final Model model = INSTANCE.convert(
+            com.pushtechnology.adapters.rest.model.v13.Model
+                .builder()
+                .services(Collections.singletonList(
+                    com.pushtechnology.adapters.rest.model.v13.ServiceConfig
+                        .builder()
+                        .name("service")
+                        .host("localhost")
+                        .port(80)
+                        .endpoints(Collections.singletonList(com.pushtechnology.adapters.rest.model.v13.EndpointConfig
+                            .builder()
+                            .name("endpoint")
+                            .topicPath("topic")
+                            .url("/url")
+                            .produces("binary")
+                            .build()))
+                        .pollPeriod(5000)
+                        .topicPathRoot("a")
+                        .security(null)
+                        .build()
+                ))
+                .diffusion(com.pushtechnology.adapters.rest.model.v13.DiffusionConfig
+                    .builder()
+                    .host("localhost")
+                    .port(8080)
+                    .principal("control")
+                    .password("password")
+                    .connectionTimeout(500)
+                    .reconnectionTimeout(5000)
+                    .maximumMessageSize(64000)
+                    .build())
+                .build());
+
+        assertEquals(1, model.getServices().size());
+        final DiffusionConfig diffusion = model.getDiffusion();
+        final ServiceConfig service = model.getServices().get(0);
+        final List<EndpointConfig> endpoints = service.getEndpoints();
+        final BasicAuthenticationConfig basic = service.getSecurity().getBasic();
+
+        assertTrue(model.isActive());
+        assertEquals("service", service.getName());
+        assertEquals("localhost", service.getHost());
+        assertEquals(80, service.getPort());
+        assertEquals(1, endpoints.size());
+        assertEquals(5000, service.getPollPeriod());
+        assertEquals("a", service.getTopicPathRoot());
+
+        assertEquals("localhost", diffusion.getHost());
+        assertEquals(8080, diffusion.getPort());
+        assertEquals("control", diffusion.getPrincipal());
+        assertEquals("password", diffusion.getPassword());
+        assertEquals(500, diffusion.getConnectionTimeout());
+        assertEquals(5000, diffusion.getReconnectionTimeout());
+        assertEquals(64000, diffusion.getMaximumMessageSize());
+
+        assertEquals("endpoint", endpoints.get(0).getName());
+        assertEquals("topic", endpoints.get(0).getTopicPath());
+        assertEquals("/url", endpoints.get(0).getUrl());
+        assertEquals("binary", endpoints.get(0).getProduces());
+        assertNull(basic);
+
+        assertNull(model.getMetrics().getSummary());
+        assertFalse(model.getMetrics().isCounting());
+    }
+
     @Test(expected = IllegalArgumentException.class)
     public void testUnknownModel() {
         final ModelConverter converter = V13Converter.INSTANCE;
