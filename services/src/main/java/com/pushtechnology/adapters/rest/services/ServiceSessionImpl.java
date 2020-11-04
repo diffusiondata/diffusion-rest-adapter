@@ -139,7 +139,7 @@ public final class ServiceSessionImpl implements ServiceSession {
         private final EndpointConfig endpointConfig;
         private final BiConsumer<EndpointResponse, Throwable> handler;
 
-        public PollingTask(EndpointConfig endpointConfig, BiConsumer<EndpointResponse, Throwable> handler) {
+        PollingTask(EndpointConfig endpointConfig, BiConsumer<EndpointResponse, Throwable> handler) {
             this.endpointConfig = endpointConfig;
             this.handler = handler;
         }

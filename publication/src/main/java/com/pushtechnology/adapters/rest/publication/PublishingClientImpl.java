@@ -43,9 +43,9 @@ public final class PublishingClientImpl implements PublishingClient {
     private final EventedSessionListener sessionListener;
     private final PublicationListener publicationListener;
     @GuardedBy("this")
-    private Map<ServiceConfig, EventedUpdateSource> updaterSources = new HashMap<>();
+    private final Map<ServiceConfig, EventedUpdateSource> updaterSources = new HashMap<>();
     @GuardedBy("this")
-    private Map<ServiceConfig, SessionLock> locks = new HashMap<>();
+    private final Map<ServiceConfig, SessionLock> locks = new HashMap<>();
 
     /**
      * Constructor.
@@ -64,18 +64,18 @@ public final class PublishingClientImpl implements PublishingClient {
 
         final EventedUpdateSource source = new EventedUpdateSourceImpl(serviceConfig.getTopicPathRoot())
             .onActive(sessionLock -> {
-                synchronized (PublishingClientImpl.this) {
+                synchronized (this) {
                     locks.put(serviceConfig, sessionLock);
                 }
             })
             .onClose(() -> {
-                synchronized (PublishingClientImpl.this) {
+                synchronized (this) {
                     updaterSources.remove(serviceConfig);
                     locks.remove(serviceConfig);
                 }
             })
             .onError(errorReason -> {
-                synchronized (PublishingClientImpl.this) {
+                synchronized (this) {
                     updaterSources.remove(serviceConfig);
                     locks.remove(serviceConfig);
                 }

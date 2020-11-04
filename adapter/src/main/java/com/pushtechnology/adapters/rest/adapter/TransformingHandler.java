@@ -33,7 +33,7 @@ import com.pushtechnology.diffusion.transform.transformer.UnsafeTransformer;
     /**
      * Constructor.
      */
-    public TransformingHandler(UnsafeTransformer<S, T> transformer, BiConsumer<T, Throwable> delegate) {
+    TransformingHandler(UnsafeTransformer<S, T> transformer, BiConsumer<T, Throwable> delegate) {
         this.transformer = transformer;
         this.delegate = delegate;
     }

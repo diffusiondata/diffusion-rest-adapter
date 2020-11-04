@@ -276,7 +276,7 @@ public final class InternalRESTAdapter implements RESTAdapterListener, AutoClose
 
         return diffusionConfig == null ||
             services == null ||
-            services.size() == 0 ||
+            services.isEmpty() ||
             services.stream().map(ServiceConfig::getEndpoints).mapToInt(Collection::size).sum() == 0;
     }
 

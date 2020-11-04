@@ -50,6 +50,6 @@ public abstract class AbstractModelStore implements ModelStore {
      * @param newModel The new model
      */
     protected final synchronized void notifyListeners(Model newModel) {
-        listeners.forEach(listeners -> listeners.accept(newModel));
+        listeners.forEach(listener -> listener.accept(newModel));
     }
 }

@@ -8,51 +8,132 @@
         PMD ruleset for REST adapter.
     </description>
 
-    <rule ref="rulesets/java/basic.xml"/>
-    <rule ref="rulesets/java/braces.xml"/>
-    <rule ref="rulesets/java/clone.xml"/>
-    <rule ref="rulesets/java/empty.xml"/>
-    <rule ref="rulesets/java/junit.xml"/>
-    <rule ref="rulesets/java/migrating.xml"/>
-    <rule ref="rulesets/java/strictexception.xml">
-        <!-- Also checked by checkstyle -->
-        <exclude name="AvoidCatchingGenericException"/>
-    </rule>
-    <rule ref="rulesets/java/finalizers.xml"/>
-    <rule ref="rulesets/java/imports.xml">
+    <rule ref="category/java/bestpractices.xml">
+        <exclude name="AbstractClassWithoutAbstractMethod"/>
+        <exclude name="AccessorClassGeneration"/>
+        <exclude name="AccessorMethodGeneration"/>
+        <!-- We do this a lot. Trust ourselves to get it right. -->
+        <exclude name="ArrayIsStoredDirectly"/>
+        <!-- Our custom checkstyle rules handle this for slf4j. -->
+        <exclude name="GuardLogStatement"/>
+        <exclude name="JUnit4TestShouldUseTestAnnotation"/>
+        <exclude name="MethodReturnsInternalArray"/>
+        <exclude name="PreserveStackTrace"/>
+        <!-- Caught by Checkstyle -->
+        <exclude name="SystemPrintln"/>
+        <!-- Doesn't understand heap pollution. -->
+        <exclude name="UseVarargs"/>
         <!-- Checkstyle catches unused imports, and we don't want additional
              workarounds for things only referenced by javadoc. -->
         <exclude name="UnusedImports"/>
-        <!-- Customised below. -->
-        <exclude name="TooManyStaticImports"/>
-    </rule>
-
-     <rule ref="rulesets/java/optimizations.xml">
-         <!-- This seems like a matter of style -->
-         <exclude name="MethodArgumentCouldBeFinal"/>
-         <!-- Makes the assumption that the life of the object is the same as the loop -->
-         <exclude name="AvoidInstantiatingObjectsInLoops"/>
-     </rule>
-
-    <rule ref="rulesets/java/strings.xml">
-        <!-- Caught by Checkstyle -->
-        <exclude name="AvoidDuplicateLiterals"/>
-    </rule>
-
-    <rule ref="rulesets/java/typeresolution.xml">
-        <!-- A variant of the unused import rule -->
-        <exclude name="UnusedImports"/>
-    </rule>
-
-    <rule ref="rulesets/java/unnecessary.xml"/>
-    <rule ref="rulesets/java/unusedcode.xml">
-        <!-- Broken: http://pmd.sourceforge.net/pmd-4.3.0/rules/unusedcode.html -->
+        <!-- Broken. -->
         <exclude name="UnusedPrivateMethod"/>
     </rule>
 
-    <rule ref="rulesets/java/imports.xml/TooManyStaticImports">
-        <properties>
-            <property name="maximumStaticImports" value="50"/>
-        </properties>
+    <rule ref="category/java/codestyle.xml">
+        <exclude name="AbstractNaming"/>
+        <exclude name="AtLeastOneConstructor"/>
+        <exclude name="AvoidFinalLocalVariable"/> <!-- Insane. -->
+        <exclude name="AvoidPrefixingMethodParameters"/>
+        <exclude name="BooleanGetMethodName"/>
+        <exclude name="CallSuperInConstructor"/>
+        <exclude name="ClassNamingConventions"/>
+        <exclude name="CommentDefaultAccessModifier"/>
+        <exclude name="ConfusingTernary"/>
+        <exclude name="DefaultPackage"/>
+        <exclude name="EmptyMethodInAbstractClassShouldBeAbstract"/>
+        <exclude name="FieldDeclarationsShouldBeAtStartOfClass"/>
+        <!-- Caught by checkstyle. Can't be customised for loop variables. -->
+        <exclude name="LocalVariableCouldBeFinal"/>
+        <exclude name="LongVariable"/>
+        <exclude name="MethodArgumentCouldBeFinal"/>
+        <!-- If this ignores declarations with side-effects, it would
+             be useful. But it doesn't, so it's broken advice. -->
+        <exclude name="PrematureDeclaration"/>
+        <exclude name="OnlyOneReturn"/>
+        <exclude name="ShortClassName"/>
+        <exclude name="ShortMethodName"/>
+        <exclude name="ShortVariable"/>
+        <exclude name="TooManyStaticImports"/>
+        <!-- Style should be driven by checkstyle -->
+        <exclude name="UnnecessaryFullyQualifiedName"/>
+    </rule>
+
+    <rule ref="category/java/design.xml">
+        <!-- Spotbugs deals with some of the exclusions. -->
+        <exclude name="AvoidCatchingGenericException"/>
+        <exclude name="AvoidDeeplyNestedIfStmts"/>
+        <exclude name="AvoidRethrowingException"/>
+        <exclude name="AvoidThrowingNullPointerException"/>
+        <exclude name="AvoidThrowingRawExceptionTypes"/>
+        <exclude name="CouplingBetweenObjects"/>
+        <exclude name="CyclomaticComplexity"/>
+        <exclude name="DataClass"/>
+        <exclude name="ExceptionAsFlowControl"/>
+        <exclude name="ExcessiveClassLength"/>
+        <exclude name="ExcessiveImports"/>
+        <exclude name="ExcessiveMethodLength"/>
+        <exclude name="ExcessiveParameterList"/>
+        <exclude name="ExcessivePublicCount"/>
+        <exclude name="GodClass"/>
+        <exclude name="LawOfDemeter"/>
+        <exclude name="LoosePackageCoupling"/>
+        <exclude name="NcssCount"/>
+        <exclude name="NPathComplexity"/>
+        <exclude name="SignatureDeclareThrowsException"/>
+        <exclude name="TooManyFields"/>
+        <exclude name="TooManyMethods"/>
+        <exclude name="UseObjectForClearerAPI"/>
+        <exclude name="UseUtilityClass"/>
+    </rule>
+
+    <!-- All documentation rules ignored in favour of checkstyle. -->
+    <!-- <rule ref="category/java/documentation.xml"> -->
+
+    <rule ref="category/java/errorprone.xml">
+        <exclude name="AvoidCatchingNPE"/>
+        <exclude name="AvoidCatchingThrowable"/>
+        <exclude name="AvoidDuplicateLiterals"/>
+        <exclude name="AvoidFieldNameMatchingMethodName"/>
+        <exclude name="AvoidFieldNameMatchingTypeName"/>
+        <exclude name="AvoidLiteralsInIfCondition"/>
+        <exclude name="BeanMembersShouldSerialize"/>
+        <!-- Checks AutoCloseable => far too many false positives. -->
+        <exclude name="CloseResource"/>
+        <exclude name="CompareObjectsWithEquals"/>
+        <exclude name="DataflowAnomalyAnalysis"/>
+        <!-- Checksyle adequately constrains switch statements. -->
+        <exclude name="MissingBreakInSwitch"/>
+        <exclude name="NullAssignment"/>
+        <!-- Rule is dumb and matches all getInstance(...) methods. -->
+        <exclude name="SingletonClassReturningNewInstance"/>
+        <exclude name="UseProperClassLoader"/>
+        <exclude name="UseLocaleWithCaseConversions"/>
+    </rule>
+
+    <rule ref="category/java/multithreading.xml">
+        <exclude name="AvoidSynchronizedAtMethodLevel"/>
+        <exclude name="AvoidUsingVolatile"/>
+        <exclude name="DoNotUseThreads"/>
+        <exclude name="NonThreadSafeSingleton"/>
+        <!-- Stupid matches for non-concurrent code. -->
+        <exclude name="UseConcurrentHashMap"/>
+    </rule>
+
+    <!-- Many of the excluded performance rules are naive and easily
+         optimised away by javac or the JIT. E.g.
+         ConsecutiveAppendsShouldReuse, RedundantFieldInitializer,
+         SimplifyStartsWith. -->
+    <rule ref="category/java/performance.xml">
+        <exclude name="AvoidInstantiatingObjectsInLoops"/>
+        <exclude name="AvoidUsingShortType"/>
+        <exclude name="ConsecutiveAppendsShouldReuse"/>
+        <exclude name="ConsecutiveLiteralAppends"/>
+        <!-- Bad advice. -->
+        <exclude name="IntegerInstantiation"/>
+        <exclude name="LongInstantiation"/>
+        <exclude name="RedundantFieldInitializer"/>
+        <exclude name="SimplifyStartsWith"/>
+        <exclude name="TooFewBranchesForASwitchStatement"/>
     </rule>
 </ruleset>

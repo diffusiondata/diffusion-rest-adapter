@@ -28,6 +28,10 @@ import java.util.function.Function;
 public interface AsyncFunction<T, U> extends Function<T, CompletableFuture<U>> {
     /**
      * Create an async function from an exceptional function.
+     *
+     * @param <T> the value type
+     * @param <U> the result type
+     * @param <E> the exception type
      */
     static <T, U, E extends Exception> AsyncFunction<T, U> create(ExceptionalFunction<T, U, E> func) {
         return value -> {
@@ -46,6 +50,9 @@ public interface AsyncFunction<T, U> extends Function<T, CompletableFuture<U>> {
 
     /**
      * Create an async function from an exceptional consumer.
+     *
+     * @param <T> the value type
+     * @param <E> the exception type
      */
     static <T, E extends Exception> AsyncFunction<T, Void> consume(ExceptionalConsumer<T, E> func) {
         return value -> {
@@ -65,6 +72,10 @@ public interface AsyncFunction<T, U> extends Function<T, CompletableFuture<U>> {
 
     /**
      * A function that can fail to be applied.
+     *
+     * @param <T> the value type
+     * @param <U> the result type
+     * @param <E> the exception type
      */
     interface ExceptionalFunction<T, U, E extends Exception> {
         /**
@@ -78,6 +89,9 @@ public interface AsyncFunction<T, U> extends Function<T, CompletableFuture<U>> {
 
     /**
      * A consumer that can fail to be applied.
+     *
+     * @param <T> the value type
+     * @param <E> the exception type
      */
     interface ExceptionalConsumer<T, E extends Exception> {
         /**

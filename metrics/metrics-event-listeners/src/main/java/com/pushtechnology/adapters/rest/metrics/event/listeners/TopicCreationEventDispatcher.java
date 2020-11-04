@@ -59,7 +59,7 @@ public final class TopicCreationEventDispatcher implements TopicCreationListener
         /**
          * Constructor.
          */
-        public CompletionListener(TopicCreationEventListener listener, TopicCreationRequestEvent requestEvent) {
+        CompletionListener(TopicCreationEventListener listener, TopicCreationRequestEvent requestEvent) {
             this.listener = listener;
             this.requestEvent = requestEvent;
         }

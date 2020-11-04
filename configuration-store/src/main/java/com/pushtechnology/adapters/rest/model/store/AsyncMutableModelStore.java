@@ -253,7 +253,7 @@ public final class AsyncMutableModelStore implements ModelStore {
      * @return the store
      */
     public AsyncMutableModelStore setModel(Model newModel) {
-        return apply(model -> newModel);
+        return apply(oldModel -> newModel);
     }
 
     @Override

@@ -32,12 +32,6 @@ public final class EventedSessionListener {
     private final List<Session.Listener> attachedListeners = new CopyOnWriteArrayList<>();
 
     /**
-     * Constructor.
-     */
-    public EventedSessionListener() {
-    }
-
-    /**
      * Attach a new listener for state change events.
      */
     public EventedSessionListener onSessionStateChange(Session.Listener listener) {

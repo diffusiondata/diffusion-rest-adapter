@@ -30,11 +30,6 @@ import kotlin.Pair;
  */
 public final class ValidateContentType
         implements Function<Pair<EndpointConfig, EndpointResponse>, Pair<EndpointConfig, EndpointResponse>> {
-    /**
-     * Constructor.
-     */
-    public ValidateContentType() {
-    }
 
     @Override
     public Pair<EndpointConfig, EndpointResponse> apply(Pair<EndpointConfig, EndpointResponse> configAndResult) {
