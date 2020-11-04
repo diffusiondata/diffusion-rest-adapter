@@ -15,9 +15,6 @@
 
 package com.pushtechnology.adapters.rest.adapter;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
 /**
  * The metrics manager.
  *
@@ -41,12 +38,10 @@ public final class MetricsProvider implements AutoCloseable {
     /**
      * Start logging the metrics.
      */
-    @PostConstruct
     public void start() {
         startTask.run();
     }
 
-    @PreDestroy
     @Override
     public void close() {
         stopTask.run();

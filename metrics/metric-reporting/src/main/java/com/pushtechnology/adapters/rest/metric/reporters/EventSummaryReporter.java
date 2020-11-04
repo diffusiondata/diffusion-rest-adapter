@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Push Technology Ltd.
+ * Copyright (C) 2020 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,9 +23,6 @@ import java.text.NumberFormat;
 import java.util.OptionalLong;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,7 +71,6 @@ public final class EventSummaryReporter implements AutoCloseable {
     /**
      * Start logging the metrics.
      */
-    @PostConstruct
     public synchronized void start() {
         if (loggingTask != null) {
             return;
@@ -91,7 +87,6 @@ public final class EventSummaryReporter implements AutoCloseable {
             MINUTES);
     }
 
-    @PreDestroy
     @Override
     public synchronized void close() {
         if (loggingTask != null) {

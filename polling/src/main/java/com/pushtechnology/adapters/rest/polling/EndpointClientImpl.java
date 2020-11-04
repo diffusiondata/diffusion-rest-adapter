@@ -18,8 +18,6 @@ package com.pushtechnology.adapters.rest.polling;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import javax.net.ssl.SSLContext;
 
 import org.apache.http.HttpHost;
@@ -116,7 +114,6 @@ public final class EndpointClientImpl implements EndpointClient {
         return result;
     }
 
-    @PostConstruct
     @Override
     public void start() {
         LOG.debug("Opening endpoint client");
@@ -126,7 +123,6 @@ public final class EndpointClientImpl implements EndpointClient {
         LOG.debug("Opened endpoint client");
     }
 
-    @PreDestroy
     @Override
     public void close() {
         LOG.debug("Closing endpoint client");

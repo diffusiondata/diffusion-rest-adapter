@@ -33,9 +33,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeoutException;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -116,7 +113,6 @@ public final class TopicBasedMetricsReporter implements AutoCloseable {
     /**
      * Start logging the metrics.
      */
-    @PostConstruct
     public synchronized void start() {
         allOf(
             topicManagementClient.addTopic(rootTopic + "/poll/requests", INT64, 120),
@@ -156,7 +152,6 @@ public final class TopicBasedMetricsReporter implements AutoCloseable {
             });
     }
 
-    @PreDestroy
     @Override
     public synchronized void close() {
         if (reportingTask != null) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Push Technology Ltd.
+ * Copyright (C) 2020 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,6 @@
 package com.pushtechnology.adapters.rest.polling;
 
 import java.util.concurrent.CompletableFuture;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
@@ -43,10 +40,8 @@ public interface EndpointClient extends AutoCloseable {
     /**
      * Start component.
      */
-    @PostConstruct
     void start();
 
-    @PreDestroy
     @Override
     void close();
 }
