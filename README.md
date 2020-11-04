@@ -87,7 +87,7 @@ If there is no other client configured with the service the topics associated wi
 | 1.0.x | 5.9.1 |
 | 1.1.x | 5.9.1 |
 | 2.0.x | 6.0.3 - 6.1.x |
-| 3.0.x | 6.2.x - 6.6.x |
+| 3.0.x | 6.2.x - 6.4.x |
 
 ## Licensing
 
