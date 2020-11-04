@@ -57,9 +57,6 @@ import com.pushtechnology.adapters.rest.session.management.EventedSessionListene
 import com.pushtechnology.diffusion.client.features.TopicCreationResult;
 import com.pushtechnology.diffusion.client.features.TopicUpdate;
 import com.pushtechnology.diffusion.client.features.UpdateStream;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater.UpdateContextCallback;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.ValueUpdater;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.session.SessionFactory;
 import com.pushtechnology.diffusion.datatype.DataType;

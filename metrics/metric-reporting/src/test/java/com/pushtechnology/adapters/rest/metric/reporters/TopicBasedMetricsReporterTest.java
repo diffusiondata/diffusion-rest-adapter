@@ -48,7 +48,6 @@ import com.pushtechnology.adapters.rest.publication.PublishingClient;
 import com.pushtechnology.adapters.rest.publication.UpdateContext;
 import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
 import com.pushtechnology.diffusion.client.session.Session;
 
 /**
@@ -65,8 +64,6 @@ public final class TopicBasedMetricsReporterTest {
     private Session session;
     @Mock
     private TopicControl topicControl;
-    @Mock
-    private TopicUpdateControl updateControl;
     @Mock
     private TopicManagementClient topicManagementClient;
     @Mock
@@ -85,7 +82,6 @@ public final class TopicBasedMetricsReporterTest {
             .thenReturn(reportingTask);
 
         when(session.feature(TopicControl.class)).thenReturn(topicControl);
-        when(session.feature(TopicUpdateControl.class)).thenReturn(updateControl);
 
         when(topicManagementClient.addTopic(isNotNull(), isNotNull(), anyInt())).thenReturn(completedFuture(null));
 
@@ -110,7 +106,7 @@ public final class TopicBasedMetricsReporterTest {
 
     @After
     public void postConditions() {
-        Mockito.verifyNoMoreInteractions(executor, reportingTask, topicControl, updateControl, topicManagementClient);
+        Mockito.verifyNoMoreInteractions(executor, reportingTask, topicControl, topicManagementClient);
     }
 
     @Test

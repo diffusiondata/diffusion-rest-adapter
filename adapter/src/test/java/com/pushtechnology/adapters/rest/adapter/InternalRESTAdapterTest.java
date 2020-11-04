@@ -23,7 +23,6 @@ import static java.util.concurrent.CompletableFuture.completedFuture;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -51,7 +50,6 @@ import com.pushtechnology.adapters.rest.polling.HttpClientFactory;
 import com.pushtechnology.adapters.rest.session.management.SessionLossHandler;
 import com.pushtechnology.diffusion.client.features.TopicUpdate;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.session.SessionFactory;
 
@@ -78,15 +76,11 @@ public final class InternalRESTAdapterTest {
     @Mock
     private CompletableFuture<Session.SessionLock> registration;
     @Mock
-    private Session.SessionLock sessionLock;
-    @Mock
     private HttpClientFactory httpClientFactory;
     @Mock
     private CloseableHttpAsyncClient httpClient;
     @Mock
     private TopicControl topicControl;
-    @Mock
-    private TopicUpdateControl updateControl;
     @Mock
     private Runnable shutdownHandler;
 
@@ -211,7 +205,6 @@ public final class InternalRESTAdapterTest {
             session,
             httpClientFactory,
             topicControl,
-            updateControl,
             shutdownHandler);
     }
 
