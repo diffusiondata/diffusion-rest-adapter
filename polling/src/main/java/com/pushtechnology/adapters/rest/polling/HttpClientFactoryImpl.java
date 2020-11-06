@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Push Technology Ltd.
+ * Copyright (C) 2020 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,8 @@
  *******************************************************************************/
 
 package com.pushtechnology.adapters.rest.polling;
+
+import java.util.concurrent.ThreadFactory;
 
 import javax.net.ssl.SSLContext;
 
@@ -36,6 +38,8 @@ import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
  * @author Push Technology Limited
  */
 public final class HttpClientFactoryImpl implements HttpClientFactory {
+    private final ThreadFactory threadFactory = new HttpClientThreadFactory();
+
     @Override
     public CloseableHttpAsyncClient create(Model model, SSLContext sslContext) {
         final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
@@ -55,6 +59,7 @@ public final class HttpClientFactoryImpl implements HttpClientFactory {
 
         HttpAsyncClientBuilder builder = HttpAsyncClients
             .custom()
+            .setThreadFactory(threadFactory)
             .disableCookieManagement()
             .setDefaultCredentialsProvider(credentialsProvider);
 
@@ -74,4 +79,5 @@ public final class HttpClientFactoryImpl implements HttpClientFactory {
             basicAuthenticationConfig.getUserid(),
             basicAuthenticationConfig.getPassword());
     }
+
 }
