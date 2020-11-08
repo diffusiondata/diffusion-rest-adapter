@@ -29,6 +29,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.nio.file.Paths;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -184,6 +185,7 @@ public final class InternalRESTAdapterTest {
         when(session.lock(isNotNull(), isNotNull())).thenReturn(registration);
 
         restAdapter = new InternalRESTAdapter(
+            Paths.get("."),
             executorService,
             sessionFactory,
             httpClientFactory,

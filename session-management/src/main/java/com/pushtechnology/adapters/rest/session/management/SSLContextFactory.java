@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Push Technology Ltd.
+ * Copyright (C) 2020 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import static javax.net.ssl.TrustManagerFactory.getInstance;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -43,6 +43,14 @@ import net.jcip.annotations.Immutable;
  */
 @Immutable
 public final class SSLContextFactory {
+    private final Path relativePath;
+
+    /**
+     * Constructor.
+     */
+    public SSLContextFactory(Path relativePath) {
+        this.relativePath = relativePath;
+    }
 
     /**
      * @return an {@link SSLContext}.
@@ -50,18 +58,18 @@ public final class SSLContextFactory {
     public SSLContext create(Model model) {
         final String truststoreLocation = model.getTruststore();
 
-        return loadFromResource(truststoreLocation);
+        return loadFromResource(relativePath, truststoreLocation);
     }
 
     /**
      * @return an {@link SSLContext} from a trust store
      */
-    public static SSLContext loadFromResource(String truststoreLocation) {
+    public static SSLContext loadFromResource(Path relativePath, String truststoreLocation) {
         if (truststoreLocation == null) {
             return null;
         }
 
-        try (InputStream stream = resolveTruststore(truststoreLocation)) {
+        try (InputStream stream = resolveTruststore(relativePath, truststoreLocation)) {
             final KeyStore keyStore = KeyStore.getInstance(getDefaultType());
             keyStore.load(stream, null);
             final TrustManagerFactory trustManagerFactory = getInstance(getDefaultAlgorithm());
@@ -80,14 +88,14 @@ public final class SSLContextFactory {
         }
     }
 
-    private static InputStream resolveTruststore(String truststoreLocation) throws IOException {
+    private static InputStream resolveTruststore(Path relativePath, String truststoreLocation) throws IOException {
         final InputStream stream = Thread
             .currentThread()
             .getContextClassLoader()
             .getResourceAsStream(truststoreLocation);
 
         if (stream == null) {
-            return Files.newInputStream(Paths.get(truststoreLocation));
+            return Files.newInputStream(relativePath.resolve(truststoreLocation));
         }
         return stream;
     }

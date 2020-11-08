@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Push Technology Ltd.
+ * Copyright (C) 2020 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package com.pushtechnology.adapters.rest.session.management;
 import static java.util.Collections.emptyList;
 import static org.junit.Assert.assertNull;
 import static org.mockito.MockitoAnnotations.initMocks;
+
+import java.nio.file.Paths;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -45,7 +47,7 @@ public final class SSLContextFactoryTest {
             .build())
         .build();
 
-    private final SSLContextFactory contextFactory = new SSLContextFactory();
+    private final SSLContextFactory contextFactory = new SSLContextFactory(Paths.get("."));
 
     @Before
     public void setUp() {

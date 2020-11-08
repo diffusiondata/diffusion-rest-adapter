@@ -29,6 +29,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -164,6 +165,7 @@ public final class LiveIT {
     private RESTAdapterClient startClient(ServiceListener listener) {
         ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
         final RESTAdapterClient client = RESTAdapterClient.create(
+            Paths.get("."),
             modelStore,
             executor,
             executor::shutdown,

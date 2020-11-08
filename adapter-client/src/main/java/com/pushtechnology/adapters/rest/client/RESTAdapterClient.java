@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Push Technology Ltd.
+ * Copyright (C) 2020 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,6 +54,7 @@ public final class RESTAdapterClient {
     private final Runnable shutdownHandler;
 
     /*package*/ RESTAdapterClient(
+            Path relativePath,
             ModelStore modelStore,
             ScheduledExecutorService executor,
             Runnable shutdownHandler,
@@ -62,6 +63,7 @@ public final class RESTAdapterClient {
         this.modelStore = modelStore;
         this.shutdownHandler = shutdownHandler;
         restAdapter = new InternalRESTAdapter(
+            relativePath,
             executor,
             Diffusion.sessions(),
             new HttpClientFactoryImpl(),
@@ -126,13 +128,14 @@ public final class RESTAdapterClient {
      * @return a new {@link RESTAdapterClient}
      */
     public static RESTAdapterClient create(
+        Path relativePath,
         ModelStore modelStore,
         ScheduledExecutorService executor,
         Runnable shutdownHandler,
         ServiceListener serviceListener,
         Session.Listener listener) {
         LOG.debug("Creating REST adapter client with model store: {}", modelStore);
-        return new RESTAdapterClient(modelStore, executor, shutdownHandler, serviceListener, listener);
+        return new RESTAdapterClient(relativePath, modelStore, executor, shutdownHandler, serviceListener, listener);
     }
 
     /**
@@ -159,6 +162,7 @@ public final class RESTAdapterClient {
         }
 
         return RESTAdapterClient.create(
+            pathToConfigDirectory,
             modelStore,
             executor,
             () -> {

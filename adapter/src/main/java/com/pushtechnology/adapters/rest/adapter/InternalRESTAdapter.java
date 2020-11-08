@@ -17,6 +17,7 @@ package com.pushtechnology.adapters.rest.adapter;
 
 import static java.util.stream.Collectors.toList;
 
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -56,13 +57,13 @@ public final class InternalRESTAdapter implements RESTAdapterListener, AutoClose
     private final ScheduledExecutorService executor;
     private final SessionLossHandler sessionLossHandler;
     private final ServiceListener serviceListener;
+    private final SSLContextFactory sslContextFactory;
 
     private final MetricsProviderFactory metricsProviderFactory = new MetricsProviderFactory();
     private final MetricsDispatcher metricsDispatcher = new MetricsDispatcher();
     private final EventedSessionListener eventedSessionListener = new EventedSessionListener();
     private final HttpClientFactory httpClientFactory;
     private final ServiceManager serviceManager = new ServiceManager();
-    private final SSLContextFactory sslContextFactory = new SSLContextFactory();
     private final DiffusionSessionFactory sessionFactory;
     private final Runnable shutdownHandler;
     @GuardedBy("this")
@@ -85,7 +86,9 @@ public final class InternalRESTAdapter implements RESTAdapterListener, AutoClose
     /**
      * Constructor.
      */
+    // CHECKSTYLE.OFF: ParameterNumber
     public InternalRESTAdapter(
+        Path relativePath,
         ScheduledExecutorService executor,
         SessionFactory sessions,
         HttpClientFactory httpClientFactory,
@@ -93,10 +96,12 @@ public final class InternalRESTAdapter implements RESTAdapterListener, AutoClose
         SessionLossHandler sessionLossHandler,
         Runnable shutdownHandler,
         Session.Listener listener) {
+    // CHECKSTYLE.ON: ParameterNumber
 
         this.executor = new ReportingScheduledExecutorService(executor);
         this.sessionLossHandler = sessionLossHandler;
         this.serviceListener = serviceListener;
+        sslContextFactory = new SSLContextFactory(relativePath);
         this.httpClientFactory = httpClientFactory;
         sessionFactory = new DiffusionSessionFactory(sessions);
         this.shutdownHandler = shutdownHandler;

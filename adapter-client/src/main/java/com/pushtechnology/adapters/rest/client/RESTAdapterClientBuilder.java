@@ -149,7 +149,13 @@ public final class RESTAdapterClientBuilder {
     }
 
     private RESTAdapterClient create() {
-        return new RESTAdapterClient(modelStore, executor, shutdownHandler, serviceListener, sessionListener);
+        return new RESTAdapterClient(
+            pathToConfigDirectory,
+            modelStore,
+            executor,
+            shutdownHandler,
+            serviceListener,
+            sessionListener);
     }
     private RESTAdapterClientBuilder finaliseBuilder() throws IOException {
         if (shutdownHandler == null) {
