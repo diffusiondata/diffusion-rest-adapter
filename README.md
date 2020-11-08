@@ -32,8 +32,9 @@ The integration tests assume that the ports 8080, 8081, 8443 and 8444 are availa
 ### adapter-client
 
 The `adapter-client` module creates an executable JAR with all dependencies shaded in.
-It loads the configuration model from the filesystem in the current working directory.
-If the client is closed the JVM process will be terminated.
+It loads the configuration model from the filesystem.
+It defaults to loading the configuration from the current directory but can be passed a directory as a command line argument.
+If the session is lost, the JVM process will be terminated.
 
 ### adapter
 
