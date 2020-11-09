@@ -36,10 +36,20 @@ It loads the configuration model from the filesystem.
 It defaults to loading the configuration from the current directory but can be passed a directory as a command line argument.
 If the session is lost, the JVM process will be terminated.
 
+##### Logging
+
+The `adapter-client` logging uses the log4j2 binding for SLF4J.
+It defaults to logging at info to the console.
+Alternative configuration can be passed using the system property `log4j.configurationFile`.
+
 ### adapter
 
 The `adapter` module is more suitable for embedding the adapter in other applications.
 It expects to be notified of changes to the model instead of reading from the file system.
+
+##### Logging
+
+Any binding for SLF4J can be provided.
 
 ## Connecting to Diffusion
 
