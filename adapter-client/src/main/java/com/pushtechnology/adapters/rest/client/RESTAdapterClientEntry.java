@@ -49,8 +49,13 @@ public final class RESTAdapterClientEntry {
     public static void main(String[] args) throws IOException, InterruptedException {
     // CHECKSTYLE.ON: UncommentedMain
 
+        final String configurationDirectoryProperty = System.getProperty("rest-adapter.configurationDirectory");
+
         final Path pathToConfigDirectory;
-        if (args.length == 0) {
+        if (configurationDirectoryProperty != null) {
+            pathToConfigDirectory = Paths.get(configurationDirectoryProperty).toAbsolutePath();
+        }
+        else if (args.length == 0) {
             pathToConfigDirectory = Paths.get(".").toAbsolutePath();
         }
         else if (args.length == 1) {
