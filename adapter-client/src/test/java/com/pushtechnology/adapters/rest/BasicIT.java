@@ -742,8 +742,9 @@ public final class BasicIT {
         client1.close();
         verify(backupServiceListener, timed()).onRemove(INSECURE_SERVICE);
 
-        verify(stream, timed()).onUnsubscription(eq("rest/json/timestamp"), isNotNull(), eq(REMOVAL));
-        verify(stream, timed()).onUnsubscription(eq("rest/json/increment"), isNotNull(), eq(REMOVAL));
+        // Depends on automatic topic removal
+        verify(stream, timeout(120000L)).onUnsubscription(eq("rest/json/timestamp"), isNotNull(), eq(REMOVAL));
+        verify(stream, timeout(120000L)).onUnsubscription(eq("rest/json/increment"), isNotNull(), eq(REMOVAL));
 
         stopSession(session);
     }
