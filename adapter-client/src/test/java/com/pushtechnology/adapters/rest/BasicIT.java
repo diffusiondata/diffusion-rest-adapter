@@ -27,6 +27,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.after;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
@@ -801,6 +802,37 @@ public final class BasicIT {
             isNotNull(),
             isNull(),
             eq(JSON_CONSTANT));
+
+        stopSession(session);
+        client.close();
+
+        verify(serviceListener, timed()).onRemove(CONSTANT_JSON_SERVICE);
+    }
+
+    @Test
+    public void testConstantValuesNotRemoved() throws IOException {
+        modelStore.setModel(modelWith(CONSTANT_JSON_SERVICE));
+        final RESTAdapterClient client = startClient();
+
+        verify(serviceListener, timed()).onStandby(CONSTANT_JSON_SERVICE);
+        verify(serviceListener, timed()).onActive(CONSTANT_JSON_SERVICE);
+
+        final Session session = startSession();
+
+        final Topics topics = session.feature(Topics.class);
+        topics.addFallbackStream(JSON.class, stream);
+        topics.subscribe("rest/json/constant", callback);
+
+        verify(callback, timed()).onComplete();
+        verify(stream, timed()).onSubscription(eq("rest/json/constant"), isNotNull());
+
+        verify(stream, timed()).onValue(
+            eq("rest/json/constant"),
+            isNotNull(),
+            isNull(),
+            eq(JSON_CONSTANT));
+
+        verify(stream, after(5000L).times(0)).onUnsubscription(eq("rest/json/constant"), isNotNull(), isNotNull());
 
         stopSession(session);
         client.close();
