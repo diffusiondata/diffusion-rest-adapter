@@ -63,11 +63,10 @@ public final class TopicManagementClientImpl implements TopicManagementClient {
         final String topicPath = serviceConfig.getTopicPathRoot() + "/" + endpointConfig.getTopicPath();
         final TopicType topicType = EndpointType.from(produces).getTopicType();
 
-        final long pollPeriodInSeconds = serviceConfig.getPollPeriod() / 1000;
         final TopicSpecification specification = session
             .feature(TopicControl.class)
             .newSpecification(topicType)
-            .withProperty(TopicSpecification.REMOVAL, format("when no updates for %ds", pollPeriodInSeconds * 2));
+            .withProperty(TopicSpecification.REMOVAL, format("when no session has \"$Principal eq '%s'\" for 1m", session.getPrincipal()));
         addTopic(topicPath, specification)
             .thenAccept(x -> callback.onTopicAdded(topicPath))
             .whenComplete((x, t) -> {

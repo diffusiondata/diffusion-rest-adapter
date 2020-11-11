@@ -62,7 +62,7 @@ If recovery fails the client is closed.
 If the initial poll of a REST endpoint fails no topic will be created for it.
 If the topic does not exist with the same metadata or it cannot be created no subsequent polls will be made.
 Redirection responses will be followed.
-Topics will be removed if they are not updated within twice the polling period.
+Topics will be removed if no sessions with the adapter principal are connected.
 
 ## Backup adapter clients
 
