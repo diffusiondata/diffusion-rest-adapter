@@ -104,6 +104,7 @@ public final class TopicManagementClientImplTest {
 
         when(topicCreationListener.onTopicCreationRequest(isNotNull(), isNotNull())).thenReturn(topicCreationCompletionListener);
         when(session.feature(TopicControl.class)).thenReturn(topicControl);
+        when(session.getPrincipal()).thenReturn("adapter");
         when(topicControl.newSpecification(any())).thenReturn(specification);
         when(specification.withProperty(any(), any())).thenReturn(specification);
     }
@@ -128,7 +129,7 @@ public final class TopicManagementClientImplTest {
         verify(topicCreationListener).onTopicCreationRequest("service/jsonEndpoint", TopicType.JSON);
         verify(topicControl).newSpecification(TopicType.JSON);
         verify(topicControl).addTopic("service/jsonEndpoint", specification);
-        verify(specification).withProperty(REMOVAL, "when no updates for 10s");
+        verify(specification).withProperty(REMOVAL, "when no session has \"$Principal eq 'adapter'\" for 1m");
         verify(specification).getType();
 
         verify(addCallback).onDiscard();
@@ -145,7 +146,7 @@ public final class TopicManagementClientImplTest {
         verify(topicCreationListener).onTopicCreationRequest("service/binaryEndpoint", TopicType.BINARY);
         verify(topicControl).newSpecification(TopicType.BINARY);
         verify(topicControl).addTopic("service/binaryEndpoint", specification);
-        verify(specification).withProperty(REMOVAL, "when no updates for 10s");
+        verify(specification).withProperty(REMOVAL, "when no session has \"$Principal eq 'adapter'\" for 1m");
         verify(specification).getType();
 
         verify(addCallback).onDiscard();
@@ -162,7 +163,7 @@ public final class TopicManagementClientImplTest {
         verify(topicCreationListener).onTopicCreationRequest("service/stringEndpoint", TopicType.STRING);
         verify(topicControl).newSpecification(TopicType.STRING);
         verify(topicControl).addTopic("service/stringEndpoint", specification);
-        verify(specification).withProperty(REMOVAL, "when no updates for 10s");
+        verify(specification).withProperty(REMOVAL, "when no session has \"$Principal eq 'adapter'\" for 1m");
         verify(specification).getType();
 
         verify(addCallback).onDiscard();
