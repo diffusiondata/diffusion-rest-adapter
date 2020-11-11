@@ -75,7 +75,11 @@ public final class TopicManagementClientImpl implements TopicManagementClient {
                     if (e instanceof TopicControl.InvalidTopicPathException) {
                         callback.onTopicAddFailed(topicPath, TopicAddFailReason.INVALID_NAME);
                     }
-                    else if (e instanceof TopicControl.IncompatibleExistingTopicException) {
+                    else if (e instanceof TopicControl.IncompatibleTopicException) {
+                        // May be one of:
+                        //   * IncompatibleParentTopicException
+                        //   * IncompatibleExistingTopicException
+                        //   * IncompatibleMasterTopicException
                         callback.onTopicAddFailed(topicPath, TopicAddFailReason.EXISTS_INCOMPATIBLE);
                     }
                     else if (e instanceof TopicControl.TopicLicenseLimitException) {
@@ -83,6 +87,9 @@ public final class TopicManagementClientImpl implements TopicManagementClient {
                     }
                     else if (e instanceof TopicControl.InvalidTopicSpecificationException) {
                         callback.onTopicAddFailed(topicPath, TopicAddFailReason.INVALID_DETAILS);
+                    }
+                    else if (e instanceof TopicControl.ExistingTopicException) {
+                        callback.onTopicAddFailed(topicPath, TopicAddFailReason.EXISTS_MISMATCH);
                     }
                     else {
                         callback.onDiscard();
