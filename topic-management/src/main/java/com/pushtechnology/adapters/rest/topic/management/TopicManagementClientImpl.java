@@ -66,7 +66,9 @@ public final class TopicManagementClientImpl implements TopicManagementClient {
         final TopicSpecification specification = session
             .feature(TopicControl.class)
             .newSpecification(topicType)
-            .withProperty(TopicSpecification.REMOVAL, format("when no session has \"$Principal eq '%s'\" for 1m", session.getPrincipal()));
+            .withProperty(
+                TopicSpecification.REMOVAL,
+                format("when no session has \"$Principal eq '%s'\" for 1m", session.getPrincipal()));
         addTopic(topicPath, specification)
             .thenAccept(x -> callback.onTopicAdded(topicPath))
             .whenComplete((x, t) -> {
