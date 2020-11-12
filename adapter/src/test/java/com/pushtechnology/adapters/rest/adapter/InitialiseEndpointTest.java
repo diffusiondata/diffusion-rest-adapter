@@ -19,7 +19,6 @@ import static java.util.Collections.emptyList;
 import static java.util.concurrent.CompletableFuture.completedFuture;
 import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.isA;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -28,6 +27,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.concurrent.CompletableFuture;
 
 import org.junit.After;
 import org.junit.Before;
@@ -42,7 +42,6 @@ import com.pushtechnology.adapters.rest.publication.PublishingClient;
 import com.pushtechnology.adapters.rest.publication.UpdateContext;
 import com.pushtechnology.adapters.rest.services.ServiceSession;
 import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.AddCallback;
 
 /**
  * Unit tests for {@link InitialiseEndpoint}.
@@ -95,6 +94,7 @@ public final class InitialiseEndpointTest {
         when(response.getHeader("content-type")).thenReturn("application/json; charset=utf-8");
         when(response.getResponse()).thenReturn("{}".getBytes(Charset.forName("UTF-8")));
         when(publishingClient.createUpdateContext(eq(serviceConfig), eq(endpointConfig), isNotNull(), isNotNull())).thenReturn(updateContext);
+        when(topicManagementClient.addEndpoint(serviceConfig, endpointConfig)).thenReturn(CompletableFuture.completedFuture(null));
 
         initialiseEndpoint = new InitialiseEndpoint(
             endpointClient,
@@ -111,7 +111,7 @@ public final class InitialiseEndpointTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void accept() throws IOException {
+    public void accept() {
         when(endpointClient.request(eq(serviceConfig), eq(endpointConfig))).thenReturn(completedFuture(response));
 
         initialiseEndpoint.accept(endpointConfig);
@@ -122,15 +122,15 @@ public final class InitialiseEndpointTest {
         verify(response).getResponse();
         verify(topicManagementClient).addEndpoint(
             eq(serviceConfig),
-            eq(endpointConfig),
-            isA(AddCallback.class));
+            eq(endpointConfig));
         verify(publishingClient).createUpdateContext(eq(serviceConfig), eq(endpointConfig), isNotNull(), isNotNull());
         verify(updateContext).publish(isNotNull());
+        verify(serviceSession).addEndpoint(endpointConfig);
     }
 
     @SuppressWarnings("unchecked")
     @Test
-    public void acceptInfer() throws IOException {
+    public void acceptInfer() {
         when(endpointClient.request(eq(serviceConfig), eq(inferEndpointConfig))).thenReturn(completedFuture(response));
 
         initialiseEndpoint.accept(inferEndpointConfig);
@@ -142,9 +142,9 @@ public final class InitialiseEndpointTest {
 
         verify(topicManagementClient).addEndpoint(
             eq(serviceConfig),
-            eq(endpointConfig),
-            isA(AddCallback.class));
+            eq(endpointConfig));
         verify(publishingClient).createUpdateContext(eq(serviceConfig), eq(endpointConfig), isNotNull(), isNotNull());
         verify(updateContext).publish(isNotNull());
+        verify(serviceSession).addEndpoint(endpointConfig);
     }
 }

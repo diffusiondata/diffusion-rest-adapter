@@ -55,8 +55,6 @@ public final class TopicManagementClientImplTest {
     @Mock
     private TopicControl topicControl;
     @Mock
-    private TopicControl.AddCallback addCallback;
-    @Mock
     private TopicCreationListener topicCreationListener;
     @Mock
     private TopicCreationCompletionListener topicCreationCompletionListener;
@@ -111,7 +109,7 @@ public final class TopicManagementClientImplTest {
 
     @After
     public void postConditions() {
-        verifyNoMoreInteractions(topicControl, addCallback, topicCreationListener, topicCreationCompletionListener, specification);
+        verifyNoMoreInteractions(topicControl, topicCreationListener, topicCreationCompletionListener, specification);
     }
 
     @Test
@@ -124,7 +122,7 @@ public final class TopicManagementClientImplTest {
         when(specification.getType()).thenReturn(TopicType.JSON);
         when(topicControl.addTopic(isNotNull(), ArgumentMatchers.<TopicSpecification>isNotNull())).thenReturn(cf(new SessionDisconnectedException()));
 
-        topicManagementClient.addEndpoint(serviceConfig, jsonEndpointConfig, addCallback);
+        topicManagementClient.addEndpoint(serviceConfig, jsonEndpointConfig);
 
         verify(topicCreationListener).onTopicCreationRequest("service/jsonEndpoint", TopicType.JSON);
         verify(topicControl).newSpecification(TopicType.JSON);
@@ -132,7 +130,6 @@ public final class TopicManagementClientImplTest {
         verify(specification).withProperty(REMOVAL, "when no session has \"$Principal eq 'adapter'\" for 1m");
         verify(specification).getType();
 
-        verify(addCallback).onDiscard();
         verify(topicCreationCompletionListener).onTopicCreationFailed(TopicAddFailReason.UNEXPECTED_ERROR);
     }
 
@@ -141,7 +138,7 @@ public final class TopicManagementClientImplTest {
         when(specification.getType()).thenReturn(TopicType.BINARY);
         when(topicControl.addTopic(isNotNull(), ArgumentMatchers.<TopicSpecification>isNotNull())).thenReturn(cf(new SessionDisconnectedException()));
 
-        topicManagementClient.addEndpoint(serviceConfig, binaryEndpointConfig, addCallback);
+        topicManagementClient.addEndpoint(serviceConfig, binaryEndpointConfig);
 
         verify(topicCreationListener).onTopicCreationRequest("service/binaryEndpoint", TopicType.BINARY);
         verify(topicControl).newSpecification(TopicType.BINARY);
@@ -149,7 +146,6 @@ public final class TopicManagementClientImplTest {
         verify(specification).withProperty(REMOVAL, "when no session has \"$Principal eq 'adapter'\" for 1m");
         verify(specification).getType();
 
-        verify(addCallback).onDiscard();
         verify(topicCreationCompletionListener).onTopicCreationFailed(TopicAddFailReason.UNEXPECTED_ERROR);
     }
 
@@ -158,7 +154,7 @@ public final class TopicManagementClientImplTest {
         when(specification.getType()).thenReturn(TopicType.STRING);
         when(topicControl.addTopic(isNotNull(), ArgumentMatchers.<TopicSpecification>isNotNull())).thenReturn(cf(new SessionDisconnectedException()));
 
-        topicManagementClient.addEndpoint(serviceConfig, stringEndpointConfig, addCallback);
+        topicManagementClient.addEndpoint(serviceConfig, stringEndpointConfig);
 
         verify(topicCreationListener).onTopicCreationRequest("service/stringEndpoint", TopicType.STRING);
         verify(topicControl).newSpecification(TopicType.STRING);
@@ -166,7 +162,6 @@ public final class TopicManagementClientImplTest {
         verify(specification).withProperty(REMOVAL, "when no session has \"$Principal eq 'adapter'\" for 1m");
         verify(specification).getType();
 
-        verify(addCallback).onDiscard();
         verify(topicCreationCompletionListener).onTopicCreationFailed(TopicAddFailReason.UNEXPECTED_ERROR);
     }
 

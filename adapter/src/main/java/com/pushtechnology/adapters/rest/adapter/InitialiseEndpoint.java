@@ -30,6 +30,7 @@ import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.polling.EndpointClient;
 import com.pushtechnology.adapters.rest.polling.EndpointResponse;
 import com.pushtechnology.adapters.rest.publication.PublishingClient;
+import com.pushtechnology.adapters.rest.publication.UpdateContext;
 import com.pushtechnology.adapters.rest.services.ServiceSession;
 import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
 
@@ -108,17 +109,22 @@ import kotlin.Pair;
             EndpointResponse response) throws Exception {
 
         final T value = endpointType.getParser().transform(response);
-        final AddTopicForEndpoint<T> handler = new AddTopicForEndpoint<>(
-            topicManagementClient,
+        final UpdateContext<T> updateContext = publishingClient.createUpdateContext(
             service,
             endpointConfig,
-            publishingClient.createUpdateContext(
-                service,
-                endpointConfig,
-                endpointType.getValueType(),
-                endpointType.getDataType()),
-            new AddEndpointToServiceSession(endpointConfig, serviceSession));
+            endpointType.getValueType(),
+            endpointType.getDataType());
 
-        handler.accept(value, null);
+        topicManagementClient
+            .addEndpoint(service, endpointConfig)
+            .thenRun(() -> {
+                LOG.info("Endpoint {} exists, adding endpoint to service session", endpointConfig);
+                serviceSession.addEndpoint(endpointConfig);
+                updateContext.publish(value);
+            })
+            .exceptionally(ex -> {
+                LOG.warn("Topic creation failed for {} because {}", endpointConfig, ex.getMessage());
+                return null;
+            });
     }
 }

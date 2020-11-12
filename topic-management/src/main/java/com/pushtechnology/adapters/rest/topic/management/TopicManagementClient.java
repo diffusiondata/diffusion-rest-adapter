@@ -19,7 +19,6 @@ import java.util.concurrent.CompletableFuture;
 
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.AddCallback;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
 
 /**
@@ -37,9 +36,9 @@ public interface TopicManagementClient {
      * Start managing the topic for a REST endpoint.
      * @param serviceConfig the service of the endpoint
      * @param endpointConfig the endpoint
-     * @param callback callback for completion. The onTopicAddFailed with the reason EXISTS.
+     * @return a future representing the completion of adding the endpoint topic
      */
-    void addEndpoint(ServiceConfig serviceConfig, EndpointConfig endpointConfig, AddCallback callback);
+    CompletableFuture<Void> addEndpoint(ServiceConfig serviceConfig, EndpointConfig endpointConfig);
 
     /**
      * Remove the topic for a REST endpoint.

@@ -27,7 +27,6 @@ import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicAddFailReason;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.AddCallback;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
@@ -54,10 +53,9 @@ public final class TopicManagementClientImpl implements TopicManagementClient {
     }
 
     @Override
-    public void addEndpoint(
+    public CompletableFuture<Void> addEndpoint(
             ServiceConfig serviceConfig,
-            EndpointConfig endpointConfig,
-            AddCallback callback) {
+            EndpointConfig endpointConfig) {
 
         final String produces = endpointConfig.getProduces();
         final String topicPath = serviceConfig.getTopicPathRoot() + "/" + endpointConfig.getTopicPath();
@@ -69,38 +67,8 @@ public final class TopicManagementClientImpl implements TopicManagementClient {
             .withProperty(
                 TopicSpecification.REMOVAL,
                 format("when no session has \"$Principal eq '%s'\" for 1m", session.getPrincipal()));
-        addTopic(topicPath, specification)
-            .thenAccept(x -> callback.onTopicAdded(topicPath))
-            .whenComplete((x, t) -> {
-                if (t instanceof CompletionException) {
-                    final Throwable e = t.getCause();
-                    if (e instanceof TopicControl.InvalidTopicPathException) {
-                        callback.onTopicAddFailed(topicPath, TopicAddFailReason.INVALID_NAME);
-                    }
-                    else if (e instanceof TopicControl.IncompatibleTopicException) {
-                        // May be one of:
-                        //   * IncompatibleParentTopicException
-                        //   * IncompatibleExistingTopicException
-                        //   * IncompatibleMasterTopicException
-                        callback.onTopicAddFailed(topicPath, TopicAddFailReason.EXISTS_INCOMPATIBLE);
-                    }
-                    else if (e instanceof TopicControl.TopicLicenseLimitException) {
-                        callback.onTopicAddFailed(topicPath, TopicAddFailReason.EXCEEDED_LICENSE_LIMIT);
-                    }
-                    else if (e instanceof TopicControl.InvalidTopicSpecificationException) {
-                        callback.onTopicAddFailed(topicPath, TopicAddFailReason.INVALID_DETAILS);
-                    }
-                    else if (e instanceof TopicControl.ExistingTopicException) {
-                        callback.onTopicAddFailed(topicPath, TopicAddFailReason.EXISTS_MISMATCH);
-                    }
-                    else {
-                        callback.onDiscard();
-                    }
-                }
-                else if (t != null) {
-                    callback.onDiscard();
-                }
-            });
+
+        return addTopic(topicPath, specification);
     }
 
     @Override
