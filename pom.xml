@@ -19,7 +19,6 @@
         <module>build-rules</module>
         <module>configuration-model</module>
         <module>configuration-model-conversion</module>
-        <module>configuration-persistence</module>
         <module>configuration-store</module>
         <module>endpoints</module>
         <module>metrics</module>
@@ -84,12 +83,6 @@
             <dependency>
                 <groupId>com.pushtechnology.adapters.rest</groupId>
                 <artifactId>configuration-model-conversion</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.pushtechnology.adapters.rest</groupId>
-                <artifactId>configuration-persistence</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
