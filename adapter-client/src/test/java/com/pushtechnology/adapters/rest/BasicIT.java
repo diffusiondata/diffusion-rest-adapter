@@ -387,7 +387,7 @@ public final class BasicIT {
 
         final HttpConfiguration httpsConfiguration = new HttpConfiguration();
         httpsConfiguration.addCustomizer(new SecureRequestCustomizer());
-        SslContextFactory sslContextFactory = new SslContextFactory(true);
+        SslContextFactory sslContextFactory = new SslContextFactory.Client(true);
         sslContextFactory.setKeyStorePath(BasicIT.class.getResource("/testKeystore.jks").toExternalForm());
         sslContextFactory.setKeyStorePassword("password");
         sslContextFactory.setExcludeProtocols();
