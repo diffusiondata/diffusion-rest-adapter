@@ -52,7 +52,6 @@ import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.features.Topics;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
-import com.pushtechnology.diffusion.datatype.binary.Binary;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
 /**
@@ -85,10 +84,6 @@ public final class LiveIT {
     private ServiceListener backupServiceListener;
     @Mock
     private Topics.ValueStream<JSON> stream;
-    @Mock
-    private Topics.ValueStream<Binary> binaryStream;
-    @Mock
-    private Topics.CompletionCallback callback;
 
     private MutableModelStore modelStore;
 
@@ -101,7 +96,7 @@ public final class LiveIT {
 
     @After
     public void postConditions() {
-        verifyNoMoreInteractions(listener, callback, serviceListener, backupServiceListener);
+        verifyNoMoreInteractions(listener, serviceListener, backupServiceListener);
     }
 
     @Test
@@ -141,9 +136,8 @@ public final class LiveIT {
 
         final Topics topics = session.feature(Topics.class);
         topics.addFallbackStream(JSON.class, stream);
-        topics.subscribe("?icndb/", callback);
+        topics.subscribe("?icndb/");
 
-        verify(callback, timed()).onComplete();
         verify(stream, timed()).onSubscription(eq("icndb/random"), isA(TopicSpecification.class));
 
         verify(stream, timed()).onValue(eq("icndb/random"), isA(TopicSpecification.class), isNull(), isA(JSON.class));
