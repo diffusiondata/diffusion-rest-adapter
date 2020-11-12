@@ -252,6 +252,7 @@ public final class AsyncMutableModelStore implements ModelStore {
      * @param newModel the new model
      * @return the store
      */
+    @SuppressWarnings("PMD.LinguisticNaming")
     public AsyncMutableModelStore setModel(Model newModel) {
         return apply(oldModel -> newModel);
     }

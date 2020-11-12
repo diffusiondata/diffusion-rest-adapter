@@ -40,6 +40,7 @@ public final class MutableModelStore extends AbstractModelStore {
      * @param newModel the new model
      * @return the store
      */
+    @SuppressWarnings("PMD.LinguisticNaming")
     public synchronized MutableModelStore setModel(Model newModel) {
         if (newModel.equals(model)) {
             return this;

@@ -46,6 +46,7 @@ public final class RESTAdapterClientEntry {
      * @throws InterruptedException if the thread was interrupted
      */
     // CHECKSTYLE.OFF: UncommentedMain
+    @SuppressWarnings("PMD.DoNotCallSystemExit") // Exit is called during start up
     public static void main(String[] args) throws IOException, InterruptedException {
     // CHECKSTYLE.ON: UncommentedMain
 
