@@ -18,8 +18,10 @@ package com.pushtechnology.adapters.rest.adapter;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.concurrent.CompletableFuture.completedFuture;
+import static org.mockito.AdditionalAnswers.answer;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNotNull;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -33,6 +35,7 @@ import java.util.function.Consumer;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.AdditionalAnswers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -139,6 +142,7 @@ public final class ServiceSessionStarterImplTest {
         when(topicManagementClient.addEndpoint(isNotNull(), isNotNull())).thenReturn(CompletableFuture.completedFuture(null));
         when(publishingClient.addService(isNotNull())).thenReturn(source);
         when(publishingClient.createUpdateContext(isNotNull(), isNotNull(), isNotNull(), eq(Diffusion.dataTypes().json()))).thenReturn(updateContext);
+        doAnswer(answer((ServiceConfig service, Runnable task) -> { task.run(); return null; })).when(publishingClient).forService(isNotNull(), isNotNull());
         when(source.onStandby(isNotNull())).thenReturn(source);
         when(source.onActive(isNotNull())).thenReturn(source);
         when(source.onClose(isNotNull())).thenReturn(source);
@@ -223,6 +227,7 @@ public final class ServiceSessionStarterImplTest {
         verify(publishingClient).createUpdateContext(eq(serviceWithEndpoint), eq(endpointConfig), isNotNull(), isNotNull());
         verify(updateContext).publish(isNotNull());
         verify(serviceSession).addEndpoint(endpointConfig);
+        verify(publishingClient).forService(eq(serviceWithEndpoint), isNotNull());
     }
 
     @Test
@@ -250,5 +255,6 @@ public final class ServiceSessionStarterImplTest {
         verify(publishingClient).createUpdateContext(eq(serviceWithInferedEndpoint), eq(endpointConfig), isNotNull(), isNotNull());
         verify(updateContext).publish(isNotNull());
         verify(serviceSession).addEndpoint(endpointConfig);
+        verify(publishingClient).forService(eq(serviceWithInferedEndpoint), isNotNull());
     }
 }

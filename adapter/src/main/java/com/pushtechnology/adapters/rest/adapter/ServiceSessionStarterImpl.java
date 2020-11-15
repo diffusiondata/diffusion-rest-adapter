@@ -28,7 +28,6 @@ import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.polling.EndpointClient;
 import com.pushtechnology.adapters.rest.polling.EndpointResponse;
 import com.pushtechnology.adapters.rest.publication.PublishingClient;
-import com.pushtechnology.adapters.rest.publication.UpdateContext;
 import com.pushtechnology.adapters.rest.services.ServiceSession;
 import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
 
@@ -133,18 +132,19 @@ public final class ServiceSessionStarterImpl implements ServiceSessionStarter {
         EndpointResponse response) throws Exception {
 
         final T value = endpointType.getParser().transform(response);
-        final UpdateContext<T> updateContext = publishingClient.createUpdateContext(
-            service,
-            endpointConfig,
-            endpointType.getValueType(),
-            endpointType.getDataType());
-
         topicManagementClient
             .addEndpoint(service, endpointConfig)
             .thenRun(() -> {
-                LOG.info("Endpoint {} exists, adding endpoint to service session", endpointConfig);
-                serviceSession.addEndpoint(endpointConfig);
-                updateContext.publish(value);
+                // If the service has been closed it will have been removed from the publishing client
+                publishingClient.forService(service, () -> {
+                    LOG.info("Endpoint {} exists, adding endpoint to service session", endpointConfig);
+                    serviceSession.addEndpoint(endpointConfig);
+                    publishingClient.createUpdateContext(
+                        service,
+                        endpointConfig,
+                        endpointType.getValueType(),
+                        endpointType.getDataType()).publish(value);
+                });
             })
             .exceptionally(ex -> {
                 LOG.warn("Topic creation failed for {} because {}", endpointConfig, ex.getMessage());

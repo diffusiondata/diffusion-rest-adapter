@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2019 Push Technology Ltd.
+ * Copyright (C) 2020 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,11 @@ public interface PublishingClient {
      * Remove a service.
      */
     CompletableFuture<ServiceConfig> removeService(ServiceConfig serviceConfig);
+
+    /**
+     * Run a task if the service is registered with the client.
+     */
+    void forService(ServiceConfig serviceConfig, Runnable task);
 
     /**
      * Create an update context using an exclusive updater for the service.

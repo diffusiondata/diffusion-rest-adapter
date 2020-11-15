@@ -103,6 +103,13 @@ public final class PublishingClientImpl implements PublishingClient {
     }
 
     @Override
+    public synchronized void forService(ServiceConfig serviceConfig, Runnable task) {
+        if (updaterSources.containsKey(serviceConfig)) {
+            task.run();
+        }
+    }
+
+    @Override
     public synchronized <T> UpdateContext<T> createUpdateContext(
             ServiceConfig serviceConfig,
             EndpointConfig endpointConfig,
