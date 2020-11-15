@@ -103,7 +103,7 @@ public final class PublishingClientImpl implements PublishingClient {
     }
 
     @Override
-    public <T> UpdateContext<T> createUpdateContext(
+    public synchronized <T> UpdateContext<T> createUpdateContext(
             ServiceConfig serviceConfig,
             EndpointConfig endpointConfig,
             Class<T> valueType,
