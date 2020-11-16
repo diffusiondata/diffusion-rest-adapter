@@ -44,6 +44,7 @@ public final class EndpointResponseToStringTransformerTest {
     @Before
     public void setUp() {
         initMocks(this);
+        when(endpointResponse.getContentType()).thenCallRealMethod();
     }
 
     @Test

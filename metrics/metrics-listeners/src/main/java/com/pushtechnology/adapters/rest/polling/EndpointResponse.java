@@ -39,4 +39,11 @@ public interface EndpointResponse {
      * @return the response length
      */
     int getResponseLength();
+
+    /**
+     * @return the value of the content type header
+     */
+    default String getContentType() {
+        return getHeader("content-type");
+    }
 }

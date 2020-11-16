@@ -137,6 +137,7 @@ public final class ServiceSessionStarterImplTest {
             publishingClient,
             serviceListener);
 
+        when(response.getContentType()).thenCallRealMethod();
         when(response.getHeader("content-type")).thenReturn("application/json; charset=utf-8");
         when(response.getResponse()).thenReturn("{}".getBytes(Charset.forName("UTF-8")));
         when(topicManagementClient.addEndpoint(isNotNull(), isNotNull())).thenReturn(CompletableFuture.completedFuture(null));
@@ -219,7 +220,8 @@ public final class ServiceSessionStarterImplTest {
         verify(serviceSession).start();
         verify(endpointClient).request(eq(serviceWithEndpoint), eq(endpointConfig));
 
-        verify(response,times(2)).getHeader("content-type");
+        verify(response, times(2)).getHeader("content-type");
+        verify(response, times(2)).getContentType();
         verify(response).getResponse();
         verify(topicManagementClient).addEndpoint(
             eq(serviceWithEndpoint),
@@ -247,6 +249,7 @@ public final class ServiceSessionStarterImplTest {
         verify(endpointClient).request(eq(serviceWithInferedEndpoint), eq(inferEndpointConfig));
 
         verify(response, times(3)).getHeader("content-type");
+        verify(response, times(3)).getContentType();
         verify(response).getResponse();
 
         verify(topicManagementClient).addEndpoint(

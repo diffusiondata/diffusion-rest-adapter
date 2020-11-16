@@ -67,6 +67,8 @@ public final class ValidateContentTypeTest {
     public void setUp() {
         initMocks(this);
 
+        when(endpointResponse.getContentType()).thenCallRealMethod();
+
         validate = new ValidateContentType();
     }
 
@@ -80,6 +82,7 @@ public final class ValidateContentTypeTest {
         validate.apply(new Pair<>(jsonEndpoint, endpointResponse));
 
         verify(endpointResponse).getHeader("content-type");
+        verify(endpointResponse).getContentType();
     }
 
     @Test
@@ -87,6 +90,7 @@ public final class ValidateContentTypeTest {
         validate.apply(new Pair<>(plainEndpoint, endpointResponse));
 
         verify(endpointResponse).getHeader("content-type");
+        verify(endpointResponse).getContentType();
     }
 
     @Test
@@ -94,6 +98,7 @@ public final class ValidateContentTypeTest {
         validate.apply(new Pair<>(binaryEndpoint, endpointResponse));
 
         verify(endpointResponse).getHeader("content-type");
+        verify(endpointResponse).getContentType();
     }
 
     @Test
@@ -102,6 +107,7 @@ public final class ValidateContentTypeTest {
         validate.apply(new Pair<>(jsonEndpoint, endpointResponse));
 
         verify(endpointResponse).getHeader("content-type");
+        verify(endpointResponse).getContentType();
     }
 
     @Test
@@ -110,6 +116,7 @@ public final class ValidateContentTypeTest {
         validate.apply(new Pair<>(plainEndpoint, endpointResponse));
 
         verify(endpointResponse).getHeader("content-type");
+        verify(endpointResponse).getContentType();
     }
 
     @Test
@@ -118,6 +125,7 @@ public final class ValidateContentTypeTest {
         validate.apply(new Pair<>(binaryEndpoint, endpointResponse));
 
         verify(endpointResponse).getHeader("content-type");
+        verify(endpointResponse).getContentType();
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -128,6 +136,7 @@ public final class ValidateContentTypeTest {
         }
         finally {
             verify(endpointResponse).getHeader("content-type");
+            verify(endpointResponse).getContentType();
         }
     }
 
@@ -137,6 +146,7 @@ public final class ValidateContentTypeTest {
         validate.apply(new Pair<>(plainEndpoint, endpointResponse));
 
         verify(endpointResponse).getHeader("content-type");
+        verify(endpointResponse).getContentType();
     }
 
     @Test
@@ -145,5 +155,6 @@ public final class ValidateContentTypeTest {
         validate.apply(new Pair<>(binaryEndpoint, endpointResponse));
 
         verify(endpointResponse).getHeader("content-type");
+        verify(endpointResponse).getContentType();
     }
 }

@@ -45,7 +45,7 @@ import com.pushtechnology.diffusion.transform.transformer.UnsafeTransformer;
     }
 
     private Charset getResponseCharset(EndpointResponse response) throws UnsupportedCharsetException {
-        final String contentType = response.getHeader("content-type");
+        final String contentType = response.getContentType();
         if (contentType != null) {
             final Matcher matcher = CHARSET_PATTERN.matcher(contentType);
 

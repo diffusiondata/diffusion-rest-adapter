@@ -106,7 +106,7 @@ public final class ServiceSessionStarterImpl implements ServiceSessionStarter {
     private EndpointConfig resolveEndpointConfig(EndpointConfig endpointConfig, EndpointResponse response) {
         final String produces = endpointConfig.getProduces();
         if ("auto".equals(produces)) {
-            return inferEndpointConfig(inferFromContentType(response.getHeader("content-type")), endpointConfig);
+            return inferEndpointConfig(inferFromContentType(response.getContentType()), endpointConfig);
         }
         else {
             return endpointConfig;

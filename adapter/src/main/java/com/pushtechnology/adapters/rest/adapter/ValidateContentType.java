@@ -33,7 +33,7 @@ public final class ValidateContentType
 
     @Override
     public Pair<EndpointConfig, EndpointResponse> apply(Pair<EndpointConfig, EndpointResponse> configAndResult) {
-        final String contentType = configAndResult.getSecond().getHeader("content-type");
+        final String contentType = configAndResult.getSecond().getContentType();
         if (contentType == null) {
             // Assume correct when no content type provided
             return configAndResult;
