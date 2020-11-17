@@ -21,11 +21,6 @@
         </dependency>
 
         <dependency>
-            <groupId>com.pushtechnology.adapters.rest</groupId>
-            <artifactId>publication</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>com.pushtechnology.diffusion</groupId>
             <artifactId>diffusion-client</artifactId>
         </dependency>

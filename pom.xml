@@ -23,7 +23,6 @@
         <module>endpoints</module>
         <module>metrics</module>
         <module>polling</module>
-        <module>publication</module>
         <module>services</module>
         <module>session-management</module>
         <module>topic-management</module>
@@ -125,12 +124,6 @@
             <dependency>
                 <groupId>com.pushtechnology.adapters.rest</groupId>
                 <artifactId>polling</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.pushtechnology.adapters.rest</groupId>
-                <artifactId>publication</artifactId>
                 <version>${project.version}</version>
             </dependency>
 

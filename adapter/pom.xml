@@ -17,11 +17,6 @@
 
         <dependency>
             <groupId>com.pushtechnology.adapters.rest</groupId>
-            <artifactId>publication</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.pushtechnology.adapters.rest</groupId>
             <artifactId>services</artifactId>
         </dependency>
 
