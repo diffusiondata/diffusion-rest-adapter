@@ -28,6 +28,7 @@ import javax.net.ssl.SSLContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.pushtechnology.adapters.rest.endpoints.EndpointType;
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.MetricsConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
@@ -197,6 +198,7 @@ public final class InternalRESTAdapter implements RESTAdapterListener, AutoClose
         else if (isNotPolling(currentModel)) {
             diffusionSession = session;
             topicManagementClient = new TopicManagementClientImpl(
+                identifier -> EndpointType.from(identifier).getTopicType(),
                 metricsDispatcher,
                 diffusionSession);
             publishingClient = new PublishingClientImpl(
@@ -209,6 +211,7 @@ public final class InternalRESTAdapter implements RESTAdapterListener, AutoClose
         else {
             diffusionSession = session;
             topicManagementClient = new TopicManagementClientImpl(
+                identifier -> EndpointType.from(identifier).getTopicType(),
                 metricsDispatcher,
                 diffusionSession);
             publishingClient = new PublishingClientImpl(

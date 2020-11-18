@@ -26,6 +26,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.function.Function;
 
 import org.junit.After;
 import org.junit.Before;
@@ -93,12 +94,29 @@ public final class TopicManagementClientImplTest {
         .build();
 
     private TopicManagementClient topicManagementClient;
+    private Function<String, TopicType> topicTypeLookup;
 
     @Before
     public void setUp() {
         initMocks(this);
 
-        topicManagementClient = new TopicManagementClientImpl(topicCreationListener, session);
+        topicTypeLookup = new Function<String, TopicType>() {
+            @Override
+            public TopicType apply(String identifier) {
+                switch (identifier) {
+                    case "json":
+                        return TopicType.JSON;
+                    case "binary":
+                        return TopicType.BINARY;
+                    case "string":
+                        return TopicType.STRING;
+                    default:
+                        throw new IllegalArgumentException("Unknown identifier " + identifier);
+                }
+            }
+        };
+
+        topicManagementClient = new TopicManagementClientImpl(topicTypeLookup, topicCreationListener, session);
 
         when(topicCreationListener.onTopicCreationRequest(isNotNull(), isNotNull())).thenReturn(topicCreationCompletionListener);
         when(session.feature(TopicControl.class)).thenReturn(topicControl);

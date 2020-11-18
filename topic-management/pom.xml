@@ -12,11 +12,6 @@
     <dependencies>
         <dependency>
             <groupId>com.pushtechnology.adapters.rest</groupId>
-            <artifactId>endpoints</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.pushtechnology.adapters.rest</groupId>
             <artifactId>session-management</artifactId>
         </dependency>
 

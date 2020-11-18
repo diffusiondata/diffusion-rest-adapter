@@ -19,8 +19,8 @@ import static java.lang.String.format;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.function.Function;
 
-import com.pushtechnology.adapters.rest.endpoints.EndpointType;
 import com.pushtechnology.adapters.rest.metrics.listeners.TopicCreationListener;
 import com.pushtechnology.adapters.rest.metrics.listeners.TopicCreationListener.TopicCreationCompletionListener;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
@@ -37,13 +37,18 @@ import com.pushtechnology.diffusion.client.topics.details.TopicType;
  * @author Push Technology Limited
  */
 public final class TopicManagementClientImpl implements TopicManagementClient {
+    private final Function<String, TopicType> topicTypeLookup;
     private final TopicCreationListener topicCreationListener;
     private final Session session;
 
     /**
      * Constructor.
      */
-    public TopicManagementClientImpl(TopicCreationListener topicCreationListener, Session session) {
+    public TopicManagementClientImpl(
+            Function<String, TopicType> topicTypeLookup,
+            TopicCreationListener topicCreationListener,
+            Session session) {
+        this.topicTypeLookup = topicTypeLookup;
         this.topicCreationListener = topicCreationListener;
         this.session = session;
     }
@@ -57,9 +62,8 @@ public final class TopicManagementClientImpl implements TopicManagementClient {
             ServiceConfig serviceConfig,
             EndpointConfig endpointConfig) {
 
-        final String produces = endpointConfig.getProduces();
         final String topicPath = serviceConfig.getTopicPathRoot() + "/" + endpointConfig.getTopicPath();
-        final TopicType topicType = EndpointType.from(produces).getTopicType();
+        final TopicType topicType = topicTypeLookup.apply(endpointConfig.getProduces());
 
         final TopicSpecification specification = session
             .feature(TopicControl.class)
