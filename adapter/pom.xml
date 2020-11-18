@@ -17,11 +17,6 @@
 
         <dependency>
             <groupId>com.pushtechnology.adapters.rest</groupId>
-            <artifactId>endpoints</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.pushtechnology.adapters.rest</groupId>
             <artifactId>services</artifactId>
         </dependency>
 
@@ -38,6 +33,11 @@
         <dependency>
             <groupId>com.pushtechnology.adapters.rest</groupId>
             <artifactId>metric-reporting</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.pushtechnology.diffusion.transform</groupId>
+            <artifactId>transformers</artifactId>
         </dependency>
 
         <dependency>

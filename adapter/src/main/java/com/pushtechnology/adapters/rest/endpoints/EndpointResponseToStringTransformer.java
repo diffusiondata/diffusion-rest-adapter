@@ -17,7 +17,6 @@ package com.pushtechnology.adapters.rest.endpoints;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.nio.charset.UnsupportedCharsetException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -40,11 +39,11 @@ import com.pushtechnology.diffusion.transform.transformer.UnsafeTransformer;
     }
 
     @Override
-    public String transform(EndpointResponse response) throws UnsupportedCharsetException {
+    public String transform(EndpointResponse response) {
         return new String(response.getResponse(), getResponseCharset(response));
     }
 
-    private Charset getResponseCharset(EndpointResponse response) throws UnsupportedCharsetException {
+    private Charset getResponseCharset(EndpointResponse response) {
         final String contentType = response.getContentType();
         if (contentType != null) {
             final Matcher matcher = CHARSET_PATTERN.matcher(contentType);

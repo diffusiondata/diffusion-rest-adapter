@@ -20,7 +20,6 @@
         <module>configuration-model</module>
         <module>configuration-model-conversion</module>
         <module>configuration-store</module>
-        <module>endpoints</module>
         <module>metrics</module>
         <module>polling</module>
         <module>services</module>
@@ -88,12 +87,6 @@
             <dependency>
                 <groupId>com.pushtechnology.adapters.rest</groupId>
                 <artifactId>configuration-store</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.pushtechnology.adapters.rest</groupId>
-                <artifactId>endpoints</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
