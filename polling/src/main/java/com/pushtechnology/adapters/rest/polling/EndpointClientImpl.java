@@ -20,12 +20,11 @@ import java.util.concurrent.CompletableFuture;
 
 import javax.net.ssl.SSLContext;
 
-import org.apache.http.HttpHost;
-import org.apache.http.HttpResponse;
-import org.apache.http.StatusLine;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.concurrent.FutureCallback;
-import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
+import org.apache.hc.client5.http.async.methods.SimpleHttpRequest;
+import org.apache.hc.client5.http.async.methods.SimpleHttpResponse;
+import org.apache.hc.client5.http.impl.async.CloseableHttpAsyncClient;
+import org.apache.hc.core5.concurrent.FutureCallback;
+import org.apache.hc.core5.http.HttpHost;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,26 +77,24 @@ public final class EndpointClientImpl implements EndpointClient {
 
         final CompletableFuture<EndpointResponse> result = new CompletableFuture<>();
         client.execute(
-            new HttpHost(serviceConfig.getHost(), serviceConfig.getPort(), serviceConfig.isSecure() ? "https" : "http"),
-            new HttpGet(endpointConfig.getUrl()),
-            new FutureCallback<HttpResponse>() {
+            new SimpleHttpRequest(
+                "GET",
+                new HttpHost(
+                    serviceConfig.isSecure() ? "https" : "http", serviceConfig.getHost(),
+                    serviceConfig.getPort()),
+                endpointConfig.getUrl()),
+            new FutureCallback<>() {
                 @Override
-                public void completed(HttpResponse httpResponse) {
-                    final StatusLine statusLine = httpResponse.getStatusLine();
-                    if (statusLine.getStatusCode() >= 400) {
-                        result.completeExceptionally(new Exception("Received response " + statusLine));
+                public void completed(SimpleHttpResponse httpResponse) {
+                    if (httpResponse.getCode() >= 400) {
+                        result.completeExceptionally(
+                            new Exception("Received response " + httpResponse.getReasonPhrase()));
                         return;
                     }
 
-                    try {
-                        final EndpointResponse response = EndpointResponseImpl.create(httpResponse);
-                        completionListener.onPollResponse(response);
-                        result.complete(response);
-                    }
-                    catch (IOException e) {
-                        completionListener.onPollFailure(e);
-                        result.completeExceptionally(e);
-                    }
+                    final EndpointResponse response = EndpointResponseImpl.create(httpResponse);
+                    completionListener.onPollResponse(response);
+                    result.complete(response);
                 }
 
                 @Override

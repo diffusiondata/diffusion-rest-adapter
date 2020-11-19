@@ -17,13 +17,10 @@ package com.pushtechnology.adapters.rest.polling;
 
 import static org.junit.Assert.assertEquals;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-import org.apache.http.ProtocolVersion;
-import org.apache.http.entity.BasicHttpEntity;
-import org.apache.http.message.BasicHttpResponse;
+import org.apache.hc.client5.http.async.methods.SimpleHttpResponse;
+import org.apache.hc.core5.http.ContentType;
 import org.junit.Test;
 
 /**
@@ -33,36 +30,33 @@ import org.junit.Test;
  */
 public final class EndpointResponseImplTest {
     @Test
-    public void getResponseLength() throws IOException {
+    public void getResponseLength() {
         final EndpointResponse response = createResponse();
         assertEquals(13, response.getResponseLength());
     }
 
     @Test
-    public void getResponse() throws IOException {
+    public void getResponse() {
         final EndpointResponse response = createResponse();
         assertEquals("Hello, world!", new String(response.getResponse(), StandardCharsets.UTF_8));
         assertEquals("Hello, world!", new String(response.getResponse(), StandardCharsets.UTF_8));
     }
 
     @Test
-    public void getHeader() throws IOException {
+    public void getHeader() {
         final EndpointResponse response = createResponse();
         assertEquals("text/plain", response.getHeader("Content-Type"));
     }
 
     @Test
-    public void getStatusCode() throws IOException {
+    public void getStatusCode() {
         final EndpointResponse response = createResponse();
         assertEquals(200, response.getStatusCode());
     }
 
-    private EndpointResponse createResponse() throws IOException {
-        final ProtocolVersion protocolVersion = new ProtocolVersion("HTTP", 1, 1);
-        final BasicHttpResponse httpResponse = new BasicHttpResponse(protocolVersion, 200, "OK");
-        final BasicHttpEntity httpEntity = new BasicHttpEntity();
-        httpEntity.setContent(new ByteArrayInputStream("Hello, world!".getBytes()));
-        httpResponse.setEntity(httpEntity);
+    private EndpointResponse createResponse() {
+        final SimpleHttpResponse httpResponse = new SimpleHttpResponse(200, "OK");
+        httpResponse.setBody("Hello, world!", ContentType.TEXT_PLAIN);
         httpResponse.addHeader("Content-Type", "text/plain");
         return EndpointResponseImpl.create(httpResponse);
     }

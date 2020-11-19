@@ -19,14 +19,16 @@ import java.util.concurrent.ThreadFactory;
 
 import javax.net.ssl.SSLContext;
 
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.Credentials;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
-import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
-import org.apache.http.impl.nio.client.HttpAsyncClients;
+
+import org.apache.hc.client5.http.auth.AuthScope;
+import org.apache.hc.client5.http.auth.Credentials;
+import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
+import org.apache.hc.client5.http.impl.async.CloseableHttpAsyncClient;
+import org.apache.hc.client5.http.impl.async.HttpAsyncClientBuilder;
+import org.apache.hc.client5.http.impl.async.HttpAsyncClients;
+import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
+import org.apache.hc.client5.http.impl.nio.PoolingAsyncClientConnectionManagerBuilder;
+import org.apache.hc.core5.http.nio.ssl.BasicClientTlsStrategy;
 
 import com.pushtechnology.adapters.rest.model.latest.BasicAuthenticationConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
@@ -42,7 +44,7 @@ public final class HttpClientFactoryImpl implements HttpClientFactory {
 
     @Override
     public CloseableHttpAsyncClient create(Model model, SSLContext sslContext) {
-        final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+        final BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
 
         // Configure client with Basic authentication credentials
         model
@@ -64,7 +66,10 @@ public final class HttpClientFactoryImpl implements HttpClientFactory {
             .setDefaultCredentialsProvider(credentialsProvider);
 
         if (sslContext != null) {
-            builder = builder.setSSLContext(sslContext);
+            builder = builder.setConnectionManager(PoolingAsyncClientConnectionManagerBuilder
+                .create()
+                .setTlsStrategy(new BasicClientTlsStrategy(sslContext))
+                .build());
         }
 
         return builder.build();
@@ -77,7 +82,7 @@ public final class HttpClientFactoryImpl implements HttpClientFactory {
     private static Credentials getCredentials(BasicAuthenticationConfig basicAuthenticationConfig) {
         return new UsernamePasswordCredentials(
             basicAuthenticationConfig.getUserid(),
-            basicAuthenticationConfig.getPassword());
+            basicAuthenticationConfig.getPassword().toCharArray());
     }
 
 }

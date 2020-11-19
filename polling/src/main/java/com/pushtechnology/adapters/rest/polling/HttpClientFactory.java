@@ -17,7 +17,7 @@ package com.pushtechnology.adapters.rest.polling;
 
 import javax.net.ssl.SSLContext;
 
-import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
+import org.apache.hc.client5.http.impl.async.CloseableHttpAsyncClient;
 
 import com.pushtechnology.adapters.rest.model.latest.Model;
 

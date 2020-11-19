@@ -15,13 +15,10 @@
 
 package com.pushtechnology.adapters.rest.polling;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Arrays;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
+import org.apache.hc.client5.http.async.methods.SimpleHttpResponse;
+import org.apache.hc.core5.http.HttpResponse;
 
 import net.jcip.annotations.Immutable;
 
@@ -38,19 +35,8 @@ public final class EndpointResponseImpl implements EndpointResponse {
     /**
      * Factory method.
      */
-    public static EndpointResponse create(HttpResponse httpResponse) throws IOException {
-        final HttpEntity entity = httpResponse.getEntity();
-
-        final InputStream contentStream = entity.getContent();
-        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-        int next = contentStream.read();
-        while (next != -1) {
-            baos.write(next);
-            next = contentStream.read();
-        }
-
-        return new EndpointResponseImpl(httpResponse, baos.toByteArray());
+    public static EndpointResponse create(SimpleHttpResponse httpResponse) {
+        return new EndpointResponseImpl(httpResponse, httpResponse.getBodyBytes());
     }
 
     private EndpointResponseImpl(HttpResponse httpResponse, byte[] content) {
@@ -60,7 +46,7 @@ public final class EndpointResponseImpl implements EndpointResponse {
 
     @Override
     public int getStatusCode() {
-        return httpResponse.getStatusLine().getStatusCode();
+        return httpResponse.getCode();
     }
 
     @Override

@@ -20,13 +20,13 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThrows;
-import static org.mockito.Mockito.isA;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
@@ -35,14 +35,11 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpHost;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpResponse;
-import org.apache.http.StatusLine;
-import org.apache.http.concurrent.FutureCallback;
-import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
+import org.apache.hc.client5.http.async.methods.SimpleHttpResponse;
+import org.apache.hc.client5.http.impl.async.TestHttpClient;
+import org.apache.hc.core5.concurrent.FutureCallback;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.HttpResponse;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -67,21 +64,15 @@ public final class EndpointClientImplTest {
     @Mock
     private HttpClientFactory clientFactory;
     @Mock
-    private CloseableHttpAsyncClient httpClient;
+    private TestHttpClient httpClient;
     @Mock
     private Future<HttpResponse> future;
-    @Mock
-    private HttpResponse response;
-    @Mock
-    private HttpEntity entity;
-    @Mock
-    private StatusLine statusLine;
     @Mock
     private PollListener pollListener;
     @Mock
     private PollCompletionListener completionListener;
     @Captor
-    private ArgumentCaptor<FutureCallback<HttpResponse>> callbackCaptor;
+    private ArgumentCaptor<FutureCallback<SimpleHttpResponse>> callbackCaptor;
 
     private final EndpointConfig endpointConfig = EndpointConfig
         .builder()
@@ -111,20 +102,17 @@ public final class EndpointClientImplTest {
         .build();
 
     private EndpointClientImpl endpointClient;
+    private SimpleHttpResponse response;
 
     @SuppressWarnings("unchecked")
     @Before
-    public void setUp() throws IOException {
+    public void setUp() {
         initMocks(this);
 
         when(clientFactory.create(model, null)).thenReturn(httpClient);
-        when(httpClient.execute(isA(HttpHost.class), isA(HttpRequest.class), isA(FutureCallback.class)))
-            .thenReturn(future);
-        when(response.getStatusLine()).thenReturn(statusLine);
-        when(response.getEntity()).thenReturn(entity);
-        when(entity.getContent()).thenReturn(new ByteArrayInputStream("{}".getBytes("UTF-8")));
-        when(response.getHeaders("content-type")).thenReturn(new Header[0]);
-        when(statusLine.getStatusCode()).thenReturn(200);
+        response = new SimpleHttpResponse(200);
+        response.setBody("{}", ContentType.TEXT_PLAIN);
+        response.addHeader("content-type", "text/plain");
         when(pollListener.onPollRequest(serviceConfig, endpointConfig)).thenReturn(completionListener);
 
         endpointClient = new EndpointClientImpl(model, null, clientFactory, pollListener);
@@ -155,7 +143,7 @@ public final class EndpointClientImplTest {
 
         assertNotEquals(future, handle);
         verify(pollListener).onPollRequest(serviceConfig, endpointConfig);
-        verify(httpClient).execute(isA(HttpHost.class), isA(HttpRequest.class), isA(FutureCallback.class));
+        verify(httpClient).doExecute(any(), isNotNull(), isNotNull(), any(), isNotNull(), isNotNull());
     }
 
     @Test
@@ -169,9 +157,9 @@ public final class EndpointClientImplTest {
 
         assertNotEquals(future, handle);
         verify(pollListener).onPollRequest(serviceConfig, endpointConfig);
-        verify(httpClient).execute(isA(HttpHost.class), isA(HttpRequest.class), callbackCaptor.capture());
+        verify(httpClient).doExecute(any(), isNotNull(), isNotNull(), any(), isNotNull(), callbackCaptor.capture());
 
-        final FutureCallback<HttpResponse> responseCallback = callbackCaptor.getValue();
+        final FutureCallback<SimpleHttpResponse> responseCallback = callbackCaptor.getValue();
 
         responseCallback.completed(response);
         final EndpointResponse endpointResponse = handle.get(1, TimeUnit.SECONDS);
@@ -191,9 +179,9 @@ public final class EndpointClientImplTest {
 
         assertNotEquals(future, handle);
         verify(pollListener).onPollRequest(serviceConfig, endpointConfig);
-        verify(httpClient).execute(isA(HttpHost.class), isA(HttpRequest.class), callbackCaptor.capture());
+        verify(httpClient).doExecute(any(), isNotNull(), isNotNull(), any(), isNotNull(), callbackCaptor.capture());
 
-        final FutureCallback<HttpResponse> responseCallback = callbackCaptor.getValue();
+        final FutureCallback<SimpleHttpResponse> responseCallback = callbackCaptor.getValue();
 
         final Exception exception = new Exception("Intentional for test");
         responseCallback.failed(exception);
@@ -215,9 +203,9 @@ public final class EndpointClientImplTest {
 
         assertNotEquals(future, handle);
         verify(pollListener).onPollRequest(serviceConfig, endpointConfig);
-        verify(httpClient).execute(isA(HttpHost.class), isA(HttpRequest.class), callbackCaptor.capture());
+        verify(httpClient).doExecute(any(), isNotNull(), isNotNull(), any(), isNotNull(), callbackCaptor.capture());
 
-        final FutureCallback<HttpResponse> responseCallback = callbackCaptor.getValue();
+        final FutureCallback<SimpleHttpResponse> responseCallback = callbackCaptor.getValue();
 
         responseCallback.cancelled();
         assertThrows(
