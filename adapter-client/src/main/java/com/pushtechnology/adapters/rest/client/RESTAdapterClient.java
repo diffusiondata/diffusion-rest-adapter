@@ -164,6 +164,8 @@ public final class RESTAdapterClient {
             () -> {
                 modelStore.stop();
                 executor.shutdown();
+                // Needed because Diffusion client threads are not daemons, in packaged version
+                Runtime.getRuntime().exit(0);
             },
             ServiceListener.NULL_LISTENER,
             (session, oldState, newState) ->
