@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2020 Push Technology Ltd.
+ * Copyright (C) 2021 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import net.jcip.annotations.ThreadSafe;
  * @author Push Technology Limited
  */
 @ThreadSafe
-public final class EventSummaryReporter implements AutoCloseable {
+public final class EventSummaryReporter implements MetricsReporter {
 
     private static final Logger LOG = LoggerFactory.getLogger(EventSummaryReporter.class);
     private static final NumberFormat FORMAT;

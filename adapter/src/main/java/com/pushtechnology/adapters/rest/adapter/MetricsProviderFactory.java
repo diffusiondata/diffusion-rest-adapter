@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Push Technology Ltd.
+ * Copyright (C) 2021 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,15 +28,18 @@ import com.pushtechnology.adapters.rest.metric.reporters.EventCountReporter;
 import com.pushtechnology.adapters.rest.metric.reporters.EventSummaryReporter;
 import com.pushtechnology.adapters.rest.metric.reporters.PollEventCounter;
 import com.pushtechnology.adapters.rest.metric.reporters.PollEventQuerier;
+import com.pushtechnology.adapters.rest.metric.reporters.PrometheusMetricsListener;
+import com.pushtechnology.adapters.rest.metric.reporters.PrometheusReporter;
 import com.pushtechnology.adapters.rest.metric.reporters.PublicationEventCounter;
 import com.pushtechnology.adapters.rest.metric.reporters.PublicationEventQuerier;
+import com.pushtechnology.adapters.rest.metric.reporters.TopicBasedMetricsReporter;
 import com.pushtechnology.adapters.rest.metric.reporters.TopicCreationEventCounter;
 import com.pushtechnology.adapters.rest.metric.reporters.TopicCreationEventQuerier;
 import com.pushtechnology.adapters.rest.metrics.event.listeners.BoundedPollEventCollector;
 import com.pushtechnology.adapters.rest.metrics.event.listeners.BoundedPublicationEventCollector;
 import com.pushtechnology.adapters.rest.metrics.event.listeners.BoundedTopicCreationEventCollector;
-import com.pushtechnology.adapters.rest.metric.reporters.TopicBasedMetricsReporter;
 import com.pushtechnology.adapters.rest.model.latest.Model;
+import com.pushtechnology.adapters.rest.model.latest.PrometheusConfig;
 import com.pushtechnology.adapters.rest.model.latest.SummaryConfig;
 import com.pushtechnology.adapters.rest.model.latest.TopicConfig;
 import com.pushtechnology.adapters.rest.publication.PublishingClient;
@@ -68,6 +71,30 @@ public final class MetricsProviderFactory {
 
         final Helper helper = new Helper(metricsDispatcher);
 
+        configureSimpleMetricsReporter(model, executorService, startTasks, stopTasks, helper);
+        configureSummaryMetricsReporter(executorService, summaryConfig, startTasks, stopTasks, helper);
+        configureTopicMetricsReporter(
+            diffusionSession,
+            topicManagementClient,
+            publishingClient,
+            model,
+            executorService,
+            startTasks,
+            stopTasks,
+            helper);
+        configurePrometheusMetricsReporter(model, metricsDispatcher, startTasks, stopTasks);
+
+        return new MetricsProvider(
+            () -> startTasks.forEach(Runnable::run),
+            () -> stopTasks.forEach(Runnable::run));
+    }
+
+    private void configureSimpleMetricsReporter(
+            Model model,
+            ScheduledExecutorService executorService,
+            List<Runnable> startTasks,
+            List<Runnable> stopTasks,
+            Helper helper) {
         if (model.getMetrics().isCounting()) {
             LOG.info("Enabling counting metrics reporting");
 
@@ -80,7 +107,14 @@ public final class MetricsProviderFactory {
             startTasks.add(reporter::start);
             stopTasks.add(reporter::close);
         }
+    }
 
+    private void configureSummaryMetricsReporter(
+            ScheduledExecutorService executorService,
+            SummaryConfig summaryConfig,
+            List<Runnable> startTasks,
+            List<Runnable> stopTasks,
+            Helper helper) {
         if (summaryConfig != null) {
             final int eventBound = summaryConfig.getEventBound();
             LOG.info("Enabling summary metrics reporting. {} event bound", eventBound);
@@ -94,7 +128,19 @@ public final class MetricsProviderFactory {
             startTasks.add(reporter::start);
             stopTasks.add(reporter::close);
         }
+    }
 
+    // CHECKSTYLE.OFF: ParameterNumber
+    private void configureTopicMetricsReporter(
+    // CHECKSTYLE.ON
+            Session diffusionSession,
+            TopicManagementClient topicManagementClient,
+            PublishingClient publishingClient,
+            Model model,
+            ScheduledExecutorService executorService,
+            List<Runnable> startTasks,
+            List<Runnable> stopTasks,
+            Helper helper) {
         final TopicConfig topicConfig = model.getMetrics().getTopic();
         if (topicConfig != null) {
             final int eventBound = topicConfig.getEventBound();
@@ -116,10 +162,27 @@ public final class MetricsProviderFactory {
             startTasks.add(reporter::start);
             stopTasks.add(reporter::close);
         }
+    }
 
-        return new MetricsProvider(
-            () -> startTasks.forEach(Runnable::run),
-            () -> stopTasks.forEach(Runnable::run));
+    private void configurePrometheusMetricsReporter(
+            Model model,
+            MetricsDispatcher metricsDispatcher,
+            List<Runnable> startTasks,
+            List<Runnable> stopTasks) {
+        final PrometheusConfig prometheusConfig = model.getMetrics().getPrometheus();
+        if (prometheusConfig != null) {
+            LOG.info("Enabling metrics prometheus reporting");
+
+            final PrometheusMetricsListener listener = new PrometheusMetricsListener();
+            final PrometheusReporter reporter = new PrometheusReporter(prometheusConfig.getPort());
+
+            metricsDispatcher.addPollEventListener(listener);
+            metricsDispatcher.addPublicationEventListener(listener);
+            metricsDispatcher.addTopicCreationEventListener(listener);
+
+            startTasks.add(reporter::start);
+            stopTasks.add(reporter::close);
+        }
     }
 
     /**

@@ -14,6 +14,7 @@ import org.mockito.junit.MockitoRule;
 
 import com.pushtechnology.adapters.rest.model.latest.MetricsConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
+import com.pushtechnology.adapters.rest.model.latest.PrometheusConfig;
 import com.pushtechnology.adapters.rest.model.latest.SummaryConfig;
 import com.pushtechnology.adapters.rest.publication.PublishingClient;
 import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
@@ -81,6 +82,23 @@ public final class MetricsProviderFactoryTest {
             .metrics(MetricsConfig
                 .builder()
                 .summary(SummaryConfig.builder().eventBound(10).build())
+                .build())
+            .build();
+
+        final MetricsProvider provider = factory.create(session, topicManagementClient, publishingClient, model, executorService, new MetricsDispatcher());
+
+        assertNotNull(provider);
+    }
+
+    @Test
+    public void createPrometheusProvider() {
+        final MetricsProviderFactory factory = new MetricsProviderFactory();
+
+        final Model model = Model
+            .builder()
+            .metrics(MetricsConfig
+                .builder()
+                .prometheus(PrometheusConfig.builder().port(9000).build())
                 .build())
             .build();
 

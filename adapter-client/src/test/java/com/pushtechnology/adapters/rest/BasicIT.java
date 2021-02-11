@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2020 Push Technology Ltd.
+ * Copyright (C) 2021 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,8 @@ import static com.pushtechnology.diffusion.client.session.Session.State.CONNECTI
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.joining;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNotNull;
@@ -35,7 +37,11 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -77,6 +83,7 @@ import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.MetricsConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
+import com.pushtechnology.adapters.rest.model.latest.PrometheusConfig;
 import com.pushtechnology.adapters.rest.model.latest.SecurityConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.model.latest.TopicConfig;
@@ -877,6 +884,69 @@ public final class BasicIT {
         stopSession(session);
         client.close();
 
+        verify(serviceListener, timed()).onRemove(CONSTANT_STRING_SERVICE);
+    }
+
+    @Test
+    public void prometheusHealthy() throws IOException {
+        modelStore.setModel(Model
+            .builder()
+            .active(true)
+            .diffusion(DIFFUSION_CONFIG)
+            .services(asList(CONSTANT_STRING_SERVICE))
+            .metrics(MetricsConfig.builder().prometheus(PrometheusConfig.builder().port(9000).build()).build())
+            .truststore("testKeystore.jks")
+            .build());
+        final RESTAdapterClient client = startClient();
+
+        verify(serviceListener, timed()).onStandby(CONSTANT_STRING_SERVICE);
+        verify(serviceListener, timed()).onActive(CONSTANT_STRING_SERVICE);
+
+        final HttpURLConnection connection = (HttpURLConnection) new URL("http://localhost:9000/-/healthy").openConnection();
+
+        assertEquals(200, connection.getResponseCode());
+
+        final byte[] bytes = connection.getInputStream().readAllBytes();
+        final String response = StandardCharsets.UTF_8.decode(ByteBuffer.wrap(bytes)).toString();
+
+        assertThat(response, containsString("Exporter is Healthy."));
+
+        client.close();
+        verify(serviceListener, timed()).onRemove(CONSTANT_STRING_SERVICE);
+    }
+
+    @Test
+    public void prometheusMetrics() throws IOException {
+        modelStore.setModel(Model
+            .builder()
+            .active(true)
+            .diffusion(DIFFUSION_CONFIG)
+            .services(asList(CONSTANT_STRING_SERVICE))
+            .metrics(MetricsConfig.builder().prometheus(PrometheusConfig.builder().port(9001).build()).build())
+            .truststore("testKeystore.jks")
+            .build());
+        final RESTAdapterClient client = startClient();
+
+        verify(serviceListener, timed()).onStandby(CONSTANT_STRING_SERVICE);
+        verify(serviceListener, timed()).onActive(CONSTANT_STRING_SERVICE);
+
+        final HttpURLConnection connection = (HttpURLConnection) new URL("http://localhost:9001/metrics").openConnection();
+
+        assertEquals(200, connection.getResponseCode());
+
+        final byte[] bytes = connection.getInputStream().readAllBytes();
+        final String response = StandardCharsets.UTF_8.decode(ByteBuffer.wrap(bytes)).toString();
+
+        assertThat(response, containsString("# TYPE process_cpu_seconds_total counter"));
+        assertThat(response, containsString("# TYPE process_open_fds gauge"));
+        assertThat(response, containsString("# TYPE jvm_memory_bytes_used gauge"));
+        assertThat(response, containsString("# TYPE jvm_threads_peak gauge"));
+
+        assertThat(response, containsString("# TYPE poll_requests_total counter"));
+        assertThat(response, containsString("# TYPE updates_published_total counter"));
+        assertThat(response, containsString("# TYPE topics_created_total counter"));
+
+        client.close();
         verify(serviceListener, timed()).onRemove(CONSTANT_STRING_SERVICE);
     }
 
