@@ -20,24 +20,18 @@ import lombok.Builder;
 import lombok.Value;
 
 /**
- * Metrics configuration. Version 15.
+ * Prometheus configuration. Version 15.
  * <p>
- * Description of the metrics to gather and report.
+ * Configuration for the Prometheus metrics exporter.
  *
  * @author Push Technology Limited
  */
 @Value
 @Builder
 @AllArgsConstructor
-public final class TopicConfig {
+public final class PrometheusConfig {
     /**
      * The maximum number of events that be collected.
      */
-    @Builder.Default
-    int eventBound = 100;
-    /**
-     * The topic to report metrics on
-     */
-    @Builder.Default
-    String metricsTopic = "adapter/rest/metrics";
+    int port;
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Push Technology Ltd.
+ * Copyright (C) 2021 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import lombok.ToString;
 import lombok.Value;
 
 /**
- * Endpoint configuration. Version 14.
+ * Endpoint configuration. Version 15.
  * <p>
  * Description of a REST endpoint to poll.
  *

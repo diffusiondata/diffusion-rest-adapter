@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Push Technology Ltd.
+ * Copyright (C) 2021 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import lombok.NonNull;
 import lombok.Value;
 
 /**
- * Configuration model. Version 14.
+ * Configuration model. Version 15.
  *
  * @author Push Technology Limited
  */
@@ -39,7 +39,7 @@ public class Model implements AnyModel {
     /**
      * The version of the model.
      */
-    public static final int VERSION = 14;
+    public static final int VERSION = 15;
 
     /**
      * If the client should run. Defaults to true.

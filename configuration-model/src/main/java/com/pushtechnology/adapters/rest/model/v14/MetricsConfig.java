@@ -13,14 +13,14 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.model.latest;
+package com.pushtechnology.adapters.rest.model.v14;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Value;
 
 /**
- * Metrics configuration. Version 15.
+ * Metrics configuration. Version 14.
  * <p>
  * Description of the metrics to gather and report.
  *
@@ -29,15 +29,17 @@ import lombok.Value;
 @Value
 @Builder
 @AllArgsConstructor
-public final class TopicConfig {
+public final class MetricsConfig {
     /**
-     * The maximum number of events that be collected.
+     * If metrics are reported as a simple count of events.
      */
-    @Builder.Default
-    int eventBound = 100;
+    boolean counting;
     /**
-     * The topic to report metrics on
+     * How metrics are reported as a summary of events.
      */
-    @Builder.Default
-    String metricsTopic = "adapter/rest/metrics";
+    SummaryConfig summary;
+    /**
+     * How metrics are reported through topics.
+     */
+    TopicConfig topic;
 }

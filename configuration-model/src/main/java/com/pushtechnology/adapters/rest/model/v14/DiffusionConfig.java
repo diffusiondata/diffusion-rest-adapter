@@ -13,7 +13,7 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.model.latest;
+package com.pushtechnology.adapters.rest.model.v14;
 
 import static com.pushtechnology.diffusion.client.session.SessionAttributes.DEFAULT_CONNECTION_TIMEOUT;
 import static com.pushtechnology.diffusion.client.session.SessionAttributes.DEFAULT_INPUT_BUFFER_SIZE;
@@ -32,7 +32,7 @@ import lombok.ToString;
 import lombok.Value;
 
 /**
- * Diffusion configuration. Version 15.
+ * Diffusion configuration. Version 14.
  * <p>
  * Description of a Diffusion server to publish to.
  *
@@ -48,17 +48,17 @@ public class DiffusionConfig {
      * The host of the Diffusion server. Defaults to the localhost.
      */
     @NonNull
-    @Builder.Default
+    @Default
     String host = "localhost";
     /**
      * The port the Diffusion server listens on. Defaults to 8080.
      */
-    @Builder.Default
+    @Default
     int port = 8080;
     /**
      * If a secure connection should be used. Defaults to false.
      */
-    @Builder.Default
+    @Default
     boolean secure = false;
     /**
      * The principal. Can be {@code null}.

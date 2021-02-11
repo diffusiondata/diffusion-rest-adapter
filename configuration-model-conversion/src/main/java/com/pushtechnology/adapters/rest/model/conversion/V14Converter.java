@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Push Technology Ltd.
+ * Copyright (C) 2021 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,35 +17,37 @@ package com.pushtechnology.adapters.rest.model.conversion;
 
 import static java.util.stream.Collectors.toList;
 
-import com.pushtechnology.adapters.rest.model.v14.BasicAuthenticationConfig;
-import com.pushtechnology.adapters.rest.model.v14.DiffusionConfig;
-import com.pushtechnology.adapters.rest.model.v14.EndpointConfig;
-import com.pushtechnology.adapters.rest.model.v14.MetricsConfig;
-import com.pushtechnology.adapters.rest.model.v14.Model;
-import com.pushtechnology.adapters.rest.model.v14.SecurityConfig;
-import com.pushtechnology.adapters.rest.model.v14.ServiceConfig;
+import com.pushtechnology.adapters.rest.model.latest.BasicAuthenticationConfig;
+import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
+import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
+import com.pushtechnology.adapters.rest.model.latest.MetricsConfig;
+import com.pushtechnology.adapters.rest.model.latest.Model;
+import com.pushtechnology.adapters.rest.model.latest.SecurityConfig;
+import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
+import com.pushtechnology.adapters.rest.model.latest.SummaryConfig;
+import com.pushtechnology.adapters.rest.model.latest.TopicConfig;
 
 import net.jcip.annotations.Immutable;
 
 /**
- * Converter between different version 13 of the model and version 14.
+ * Converter between different version 14 of the model and version 15.
  *
  * @author Push Technology Limited
  */
 @Immutable
-public final class V13Converter
-        extends AbstractModelConverter<com.pushtechnology.adapters.rest.model.v13.Model, Model> {
+public final class V14Converter
+        extends AbstractModelConverter<com.pushtechnology.adapters.rest.model.v14.Model, Model> {
     /**
      * The converter.
      */
-    public static final V13Converter INSTANCE = new V13Converter();
+    public static final V14Converter INSTANCE = new V14Converter();
 
-    private V13Converter() {
-        super(com.pushtechnology.adapters.rest.model.v13.Model.class);
+    private V14Converter() {
+        super(com.pushtechnology.adapters.rest.model.v14.Model.class);
     }
 
     @Override
-    protected Model convertFrom(com.pushtechnology.adapters.rest.model.v13.Model model) {
+    protected Model convertFrom(com.pushtechnology.adapters.rest.model.v14.Model model) {
         return Model
             .builder()
             .active(true)
@@ -101,6 +103,21 @@ public final class V13Converter
                 .build())
             .metrics(MetricsConfig
                 .builder()
+                .counting(model.getMetrics().isCounting())
+                .summary(
+                    model.getMetrics().getSummary() == null ?
+                        null :
+                        SummaryConfig
+                            .builder()
+                            .eventBound(model.getMetrics().getSummary().getEventBound())
+                            .build())
+                .topic(model.getMetrics().getTopic() == null ?
+                           null :
+                           TopicConfig
+                               .builder()
+                               .eventBound(model.getMetrics().getTopic().getEventBound())
+                               .metricsTopic(model.getMetrics().getTopic().getMetricsTopic())
+                               .build())
                 .build())
             .truststore(model.getTruststore())
             .build();

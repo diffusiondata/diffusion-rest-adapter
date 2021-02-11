@@ -1,6 +1,6 @@
 package com.pushtechnology.adapters.rest.model.conversion;
 
-import static com.pushtechnology.adapters.rest.model.conversion.V13Converter.INSTANCE;
+import static com.pushtechnology.adapters.rest.model.conversion.V14Converter.INSTANCE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -12,30 +12,31 @@ import java.util.List;
 
 import org.junit.Test;
 
-import com.pushtechnology.adapters.rest.model.v14.BasicAuthenticationConfig;
-import com.pushtechnology.adapters.rest.model.v14.DiffusionConfig;
-import com.pushtechnology.adapters.rest.model.v14.EndpointConfig;
-import com.pushtechnology.adapters.rest.model.v14.Model;
-import com.pushtechnology.adapters.rest.model.v14.ServiceConfig;
+import com.pushtechnology.adapters.rest.model.latest.BasicAuthenticationConfig;
+import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
+import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
+import com.pushtechnology.adapters.rest.model.latest.Model;
+import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
+import com.pushtechnology.adapters.rest.model.v14.SecurityConfig;
 
 /**
- * Unit tests for {@link V13Converter}.
+ * Unit tests for {@link V14Converter}.
  *
  * @author Push Technology Limited
  */
-public final class V13ConverterTest {
+public final class V14ConverterTest {
     @Test
     public void testConvert() {
         final Model model = INSTANCE.convert(
-            com.pushtechnology.adapters.rest.model.v13.Model
+            com.pushtechnology.adapters.rest.model.v14.Model
                 .builder()
                 .services(Collections.singletonList(
-                    com.pushtechnology.adapters.rest.model.v13.ServiceConfig
+                    com.pushtechnology.adapters.rest.model.v14.ServiceConfig
                         .builder()
                         .name("service")
                         .host("localhost")
                         .port(80)
-                        .endpoints(Collections.singletonList(com.pushtechnology.adapters.rest.model.v13.EndpointConfig
+                        .endpoints(Collections.singletonList(com.pushtechnology.adapters.rest.model.v14.EndpointConfig
                             .builder()
                             .name("endpoint")
                             .topicPath("topic")
@@ -44,9 +45,9 @@ public final class V13ConverterTest {
                             .build()))
                         .pollPeriod(5000)
                         .topicPathRoot("a")
-                        .security(com.pushtechnology.adapters.rest.model.v13.SecurityConfig
+                        .security(SecurityConfig
                             .builder()
-                            .basic(com.pushtechnology.adapters.rest.model.v13.BasicAuthenticationConfig
+                            .basic(com.pushtechnology.adapters.rest.model.v14.BasicAuthenticationConfig
                                 .builder()
                                 .userid("control")
                                 .password("password")
@@ -54,7 +55,7 @@ public final class V13ConverterTest {
                             .build())
                         .build()
                 ))
-                .diffusion(com.pushtechnology.adapters.rest.model.v13.DiffusionConfig
+                .diffusion(com.pushtechnology.adapters.rest.model.v14.DiffusionConfig
                     .builder()
                     .host("localhost")
                     .port(8080)
@@ -64,6 +65,7 @@ public final class V13ConverterTest {
                     .reconnectionTimeout(5000)
                     .maximumMessageSize(64000)
                     .build())
+                .metrics(com.pushtechnology.adapters.rest.model.v14.MetricsConfig.builder().counting(true).build())
                 .build());
 
         assertEquals(1, model.getServices().size());
@@ -97,21 +99,22 @@ public final class V13ConverterTest {
         assertEquals("password", basic.getPassword());
 
         assertNull(model.getMetrics().getSummary());
-        assertFalse(model.getMetrics().isCounting());
+        assertTrue(model.getMetrics().isCounting());
+        assertNull(model.getMetrics().getPrometheus());
     }
 
     @Test
     public void testConvertWithoutSecurity() {
         final Model model = INSTANCE.convert(
-            com.pushtechnology.adapters.rest.model.v13.Model
+            com.pushtechnology.adapters.rest.model.v14.Model
                 .builder()
                 .services(Collections.singletonList(
-                    com.pushtechnology.adapters.rest.model.v13.ServiceConfig
+                    com.pushtechnology.adapters.rest.model.v14.ServiceConfig
                         .builder()
                         .name("service")
                         .host("localhost")
                         .port(80)
-                        .endpoints(Collections.singletonList(com.pushtechnology.adapters.rest.model.v13.EndpointConfig
+                        .endpoints(Collections.singletonList(com.pushtechnology.adapters.rest.model.v14.EndpointConfig
                             .builder()
                             .name("endpoint")
                             .topicPath("topic")
@@ -123,7 +126,7 @@ public final class V13ConverterTest {
                         .security(null)
                         .build()
                 ))
-                .diffusion(com.pushtechnology.adapters.rest.model.v13.DiffusionConfig
+                .diffusion(com.pushtechnology.adapters.rest.model.v14.DiffusionConfig
                     .builder()
                     .host("localhost")
                     .port(8080)

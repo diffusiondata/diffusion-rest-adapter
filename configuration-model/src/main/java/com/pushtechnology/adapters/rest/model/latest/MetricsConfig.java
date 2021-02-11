@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Push Technology Ltd.
+ * Copyright (C) 2021 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import lombok.Builder;
 import lombok.Value;
 
 /**
- * Metrics configuration. Version 14.
+ * Metrics configuration. Version 15.
  * <p>
  * Description of the metrics to gather and report.
  *
@@ -42,4 +42,8 @@ public final class MetricsConfig {
      * How metrics are reported through topics.
      */
     TopicConfig topic;
+    /**
+     * How metrics are exported to Prometheus.
+     */
+    PrometheusConfig prometheus;
 }

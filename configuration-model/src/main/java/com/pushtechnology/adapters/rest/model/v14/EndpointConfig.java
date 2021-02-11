@@ -13,31 +13,57 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.model.latest;
+package com.pushtechnology.adapters.rest.model.v14;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.NonNull;
+import lombok.ToString;
 import lombok.Value;
 
 /**
- * Metrics configuration. Version 15.
+ * Endpoint configuration. Version 14.
  * <p>
- * Description of the metrics to gather and report.
+ * Description of a REST endpoint to poll.
  *
  * @author Push Technology Limited
  */
 @Value
 @Builder
 @AllArgsConstructor
-public final class TopicConfig {
+@ToString(of = "name")
+public class EndpointConfig {
     /**
-     * The maximum number of events that be collected.
+     * The name of the endpoint.
      */
-    @Builder.Default
-    int eventBound = 100;
+    @NonNull
+    String name;
     /**
-     * The topic to report metrics on
+     * The URL of the endpoint.
      */
-    @Builder.Default
-    String metricsTopic = "adapter/rest/metrics";
+    @NonNull
+    String url;
+    /**
+     * The topic path to map the endpoint to. It is relative to the service
+     * topic path root.
+     */
+    @NonNull
+    String topicPath;
+    /**
+     * The type of content produced by the endpoint.
+     * <p>
+     * Supports the values:
+     * <ul>
+     *     <li>auto</li>
+     *     <li>json</li>
+     *     <li>application/json</li>
+     *     <li>text/json</li>
+     *     <li>string</li>
+     *     <li>text/plain</li>
+     *     <li>binary</li>
+     *     <li>application/octet-stream</li>
+     * </ul>
+     */
+    @NonNull
+    String produces;
 }

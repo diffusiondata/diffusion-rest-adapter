@@ -13,21 +13,19 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.model.latest;
+package com.pushtechnology.adapters.rest.model.v14;
 
 import static java.util.Collections.emptyList;
 
-import java.util.Collections;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NonNull;
-import lombok.ToString;
 import lombok.Value;
 
 /**
- * Service configuration. Version 15.
+ * Service configuration. Version 14.
  * <p>
  * Description of a REST service to poll.
  *

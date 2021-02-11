@@ -13,31 +13,22 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.model.latest;
+package com.pushtechnology.adapters.rest.model.v14;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Value;
 
 /**
- * Metrics configuration. Version 15.
+ * Security configuration. Version 14.
  * <p>
- * Description of the metrics to gather and report.
+ * Description of the security used by a REST service.
  *
  * @author Push Technology Limited
  */
 @Value
 @Builder
 @AllArgsConstructor
-public final class TopicConfig {
-    /**
-     * The maximum number of events that be collected.
-     */
-    @Builder.Default
-    int eventBound = 100;
-    /**
-     * The topic to report metrics on
-     */
-    @Builder.Default
-    String metricsTopic = "adapter/rest/metrics";
+public class SecurityConfig {
+    BasicAuthenticationConfig basic;
 }
