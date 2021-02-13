@@ -321,7 +321,7 @@ public final class BasicIT {
     @Mock
     private Topics.ValueStream<Long> int64Stream;
     @Mock
-    private Topics.ValueStream<Double> dobuleStream;
+    private Topics.ValueStream<Double> doubleStream;
     @Mock
     private Topics.ValueStream<String> stringStream;
     @Captor
@@ -443,7 +443,7 @@ public final class BasicIT {
         final Topics topics = session.feature(Topics.class);
         topics.addFallbackStream(JSON.class, stream);
         topics.addFallbackStream(Long.class, int64Stream);
-        topics.addFallbackStream(Double.class, dobuleStream);
+        topics.addFallbackStream(Double.class, doubleStream);
         topics.subscribe("?rest/");
         topics.subscribe("?adapter/");
 
@@ -478,7 +478,7 @@ public final class BasicIT {
         final Topics topics = session.feature(Topics.class);
         topics.addFallbackStream(Binary.class, binaryStream);
         topics.addFallbackStream(Long.class, int64Stream);
-        topics.addFallbackStream(Double.class, dobuleStream);
+        topics.addFallbackStream(Double.class, doubleStream);
         topics.subscribe("?rest/");
         topics.subscribe("?adapter/");
 
@@ -516,7 +516,7 @@ public final class BasicIT {
         final Topics topics = session.feature(Topics.class);
         topics.addFallbackStream(String.class, stringStream);
         topics.addFallbackStream(Long.class, int64Stream);
-        topics.addFallbackStream(Double.class, dobuleStream);
+        topics.addFallbackStream(Double.class, doubleStream);
         topics.subscribe("?rest/");
         topics.subscribe("?adapter/");
 
@@ -555,7 +555,7 @@ public final class BasicIT {
         final Topics topics = session.feature(Topics.class);
         topics.addFallbackStream(JSON.class, stream);
         topics.addFallbackStream(Long.class, int64Stream);
-        topics.addFallbackStream(Double.class, dobuleStream);
+        topics.addFallbackStream(Double.class, doubleStream);
         topics.subscribe("?rest/");
         topics.subscribe("?adapter/");
 
@@ -597,7 +597,7 @@ public final class BasicIT {
         final Topics topics = session.feature(Topics.class);
         topics.addFallbackStream(JSON.class, stream);
         topics.addFallbackStream(Long.class, int64Stream);
-        topics.addFallbackStream(Double.class, dobuleStream);
+        topics.addFallbackStream(Double.class, doubleStream);
         topics.subscribe("?rest/");
         topics.subscribe("?adapter/");
 
@@ -630,7 +630,7 @@ public final class BasicIT {
         final Topics topics = session.feature(Topics.class);
         topics.addFallbackStream(JSON.class, stream);
         topics.addFallbackStream(Long.class, int64Stream);
-        topics.addFallbackStream(Double.class, dobuleStream);
+        topics.addFallbackStream(Double.class, doubleStream);
         topics.subscribe("?rest/");
         topics.subscribe("?adapter/");
 
@@ -665,7 +665,7 @@ public final class BasicIT {
         topics.addStream("?rest/json/", JSON.class, stream);
         topics.addStream("?rest/binary/", Binary.class, binaryStream);
         topics.addFallbackStream(Long.class, int64Stream);
-        topics.addFallbackStream(Double.class, dobuleStream);
+        topics.addFallbackStream(Double.class, doubleStream);
         topics.subscribe("?rest/");
         topics.subscribe("?adapter/");
 
@@ -713,7 +713,7 @@ public final class BasicIT {
         final Topics topics = session.feature(Topics.class);
         topics.addFallbackStream(JSON.class, stream);
         topics.addFallbackStream(Long.class, int64Stream);
-        topics.addFallbackStream(Double.class, dobuleStream);
+        topics.addFallbackStream(Double.class, doubleStream);
         topics.subscribe("?rest/");
         topics.subscribe("?adapter/");
 
@@ -755,7 +755,7 @@ public final class BasicIT {
         final Topics topics = session.feature(Topics.class);
         topics.addFallbackStream(JSON.class, stream);
         topics.addFallbackStream(Long.class, int64Stream);
-        topics.addFallbackStream(Double.class, dobuleStream);
+        topics.addFallbackStream(Double.class, doubleStream);
         topics.subscribe("?rest/");
         topics.subscribe("?adapter/");
 
@@ -958,8 +958,8 @@ public final class BasicIT {
         verify(int64Stream, timed()).onSubscription(eq("adapter/rest/metrics/poll/maximumSuccessfulRequestTime"), isNotNull());
         verify(int64Stream, timed()).onSubscription(eq("adapter/rest/metrics/poll/minimumSuccessfulRequestTime"), isNotNull());
         verify(int64Stream, timed()).onSubscription(eq("adapter/rest/metrics/poll/successfulRequestTimeNinetiethPercentile"), isNotNull());
-        verify(dobuleStream, timed()).onSubscription(eq("adapter/rest/metrics/poll/failureThroughput"), isNotNull());
-        verify(dobuleStream, timed()).onSubscription(eq("adapter/rest/metrics/poll/requestThroughput"), isNotNull());
+        verify(doubleStream, timed()).onSubscription(eq("adapter/rest/metrics/poll/failureThroughput"), isNotNull());
+        verify(doubleStream, timed()).onSubscription(eq("adapter/rest/metrics/poll/requestThroughput"), isNotNull());
 
         // Verify metrics publication topics
         verify(int64Stream, timed()).onSubscription(eq("adapter/rest/metrics/publication/requests"), isNotNull());
@@ -968,8 +968,8 @@ public final class BasicIT {
         verify(int64Stream, timed()).onSubscription(eq("adapter/rest/metrics/publication/maximumSuccessfulRequestTime"), isNotNull());
         verify(int64Stream, timed()).onSubscription(eq("adapter/rest/metrics/publication/minimumSuccessfulRequestTime"), isNotNull());
         verify(int64Stream, timed()).onSubscription(eq("adapter/rest/metrics/publication/successfulRequestTimeNinetiethPercentile"), isNotNull());
-        verify(dobuleStream, timed()).onSubscription(eq("adapter/rest/metrics/publication/failureThroughput"), isNotNull());
-        verify(dobuleStream, timed()).onSubscription(eq("adapter/rest/metrics/publication/requestThroughput"), isNotNull());
+        verify(doubleStream, timed()).onSubscription(eq("adapter/rest/metrics/publication/failureThroughput"), isNotNull());
+        verify(doubleStream, timed()).onSubscription(eq("adapter/rest/metrics/publication/requestThroughput"), isNotNull());
 
         // Verify metrics topic creation topics
         verify(int64Stream, timed()).onSubscription(eq("adapter/rest/metrics/topicCreation/requests"), isNotNull());
@@ -978,8 +978,8 @@ public final class BasicIT {
         verify(int64Stream, timed()).onSubscription(eq("adapter/rest/metrics/topicCreation/maximumSuccessfulRequestTime"), isNotNull());
         verify(int64Stream, timed()).onSubscription(eq("adapter/rest/metrics/topicCreation/minimumSuccessfulRequestTime"), isNotNull());
         verify(int64Stream, timed()).onSubscription(eq("adapter/rest/metrics/topicCreation/successfulRequestTimeNinetiethPercentile"), isNotNull());
-        verify(dobuleStream, timed()).onSubscription(eq("adapter/rest/metrics/topicCreation/failureThroughput"), isNotNull());
-        verify(dobuleStream, timed()).onSubscription(eq("adapter/rest/metrics/topicCreation/requestThroughput"), isNotNull());
+        verify(doubleStream, timed()).onSubscription(eq("adapter/rest/metrics/topicCreation/failureThroughput"), isNotNull());
+        verify(doubleStream, timed()).onSubscription(eq("adapter/rest/metrics/topicCreation/requestThroughput"), isNotNull());
     }
 
     private static VerificationWithTimeout timed() {
