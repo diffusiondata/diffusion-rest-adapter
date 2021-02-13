@@ -15,10 +15,6 @@ import org.mockito.junit.MockitoRule;
 import com.pushtechnology.adapters.rest.model.latest.MetricsConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.PrometheusConfig;
-import com.pushtechnology.adapters.rest.model.latest.SummaryConfig;
-import com.pushtechnology.adapters.rest.publication.PublishingClient;
-import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
-import com.pushtechnology.diffusion.client.session.Session;
 
 /**
  * Unit tests for {@link MetricsProviderFactory}.
@@ -26,12 +22,6 @@ import com.pushtechnology.diffusion.client.session.Session;
  * @author Push Technology Limited
  */
 public final class MetricsProviderFactoryTest {
-    @Mock
-    private Session session;
-    @Mock
-    private TopicManagementClient topicManagementClient;
-    @Mock
-    private PublishingClient publishingClient;
     @Mock
     private ScheduledExecutorService executorService;
 
@@ -51,7 +41,7 @@ public final class MetricsProviderFactoryTest {
             .builder()
             .build();
 
-        final MetricsProvider provider = factory.create(session, topicManagementClient, publishingClient, model, executorService, new MetricsDispatcher());
+        final MetricsProvider provider = factory.create(model, executorService, new MetricsDispatcher());
 
         assertNotNull(provider);
     }
@@ -68,24 +58,7 @@ public final class MetricsProviderFactoryTest {
                 .build())
             .build();
 
-        final MetricsProvider provider = factory.create(session, topicManagementClient, publishingClient, model, executorService, new MetricsDispatcher());
-
-        assertNotNull(provider);
-    }
-
-    @Test
-    public void createSummaryProvider() throws Exception {
-        final MetricsProviderFactory factory = new MetricsProviderFactory();
-
-        final Model model = Model
-            .builder()
-            .metrics(MetricsConfig
-                .builder()
-                .summary(SummaryConfig.builder().eventBound(10).build())
-                .build())
-            .build();
-
-        final MetricsProvider provider = factory.create(session, topicManagementClient, publishingClient, model, executorService, new MetricsDispatcher());
+        final MetricsProvider provider = factory.create(model, executorService, new MetricsDispatcher());
 
         assertNotNull(provider);
     }
@@ -102,7 +75,7 @@ public final class MetricsProviderFactoryTest {
                 .build())
             .build();
 
-        final MetricsProvider provider = factory.create(session, topicManagementClient, publishingClient, model, executorService, new MetricsDispatcher());
+        final MetricsProvider provider = factory.create(model, executorService, new MetricsDispatcher());
 
         assertNotNull(provider);
     }

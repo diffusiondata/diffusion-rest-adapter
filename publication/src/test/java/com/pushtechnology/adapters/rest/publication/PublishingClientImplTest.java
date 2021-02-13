@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2020 Push Technology Ltd.
+ * Copyright (C) 2021 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -301,22 +301,6 @@ public final class PublishingClientImplTest {
         sessionListener.onSessionStateChanged(session, RECOVERING_RECONNECT, CONNECTED_ACTIVE);
 
         verify(jsonDataType).toBytes(json);
-        verify(jsonStream).set(json);
-    }
-
-    @Test
-    public void nonExclusiveUpdateContext() {
-        final UpdateContext<JSON> updateContext = client.createUpdateContext(
-            "a/topic",
-            JSON.class,
-            jsonDataType);
-        verify(session).feature(TopicUpdate.class);
-        verify(topicUpdate).createUpdateStream("a/topic", JSON.class);
-
-        updateContext.publish(json);
-
-        verify(jsonDataType).toBytes(json);
-        verify(session).getState();
         verify(jsonStream).set(json);
     }
 }

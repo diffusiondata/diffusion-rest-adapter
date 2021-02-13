@@ -86,7 +86,6 @@ import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.PrometheusConfig;
 import com.pushtechnology.adapters.rest.model.latest.SecurityConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.adapters.rest.model.latest.TopicConfig;
 import com.pushtechnology.adapters.rest.model.store.MutableModelStore;
 import com.pushtechnology.adapters.rest.resources.ConstantResource;
 import com.pushtechnology.adapters.rest.resources.IncrementingResource;
@@ -290,13 +289,6 @@ public final class BasicIT {
         .topicPathRoot("rest/string")
         .endpoints(singletonList(CONSTANT_STRING_ENDPOINT))
         .build();
-    private static final MetricsConfig TOPIC_REPORTED_METRICS = MetricsConfig
-        .builder()
-        .counting(false)
-        .topic(TopicConfig
-            .builder()
-            .build())
-        .build();
 
     private static final String STRING_CONSTANT = "{\"cromulent\":\"good\",\"embiggen\":\"to make larger\"}";
     private static final JSON JSON_CONSTANT = dataTypes()
@@ -445,9 +437,6 @@ public final class BasicIT {
         topics.addFallbackStream(Long.class, int64Stream);
         topics.addFallbackStream(Double.class, doubleStream);
         topics.subscribe("?rest/");
-        topics.subscribe("?adapter/");
-
-        verifyMetricsTopics();
 
         verify(stream, timed()).onSubscription(eq("rest/json/timestamp"), isNotNull());
         verify(stream, timed()).onSubscription(eq("rest/json/increment"), isNotNull());
@@ -480,9 +469,6 @@ public final class BasicIT {
         topics.addFallbackStream(Long.class, int64Stream);
         topics.addFallbackStream(Double.class, doubleStream);
         topics.subscribe("?rest/");
-        topics.subscribe("?adapter/");
-
-        verifyMetricsTopics();
 
         verify(binaryStream, timed()).onSubscription(eq("rest/binary/timestamp"), isNotNull());
         verify(binaryStream, timed()).onSubscription(eq("rest/binary/increment"), isNotNull());
@@ -518,9 +504,6 @@ public final class BasicIT {
         topics.addFallbackStream(Long.class, int64Stream);
         topics.addFallbackStream(Double.class, doubleStream);
         topics.subscribe("?rest/");
-        topics.subscribe("?adapter/");
-
-        verifyMetricsTopics();
 
         verify(stringStream, timed()).onSubscription(eq("rest/string/timestamp"), isNotNull());
         verify(stringStream, timed()).onSubscription(eq("rest/string/increment"), isNotNull());
@@ -557,9 +540,6 @@ public final class BasicIT {
         topics.addFallbackStream(Long.class, int64Stream);
         topics.addFallbackStream(Double.class, doubleStream);
         topics.subscribe("?rest/");
-        topics.subscribe("?adapter/");
-
-        verifyMetricsTopics();
 
         modelStore.setModel(modelWith(INSECURE_SERVICE, SECURE_SERVICE));
 
@@ -599,9 +579,6 @@ public final class BasicIT {
         topics.addFallbackStream(Long.class, int64Stream);
         topics.addFallbackStream(Double.class, doubleStream);
         topics.subscribe("?rest/");
-        topics.subscribe("?adapter/");
-
-        verifyMetricsTopics();
 
         modelStore.setModel(modelWith(INSECURE_SERVICE));
         verify(serviceListener, timed()).onStandby(INSECURE_SERVICE);
@@ -632,9 +609,6 @@ public final class BasicIT {
         topics.addFallbackStream(Long.class, int64Stream);
         topics.addFallbackStream(Double.class, doubleStream);
         topics.subscribe("?rest/");
-        topics.subscribe("?adapter/");
-
-        verifyMetricsTopics();
 
         verify(stream, timed()).onSubscription(eq("rest/json/timestamp"), isNotNull());
         verify(stream, timed()).onSubscription(eq("rest/json/increment"), isNotNull());
@@ -667,9 +641,6 @@ public final class BasicIT {
         topics.addFallbackStream(Long.class, int64Stream);
         topics.addFallbackStream(Double.class, doubleStream);
         topics.subscribe("?rest/");
-        topics.subscribe("?adapter/");
-
-        verifyMetricsTopics();
 
         verify(stream, timed()).onSubscription(eq("rest/json/timestamp"), isNotNull());
         verify(stream, timed()).onSubscription(eq("rest/json/increment"), isNotNull());
@@ -715,9 +686,6 @@ public final class BasicIT {
         topics.addFallbackStream(Long.class, int64Stream);
         topics.addFallbackStream(Double.class, doubleStream);
         topics.subscribe("?rest/");
-        topics.subscribe("?adapter/");
-
-        verifyMetricsTopics();
 
         verify(stream, timed()).onSubscription(eq("rest/json/timestamp"), isNotNull());
         verify(stream, timed()).onSubscription(eq("rest/json/increment"), isNotNull());
@@ -757,9 +725,6 @@ public final class BasicIT {
         topics.addFallbackStream(Long.class, int64Stream);
         topics.addFallbackStream(Double.class, doubleStream);
         topics.subscribe("?rest/");
-        topics.subscribe("?adapter/");
-
-        verifyMetricsTopics();
 
         verify(stream, timed()).onSubscription(eq("rest/auto/timestamp"), specificationCaptor.capture());
 
@@ -950,38 +915,6 @@ public final class BasicIT {
         verify(serviceListener, timed()).onRemove(CONSTANT_STRING_SERVICE);
     }
 
-    private void verifyMetricsTopics() {
-        // Verify metrics poll topics
-        verify(int64Stream, timed()).onSubscription(eq("adapter/rest/metrics/poll/requests"), isNotNull());
-        verify(int64Stream, timed()).onSubscription(eq("adapter/rest/metrics/poll/successes"), isNotNull());
-        verify(int64Stream, timed()).onSubscription(eq("adapter/rest/metrics/poll/failures"), isNotNull());
-        verify(int64Stream, timed()).onSubscription(eq("adapter/rest/metrics/poll/maximumSuccessfulRequestTime"), isNotNull());
-        verify(int64Stream, timed()).onSubscription(eq("adapter/rest/metrics/poll/minimumSuccessfulRequestTime"), isNotNull());
-        verify(int64Stream, timed()).onSubscription(eq("adapter/rest/metrics/poll/successfulRequestTimeNinetiethPercentile"), isNotNull());
-        verify(doubleStream, timed()).onSubscription(eq("adapter/rest/metrics/poll/failureThroughput"), isNotNull());
-        verify(doubleStream, timed()).onSubscription(eq("adapter/rest/metrics/poll/requestThroughput"), isNotNull());
-
-        // Verify metrics publication topics
-        verify(int64Stream, timed()).onSubscription(eq("adapter/rest/metrics/publication/requests"), isNotNull());
-        verify(int64Stream, timed()).onSubscription(eq("adapter/rest/metrics/publication/successes"), isNotNull());
-        verify(int64Stream, timed()).onSubscription(eq("adapter/rest/metrics/publication/failures"), isNotNull());
-        verify(int64Stream, timed()).onSubscription(eq("adapter/rest/metrics/publication/maximumSuccessfulRequestTime"), isNotNull());
-        verify(int64Stream, timed()).onSubscription(eq("adapter/rest/metrics/publication/minimumSuccessfulRequestTime"), isNotNull());
-        verify(int64Stream, timed()).onSubscription(eq("adapter/rest/metrics/publication/successfulRequestTimeNinetiethPercentile"), isNotNull());
-        verify(doubleStream, timed()).onSubscription(eq("adapter/rest/metrics/publication/failureThroughput"), isNotNull());
-        verify(doubleStream, timed()).onSubscription(eq("adapter/rest/metrics/publication/requestThroughput"), isNotNull());
-
-        // Verify metrics topic creation topics
-        verify(int64Stream, timed()).onSubscription(eq("adapter/rest/metrics/topicCreation/requests"), isNotNull());
-        verify(int64Stream, timed()).onSubscription(eq("adapter/rest/metrics/topicCreation/successes"), isNotNull());
-        verify(int64Stream, timed()).onSubscription(eq("adapter/rest/metrics/topicCreation/failures"), isNotNull());
-        verify(int64Stream, timed()).onSubscription(eq("adapter/rest/metrics/topicCreation/maximumSuccessfulRequestTime"), isNotNull());
-        verify(int64Stream, timed()).onSubscription(eq("adapter/rest/metrics/topicCreation/minimumSuccessfulRequestTime"), isNotNull());
-        verify(int64Stream, timed()).onSubscription(eq("adapter/rest/metrics/topicCreation/successfulRequestTimeNinetiethPercentile"), isNotNull());
-        verify(doubleStream, timed()).onSubscription(eq("adapter/rest/metrics/topicCreation/failureThroughput"), isNotNull());
-        verify(doubleStream, timed()).onSubscription(eq("adapter/rest/metrics/topicCreation/requestThroughput"), isNotNull());
-    }
-
     private static VerificationWithTimeout timed() {
         return timeout(5000);
     }
@@ -1025,7 +958,6 @@ public final class BasicIT {
             .active(true)
             .diffusion(DIFFUSION_CONFIG)
             .services(asList(services))
-            .metrics(TOPIC_REPORTED_METRICS)
             .truststore("testKeystore.jks")
             .build();
     }

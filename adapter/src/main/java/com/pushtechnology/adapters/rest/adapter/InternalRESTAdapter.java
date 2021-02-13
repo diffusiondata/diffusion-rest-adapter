@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2020 Push Technology Ltd.
+ * Copyright (C) 2021 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -126,14 +126,23 @@ public final class InternalRESTAdapter implements RESTAdapterListener, AutoClose
         }
         else if (state == State.INIT) {
             currentModel = model;
+            reconfigureMetricsReporting();
             connectSession(model);
         }
         else if (isNotPolling(model)) {
+            if (haveMetricsChanged(model)) {
+                reconfigureMetricsReporting();
+            }
+
             currentModel = model;
             shutdownPolling();
             state = State.STANDBY;
         }
         else if (hasTruststoreChanged(model) || hasDiffusionChanged(model)) {
+            if (haveMetricsChanged(model)) {
+                reconfigureMetricsReporting();
+            }
+
             currentModel = model;
             shutdownSession();
             connectSession(model);
@@ -203,7 +212,6 @@ public final class InternalRESTAdapter implements RESTAdapterListener, AutoClose
                 diffusionSession,
                 eventedSessionListener,
                 metricsDispatcher);
-            reconfigureMetricsReporting();
             state = State.STANDBY;
         }
         else {
@@ -215,7 +223,6 @@ public final class InternalRESTAdapter implements RESTAdapterListener, AutoClose
                 diffusionSession,
                 eventedSessionListener,
                 metricsDispatcher);
-            reconfigureMetricsReporting();
             reconfigureServiceManager();
             state = State.ACTIVE;
         }
@@ -253,9 +260,6 @@ public final class InternalRESTAdapter implements RESTAdapterListener, AutoClose
             metricsProvider.close();
         }
         metricsProvider = metricsProviderFactory.create(
-            diffusionSession,
-            topicManagementClient,
-            publishingClient,
             currentModel,
             executor,
             metricsDispatcher);

@@ -98,7 +98,6 @@ public final class V14ConverterTest {
         assertEquals("control", basic.getUserid());
         assertEquals("password", basic.getPassword());
 
-        assertNull(model.getMetrics().getSummary());
         assertTrue(model.getMetrics().isCounting());
         assertNull(model.getMetrics().getPrometheus());
     }
@@ -166,7 +165,6 @@ public final class V14ConverterTest {
         assertEquals("binary", endpoints.get(0).getProduces());
         assertNull(basic);
 
-        assertNull(model.getMetrics().getSummary());
         assertFalse(model.getMetrics().isCounting());
     }
 

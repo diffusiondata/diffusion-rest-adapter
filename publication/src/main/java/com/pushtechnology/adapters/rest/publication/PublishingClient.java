@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2020 Push Technology Ltd.
+ * Copyright (C) 2021 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,14 +48,6 @@ public interface PublishingClient {
     <T> UpdateContext<T> createUpdateContext(
         ServiceConfig serviceConfig,
         EndpointConfig endpointConfig,
-        Class<T> valueType,
-        DataType<T> dataType);
-
-    /**
-     * Create an update context using an non-exclusive updater.
-     */
-    <T> UpdateContext<T> createUpdateContext(
-        String path,
         Class<T> valueType,
         DataType<T> dataType);
 }

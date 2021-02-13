@@ -35,14 +35,6 @@ public final class MetricsConfig {
      */
     boolean counting;
     /**
-     * How metrics are reported as a summary of events.
-     */
-    SummaryConfig summary;
-    /**
-     * How metrics are reported through topics.
-     */
-    TopicConfig topic;
-    /**
      * How metrics are exported to Prometheus.
      */
     PrometheusConfig prometheus;

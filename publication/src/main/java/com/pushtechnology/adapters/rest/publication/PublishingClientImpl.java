@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2020 Push Technology Ltd.
+ * Copyright (C) 2021 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -125,18 +125,6 @@ public final class PublishingClientImpl implements PublishingClient {
         final ValueUpdateContext<T> updateContext = new ValueUpdateContext<>(
             session,
             sessionLock,
-            path,
-            valueType,
-            dataType,
-            publicationListener);
-        sessionListener.onSessionStateChange(updateContext);
-        return updateContext;
-    }
-
-    @Override
-    public <T> UpdateContext<T> createUpdateContext(String path, Class<T> valueType, DataType<T> dataType) {
-        final ValueUpdateContext<T> updateContext = new ValueUpdateContext<>(
-            session,
             path,
             valueType,
             dataType,

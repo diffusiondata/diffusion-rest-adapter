@@ -24,8 +24,6 @@ import com.pushtechnology.adapters.rest.model.latest.MetricsConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.SecurityConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.adapters.rest.model.latest.SummaryConfig;
-import com.pushtechnology.adapters.rest.model.latest.TopicConfig;
 
 import net.jcip.annotations.Immutable;
 
@@ -104,20 +102,6 @@ public final class V14Converter
             .metrics(MetricsConfig
                 .builder()
                 .counting(model.getMetrics().isCounting())
-                .summary(
-                    model.getMetrics().getSummary() == null ?
-                        null :
-                        SummaryConfig
-                            .builder()
-                            .eventBound(model.getMetrics().getSummary().getEventBound())
-                            .build())
-                .topic(model.getMetrics().getTopic() == null ?
-                           null :
-                           TopicConfig
-                               .builder()
-                               .eventBound(model.getMetrics().getTopic().getEventBound())
-                               .metricsTopic(model.getMetrics().getTopic().getMetricsTopic())
-                               .build())
                 .build())
             .truststore(model.getTruststore())
             .build();
