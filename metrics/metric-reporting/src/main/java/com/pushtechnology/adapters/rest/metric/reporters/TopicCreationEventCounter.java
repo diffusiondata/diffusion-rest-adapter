@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Push Technology Ltd.
+ * Copyright (C) 2021 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import com.pushtechnology.adapters.rest.metrics.TopicCreationSuccessEvent;
 import com.pushtechnology.adapters.rest.metrics.event.listeners.TopicCreationEventListener;
 
 /**
- * Implementation of {@link com.pushtechnology.adapters.rest.metrics.listeners.EventCounter} for topic creation events.
+ * Implementation of {@link AbstractEventCounter} for topic creation events.
  *
  * @author Push Technology Limited
  */

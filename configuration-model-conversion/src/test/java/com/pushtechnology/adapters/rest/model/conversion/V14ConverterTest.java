@@ -98,7 +98,7 @@ public final class V14ConverterTest {
         assertEquals("control", basic.getUserid());
         assertEquals("password", basic.getPassword());
 
-        assertTrue(model.getMetrics().isCounting());
+        assertTrue(model.getMetrics().isLogging());
         assertNull(model.getMetrics().getPrometheus());
     }
 
@@ -165,7 +165,7 @@ public final class V14ConverterTest {
         assertEquals("binary", endpoints.get(0).getProduces());
         assertNull(basic);
 
-        assertFalse(model.getMetrics().isCounting());
+        assertFalse(model.getMetrics().isLogging());
     }
 
     @Test(expected = IllegalArgumentException.class)

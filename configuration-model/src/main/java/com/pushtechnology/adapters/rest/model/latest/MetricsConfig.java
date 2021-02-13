@@ -31,9 +31,9 @@ import lombok.Value;
 @AllArgsConstructor
 public final class MetricsConfig {
     /**
-     * If metrics are reported as a simple count of events.
+     * If metrics are reported to the logger.
      */
-    boolean counting;
+    boolean logging;
     /**
      * How metrics are exported to Prometheus.
      */

@@ -32,9 +32,9 @@ import net.jcip.annotations.ThreadSafe;
  * @author Push Technology Limited
  */
 @ThreadSafe
-public final class EventCountReporter implements MetricsReporter {
+public final class LogReporter implements MetricsReporter {
 
-    private static final Logger LOG = LoggerFactory.getLogger(EventCountReporter.class);
+    private static final Logger LOG = LoggerFactory.getLogger(LogReporter.class);
 
     private final PollEventCounter pollEventCounter;
     private final PublicationEventCounter publicationEventCounter;
@@ -47,7 +47,7 @@ public final class EventCountReporter implements MetricsReporter {
     /**
      * Constructor.
      */
-    public EventCountReporter(
+    public LogReporter(
             PollEventCounter pollEventCounter,
             PublicationEventCounter publicationEventCounter,
             TopicCreationEventCounter topicCreationEventCounter,

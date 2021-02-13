@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2020 Push Technology Ltd.
+ * Copyright (C) 2021 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,17 +33,17 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 
 /**
- * Unit tests for {@link EventCountReporter}.
+ * Unit tests for {@link LogReporter}.
  *
  * @author Push Technology Limited
  */
-public final class EventCountReporterTest {
+public final class LogReporterTest {
     @Mock
     private ScheduledExecutorService executor;
     @Mock
     private ScheduledFuture loggingTask;
 
-    private EventCountReporter collector;
+    private LogReporter collector;
 
     @SuppressWarnings("unchecked")
     @Before
@@ -53,7 +53,7 @@ public final class EventCountReporterTest {
         when(executor.scheduleAtFixedRate(isA(Runnable.class), isA(Long.class), isA(Long.class), isA(TimeUnit.class)))
             .thenReturn(loggingTask);
 
-        collector = new EventCountReporter(
+        collector = new LogReporter(
             new PollEventCounter(),
             new PublicationEventCounter(),
             new TopicCreationEventCounter(),

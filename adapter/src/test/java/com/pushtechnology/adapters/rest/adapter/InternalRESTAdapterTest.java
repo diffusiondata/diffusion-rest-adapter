@@ -135,28 +135,28 @@ public final class InternalRESTAdapterTest {
         .active(true)
         .diffusion(diffusionConfig)
         .services(singletonList(serviceConfig0))
-        .metrics(MetricsConfig.builder().counting(false).build())
+        .metrics(MetricsConfig.builder().logging(false).build())
         .build();
     private final Model model1 = Model
         .builder()
         .active(true)
         .diffusion(diffusionConfig)
         .services(singletonList(serviceConfig1))
-        .metrics(MetricsConfig.builder().counting(false).build())
+        .metrics(MetricsConfig.builder().logging(false).build())
         .build();
     private final Model model2 = Model
         .builder()
         .active(true)
         .diffusion(diffusionConfig)
         .services(emptyList())
-        .metrics(MetricsConfig.builder().counting(false).build())
+        .metrics(MetricsConfig.builder().logging(false).build())
         .build();
     private final Model inactiveModel = Model
         .builder()
         .active(false)
         .diffusion(diffusionConfig)
         .services(singletonList(serviceConfig0))
-        .metrics(MetricsConfig.builder().counting(false).build())
+        .metrics(MetricsConfig.builder().logging(false).build())
         .build();
 
     private InternalRESTAdapter restAdapter;

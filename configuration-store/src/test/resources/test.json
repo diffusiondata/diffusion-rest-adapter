@@ -15,7 +15,7 @@
   },
   "services" : [],
   "metrics" : {
-    "counting" : false,
+    "logging" : false,
     "prometheus": null
   },
   "truststore" : null

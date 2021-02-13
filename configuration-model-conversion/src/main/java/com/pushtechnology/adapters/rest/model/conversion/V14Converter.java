@@ -101,7 +101,7 @@ public final class V14Converter
                 .build())
             .metrics(MetricsConfig
                 .builder()
-                .counting(model.getMetrics().isCounting())
+                .logging(model.getMetrics().isCounting())
                 .build())
             .truststore(model.getTruststore())
             .build();

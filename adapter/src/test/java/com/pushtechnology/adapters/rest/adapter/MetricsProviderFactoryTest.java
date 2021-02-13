@@ -54,7 +54,7 @@ public final class MetricsProviderFactoryTest {
             .builder()
             .metrics(MetricsConfig
                 .builder()
-                .counting(true)
+                .logging(true)
                 .build())
             .build();
 

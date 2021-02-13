@@ -22,7 +22,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.pushtechnology.adapters.rest.metric.reporters.EventCountReporter;
+import com.pushtechnology.adapters.rest.metric.reporters.LogReporter;
 import com.pushtechnology.adapters.rest.metric.reporters.PollEventCounter;
 import com.pushtechnology.adapters.rest.metric.reporters.PrometheusMetricsListener;
 import com.pushtechnology.adapters.rest.metric.reporters.PrometheusReporter;
@@ -64,7 +64,7 @@ public final class MetricsProviderFactory {
             ScheduledExecutorService executorService,
             List<Runnable> startTasks,
             List<Runnable> stopTasks) {
-        if (model.getMetrics().isCounting()) {
+        if (model.getMetrics().isLogging()) {
             LOG.info("Enabling counting metrics reporting");
 
             final PollEventCounter pollEventCounter = new PollEventCounter();
@@ -75,7 +75,7 @@ public final class MetricsProviderFactory {
             metricsDispatcher.addPublicationEventListener(publicationEventCounter);
             metricsDispatcher.addTopicCreationEventListener(topicCreationEventCounter);
 
-            final EventCountReporter reporter = new EventCountReporter(
+            final LogReporter reporter = new LogReporter(
                 pollEventCounter,
                 publicationEventCounter,
                 topicCreationEventCounter,

@@ -17,29 +17,36 @@ package com.pushtechnology.adapters.rest.metric.reporters;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.pushtechnology.adapters.rest.metrics.listeners.EventCounter;
-
 /**
- * Abstract implementation of {@link EventCounter}.
+ * A counter for events.
+ * <p>
+ * Counts three different types of events, action
+ * requests, action successes and action failures.
  *
  * @author Push Technology Limited
  */
-/*package*/ abstract class AbstractEventCounter implements EventCounter {
+/*package*/ abstract class AbstractEventCounter {
     private final AtomicInteger requests = new AtomicInteger(0);
     private final AtomicInteger failures = new AtomicInteger(0);
     private final AtomicInteger successes = new AtomicInteger(0);
 
-    @Override
+    /**
+     * @return the number request events
+     */
     public int getRequests() {
         return requests.get();
     }
 
-    @Override
+    /**
+     * @return the number successful request events
+     */
     public int getSuccesses() {
         return successes.get();
     }
 
-    @Override
+    /**
+     * @return the number failed request events
+     */
     public int getFailures() {
         return failures.get();
     }
