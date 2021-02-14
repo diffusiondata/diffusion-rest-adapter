@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2020 Push Technology Ltd.
+ * Copyright (C) 2021 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,15 @@ package com.pushtechnology.adapters.rest.adapter;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import com.pushtechnology.adapters.rest.metrics.PollFailedEvent;
+import com.pushtechnology.adapters.rest.metrics.PollRequestEvent;
+import com.pushtechnology.adapters.rest.metrics.PollSuccessEvent;
+import com.pushtechnology.adapters.rest.metrics.PublicationFailedEvent;
+import com.pushtechnology.adapters.rest.metrics.PublicationRequestEvent;
+import com.pushtechnology.adapters.rest.metrics.PublicationSuccessEvent;
+import com.pushtechnology.adapters.rest.metrics.TopicCreationFailedEvent;
+import com.pushtechnology.adapters.rest.metrics.TopicCreationRequestEvent;
+import com.pushtechnology.adapters.rest.metrics.TopicCreationSuccessEvent;
 import com.pushtechnology.adapters.rest.metrics.event.listeners.PollEventDispatcher;
 import com.pushtechnology.adapters.rest.metrics.event.listeners.PollEventListener;
 import com.pushtechnology.adapters.rest.metrics.event.listeners.PublicationEventDispatcher;
@@ -29,9 +38,6 @@ import com.pushtechnology.adapters.rest.metrics.listeners.PublicationListener;
 import com.pushtechnology.adapters.rest.metrics.listeners.TopicCreationListener;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.adapters.rest.polling.EndpointResponse;
-import com.pushtechnology.diffusion.client.callbacks.ErrorReason;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicAddFailReason;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
 
 import net.jcip.annotations.GuardedBy;
@@ -49,11 +55,15 @@ public final class MetricsDispatcher implements
         TopicCreationListener {
 
     @GuardedBy("this")
-    private final Collection<PollListener> pollListeners;
+    private final Collection<PollEventListener> pollListeners;
     @GuardedBy("this")
-    private final Collection<PublicationListener> publicationListeners;
+    private final Collection<PublicationEventListener> publicationListeners;
     @GuardedBy("this")
-    private final Collection<TopicCreationListener> topicCreationListeners;
+    private final Collection<TopicCreationEventListener> topicCreationListeners;
+
+    private final PollEventDispatcher pollEventDispatcher;
+    private final PublicationEventDispatcher publicationEventDispatcher;
+    private final TopicCreationEventDispatcher topicCreationEventDispatcher;
 
     /**
      * Constructor.
@@ -62,97 +72,110 @@ public final class MetricsDispatcher implements
         pollListeners = new ArrayList<>();
         publicationListeners = new ArrayList<>();
         topicCreationListeners = new ArrayList<>();
+
+        pollEventDispatcher = new PollEventDispatcher(new PollHandler());
+        publicationEventDispatcher = new PublicationEventDispatcher(new PublicationHandler());
+        topicCreationEventDispatcher = new TopicCreationEventDispatcher(new TopicCreationHandler());
     }
 
     /**
      * Add a poll event listener.
      */
     public synchronized void addPollEventListener(PollEventListener pollListener) {
-        pollListeners.add(new PollEventDispatcher(pollListener));
+        pollListeners.add(pollListener);
     }
 
     /**
      * Add a publication event listener.
      */
     public synchronized void addPublicationEventListener(PublicationEventListener publicationListener) {
-        publicationListeners.add(new PublicationEventDispatcher(publicationListener));
+        publicationListeners.add(publicationListener);
     }
 
     /**
      * Add a topic creation event listener.
      */
     public synchronized void addTopicCreationEventListener(TopicCreationEventListener topicCreationListener) {
-        topicCreationListeners.add(new TopicCreationEventDispatcher(topicCreationListener));
+        topicCreationListeners.add(topicCreationListener);
     }
 
     @Override
     public PollCompletionListener onPollRequest(ServiceConfig serviceConfig, EndpointConfig endpointConfig) {
-        final Collection<PollCompletionListener> listeners = new ArrayList<>();
-        synchronized (this) {
-            pollListeners.forEach(pollListener -> {
-                final PollCompletionListener completionListener =
-                    pollListener.onPollRequest(serviceConfig, endpointConfig);
-                listeners.add(completionListener);
-            });
-        }
-        return new PollCompletionListener() {
-            @Override
-            public void onPollResponse(EndpointResponse response) {
-                listeners.forEach(listener -> listener.onPollResponse(response));
-            }
-
-            @Override
-            public void onPollFailure(Exception exception) {
-                listeners.forEach(listener -> listener.onPollFailure(exception));
-            }
-        };
+        return pollEventDispatcher.onPollRequest(serviceConfig, endpointConfig);
     }
 
     @Override
     public TopicCreationCompletionListener onTopicCreationRequest(String path, TopicType topicType) {
-
-        final Collection<TopicCreationCompletionListener> listeners = new ArrayList<>();
-        synchronized (this) {
-            topicCreationListeners.forEach(topicCreationListener -> {
-                final TopicCreationCompletionListener completionListener =
-                    topicCreationListener.onTopicCreationRequest(path, topicType);
-                listeners.add(completionListener);
-            });
-        }
-        return new TopicCreationCompletionListener() {
-            @Override
-            public void onTopicCreated() {
-                listeners.forEach(TopicCreationCompletionListener::onTopicCreated);
-            }
-
-            @Override
-            public void onTopicCreationFailed(TopicAddFailReason reason) {
-                listeners.forEach(listener -> listener.onTopicCreationFailed(reason));
-            }
-        };
+        return topicCreationEventDispatcher.onTopicCreationRequest(path, topicType);
     }
 
     @Override
     public PublicationCompletionListener onPublicationRequest(String path, int size) {
+        return publicationEventDispatcher.onPublicationRequest(path, size);
+    }
 
-        final Collection<PublicationCompletionListener> listeners = new ArrayList<>();
-        synchronized (this) {
-            publicationListeners.forEach(publicationListener -> {
-                final PublicationCompletionListener completionListener =
-                    publicationListener.onPublicationRequest(path, size);
-                listeners.add(completionListener);
-            });
+    private final class PollHandler implements PollEventListener {
+        @Override
+        public void onPollRequest(PollRequestEvent event) {
+            synchronized (MetricsDispatcher.this) {
+                pollListeners.forEach(listener -> listener.onPollRequest(event));
+            }
         }
-        return new PublicationCompletionListener() {
-            @Override
-            public void onPublication() {
-                listeners.forEach(PublicationCompletionListener::onPublication);
-            }
 
-            @Override
-            public void onPublicationFailed(ErrorReason reason) {
-                listeners.forEach(listener -> listener.onPublicationFailed(reason));
+        @Override
+        public void onPollSuccess(PollSuccessEvent event) {
+            synchronized (MetricsDispatcher.this) {
+                pollListeners.forEach(listener -> listener.onPollSuccess(event));
             }
-        };
+        }
+
+        @Override
+        public void onPollFailed(PollFailedEvent event) {
+            synchronized (MetricsDispatcher.this) {
+                pollListeners.forEach(listener -> listener.onPollFailed(event));
+            }
+        }
+    }
+
+    private final class PublicationHandler implements PublicationEventListener {
+        @Override
+        public void onPublicationRequest(PublicationRequestEvent event) {
+            synchronized (MetricsDispatcher.this) {
+                publicationListeners.forEach(listener -> listener.onPublicationRequest(event));
+            }
+        }
+
+        @Override
+        public void onPublicationSuccess(PublicationSuccessEvent event) {
+            publicationListeners.forEach(listener -> listener.onPublicationSuccess(event));
+        }
+
+        @Override
+        public void onPublicationFailed(PublicationFailedEvent event) {
+            publicationListeners.forEach(listener -> listener.onPublicationFailed(event));
+        }
+    }
+
+    private final class TopicCreationHandler implements TopicCreationEventListener {
+        @Override
+        public void onTopicCreationRequest(TopicCreationRequestEvent event) {
+            synchronized (MetricsDispatcher.this) {
+                topicCreationListeners.forEach(listener -> listener.onTopicCreationRequest(event));
+            }
+        }
+
+        @Override
+        public void onTopicCreationSuccess(TopicCreationSuccessEvent event) {
+            synchronized (MetricsDispatcher.this) {
+                topicCreationListeners.forEach(listener -> listener.onTopicCreationSuccess(event));
+            }
+        }
+
+        @Override
+        public void onTopicCreationFailed(TopicCreationFailedEvent event) {
+            synchronized (MetricsDispatcher.this) {
+                topicCreationListeners.forEach(listener -> listener.onTopicCreationFailed(event));
+            }
+        }
     }
 }
