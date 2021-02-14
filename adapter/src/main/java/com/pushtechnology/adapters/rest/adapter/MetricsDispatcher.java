@@ -31,6 +31,7 @@ import com.pushtechnology.adapters.rest.metrics.event.listeners.PollEventDispatc
 import com.pushtechnology.adapters.rest.metrics.event.listeners.PollEventListener;
 import com.pushtechnology.adapters.rest.metrics.event.listeners.PublicationEventDispatcher;
 import com.pushtechnology.adapters.rest.metrics.event.listeners.PublicationEventListener;
+import com.pushtechnology.adapters.rest.metrics.event.listeners.ServiceEventListener;
 import com.pushtechnology.adapters.rest.metrics.event.listeners.TopicCreationEventDispatcher;
 import com.pushtechnology.adapters.rest.metrics.event.listeners.TopicCreationEventListener;
 import com.pushtechnology.adapters.rest.metrics.listeners.PollListener;
@@ -52,7 +53,8 @@ import net.jcip.annotations.ThreadSafe;
 public final class MetricsDispatcher implements
         PollListener,
         PublicationListener,
-        TopicCreationListener {
+        TopicCreationListener,
+        ServiceEventListener {
 
     @GuardedBy("this")
     private final Collection<PollEventListener> pollListeners;
@@ -60,6 +62,8 @@ public final class MetricsDispatcher implements
     private final Collection<PublicationEventListener> publicationListeners;
     @GuardedBy("this")
     private final Collection<TopicCreationEventListener> topicCreationListeners;
+    @GuardedBy("this")
+    private final Collection<ServiceEventListener> serviceListeners;
 
     private final PollEventDispatcher pollEventDispatcher;
     private final PublicationEventDispatcher publicationEventDispatcher;
@@ -72,6 +76,7 @@ public final class MetricsDispatcher implements
         pollListeners = new ArrayList<>();
         publicationListeners = new ArrayList<>();
         topicCreationListeners = new ArrayList<>();
+        serviceListeners = new ArrayList<>();
 
         pollEventDispatcher = new PollEventDispatcher(new PollHandler());
         publicationEventDispatcher = new PublicationEventDispatcher(new PublicationHandler());
@@ -99,6 +104,13 @@ public final class MetricsDispatcher implements
         topicCreationListeners.add(topicCreationListener);
     }
 
+    /**
+     * Add a topic creation event listener.
+     */
+    public synchronized void addServiceEventListener(ServiceEventListener serviceEventListener) {
+        serviceListeners.add(serviceEventListener);
+    }
+
     @Override
     public PollCompletionListener onPollRequest(ServiceConfig serviceConfig, EndpointConfig endpointConfig) {
         return pollEventDispatcher.onPollRequest(serviceConfig, endpointConfig);
@@ -112,6 +124,21 @@ public final class MetricsDispatcher implements
     @Override
     public PublicationCompletionListener onPublicationRequest(String path, int size) {
         return publicationEventDispatcher.onPublicationRequest(path, size);
+    }
+
+    @Override
+    public synchronized void onActive(ServiceConfig serviceConfig) {
+        serviceListeners.forEach(listener -> listener.onActive(serviceConfig));
+    }
+
+    @Override
+    public void onStandby(ServiceConfig serviceConfig) {
+        serviceListeners.forEach(listener -> listener.onStandby(serviceConfig));
+    }
+
+    @Override
+    public void onRemove(ServiceConfig serviceConfig) {
+        serviceListeners.forEach(listener -> listener.onRemove(serviceConfig));
     }
 
     private final class PollHandler implements PollEventListener {

@@ -57,7 +57,6 @@ public final class InternalRESTAdapter implements RESTAdapterListener, AutoClose
     private static final Logger LOG = LoggerFactory.getLogger(InternalRESTAdapter.class);
     private final ScheduledExecutorService executor;
     private final SessionLossHandler sessionLossHandler;
-    private final ServiceEventListener serviceListener;
     private final SSLContextFactory sslContextFactory;
 
     private final MetricsProviderFactory metricsProviderFactory = new MetricsProviderFactory();
@@ -101,12 +100,12 @@ public final class InternalRESTAdapter implements RESTAdapterListener, AutoClose
 
         this.executor = new ReportingScheduledExecutorService(executor);
         this.sessionLossHandler = sessionLossHandler;
-        this.serviceListener = serviceListener;
         sslContextFactory = new SSLContextFactory(relativePath);
         this.httpClientFactory = httpClientFactory;
         sessionFactory = new DiffusionSessionFactory(sessions);
         this.shutdownHandler = shutdownHandler;
         eventedSessionListener.onSessionStateChange(listener);
+        metricsDispatcher.addServiceEventListener(serviceListener);
     }
 
     // CHECKSTYLE.OFF: CyclomaticComplexity
@@ -239,7 +238,7 @@ public final class InternalRESTAdapter implements RESTAdapterListener, AutoClose
             topicManagementClient,
             endpointClient,
             publishingClient,
-            serviceListener);
+            metricsDispatcher);
         final ServiceSessionFactoryImpl serviceSessionFactory = new ServiceSessionFactoryImpl(
             executor,
             endpointClient,

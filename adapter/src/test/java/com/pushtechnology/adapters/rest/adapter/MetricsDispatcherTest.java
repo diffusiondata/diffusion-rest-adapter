@@ -33,6 +33,7 @@ import org.mockito.junit.MockitoRule;
 
 import com.pushtechnology.adapters.rest.metrics.event.listeners.PollEventListener;
 import com.pushtechnology.adapters.rest.metrics.event.listeners.PublicationEventListener;
+import com.pushtechnology.adapters.rest.metrics.event.listeners.ServiceEventListener;
 import com.pushtechnology.adapters.rest.metrics.event.listeners.TopicCreationEventListener;
 import com.pushtechnology.adapters.rest.metrics.listeners.PollListener;
 import com.pushtechnology.adapters.rest.metrics.listeners.PollListener.PollCompletionListener;
@@ -93,6 +94,10 @@ public final class MetricsDispatcherTest {
     private TopicCreationEventListener topicCreationEventListener1;
     @Mock
     private EndpointResponse endpointResponse;
+    @Mock
+    private ServiceEventListener serviceEventListener0;
+    @Mock
+    private ServiceEventListener serviceEventListener1;
 
     private final EndpointConfig endpointConfig = EndpointConfig
         .builder()
@@ -189,5 +194,28 @@ public final class MetricsDispatcherTest {
 
         verify(topicCreationEventListener0).onTopicCreationFailed(isNotNull());
         verify(topicCreationEventListener1).onTopicCreationFailed(isNotNull());
+    }
+
+    @Test
+    public void serviceEventListenerDispatch() {
+        final MetricsDispatcher dispatcher = new MetricsDispatcher();
+
+        dispatcher.addServiceEventListener(serviceEventListener0);
+        dispatcher.addServiceEventListener(serviceEventListener1);
+
+        dispatcher.onStandby(serviceConfig);
+
+        verify(serviceEventListener0).onStandby(serviceConfig);
+        verify(serviceEventListener1).onStandby(serviceConfig);
+
+        dispatcher.onActive(serviceConfig);
+
+        verify(serviceEventListener0).onActive(serviceConfig);
+        verify(serviceEventListener1).onActive(serviceConfig);
+
+        dispatcher.onRemove(serviceConfig);
+
+        verify(serviceEventListener0).onRemove(serviceConfig);
+        verify(serviceEventListener1).onRemove(serviceConfig);
     }
 }
