@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.adapters.rest.endpoints.EndpointType;
+import com.pushtechnology.adapters.rest.metrics.event.listeners.ServiceEventListener;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.polling.EndpointClient;
@@ -43,7 +44,7 @@ public final class ServiceSessionStarterImpl implements ServiceSessionStarter {
     private final TopicManagementClient topicManagementClient;
     private final EndpointClient endpointClient;
     private final PublishingClient publishingClient;
-    private final ServiceListener serviceListener;
+    private final ServiceEventListener serviceListener;
 
     /**
      * Constructor.
@@ -52,7 +53,7 @@ public final class ServiceSessionStarterImpl implements ServiceSessionStarter {
             TopicManagementClient topicManagementClient,
             EndpointClient endpointClient,
             PublishingClient publishingClient,
-            ServiceListener serviceListener) {
+            ServiceEventListener serviceListener) {
 
         this.topicManagementClient = topicManagementClient;
         this.endpointClient = endpointClient;

@@ -28,6 +28,7 @@ import javax.net.ssl.SSLContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.pushtechnology.adapters.rest.metrics.event.listeners.ServiceEventListener;
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.MetricsConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
@@ -56,7 +57,7 @@ public final class InternalRESTAdapter implements RESTAdapterListener, AutoClose
     private static final Logger LOG = LoggerFactory.getLogger(InternalRESTAdapter.class);
     private final ScheduledExecutorService executor;
     private final SessionLossHandler sessionLossHandler;
-    private final ServiceListener serviceListener;
+    private final ServiceEventListener serviceListener;
     private final SSLContextFactory sslContextFactory;
 
     private final MetricsProviderFactory metricsProviderFactory = new MetricsProviderFactory();
@@ -92,7 +93,7 @@ public final class InternalRESTAdapter implements RESTAdapterListener, AutoClose
         ScheduledExecutorService executor,
         SessionFactory sessions,
         HttpClientFactory httpClientFactory,
-        ServiceListener serviceListener,
+        ServiceEventListener serviceListener,
         SessionLossHandler sessionLossHandler,
         Runnable shutdownHandler,
         Session.Listener listener) {

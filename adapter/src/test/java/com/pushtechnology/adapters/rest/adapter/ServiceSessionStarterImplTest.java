@@ -35,11 +35,11 @@ import java.util.function.Consumer;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.AdditionalAnswers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 
+import com.pushtechnology.adapters.rest.metrics.event.listeners.ServiceEventListener;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.polling.EndpointClient;
@@ -76,7 +76,7 @@ public final class ServiceSessionStarterImplTest {
     private EventedUpdateSource source;
 
     @Mock
-    private ServiceListener serviceListener;
+    private ServiceEventListener serviceListener;
 
     @Mock
     private EndpointResponse response;

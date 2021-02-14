@@ -42,6 +42,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
+import com.pushtechnology.adapters.rest.metrics.event.listeners.ServiceEventListener;
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.MetricsConfig;
@@ -67,7 +68,7 @@ public final class InternalRESTAdapterTest {
     @Mock
     private SessionLossHandler sessionLossHandler;
     @Mock
-    private ServiceListener serviceListener;
+    private ServiceEventListener serviceListener;
     @Mock
     private SessionFactory sessionFactory;
     @Mock

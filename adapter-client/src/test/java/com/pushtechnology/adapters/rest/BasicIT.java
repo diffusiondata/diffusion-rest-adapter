@@ -76,7 +76,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.verification.VerificationWithTimeout;
 
-import com.pushtechnology.adapters.rest.adapter.ServiceListener;
+import com.pushtechnology.adapters.rest.metrics.event.listeners.ServiceEventListener;
 import com.pushtechnology.adapters.rest.client.RESTAdapterClient;
 import com.pushtechnology.adapters.rest.model.latest.BasicAuthenticationConfig;
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
@@ -323,9 +323,9 @@ public final class BasicIT {
     @Mock
     private Session.Listener listener;
     @Mock
-    private ServiceListener serviceListener;
+    private ServiceEventListener serviceListener;
     @Mock
-    private ServiceListener backupServiceListener;
+    private ServiceEventListener backupServiceListener;
     @Mock
     private Topics.ValueStream<JSON> stream;
     @Mock
@@ -980,7 +980,7 @@ public final class BasicIT {
         return startClient(serviceListener);
     }
 
-    private RESTAdapterClient startClient(ServiceListener listener) {
+    private RESTAdapterClient startClient(ServiceEventListener listener) {
         ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
         final RESTAdapterClient client = RESTAdapterClient.create(
             Paths.get("."),

@@ -15,7 +15,7 @@
 
 package com.pushtechnology.adapters.rest.client;
 
-import static com.pushtechnology.adapters.rest.adapter.ServiceListener.NULL_LISTENER;
+import static com.pushtechnology.adapters.rest.metrics.event.listeners.ServiceEventListener.NULL_LISTENER;
 import static com.pushtechnology.adapters.rest.model.conversion.ConversionContext.FULL_CONTEXT;
 import static java.util.concurrent.Executors.newSingleThreadScheduledExecutor;
 
@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.concurrent.ScheduledExecutorService;
 
-import com.pushtechnology.adapters.rest.adapter.ServiceListener;
+import com.pushtechnology.adapters.rest.metrics.event.listeners.ServiceEventListener;
 import com.pushtechnology.adapters.rest.model.store.ModelStore;
 import com.pushtechnology.adapters.rest.model.store.PollingPersistedModelStore;
 import com.pushtechnology.adapters.rest.persistence.FileSystemPersistence;
@@ -42,7 +42,7 @@ public final class RESTAdapterClientBuilder {
     private final ModelStore modelStore;
     private final ScheduledExecutorService executor;
     private final Runnable shutdownHandler;
-    private final ServiceListener serviceListener;
+    private final ServiceEventListener serviceListener;
     private final Path pathToConfigDirectory;
     private final Session.Listener sessionListener;
 
@@ -59,7 +59,7 @@ public final class RESTAdapterClientBuilder {
             ModelStore modelStore,
             ScheduledExecutorService executor,
             Runnable shutdownHandler,
-            ServiceListener serviceListener,
+            ServiceEventListener serviceListener,
             Path pathToConfigDirectory,
             Session.Listener sessionListener) {
         this.executor = executor;
@@ -86,7 +86,7 @@ public final class RESTAdapterClientBuilder {
     /**
      * Use the provided service listener.
      */
-    public RESTAdapterClientBuilder serviceListener(ServiceListener newServiceListener) {
+    public RESTAdapterClientBuilder serviceListener(ServiceEventListener newServiceListener) {
         return new RESTAdapterClientBuilder(
             modelStore,
             executor,

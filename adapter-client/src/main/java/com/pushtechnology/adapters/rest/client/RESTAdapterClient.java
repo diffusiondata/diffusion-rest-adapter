@@ -27,7 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.adapters.rest.adapter.InternalRESTAdapter;
-import com.pushtechnology.adapters.rest.adapter.ServiceListener;
+import com.pushtechnology.adapters.rest.metrics.event.listeners.ServiceEventListener;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.store.ModelStore;
 import com.pushtechnology.adapters.rest.model.store.PollingPersistedModelStore;
@@ -58,7 +58,7 @@ public final class RESTAdapterClient {
             ModelStore modelStore,
             ScheduledExecutorService executor,
             Runnable shutdownHandler,
-            ServiceListener serviceListener,
+            ServiceEventListener serviceListener,
             Session.Listener listener) {
         this.modelStore = modelStore;
         this.shutdownHandler = shutdownHandler;
@@ -132,7 +132,7 @@ public final class RESTAdapterClient {
         ModelStore modelStore,
         ScheduledExecutorService executor,
         Runnable shutdownHandler,
-        ServiceListener serviceListener,
+        ServiceEventListener serviceListener,
         Session.Listener listener) {
         LOG.debug("Creating REST adapter client with model store: {}", modelStore);
         return new RESTAdapterClient(relativePath, modelStore, executor, shutdownHandler, serviceListener, listener);
@@ -174,7 +174,7 @@ public final class RESTAdapterClient {
                     Runtime.getRuntime().exit(0);
                 }
             },
-            ServiceListener.NULL_LISTENER,
+            ServiceEventListener.NULL_LISTENER,
             (session, oldState, newState) ->
                 LOG.debug("Session state change {} {} -> {}", session, oldState, newState));
     }
