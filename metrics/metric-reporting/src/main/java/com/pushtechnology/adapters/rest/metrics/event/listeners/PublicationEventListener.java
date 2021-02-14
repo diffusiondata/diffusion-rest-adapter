@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Push Technology Ltd.
+ * Copyright (C) 2021 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,34 +15,34 @@
 
 package com.pushtechnology.adapters.rest.metrics.event.listeners;
 
-import com.pushtechnology.adapters.rest.metrics.PollFailedEvent;
-import com.pushtechnology.adapters.rest.metrics.PollRequestEvent;
-import com.pushtechnology.adapters.rest.metrics.PollSuccessEvent;
+import com.pushtechnology.adapters.rest.metrics.PublicationFailedEvent;
+import com.pushtechnology.adapters.rest.metrics.PublicationRequestEvent;
+import com.pushtechnology.adapters.rest.metrics.PublicationSuccessEvent;
 
 /**
- * Listener for events about polling.
+ * Listener for events about publication.
  *
  * @author Push Technology Limited
  */
-public interface PollEventListener {
+public interface PublicationEventListener {
     /**
-     * Notified when an attempt to poll an endpoint made.
+     * Notified when an attempt to publish to a topic is made.
      *
      * @param event the event
      */
-    void onPollRequest(PollRequestEvent event);
+    void onPublicationRequest(PublicationRequestEvent event);
 
     /**
-     * Notified when a poll completes.
+     * Notified when a publication completes.
      *
      * @param event the event
      */
-    void onPollSuccess(PollSuccessEvent event);
+    void onPublicationSuccess(PublicationSuccessEvent event);
 
     /**
-     * Notified when a poll fails.
+     * Notified when a publication fails.
      *
      * @param event the event
      */
-    void onPollFailed(PollFailedEvent event);
+    void onPublicationFailed(PublicationFailedEvent event);
 }
