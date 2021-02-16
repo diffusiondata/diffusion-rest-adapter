@@ -113,4 +113,14 @@ public final class ConversionContextTest {
     public void testUnknownModel() {
         FULL_CONTEXT.convert(new AnyModel() { });
     }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testUnknownModelVersion() {
+        FULL_CONTEXT.modelVersion(4);
+    }
+
+    @Test
+    public void testLatestVersionIsFound() {
+        assertEquals(Model.class, FULL_CONTEXT.modelVersion(Model.VERSION));
+    }
 }

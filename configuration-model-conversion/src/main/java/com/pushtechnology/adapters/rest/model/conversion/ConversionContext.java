@@ -93,9 +93,16 @@ public final class ConversionContext implements ModelConverter {
     /**
      * @param version the schema version number
      * @return the model class used by the version
+     * @throws IllegalArgumentException if the version can't be found
      */
     public Class<? extends AnyModel> modelVersion(int version) {
-        return modelVersions.get(version);
+        final Class<? extends AnyModel> modelClass = modelVersions.get(version);
+        if (modelClass != null) {
+            return modelClass;
+        }
+        else {
+            throw new IllegalArgumentException("Unknown model version " + version);
+        }
     }
 
     /**
