@@ -44,8 +44,6 @@ public final class ServiceTest {
     @Mock
     private ServiceSessionFactory serviceSessionFactory;
     @Mock
-    private ServiceSessionStarter serviceSessionStarter;
-    @Mock
     private ServiceSession serviceSession;
 
     private ServiceConfig serviceConfig = ServiceConfig
@@ -62,14 +60,14 @@ public final class ServiceTest {
     public void setUp() {
         initMocks(this);
 
-        context = new ServiceManagerContext(publishingClient, serviceSessionFactory, serviceSessionStarter);
+        context = new ServiceManagerContext(publishingClient, serviceSessionFactory);
 
         when(serviceSessionFactory.create(serviceConfig)).thenReturn(serviceSession);
     }
 
     @After
     public void postConditions() {
-        verifyNoMoreInteractions(publishingClient, serviceSessionFactory, serviceSessionStarter, serviceSession);
+        verifyNoMoreInteractions(publishingClient, serviceSessionFactory, serviceSession);
     }
 
     @Test
@@ -79,7 +77,6 @@ public final class ServiceTest {
         service.reconfigure(serviceConfig, context);
 
         verify(serviceSessionFactory).create(serviceConfig);
-        verify(serviceSessionStarter).start(serviceConfig, serviceSession);
     }
 
     @Test
@@ -89,7 +86,6 @@ public final class ServiceTest {
         service.reconfigure(serviceConfig, context);
 
         verify(serviceSessionFactory).create(serviceConfig);
-        verify(serviceSessionStarter).start(serviceConfig, serviceSession);
 
         service.reconfigure(serviceConfig, context);
 
@@ -97,7 +93,6 @@ public final class ServiceTest {
 
         verify(serviceSession).stop();
         verify(serviceSessionFactory, times(2)).create(serviceConfig);
-        verify(serviceSessionStarter, times(2)).start(serviceConfig, serviceSession);
     }
 
     @Test
@@ -114,7 +109,6 @@ public final class ServiceTest {
         service.reconfigure(serviceConfig, context);
 
         verify(serviceSessionFactory).create(serviceConfig);
-        verify(serviceSessionStarter).start(serviceConfig, serviceSession);
 
         service.close();
 
@@ -129,7 +123,6 @@ public final class ServiceTest {
         service.reconfigure(serviceConfig, context);
 
         verify(serviceSessionFactory).create(serviceConfig);
-        verify(serviceSessionStarter).start(serviceConfig, serviceSession);
 
         service.release();
 

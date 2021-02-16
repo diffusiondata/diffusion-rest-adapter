@@ -24,8 +24,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 
-import com.pushtechnology.adapters.rest.services.ServiceSessionFactory;
 import com.pushtechnology.adapters.rest.publication.PublishingClient;
+import com.pushtechnology.adapters.rest.services.ServiceSessionFactory;
 
 /**
  * Unit tests for {@link ServiceManagerContext}.
@@ -38,8 +38,6 @@ public final class ServiceManagerContextTest {
     private PublishingClient publishingClient;
     @Mock
     private ServiceSessionFactory serviceSessionFactory;
-    @Mock
-    private ServiceSessionStarter serviceSessionStarter;
 
     private ServiceManagerContext context;
 
@@ -47,12 +45,12 @@ public final class ServiceManagerContextTest {
     public void setUp() {
         initMocks(this);
 
-        context = new ServiceManagerContext(publishingClient, serviceSessionFactory, serviceSessionStarter);
+        context = new ServiceManagerContext(publishingClient, serviceSessionFactory);
     }
 
     @After
     public void postConditions() {
-        verifyNoMoreInteractions(publishingClient, serviceSessionFactory, serviceSessionStarter);
+        verifyNoMoreInteractions(publishingClient, serviceSessionFactory);
     }
 
     @Test
@@ -63,10 +61,5 @@ public final class ServiceManagerContextTest {
     @Test
     public void getServiceSessionFactory() {
         assertEquals(serviceSessionFactory, context.getServiceSessionFactory());
-    }
-
-    @Test
-    public void getServiceSessionStarter() {
-        assertEquals(serviceSessionStarter, context.getServiceSessionStarter());
     }
 }

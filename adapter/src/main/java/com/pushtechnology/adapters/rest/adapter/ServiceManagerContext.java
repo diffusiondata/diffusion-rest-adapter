@@ -29,18 +29,15 @@ import net.jcip.annotations.Immutable;
 public final class ServiceManagerContext {
     private final PublishingClient publishingClient;
     private final ServiceSessionFactory serviceSessionFactory;
-    private final ServiceSessionStarter serviceSessionStarter;
 
     /**
      * Constructor.
      */
     public ServiceManagerContext(
             PublishingClient publishingClient,
-            ServiceSessionFactory serviceSessionFactory,
-            ServiceSessionStarter serviceSessionStarter) {
+            ServiceSessionFactory serviceSessionFactory) {
         this.publishingClient = publishingClient;
         this.serviceSessionFactory = serviceSessionFactory;
-        this.serviceSessionStarter = serviceSessionStarter;
     }
 
     /**
@@ -55,12 +52,5 @@ public final class ServiceManagerContext {
      */
     public ServiceSessionFactory getServiceSessionFactory() {
         return serviceSessionFactory;
-    }
-
-    /**
-     * @return the publishing client
-     */
-    public ServiceSessionStarter getServiceSessionStarter() {
-        return serviceSessionStarter;
     }
 }

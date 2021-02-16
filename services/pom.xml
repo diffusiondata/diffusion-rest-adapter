@@ -16,6 +16,16 @@
         </dependency>
 
         <dependency>
+            <groupId>com.pushtechnology.adapters.rest</groupId>
+            <artifactId>publication</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.pushtechnology.adapters.rest</groupId>
+            <artifactId>metric-reporting</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
         </dependency>

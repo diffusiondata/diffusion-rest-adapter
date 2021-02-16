@@ -48,8 +48,6 @@ public final class ServiceManagerTest {
     @Mock
     private ServiceSessionFactory serviceSessionFactory;
     @Mock
-    private ServiceSessionStarter serviceSessionStarter;
-    @Mock
     private ServiceSession serviceSession;
 
     private ServiceConfig serviceConfig = ServiceConfig
@@ -77,14 +75,14 @@ public final class ServiceManagerTest {
     public void setUp() {
         initMocks(this);
 
-        context = new ServiceManagerContext(publishingClient, serviceSessionFactory, serviceSessionStarter);
+        context = new ServiceManagerContext(publishingClient, serviceSessionFactory);
 
         when(serviceSessionFactory.create(serviceConfig)).thenReturn(serviceSession);
     }
 
     @After
     public void postConditions() {
-        verifyNoMoreInteractions(publishingClient, serviceSessionFactory, serviceSessionStarter);
+        verifyNoMoreInteractions(publishingClient, serviceSessionFactory);
     }
 
     @Test
@@ -94,7 +92,6 @@ public final class ServiceManagerTest {
         manager.reconfigure(context, model);
 
         verify(serviceSessionFactory).create(serviceConfig);
-        verify(serviceSessionStarter).start(serviceConfig, serviceSession);
     }
 
     @Test
@@ -104,14 +101,12 @@ public final class ServiceManagerTest {
         manager.reconfigure(context, model);
 
         verify(serviceSessionFactory).create(serviceConfig);
-        verify(serviceSessionStarter).start(serviceConfig, serviceSession);
 
         manager.reconfigure(context, model);
 
         verify(publishingClient).removeService(serviceConfig);
 
         verify(serviceSessionFactory, times(2)).create(serviceConfig);
-        verify(serviceSessionStarter, times(2)).start(serviceConfig, serviceSession);
     }
 
     @Test
@@ -121,7 +116,6 @@ public final class ServiceManagerTest {
         manager.reconfigure(context, model);
 
         verify(serviceSessionFactory).create(serviceConfig);
-        verify(serviceSessionStarter).start(serviceConfig, serviceSession);
 
         manager.close();
 

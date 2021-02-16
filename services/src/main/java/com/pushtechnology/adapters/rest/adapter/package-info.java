@@ -13,19 +13,9 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.adapter;
-
-import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.adapters.rest.services.ServiceSession;
-
 /**
- * Start the {@link ServiceSession}. Setup the update sources, topics etc.
+ * Package for adapter that polls REST services and republishes data to Diffusion servers.
  *
  * @author Push Technology Limited
  */
-public interface ServiceSessionStarter {
-    /**
-     * Bind a service session.
-     */
-    void start(ServiceConfig serviceConfig, ServiceSession serviceSession);
-}
+package com.pushtechnology.adapters.rest.adapter;

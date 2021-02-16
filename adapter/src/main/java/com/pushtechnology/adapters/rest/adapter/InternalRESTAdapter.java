@@ -234,20 +234,16 @@ public final class InternalRESTAdapter implements RESTAdapterListener, AutoClose
             sslContext,
             httpClientFactory,
             metricsDispatcher);
-        final ServiceSessionStarterImpl serviceSessionStarter = new ServiceSessionStarterImpl(
-            topicManagementClient,
-            endpointClient,
-            publishingClient,
-            metricsDispatcher);
         final ServiceSessionFactoryImpl serviceSessionFactory = new ServiceSessionFactoryImpl(
             executor,
             endpointClient,
             new EndpointPollHandlerFactoryImpl(publishingClient),
-            topicManagementClient);
+            topicManagementClient,
+            publishingClient,
+            metricsDispatcher);
         final ServiceManagerContext serviceManagerContext = new ServiceManagerContext(
             publishingClient,
-            serviceSessionFactory,
-            serviceSessionStarter);
+            serviceSessionFactory);
 
         endpointClient.start();
         serviceManager.reconfigure(serviceManagerContext, currentModel);

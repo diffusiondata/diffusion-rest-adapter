@@ -18,9 +18,9 @@ package com.pushtechnology.adapters.rest.adapter;
 import static java.util.Objects.requireNonNull;
 
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
+import com.pushtechnology.adapters.rest.publication.PublishingClient;
 import com.pushtechnology.adapters.rest.services.ServiceSession;
 import com.pushtechnology.adapters.rest.services.ServiceSessionFactory;
-import com.pushtechnology.adapters.rest.publication.PublishingClient;
 
 import net.jcip.annotations.NotThreadSafe;
 
@@ -59,9 +59,7 @@ public final class Service implements AutoCloseable {
         serviceConfig = newServiceConfig;
 
         final ServiceSessionFactory serviceSessionFactory = context.getServiceSessionFactory();
-        final ServiceSessionStarter serviceSessionStarter = context.getServiceSessionStarter();
         serviceSession = serviceSessionFactory.create(serviceConfig);
-        serviceSessionStarter.start(serviceConfig, serviceSession);
     }
 
     @Override
