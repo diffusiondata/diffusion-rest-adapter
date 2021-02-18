@@ -232,7 +232,7 @@ public final class InternalRESTAdapterTest {
         verify(httpClientFactory).create(model0, null);
         verify(httpClient).start();
 
-        verify(session).lock("root", UNLOCK_ON_CONNECTION_LOSS);
+        verify(session).lock("service-0", UNLOCK_ON_CONNECTION_LOSS);
         verify(serviceListener).onStandby(model0.getServices().get(0));
 
         restAdapter.onReconfiguration(inactiveModel);
@@ -294,7 +294,7 @@ public final class InternalRESTAdapterTest {
         verify(httpClientFactory).create(model0, null);
         verify(httpClient).start();
 
-        verify(session).lock("root", UNLOCK_ON_CONNECTION_LOSS);
+        verify(session).lock("service-0", UNLOCK_ON_CONNECTION_LOSS);
         verify(serviceListener).onStandby(model0.getServices().get(0));
 
         restAdapter.onReconfiguration(model1);
@@ -302,7 +302,7 @@ public final class InternalRESTAdapterTest {
         verify(httpClientFactory).create(model1, null);
         verify(httpClient, times(2)).start();
 
-        verify(session).lock("root2", UNLOCK_ON_CONNECTION_LOSS);
+        verify(session).lock("service-1", UNLOCK_ON_CONNECTION_LOSS);
         verify(serviceListener).onStandby(model1.getServices().get(0));
     }
 
@@ -335,7 +335,7 @@ public final class InternalRESTAdapterTest {
         verify(httpClientFactory).create(model1, null);
         verify(httpClient).start();
 
-        verify(session).lock("root2", UNLOCK_ON_CONNECTION_LOSS);
+        verify(session).lock("service-1", UNLOCK_ON_CONNECTION_LOSS);
         verify(serviceListener).onStandby(model1.getServices().get(0));
     }
 
@@ -381,7 +381,7 @@ public final class InternalRESTAdapterTest {
         verify(httpClientFactory).create(model0, null);
         verify(httpClient).start();
 
-        verify(session).lock("root", UNLOCK_ON_CONNECTION_LOSS);
+        verify(session).lock("service-0", UNLOCK_ON_CONNECTION_LOSS);
         verify(serviceListener).onStandby(model0.getServices().get(0));
 
         restAdapter.onReconfiguration(model2);
@@ -438,7 +438,7 @@ public final class InternalRESTAdapterTest {
         verify(httpClientFactory).create(model0, null);
         verify(httpClient).start();
 
-        verify(session).lock("root", UNLOCK_ON_CONNECTION_LOSS);
+        verify(session).lock("service-0", UNLOCK_ON_CONNECTION_LOSS);
         verify(serviceListener).onStandby(model0.getServices().get(0));
 
         restAdapter.close();

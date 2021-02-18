@@ -177,7 +177,7 @@ public final class PublishingClientImplTest {
     public void addService() {
         client.addService(serviceConfig);
 
-        verify(session).lock("a", UNLOCK_ON_CONNECTION_LOSS);
+        verify(session).lock("service", UNLOCK_ON_CONNECTION_LOSS);
         verify(registration).whenComplete(isNotNull());
     }
 
@@ -185,7 +185,7 @@ public final class PublishingClientImplTest {
     public void addServiceStandby() {
         client.addService(serviceConfig);
 
-        verify(session).lock("a", UNLOCK_ON_CONNECTION_LOSS);
+        verify(session).lock("service", UNLOCK_ON_CONNECTION_LOSS);
         verify(registration).whenComplete(isNotNull());
     }
 
@@ -193,7 +193,7 @@ public final class PublishingClientImplTest {
     public void removeService() {
         client.addService(serviceConfig);
 
-        verify(session).lock("a", UNLOCK_ON_CONNECTION_LOSS);
+        verify(session).lock("service", UNLOCK_ON_CONNECTION_LOSS);
 
         final CompletableFuture<?> future = client.removeService(serviceConfig);
         assertFalse(future.isDone());
@@ -208,7 +208,7 @@ public final class PublishingClientImplTest {
     public void failToRegister() {
         client.addService(serviceConfig);
 
-        verify(session).lock("a", UNLOCK_ON_CONNECTION_LOSS);
+        verify(session).lock("service", UNLOCK_ON_CONNECTION_LOSS);
 
         verify(registration).whenComplete(registrationHandler.capture());
         registrationHandler.getValue().accept(sessionLock, new Exception("test exception"));
@@ -224,7 +224,7 @@ public final class PublishingClientImplTest {
     @Test
     public void jsonContext() {
         final EventedUpdateSource source = client.addService(serviceConfig);
-        verify(session).lock("a", UNLOCK_ON_CONNECTION_LOSS);
+        verify(session).lock("service", UNLOCK_ON_CONNECTION_LOSS);
         verify(registration).whenComplete(registrationHandler.capture());
         registrationHandler.getValue().accept(sessionLock, null);
 
@@ -247,7 +247,7 @@ public final class PublishingClientImplTest {
     @Test
     public void binaryContext() {
         final EventedUpdateSource source = client.addService(serviceConfig);
-        verify(session).lock("a", UNLOCK_ON_CONNECTION_LOSS);
+        verify(session).lock("service", UNLOCK_ON_CONNECTION_LOSS);
         verify(registration).whenComplete(registrationHandler.capture());
         registrationHandler.getValue().accept(sessionLock, null);
 
@@ -277,7 +277,7 @@ public final class PublishingClientImplTest {
     @Test
     public void contextRecovery() {
         final EventedUpdateSource source = client.addService(serviceConfig);
-        verify(session).lock("a", UNLOCK_ON_CONNECTION_LOSS);
+        verify(session).lock("service", UNLOCK_ON_CONNECTION_LOSS);
         verify(registration).whenComplete(registrationHandler.capture());
         registrationHandler.getValue().accept(sessionLock, null);
 

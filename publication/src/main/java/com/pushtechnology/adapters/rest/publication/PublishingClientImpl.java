@@ -62,7 +62,7 @@ public final class PublishingClientImpl implements PublishingClient {
     @Override
     public synchronized EventedUpdateSource addService(ServiceConfig serviceConfig) {
 
-        final EventedUpdateSource source = new EventedUpdateSourceImpl(serviceConfig.getTopicPathRoot())
+        final EventedUpdateSource source = new EventedUpdateSourceImpl(serviceConfig.getName())
             .onActive(sessionLock -> {
                 synchronized (this) {
                     locks.put(serviceConfig, sessionLock);

@@ -38,7 +38,7 @@ import net.jcip.annotations.ThreadSafe;
 @ThreadSafe
 public final class EventedUpdateSourceImpl implements EventedUpdateSource {
     private final Object mutex = new Object();
-    private final String registeredTopicPath;
+    private final String serviceScope;
 
     @GuardedBy("mutex")
     private final List<Consumer<SessionLock>> onActiveEventHandlers = new ArrayList<>();
@@ -61,8 +61,8 @@ public final class EventedUpdateSourceImpl implements EventedUpdateSource {
     /**
      * Constructor.
      */
-    public EventedUpdateSourceImpl(String registeredTopicPath) {
-        this.registeredTopicPath = registeredTopicPath;
+    public EventedUpdateSourceImpl(String serviceScope) {
+        this.serviceScope = serviceScope;
     }
 
     @Override
@@ -120,7 +120,7 @@ public final class EventedUpdateSourceImpl implements EventedUpdateSource {
             onStandbyEventHandlers.forEach(Runnable::run);
 
             registration = session
-                .lock(registeredTopicPath, Session.SessionLockScope.UNLOCK_ON_CONNECTION_LOSS)
+                .lock(serviceScope, Session.SessionLockScope.UNLOCK_ON_CONNECTION_LOSS)
                 .whenComplete((lock, exception) -> {
                     synchronized (mutex) {
                         if (exception == null) {
