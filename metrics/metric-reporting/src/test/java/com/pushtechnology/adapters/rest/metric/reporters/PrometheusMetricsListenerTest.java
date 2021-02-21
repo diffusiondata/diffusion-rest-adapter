@@ -15,6 +15,7 @@
 
 package com.pushtechnology.adapters.rest.metric.reporters;
 
+import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Collections;
@@ -31,6 +32,8 @@ import com.pushtechnology.adapters.rest.metrics.PublicationSuccessEvent;
 import com.pushtechnology.adapters.rest.metrics.TopicCreationFailedEvent;
 import com.pushtechnology.adapters.rest.metrics.TopicCreationRequestEvent;
 import com.pushtechnology.adapters.rest.metrics.TopicCreationSuccessEvent;
+import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
+import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.diffusion.client.callbacks.ErrorReason;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicAddFailReason;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
@@ -137,6 +140,64 @@ public final class PrometheusMetricsListenerTest {
             TopicType.JSON), TopicAddFailReason.CLUSTER_REPARTITION));
 
         assertEquals(getCurrentValue("topic_creation_failed_total", "failReason", "CLUSTER_REPARTITION"), 1.0, 0.01);
+    }
+
+    @Test
+    public void onActive() {
+        final PrometheusMetricsListener listener = new PrometheusMetricsListener();
+
+        final EndpointConfig endpointConfig = EndpointConfig
+            .builder()
+            .name("endpoint-0")
+            .topicPath("topic")
+            .url("http://localhost/json")
+            .produces("json")
+            .build();
+
+        final ServiceConfig serviceConfig = ServiceConfig
+            .builder()
+            .name("service")
+            .host("localhost")
+            .port(8080)
+            .pollPeriod(60000)
+            .endpoints(singletonList(endpointConfig))
+            .topicPathRoot("a")
+            .build();
+
+        listener.onActive(serviceConfig);
+    }
+
+    @Test
+    public void onStandbyRemove() {
+        final PrometheusMetricsListener listener = new PrometheusMetricsListener();
+
+        final EndpointConfig endpointConfig = EndpointConfig
+            .builder()
+            .name("endpoint-0")
+            .topicPath("topic")
+            .url("http://localhost/json")
+            .produces("json")
+            .build();
+
+        final ServiceConfig serviceConfig = ServiceConfig
+            .builder()
+            .name("service")
+            .host("localhost")
+            .port(8080)
+            .pollPeriod(60000)
+            .endpoints(singletonList(endpointConfig))
+            .topicPathRoot("a")
+            .build();
+
+        listener.onStandby(serviceConfig);
+
+        assertEquals(getCurrentValue("services_current"), 1.0, 0.01);
+        assertEquals(getCurrentValue("endpoints_current"), 1.0, 0.01);
+
+        listener.onRemove(serviceConfig);
+
+        assertEquals(getCurrentValue("services_current"), 0.0, 0.01);
+        assertEquals(getCurrentValue("endpoints_current"), 0.0, 0.01);
     }
 
     private static double getCurrentValue(String name) {

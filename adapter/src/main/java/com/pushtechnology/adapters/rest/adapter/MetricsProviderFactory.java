@@ -101,6 +101,7 @@ public final class MetricsProviderFactory {
             metricsDispatcher.addPollEventListener(listener);
             metricsDispatcher.addPublicationEventListener(listener);
             metricsDispatcher.addTopicCreationEventListener(listener);
+            metricsDispatcher.addServiceEventListener(listener);
 
             startTasks.add(reporter::start);
             stopTasks.add(reporter::close);

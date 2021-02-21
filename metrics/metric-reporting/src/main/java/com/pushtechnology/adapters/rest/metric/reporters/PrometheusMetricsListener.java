@@ -26,9 +26,12 @@ import com.pushtechnology.adapters.rest.metrics.TopicCreationRequestEvent;
 import com.pushtechnology.adapters.rest.metrics.TopicCreationSuccessEvent;
 import com.pushtechnology.adapters.rest.metrics.event.listeners.PollEventListener;
 import com.pushtechnology.adapters.rest.metrics.event.listeners.PublicationEventListener;
+import com.pushtechnology.adapters.rest.metrics.event.listeners.ServiceEventListener;
 import com.pushtechnology.adapters.rest.metrics.event.listeners.TopicCreationEventListener;
+import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 
 import io.prometheus.client.Counter;
+import io.prometheus.client.Gauge;
 
 /**
  * Metrics listener for Prometheus that updates metrics registry.
@@ -36,7 +39,7 @@ import io.prometheus.client.Counter;
  * @author Push Technology Limited
  */
 public final class PrometheusMetricsListener
-        implements PollEventListener, PublicationEventListener, TopicCreationEventListener {
+        implements PollEventListener, PublicationEventListener, TopicCreationEventListener, ServiceEventListener {
     private static final Counter POLL_REQUESTS = Counter
         .build()
         .name("poll_requests_total")
@@ -96,6 +99,16 @@ public final class PrometheusMetricsListener
         .name("topic_creation_duration_milliseconds")
         .help("The milliseconds to complete the creation of a topic.")
         .register();
+    private static final Gauge CURRENT_SERVICES = Gauge
+        .build()
+        .name("services_current")
+        .help("The current number of services.")
+        .register();
+    private static final Gauge CURRENT_ENDPOINTS = Gauge
+        .build()
+        .name("endpoints_current")
+        .help("The current number of endpoints.")
+        .register();
 
     @Override
     public void onPollRequest(PollRequestEvent event) {
@@ -142,5 +155,21 @@ public final class PrometheusMetricsListener
     @Override
     public void onTopicCreationFailed(TopicCreationFailedEvent event) {
         TOPIC_CREATION_FAILURES.labels(event.getFailReason().toString()).inc();
+    }
+
+    @Override
+    public void onActive(ServiceConfig serviceConfig) {
+    }
+
+    @Override
+    public void onStandby(ServiceConfig serviceConfig) {
+        CURRENT_SERVICES.inc();
+        CURRENT_ENDPOINTS.inc(serviceConfig.getEndpoints().size());
+    }
+
+    @Override
+    public void onRemove(ServiceConfig serviceConfig) {
+        CURRENT_SERVICES.dec();
+        CURRENT_ENDPOINTS.dec(serviceConfig.getEndpoints().size());
     }
 }
