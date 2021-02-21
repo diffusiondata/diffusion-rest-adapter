@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2020 Push Technology Ltd.
+ * Copyright (C) 2021 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,10 +49,6 @@ public final class TopicManagementClientImpl implements TopicManagementClient {
     }
 
     @Override
-    public void addService(ServiceConfig serviceConfig) {
-    }
-
-    @Override
     public CompletableFuture<Void> addEndpoint(
             ServiceConfig serviceConfig,
             EndpointConfig endpointConfig) {
@@ -76,19 +72,6 @@ public final class TopicManagementClientImpl implements TopicManagementClient {
         session
             .feature(TopicControl.class)
             .removeTopics(serviceConfig.getTopicPathRoot() + "/" + endpointConfig.getTopicPath());
-    }
-
-    @Override
-    public void removeService(ServiceConfig serviceConfig) {
-    }
-
-    @Override
-    public CompletableFuture<Void> addTopic(String path, TopicType topicType, int keepAlive) {
-        final TopicSpecification specification = session
-            .feature(TopicControl.class)
-            .newSpecification(topicType)
-            .withProperty(TopicSpecification.REMOVAL, format("when no updates for %ds", keepAlive));
-        return addTopic(path, specification);
     }
 
     private CompletableFuture<Void> addTopic(String path, TopicSpecification specification) {

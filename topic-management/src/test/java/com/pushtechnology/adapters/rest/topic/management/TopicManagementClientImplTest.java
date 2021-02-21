@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2020 Push Technology Ltd.
+ * Copyright (C) 2021 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -113,11 +113,6 @@ public final class TopicManagementClientImplTest {
     }
 
     @Test
-    public void addService() {
-        topicManagementClient.addService(serviceConfig);
-    }
-
-    @Test
     public void addJSONEndpoint() {
         when(specification.getType()).thenReturn(TopicType.JSON);
         when(topicControl.addTopic(isNotNull(), ArgumentMatchers.<TopicSpecification>isNotNull())).thenReturn(cf(new SessionDisconnectedException()));
@@ -172,13 +167,6 @@ public final class TopicManagementClientImplTest {
         topicManagementClient.removeEndpoint(serviceConfig, jsonEndpointConfig);
 
         verify(topicControl).removeTopics("service/jsonEndpoint");
-    }
-
-    @Test
-    public void removeService() {
-        addService();
-
-        topicManagementClient.removeService(serviceConfig);
     }
 
     private static CompletableFuture<TopicControl.AddTopicResult> cf(Exception exception) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Push Technology Ltd.
+ * Copyright (C) 2021 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -183,7 +183,6 @@ public final class ServiceSessionFactoryImplTest {
     public void startSuccessfulPoll() {
         final ServiceSession serviceSession = serviceSessionFactory.create(serviceWithEndpoint);
 
-        verify(topicManagementClient).addService(serviceWithEndpoint);
         verify(publishingClient).addService(serviceWithEndpoint);
         verify(source).onStandby(isNotNull());
         verify(source).onActive(consumerCaptor.capture());
@@ -208,7 +207,6 @@ public final class ServiceSessionFactoryImplTest {
     public void standby() {
         final ServiceSession serviceSession = serviceSessionFactory.create(serviceConfig);
 
-        verify(topicManagementClient).addService(serviceConfig);
         verify(publishingClient).addService(serviceConfig);
         verify(source).onStandby(runnableCaptor.capture());
         verify(source).onActive(isNotNull());
@@ -223,7 +221,6 @@ public final class ServiceSessionFactoryImplTest {
     public void close() {
         final ServiceSession serviceSession = serviceSessionFactory.create(serviceConfig);
 
-        verify(topicManagementClient).addService(serviceConfig);
         verify(publishingClient).addService(serviceConfig);
         verify(source).onStandby(isNotNull());
         verify(source).onActive(isNotNull());
@@ -240,7 +237,6 @@ public final class ServiceSessionFactoryImplTest {
 
         final ServiceSession serviceSession = serviceSessionFactory.create(serviceWithEndpoint);
 
-        verify(topicManagementClient).addService(serviceWithEndpoint);
         verify(publishingClient).addService(serviceWithEndpoint);
         verify(source).onStandby(isNotNull());
         verify(source).onActive(consumerCaptor.capture());
@@ -268,7 +264,6 @@ public final class ServiceSessionFactoryImplTest {
 
         final ServiceSession serviceSession = serviceSessionFactory.create(serviceWithInferedEndpoint);
 
-        verify(topicManagementClient).addService(serviceWithInferedEndpoint);
         verify(publishingClient).addService(serviceWithInferedEndpoint);
         verify(source).onStandby(isNotNull());
         verify(source).onActive(consumerCaptor.capture());
