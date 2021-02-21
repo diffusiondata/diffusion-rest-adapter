@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Push Technology Ltd.
+ * Copyright (C) 2021 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,9 @@
 
 package com.pushtechnology.adapters.rest.services;
 
+import static com.pushtechnology.adapters.rest.adapter.AsyncFunction.consume;
+import static com.pushtechnology.adapters.rest.endpoints.EndpointType.from;
+import static com.pushtechnology.adapters.rest.endpoints.EndpointType.inferFromContentType;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 import java.util.HashMap;
@@ -27,15 +30,20 @@ import java.util.function.BiConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.pushtechnology.adapters.rest.adapter.ValidateContentType;
+import com.pushtechnology.adapters.rest.endpoints.EndpointType;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.polling.EndpointClient;
 import com.pushtechnology.adapters.rest.polling.EndpointPollHandlerFactory;
 import com.pushtechnology.adapters.rest.polling.EndpointResponse;
+import com.pushtechnology.adapters.rest.publication.PublishingClient;
 import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
 
 import net.jcip.annotations.GuardedBy;
 import net.jcip.annotations.ThreadSafe;
+
+import kotlin.Pair;
 
 /**
  * Implementation of {@link ServiceSession}. Access to the endpoints is synchronised.
@@ -52,6 +60,7 @@ public final class ServiceSessionImpl implements ServiceSession {
     private final ServiceConfig serviceConfig;
     private final EndpointPollHandlerFactory handlerFactory;
     private final TopicManagementClient topicManagementClient;
+    private final PublishingClient publishingClient;
     @GuardedBy("this")
     private boolean isRunning;
 
@@ -63,13 +72,15 @@ public final class ServiceSessionImpl implements ServiceSession {
             EndpointClient endpointClient,
             ServiceConfig serviceConfig,
             EndpointPollHandlerFactory handlerFactory,
-            TopicManagementClient topicManagementClient) {
+            TopicManagementClient topicManagementClient,
+            PublishingClient publishingClient) {
 
         this.executor = executor;
         this.endpointClient = endpointClient;
         this.serviceConfig = serviceConfig;
         this.handlerFactory = handlerFactory;
         this.topicManagementClient = topicManagementClient;
+        this.publishingClient = publishingClient;
     }
 
     @Override
@@ -78,6 +89,73 @@ public final class ServiceSessionImpl implements ServiceSession {
 
         LOG.debug("Starting service session {}", serviceConfig);
         endpointPollers.replaceAll((endpoint, currentHandle) -> startEndpoint(endpoint));
+
+        serviceConfig
+            .getEndpoints()
+            .forEach(endpointConfig -> initialiseEndpoint(serviceConfig, endpointConfig));
+    }
+
+    private void initialiseEndpoint(
+        ServiceConfig service,
+        EndpointConfig endpointConfig) {
+        endpointClient
+            .request(service, endpointConfig)
+            .thenApply(result -> new Pair<>(resolveEndpointConfig(endpointConfig, result), result))
+            .thenApply(new ValidateContentType())
+            .thenCompose(consume(configAndResult -> handleResponse(
+                service,
+                from(configAndResult.getFirst().getProduces()),
+                configAndResult.getFirst(),
+                configAndResult.getSecond())))
+            .exceptionally(e -> {
+                LOG.warn("Endpoint {} not initialised. First request failed. {}", endpointConfig, e.getMessage());
+                return null;
+            });
+    }
+
+    private EndpointConfig resolveEndpointConfig(EndpointConfig endpointConfig, EndpointResponse response) {
+        final String produces = endpointConfig.getProduces();
+        if ("auto".equals(produces)) {
+            return EndpointConfig
+                .builder()
+                .name(endpointConfig.getName())
+                .topicPath(endpointConfig.getTopicPath())
+                .url(endpointConfig.getUrl())
+                .produces(inferFromContentType(response.getContentType()).getIdentifier())
+                .pollPeriod(endpointConfig.getPollPeriod())
+                .build();
+        }
+        else {
+            return endpointConfig;
+        }
+    }
+
+    @SuppressWarnings("PMD.SignatureDeclareThrowsException")
+    private <T> void handleResponse(
+        ServiceConfig service,
+        EndpointType<T> endpointType,
+        EndpointConfig endpointConfig,
+        EndpointResponse response) throws Exception {
+
+        final T value = endpointType.getParser().transform(response);
+        topicManagementClient
+            .addEndpoint(service, endpointConfig)
+            .thenRun(() -> {
+                // If the service has been closed it will have been removed from the publishing client
+                publishingClient.forService(service, () -> {
+                    LOG.info("Endpoint {} exists, adding endpoint to service session", endpointConfig);
+                    addEndpoint(endpointConfig);
+                    publishingClient.createUpdateContext(
+                        service,
+                        endpointConfig,
+                        endpointType.getValueType(),
+                        endpointType.getDataType()).publish(value);
+                });
+            })
+            .exceptionally(ex -> {
+                LOG.warn("Topic creation failed for {} because {}", endpointConfig, ex.getMessage());
+                return null;
+            });
     }
 
     @Override
@@ -150,12 +228,14 @@ public final class ServiceSessionImpl implements ServiceSession {
         @Override
         public void run() {
             synchronized (ServiceSessionImpl.this) {
-                endpointPollers
-                    .get(endpointConfig)
-                    .currentPollHandle = endpointClient
+                final PollHandle pollHandle = endpointPollers
+                    .get(endpointConfig);
+                final CompletableFuture<EndpointResponse> request = endpointClient
                     .request(
                         serviceConfig,
-                        endpointConfig)
+                        endpointConfig);
+                pollHandle
+                    .currentPollHandle = request
                     .whenComplete(handler);
             }
         }
