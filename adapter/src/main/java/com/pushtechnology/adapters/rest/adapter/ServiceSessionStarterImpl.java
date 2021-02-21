@@ -120,6 +120,7 @@ public final class ServiceSessionStarterImpl implements ServiceSessionStarter {
             .topicPath(endpointConfig.getTopicPath())
             .url(endpointConfig.getUrl())
             .produces(endpointType.getIdentifier())
+            .pollPeriod(endpointConfig.getPollPeriod())
             .build();
     }
 

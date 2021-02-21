@@ -66,4 +66,9 @@ public class EndpointConfig {
      */
     @NonNull
     String produces;
+    /**
+     * The time in milliseconds between polls. If set overrides the service
+     * poll period.
+     */
+    Long pollPeriod;
 }

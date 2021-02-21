@@ -81,6 +81,14 @@ public final class ServiceSessionTest {
         .produces("json")
         .topicPath("url")
         .build();
+    private final EndpointConfig fastEndpointConfig = EndpointConfig
+        .builder()
+        .name("endpoint")
+        .url("/a/url")
+        .produces("json")
+        .topicPath("url")
+        .pollPeriod(1000L)
+        .build();
     private final ServiceConfig serviceConfig = ServiceConfig
         .builder()
         .name("service")
@@ -106,6 +114,7 @@ public final class ServiceSessionTest {
             .request(isA(ServiceConfig.class), isA(EndpointConfig.class)))
             .thenReturn(pollFuture0, pollFuture1);
         when(handlerFactory.create(serviceConfig, endpointConfig)).thenReturn(handler);
+        when(handlerFactory.create(serviceConfig, fastEndpointConfig)).thenReturn(handler);
     }
 
     @After
@@ -128,6 +137,24 @@ public final class ServiceSessionTest {
         runnable.run();
 
         verify(endpointClient).request(eq(serviceConfig), eq(endpointConfig));
+        verify(handler).accept(endpointResponse, null);
+    }
+
+    @Test
+    public void startSuccessfulPollWithFastPoll() {
+        when(endpointClient.request(eq(serviceConfig), eq(fastEndpointConfig))).thenReturn(completedFuture(endpointResponse));
+
+        serviceSession.start();
+        serviceSession.addEndpoint(fastEndpointConfig);
+        verify(handlerFactory).create(serviceConfig, fastEndpointConfig);
+
+        verify(executor).scheduleWithFixedDelay(runnableCaptor.capture(), eq(1000L), eq(1000L), eq(MILLISECONDS));
+
+        final Runnable runnable = runnableCaptor.getValue();
+
+        runnable.run();
+
+        verify(endpointClient).request(eq(serviceConfig), eq(fastEndpointConfig));
         verify(handler).accept(endpointResponse, null);
     }
 

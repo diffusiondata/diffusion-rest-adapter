@@ -95,12 +95,15 @@ public final class ServiceSessionImpl implements ServiceSession {
         final BiConsumer<EndpointResponse, Throwable> handler =
             new PollResultHandler(handlerFactory.create(serviceConfig, endpointConfig));
 
+        final Long endpointPollPeriod = endpointConfig.getPollPeriod();
+        final long pollPeriod = endpointPollPeriod == null ? serviceConfig.getPollPeriod() : endpointPollPeriod;
+
         final Future<?> future;
-        if (serviceConfig.getPollPeriod() > 0) {
+        if (pollPeriod > 0) {
             future = executor.scheduleWithFixedDelay(
                 new PollingTask(endpointConfig, handler),
-                    serviceConfig.getPollPeriod(),
-                    serviceConfig.getPollPeriod(),
+                    pollPeriod,
+                    pollPeriod,
                     MILLISECONDS);
         }
         else {
