@@ -289,6 +289,26 @@ public final class BasicIT {
         .topicPathRoot("rest/string")
         .endpoints(singletonList(CONSTANT_STRING_ENDPOINT))
         .build();
+    private static final ServiceConfig OVERLAPPING_SERVICE_0 = ServiceConfig
+        .builder()
+        .name("service-8")
+        .host("localhost")
+        .port(8081)
+        .secure(false)
+        .pollPeriod(500)
+        .topicPathRoot("rest/overlap")
+        .endpoints(singletonList(CONSTANT_STRING_ENDPOINT))
+        .build();
+    private static final ServiceConfig OVERLAPPING_SERVICE_1 = ServiceConfig
+        .builder()
+        .name("service-9")
+        .host("localhost")
+        .port(8081)
+        .secure(false)
+        .pollPeriod(500)
+        .topicPathRoot("rest/overlap")
+        .endpoints(singletonList(INCREMENT_STRING_ENDPOINT))
+        .build();
 
     private static final String STRING_CONSTANT = "{\"cromulent\":\"good\",\"embiggen\":\"to make larger\"}";
     private static final JSON JSON_CONSTANT = dataTypes()
@@ -850,6 +870,43 @@ public final class BasicIT {
         client.close();
 
         verify(serviceListener, timed()).onRemove(CONSTANT_STRING_SERVICE);
+    }
+
+    @Test
+    public void testOverlappingServices() throws IOException {
+        modelStore.setModel(modelWith(OVERLAPPING_SERVICE_0, OVERLAPPING_SERVICE_1));
+        final RESTAdapterClient client = startClient();
+
+        verify(serviceListener, timed()).onStandby(OVERLAPPING_SERVICE_0);
+        verify(serviceListener, timed()).onStandby(OVERLAPPING_SERVICE_1);
+        verify(serviceListener, timed()).onActive(OVERLAPPING_SERVICE_0);
+        verify(serviceListener, timed()).onActive(OVERLAPPING_SERVICE_1);
+
+        final Session session = startSession();
+
+        final Topics topics = session.feature(Topics.class);
+        topics.addFallbackStream(String.class, stringStream);
+        topics.subscribe("?rest/overlap/");
+
+        verify(stringStream, timed()).onSubscription(eq("rest/overlap/constant"), isNotNull());
+        verify(stringStream, timed()).onSubscription(eq("rest/overlap/increment"), isNotNull());
+
+        verify(stringStream, timed()).onValue(
+            eq("rest/overlap/constant"),
+            isNotNull(),
+            isNull(),
+            eq(STRING_CONSTANT));
+        verify(stringStream, timed()).onValue(
+            eq("rest/overlap/increment"),
+            isNotNull(),
+            isNull(),
+            isNotNull());
+
+        stopSession(session);
+        client.close();
+
+        verify(serviceListener, timed()).onRemove(OVERLAPPING_SERVICE_0);
+        verify(serviceListener, timed()).onRemove(OVERLAPPING_SERVICE_1);
     }
 
     @Test
