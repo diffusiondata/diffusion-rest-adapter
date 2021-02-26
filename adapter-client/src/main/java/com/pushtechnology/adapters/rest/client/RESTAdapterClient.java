@@ -145,6 +145,7 @@ public final class RESTAdapterClient {
      * @throws IOException if there is a problem with accessing the model store
      * @throws IllegalStateException if the configuration is missing
      */
+    @SuppressWarnings("PMD.DoNotCallSystemExit")
     public static RESTAdapterClient create(Path pathToConfigDirectory) throws IOException {
         final Persistence fileSystemPersistence = new FileSystemPersistence(pathToConfigDirectory, FULL_CONTEXT);
         final ScheduledExecutorService executor = newSingleThreadScheduledExecutor();
@@ -168,6 +169,10 @@ public final class RESTAdapterClient {
             () -> {
                 modelStore.stop();
                 executor.shutdown();
+                if (modelStore.get().getMetrics().getPrometheus() != null) {
+                    // Needed because not all prometheus exporter threads are daemons
+                    Runtime.getRuntime().exit(0);
+                }
             },
             ServiceListener.NULL_LISTENER,
             (session, oldState, newState) ->
