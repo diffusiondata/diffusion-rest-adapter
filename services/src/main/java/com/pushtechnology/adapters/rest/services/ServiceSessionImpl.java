@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.adapters.rest.adapter.ValidateContentType;
 import com.pushtechnology.adapters.rest.endpoints.EndpointType;
+import com.pushtechnology.adapters.rest.metrics.event.listeners.ServiceEventListener;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.polling.EndpointClient;
@@ -64,10 +65,49 @@ public final class ServiceSessionImpl implements ServiceSession {
     @GuardedBy("this")
     private boolean isRunning;
 
+
+    /**
+     * Factory method for service sessions.
+     */
+    public static ServiceSession create(
+            ScheduledExecutorService executor,
+            EndpointClient endpointClient,
+            ServiceConfig serviceConfig,
+            EndpointPollHandlerFactory handlerFactory,
+            TopicManagementClient topicManagementClient,
+            PublishingClient publishingClient,
+            ServiceEventListener serviceListener) {
+        final ServiceSession serviceSession = new ServiceSessionImpl(
+            executor,
+            endpointClient,
+            serviceConfig,
+            handlerFactory,
+            topicManagementClient,
+            publishingClient);
+
+        publishingClient
+            .addService(serviceConfig)
+            .onStandby(() -> {
+                LOG.info("Service {} on standby", serviceConfig);
+                serviceListener.onStandby(serviceConfig);
+            })
+            .onActive((updater) -> {
+                LOG.info("Service {} active", serviceConfig);
+                serviceListener.onActive(serviceConfig);
+                serviceSession.start();
+            })
+            .onClose(() -> {
+                LOG.info("Service {} closed", serviceConfig);
+                serviceListener.onRemove(serviceConfig);
+            });
+
+        return serviceSession;
+    }
+
     /**
      * Constructor.
      */
-    public ServiceSessionImpl(
+    /*package*/ ServiceSessionImpl(
             ScheduledExecutorService executor,
             EndpointClient endpointClient,
             ServiceConfig serviceConfig,

@@ -17,9 +17,6 @@ package com.pushtechnology.adapters.rest.services;
 
 import java.util.concurrent.ScheduledExecutorService;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.pushtechnology.adapters.rest.metrics.event.listeners.ServiceEventListener;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.polling.EndpointClient;
@@ -33,7 +30,6 @@ import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
  * @author Push Technology Limited
  */
 public final class ServiceSessionFactoryImpl implements ServiceSessionFactory {
-    private static final Logger LOG = LoggerFactory.getLogger(ServiceSessionFactoryImpl.class);
     private final ScheduledExecutorService executor;
     private final EndpointClient endpointClient;
     private final EndpointPollHandlerFactory handlerFactory;
@@ -61,28 +57,13 @@ public final class ServiceSessionFactoryImpl implements ServiceSessionFactory {
 
     @Override
     public ServiceSession create(ServiceConfig serviceConfig) {
-        final ServiceSession serviceSession = new ServiceSessionImpl(
+        return ServiceSessionImpl.create(
             executor,
             endpointClient,
             serviceConfig,
             handlerFactory,
             topicManagementClient,
-            publishingClient);
-        publishingClient
-            .addService(serviceConfig)
-            .onStandby(() -> {
-                LOG.info("Service {} on standby", serviceConfig);
-                serviceListener.onStandby(serviceConfig);
-            })
-            .onActive((updater) -> {
-                LOG.info("Service {} active", serviceConfig);
-                serviceListener.onActive(serviceConfig);
-                serviceSession.start();
-            })
-            .onClose(() -> {
-                LOG.info("Service {} closed", serviceConfig);
-                serviceListener.onRemove(serviceConfig);
-            });
-        return serviceSession;
+            publishingClient,
+            serviceListener);
     }
 }
