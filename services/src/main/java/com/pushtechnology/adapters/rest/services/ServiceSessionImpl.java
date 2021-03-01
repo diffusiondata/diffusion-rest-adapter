@@ -65,6 +65,7 @@ public final class ServiceSessionImpl implements ServiceSession {
     private final ServiceEventListener serviceListener;
     @GuardedBy("this")
     private boolean isRunning;
+    private boolean wasRunning;
 
 
     /**
@@ -124,6 +125,7 @@ public final class ServiceSessionImpl implements ServiceSession {
 
     /*package*/ synchronized void onActive() {
         isRunning = true;
+        wasRunning = true;
 
         LOG.debug("Starting service session {}", serviceConfig);
         endpointPollers.replaceAll((endpoint, currentHandle) -> startEndpoint(endpoint));
@@ -139,7 +141,7 @@ public final class ServiceSessionImpl implements ServiceSession {
 
     /*package*/ synchronized void onClose() {
         LOG.info("Service {} closed", serviceConfig);
-        serviceListener.onRemove(serviceConfig);
+        serviceListener.onRemove(serviceConfig, wasRunning);
     }
 
     private void initialiseEndpoint(

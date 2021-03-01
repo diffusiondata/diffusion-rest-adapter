@@ -148,6 +148,6 @@ public final class ServiceSessionFactoryImplTest {
 
         runnableCaptor.getValue().run();
 
-        verify(serviceListener).onRemove(serviceConfig);
+        verify(serviceListener).onRemove(serviceConfig, false);
     }
 }

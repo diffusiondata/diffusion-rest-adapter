@@ -36,7 +36,7 @@ public interface ServiceEventListener {
         }
 
         @Override
-        public void onRemove(ServiceConfig serviceConfig) {
+        public void onRemove(ServiceConfig serviceConfig, boolean wasActive) {
         }
     };
 
@@ -53,5 +53,5 @@ public interface ServiceEventListener {
     /**
      * Notification that a service has been removed.
      */
-    void onRemove(ServiceConfig serviceConfig);
+    void onRemove(ServiceConfig serviceConfig, boolean wasActive);
 }

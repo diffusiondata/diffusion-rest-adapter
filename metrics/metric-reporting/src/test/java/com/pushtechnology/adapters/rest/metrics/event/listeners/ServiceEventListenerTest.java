@@ -45,6 +45,6 @@ public final class ServiceEventListenerTest {
 
     @Test
     public void onRemove() {
-        ServiceEventListener.NULL_LISTENER.onRemove(null);
+        ServiceEventListener.NULL_LISTENER.onRemove(null, false);
     }
 }

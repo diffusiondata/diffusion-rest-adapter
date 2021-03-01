@@ -194,7 +194,7 @@ public final class PrometheusMetricsListenerTest {
         assertEquals(getCurrentValue("services_current"), 1.0, 0.01);
         assertEquals(getCurrentValue("endpoints_current"), 1.0, 0.01);
 
-        listener.onRemove(serviceConfig);
+        listener.onRemove(serviceConfig, false);
 
         assertEquals(getCurrentValue("services_current"), 0.0, 0.01);
         assertEquals(getCurrentValue("endpoints_current"), 0.0, 0.01);

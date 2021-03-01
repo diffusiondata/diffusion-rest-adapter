@@ -193,7 +193,7 @@ public final class ServiceSessionTest {
         verify(serviceListener).onStandby(serviceConfig);
 
         serviceSession.onClose();
-        verify(serviceListener).onRemove(serviceConfig);
+        verify(serviceListener).onRemove(serviceConfig, false);
     }
 
     @Test
@@ -213,6 +213,28 @@ public final class ServiceSessionTest {
 
         verify(endpointClient, times(2)).request(eq(serviceConfig), eq(endpointConfig));
         verify(handler).accept(endpointResponse, null);
+    }
+
+    @Test
+    public void startSuccessfulPollThenClose() {
+        when(endpointClient.request(eq(serviceConfig), eq(endpointConfig))).thenReturn(completedFuture(endpointResponse));
+
+        serviceSession.onActive();
+        serviceSession.addEndpoint(endpointConfig);
+        verify(handlerFactory).create(serviceConfig, endpointConfig);
+        verify(serviceListener).onActive(serviceConfig);
+
+        verify(executor).scheduleWithFixedDelay(runnableCaptor.capture(), eq(5000L), eq(5000L), eq(MILLISECONDS));
+
+        final Runnable runnable = runnableCaptor.getValue();
+
+        runnable.run();
+
+        verify(endpointClient, times(2)).request(eq(serviceConfig), eq(endpointConfig));
+        verify(handler).accept(endpointResponse, null);
+
+        serviceSession.onClose();
+        verify(serviceListener).onRemove(serviceConfig, true);
     }
 
     @Test

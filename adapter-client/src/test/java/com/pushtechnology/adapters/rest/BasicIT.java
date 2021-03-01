@@ -471,8 +471,8 @@ public final class BasicIT {
         stopSession(session);
         client.close();
 
-        verify(serviceListener, timed()).onRemove(SECURE_SERVICE);
-        verify(serviceListener, timed()).onRemove(INSECURE_SERVICE);
+        verify(serviceListener, timed()).onRemove(SECURE_SERVICE, true);
+        verify(serviceListener, timed()).onRemove(INSECURE_SERVICE, true);
     }
 
     @Test
@@ -507,7 +507,7 @@ public final class BasicIT {
         stopSession(session);
         client.close();
 
-        verify(serviceListener, timed()).onRemove(INSECURE_BINARY_SERVICE);
+        verify(serviceListener, timed()).onRemove(INSECURE_BINARY_SERVICE, true);
     }
 
     @Test
@@ -542,7 +542,7 @@ public final class BasicIT {
         stopSession(session);
         client.close();
 
-        verify(serviceListener, timed()).onRemove(INSECURE_STRING_SERVICE);
+        verify(serviceListener, timed()).onRemove(INSECURE_STRING_SERVICE, true);
     }
 
     @Test
@@ -581,8 +581,8 @@ public final class BasicIT {
         stopSession(session);
         client.close();
 
-        verify(serviceListener, timed()).onRemove(SECURE_SERVICE);
-        verify(serviceListener, timed()).onRemove(INSECURE_SERVICE);
+        verify(serviceListener, timed()).onRemove(SECURE_SERVICE, true);
+        verify(serviceListener, timed()).onRemove(INSECURE_SERVICE, true);
     }
 
     @Test
@@ -613,7 +613,7 @@ public final class BasicIT {
         stopSession(session);
         client.close();
 
-        verify(serviceListener, timed()).onRemove(INSECURE_SERVICE);
+        verify(serviceListener, timed()).onRemove(INSECURE_SERVICE, true);
     }
 
     @Test
@@ -638,7 +638,7 @@ public final class BasicIT {
 
         modelStore.setModel(modelWith());
 
-        verify(serviceListener, timed()).onRemove(INSECURE_SERVICE);
+        verify(serviceListener, timed()).onRemove(INSECURE_SERVICE, true);
 
         verify(stream, timed()).onUnsubscription(eq("rest/json/timestamp"), isNotNull(), eq(REMOVAL));
         verify(stream, timed()).onUnsubscription(eq("rest/json/increment"), isNotNull(), eq(REMOVAL));
@@ -670,7 +670,7 @@ public final class BasicIT {
 
         modelStore.setModel(modelWith(INSECURE_SERVICE, INSECURE_BINARY_SERVICE));
 
-        verify(serviceListener, timed()).onRemove(INSECURE_SERVICE);
+        verify(serviceListener, timed()).onRemove(INSECURE_SERVICE, true);
         verify(serviceListener, timed()).onActive(INSECURE_BINARY_SERVICE);
         verify(serviceListener, timed().times(2)).onActive(INSECURE_SERVICE);
 
@@ -683,8 +683,8 @@ public final class BasicIT {
         stopSession(session);
         client.close();
 
-        verify(serviceListener, timed().times(2)).onRemove(INSECURE_SERVICE);
-        verify(serviceListener, timed()).onRemove(INSECURE_BINARY_SERVICE);
+        verify(serviceListener, timed().times(2)).onRemove(INSECURE_SERVICE, true);
+        verify(serviceListener, timed()).onRemove(INSECURE_BINARY_SERVICE, true);
     }
 
     @Test
@@ -714,14 +714,14 @@ public final class BasicIT {
         verify(stream, timed()).onValue(eq("rest/json/increment"), isNotNull(), isNull(), isNotNull());
 
         client0.close();
-        verify(serviceListener, timed()).onRemove(INSECURE_SERVICE);
+        verify(serviceListener, timed()).onRemove(INSECURE_SERVICE, true);
         verify(backupServiceListener, timed()).onActive(INSECURE_SERVICE);
 
         verify(stream, never()).onUnsubscription(eq("rest/json/timestamp"), isNotNull(), eq(REMOVAL));
         verify(stream, never()).onUnsubscription(eq("rest/json/increment"), isNotNull(), eq(REMOVAL));
 
         client1.close();
-        verify(backupServiceListener, timed()).onRemove(INSECURE_SERVICE);
+        verify(backupServiceListener, timed()).onRemove(INSECURE_SERVICE, true);
 
         // Depends on automatic topic removal
         verify(stream, timeout(120000L)).onUnsubscription(eq("rest/json/timestamp"), isNotNull(), eq(REMOVAL));
@@ -755,7 +755,7 @@ public final class BasicIT {
         stopSession(session);
         client.close();
 
-        verify(serviceListener, timed()).onRemove(INFERRED_SERVICE);
+        verify(serviceListener, timed()).onRemove(INFERRED_SERVICE, true);
     }
 
     @Test
@@ -783,7 +783,7 @@ public final class BasicIT {
         stopSession(session);
         client.close();
 
-        verify(serviceListener, timed()).onRemove(CONSTANT_JSON_SERVICE);
+        verify(serviceListener, timed()).onRemove(CONSTANT_JSON_SERVICE, true);
     }
 
     @Test
@@ -813,7 +813,7 @@ public final class BasicIT {
         stopSession(session);
         client.close();
 
-        verify(serviceListener, timed()).onRemove(CONSTANT_JSON_SERVICE);
+        verify(serviceListener, timed()).onRemove(CONSTANT_JSON_SERVICE, true);
     }
 
     @Test
@@ -841,7 +841,7 @@ public final class BasicIT {
         stopSession(session);
         client.close();
 
-        verify(serviceListener, timed()).onRemove(CONSTANT_BINARY_SERVICE);
+        verify(serviceListener, timed()).onRemove(CONSTANT_BINARY_SERVICE, true);
     }
 
     @Test
@@ -869,7 +869,7 @@ public final class BasicIT {
         stopSession(session);
         client.close();
 
-        verify(serviceListener, timed()).onRemove(CONSTANT_STRING_SERVICE);
+        verify(serviceListener, timed()).onRemove(CONSTANT_STRING_SERVICE, true);
     }
 
     @Test
@@ -905,8 +905,8 @@ public final class BasicIT {
         stopSession(session);
         client.close();
 
-        verify(serviceListener, timed()).onRemove(OVERLAPPING_SERVICE_0);
-        verify(serviceListener, timed()).onRemove(OVERLAPPING_SERVICE_1);
+        verify(serviceListener, timed()).onRemove(OVERLAPPING_SERVICE_0, true);
+        verify(serviceListener, timed()).onRemove(OVERLAPPING_SERVICE_1, true);
     }
 
     @Test
@@ -934,7 +934,7 @@ public final class BasicIT {
         assertThat(response, containsString("Exporter is Healthy."));
 
         client.close();
-        verify(serviceListener, timed()).onRemove(CONSTANT_STRING_SERVICE);
+        verify(serviceListener, timed()).onRemove(CONSTANT_STRING_SERVICE, true);
     }
 
     @Test
@@ -969,7 +969,7 @@ public final class BasicIT {
         assertThat(response, containsString("# TYPE topics_created_total counter"));
 
         client.close();
-        verify(serviceListener, timed()).onRemove(CONSTANT_STRING_SERVICE);
+        verify(serviceListener, timed()).onRemove(CONSTANT_STRING_SERVICE, true);
     }
 
     private static VerificationWithTimeout timed() {

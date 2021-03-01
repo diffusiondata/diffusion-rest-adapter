@@ -137,8 +137,8 @@ public final class MetricsDispatcher implements
     }
 
     @Override
-    public void onRemove(ServiceConfig serviceConfig) {
-        serviceListeners.forEach(listener -> listener.onRemove(serviceConfig));
+    public void onRemove(ServiceConfig serviceConfig, boolean wasActive) {
+        serviceListeners.forEach(listener -> listener.onRemove(serviceConfig, wasActive));
     }
 
     private final class PollHandler implements PollEventListener {

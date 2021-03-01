@@ -168,7 +168,7 @@ public final class PrometheusMetricsListener
     }
 
     @Override
-    public void onRemove(ServiceConfig serviceConfig) {
+    public void onRemove(ServiceConfig serviceConfig, boolean wasActive) {
         CURRENT_SERVICES.dec();
         CURRENT_ENDPOINTS.dec(serviceConfig.getEndpoints().size());
     }

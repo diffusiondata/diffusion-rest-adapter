@@ -213,9 +213,9 @@ public final class MetricsDispatcherTest {
         verify(serviceEventListener0).onActive(serviceConfig);
         verify(serviceEventListener1).onActive(serviceConfig);
 
-        dispatcher.onRemove(serviceConfig);
+        dispatcher.onRemove(serviceConfig, true);
 
-        verify(serviceEventListener0).onRemove(serviceConfig);
-        verify(serviceEventListener1).onRemove(serviceConfig);
+        verify(serviceEventListener0).onRemove(serviceConfig, true);
+        verify(serviceEventListener1).onRemove(serviceConfig, true);
     }
 }

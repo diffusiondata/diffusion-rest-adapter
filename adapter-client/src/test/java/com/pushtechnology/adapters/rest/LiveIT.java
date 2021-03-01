@@ -145,7 +145,7 @@ public final class LiveIT {
         stopSession(session);
         client.close();
 
-        verify(serviceListener, timed()).onRemove(icndb);
+        verify(serviceListener, timed()).onRemove(icndb, true);
     }
 
     private static VerificationWithTimeout timed() {
