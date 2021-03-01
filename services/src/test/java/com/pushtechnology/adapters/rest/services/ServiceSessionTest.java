@@ -44,6 +44,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 
+import com.pushtechnology.adapters.rest.metrics.event.listeners.ServiceEventListener;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.polling.EndpointClient;
@@ -84,11 +85,11 @@ public final class ServiceSessionTest {
     @Mock
     private PublishingClient publishingClient;
     @Mock
+    private ServiceEventListener serviceListener;
+    @Mock
     private EndpointResponse response;
     @Mock
     private UpdateContext<JSON> updateContext;
-    @Captor
-    private ArgumentCaptor<Consumer<Session.SessionLock>> consumerCaptor;
     @Captor
     private ArgumentCaptor<Runnable> runnableCaptor;
 
@@ -140,14 +141,14 @@ public final class ServiceSessionTest {
         .topicPathRoot("root")
         .build();
 
-    private ServiceSession serviceSession;
+    private ServiceSessionImpl serviceSession;
 
     @SuppressWarnings("unchecked")
     @Before
     public void setUp() {
         initMocks(this);
 
-        serviceSession = new ServiceSessionImpl(executor, endpointClient, serviceConfig, handlerFactory, topicManagementClient, publishingClient);
+        serviceSession = new ServiceSessionImpl(executor, endpointClient, serviceConfig, handlerFactory, topicManagementClient, publishingClient, serviceListener);
         when(executor
             .scheduleWithFixedDelay(isA(Runnable.class), isA(Long.class), isA(Long.class), isA(TimeUnit.class)))
             .thenReturn(taskFuture);
@@ -173,16 +174,36 @@ public final class ServiceSessionTest {
 
     @After
     public void postConditions() {
-        verifyNoMoreInteractions(executor, endpointClient, handlerFactory, taskFuture, topicManagementClient);
+        verifyNoMoreInteractions(executor, endpointClient, handlerFactory, taskFuture, topicManagementClient, serviceListener);
+    }
+
+    @Test
+    public void onStandby() {
+        when(endpointClient.request(eq(serviceConfig), eq(endpointConfig))).thenReturn(completedFuture(endpointResponse));
+
+        serviceSession.onStandby();
+        verify(serviceListener).onStandby(serviceConfig);
+    }
+
+    @Test
+    public void onStandbyThenClose() {
+        when(endpointClient.request(eq(serviceConfig), eq(endpointConfig))).thenReturn(completedFuture(endpointResponse));
+
+        serviceSession.onStandby();
+        verify(serviceListener).onStandby(serviceConfig);
+
+        serviceSession.onClose();
+        verify(serviceListener).onRemove(serviceConfig);
     }
 
     @Test
     public void startSuccessfulPoll() {
         when(endpointClient.request(eq(serviceConfig), eq(endpointConfig))).thenReturn(completedFuture(endpointResponse));
 
-        serviceSession.start();
+        serviceSession.onActive();
         serviceSession.addEndpoint(endpointConfig);
         verify(handlerFactory).create(serviceConfig, endpointConfig);
+        verify(serviceListener).onActive(serviceConfig);
 
         verify(executor).scheduleWithFixedDelay(runnableCaptor.capture(), eq(5000L), eq(5000L), eq(MILLISECONDS));
 
@@ -198,11 +219,12 @@ public final class ServiceSessionTest {
     public void startSuccessfulPollWithFastPoll() {
         when(endpointClient.request(eq(serviceWithFastEndpointConfig), eq(fastEndpointConfig))).thenReturn(completedFuture(endpointResponse));
 
-        serviceSession = new ServiceSessionImpl(executor, endpointClient, serviceWithFastEndpointConfig, handlerFactory, topicManagementClient, publishingClient);
+        serviceSession = new ServiceSessionImpl(executor, endpointClient, serviceWithFastEndpointConfig, handlerFactory, topicManagementClient, publishingClient, serviceListener);
 
-        serviceSession.start();
+        serviceSession.onActive();
         serviceSession.addEndpoint(fastEndpointConfig);
         verify(handlerFactory).create(serviceWithFastEndpointConfig, fastEndpointConfig);
+        verify(serviceListener).onActive(serviceWithFastEndpointConfig);
 
         verify(executor).scheduleWithFixedDelay(runnableCaptor.capture(), eq(1000L), eq(1000L), eq(MILLISECONDS));
 
@@ -220,9 +242,10 @@ public final class ServiceSessionTest {
         future.completeExceptionally(ex);
         when(endpointClient.request(eq(serviceConfig), eq(endpointConfig))).thenReturn(future);
 
-        serviceSession.start();
+        serviceSession.onActive();
         serviceSession.addEndpoint(endpointConfig);
         verify(handlerFactory).create(serviceConfig, endpointConfig);
+        verify(serviceListener).onActive(serviceConfig);
 
         verify(executor).scheduleWithFixedDelay(runnableCaptor.capture(), eq(5000L), eq(5000L), eq(MILLISECONDS));
 
@@ -236,11 +259,12 @@ public final class ServiceSessionTest {
 
     @Test
     public void stop() {
-        serviceSession.start();
+        serviceSession.onActive();
         serviceSession.addEndpoint(endpointConfig);
         verify(handlerFactory).create(serviceConfig, endpointConfig);
         verify(endpointClient).request(serviceConfig, endpointConfig);
         verify(topicManagementClient).addEndpoint(serviceConfig, endpointConfig);
+        verify(serviceListener).onActive(serviceConfig);
 
         verify(executor).scheduleWithFixedDelay(runnableCaptor.capture(), eq(5000L), eq(5000L), eq(MILLISECONDS));
 
@@ -252,11 +276,12 @@ public final class ServiceSessionTest {
 
     @Test
     public void stopBeforePoll() {
-        serviceSession.start();
+        serviceSession.onActive();
         serviceSession.addEndpoint(endpointConfig);
         verify(handlerFactory).create(serviceConfig, endpointConfig);
         verify(endpointClient).request(serviceConfig, endpointConfig);
         verify(topicManagementClient).addEndpoint(serviceConfig, endpointConfig);
+        verify(serviceListener).onActive(serviceConfig);
 
         verify(executor).scheduleWithFixedDelay(runnableCaptor.capture(), eq(5000L), eq(5000L), eq(MILLISECONDS));
 
@@ -275,11 +300,12 @@ public final class ServiceSessionTest {
 
     @Test
     public void stopBeforeSecondPoll() {
-        serviceSession.start();
+        serviceSession.onActive();
         serviceSession.addEndpoint(endpointConfig);
         verify(handlerFactory).create(serviceConfig, endpointConfig);
         verify(endpointClient).request(serviceConfig, endpointConfig);
         verify(topicManagementClient).addEndpoint(serviceConfig, endpointConfig);
+        verify(serviceListener).onActive(serviceConfig);
 
         verify(executor).scheduleWithFixedDelay(runnableCaptor.capture(), eq(5000L), eq(5000L), eq(MILLISECONDS));
 
@@ -305,9 +331,10 @@ public final class ServiceSessionTest {
         final CompletableFuture<EndpointResponse> future = new CompletableFuture<>();
         when(endpointClient.request(eq(serviceConfig), eq(endpointConfig))).thenReturn(future);
 
-        serviceSession.start();
+        serviceSession.onActive();
         serviceSession.addEndpoint(endpointConfig);
         verify(handlerFactory).create(serviceConfig, endpointConfig);
+        verify(serviceListener).onActive(serviceConfig);
 
         verify(executor).scheduleWithFixedDelay(runnableCaptor.capture(), eq(5000L), eq(5000L), eq(MILLISECONDS));
 
@@ -329,10 +356,11 @@ public final class ServiceSessionTest {
     public void initialiseEndpoint() {
         when(endpointClient.request(eq(serviceConfig), eq(endpointConfig))).thenReturn(completedFuture(response));
 
-        serviceSession.start();
+        serviceSession.onActive();
 
         verify(executor).scheduleWithFixedDelay(isA(Runnable.class), eq(serviceConfig.getPollPeriod()), eq(serviceConfig.getPollPeriod()), eq(MILLISECONDS));
         verify(endpointClient).request(eq(serviceConfig), eq(endpointConfig));
+        verify(serviceListener).onActive(serviceConfig);
 
         verify(response, times(2)).getHeader("content-type");
         verify(response, times(2)).getContentType();
@@ -348,14 +376,15 @@ public final class ServiceSessionTest {
 
     @Test
     public void initialiseEndpointInfer() {
-        serviceSession = new ServiceSessionImpl(executor, endpointClient, serviceWithInferedEndpoint, handlerFactory, topicManagementClient, publishingClient);
+        serviceSession = new ServiceSessionImpl(executor, endpointClient, serviceWithInferedEndpoint, handlerFactory, topicManagementClient, publishingClient, serviceListener);
 
         when(endpointClient.request(eq(serviceWithInferedEndpoint), eq(inferEndpointConfig))).thenReturn(completedFuture(response));
 
-        serviceSession.start();
+        serviceSession.onActive();
 
         verify(executor).scheduleWithFixedDelay(isA(Runnable.class), eq(serviceWithInferedEndpoint.getPollPeriod()), eq(serviceWithInferedEndpoint.getPollPeriod()), eq(MILLISECONDS));
         verify(endpointClient).request(eq(serviceWithInferedEndpoint), eq(inferEndpointConfig));
+        verify(serviceListener).onActive(serviceWithInferedEndpoint);
 
         verify(response, times(3)).getHeader("content-type");
         verify(response, times(3)).getContentType();

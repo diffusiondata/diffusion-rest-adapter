@@ -62,6 +62,7 @@ public final class ServiceSessionImpl implements ServiceSession {
     private final EndpointPollHandlerFactory handlerFactory;
     private final TopicManagementClient topicManagementClient;
     private final PublishingClient publishingClient;
+    private final ServiceEventListener serviceListener;
     @GuardedBy("this")
     private boolean isRunning;
 
@@ -77,29 +78,20 @@ public final class ServiceSessionImpl implements ServiceSession {
             TopicManagementClient topicManagementClient,
             PublishingClient publishingClient,
             ServiceEventListener serviceListener) {
-        final ServiceSession serviceSession = new ServiceSessionImpl(
+        final ServiceSessionImpl serviceSession = new ServiceSessionImpl(
             executor,
             endpointClient,
             serviceConfig,
             handlerFactory,
             topicManagementClient,
-            publishingClient);
+            publishingClient,
+            serviceListener);
 
         publishingClient
             .addService(serviceConfig)
-            .onStandby(() -> {
-                LOG.info("Service {} on standby", serviceConfig);
-                serviceListener.onStandby(serviceConfig);
-            })
-            .onActive((updater) -> {
-                LOG.info("Service {} active", serviceConfig);
-                serviceListener.onActive(serviceConfig);
-                serviceSession.start();
-            })
-            .onClose(() -> {
-                LOG.info("Service {} closed", serviceConfig);
-                serviceListener.onRemove(serviceConfig);
-            });
+            .onStandby(serviceSession::onStandby)
+            .onActive((updater) -> serviceSession.onActive())
+            .onClose(serviceSession::onClose);
 
         return serviceSession;
     }
@@ -113,7 +105,8 @@ public final class ServiceSessionImpl implements ServiceSession {
             ServiceConfig serviceConfig,
             EndpointPollHandlerFactory handlerFactory,
             TopicManagementClient topicManagementClient,
-            PublishingClient publishingClient) {
+            PublishingClient publishingClient,
+            ServiceEventListener serviceListener) {
 
         this.executor = executor;
         this.endpointClient = endpointClient;
@@ -121,18 +114,32 @@ public final class ServiceSessionImpl implements ServiceSession {
         this.handlerFactory = handlerFactory;
         this.topicManagementClient = topicManagementClient;
         this.publishingClient = publishingClient;
+        this.serviceListener = serviceListener;
     }
 
-    @Override
-    public synchronized void start() {
+    /*package*/ synchronized void onStandby() {
+        LOG.info("Service {} on standby", serviceConfig);
+        serviceListener.onStandby(serviceConfig);
+    }
+
+    /*package*/ synchronized void onActive() {
         isRunning = true;
 
         LOG.debug("Starting service session {}", serviceConfig);
         endpointPollers.replaceAll((endpoint, currentHandle) -> startEndpoint(endpoint));
 
+        LOG.info("Service {} active", serviceConfig);
+
         serviceConfig
             .getEndpoints()
             .forEach(endpointConfig -> initialiseEndpoint(serviceConfig, endpointConfig));
+
+        serviceListener.onActive(serviceConfig);
+    }
+
+    /*package*/ synchronized void onClose() {
+        LOG.info("Service {} closed", serviceConfig);
+        serviceListener.onRemove(serviceConfig);
     }
 
     private void initialiseEndpoint(

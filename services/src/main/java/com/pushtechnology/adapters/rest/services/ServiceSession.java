@@ -26,11 +26,6 @@ import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
  */
 public interface ServiceSession {
     /**
-     * Start the session.
-     */
-    void start();
-
-    /**
      * Add an endpoint to the session.
      */
     void addEndpoint(EndpointConfig endpointConfig);
