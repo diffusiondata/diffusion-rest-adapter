@@ -437,7 +437,7 @@ public final class BasicIT {
 
     @After
     public void postConditions() {
-        verifyNoMoreInteractions(listener, backupServiceListener);
+        verifyNoMoreInteractions(listener, serviceListener, backupServiceListener);
     }
 
     @Test
@@ -480,6 +480,7 @@ public final class BasicIT {
         modelStore.setModel(modelWith(INSECURE_BINARY_SERVICE));
         final RESTAdapterClient client = startClient();
 
+        verify(serviceListener, timed()).onStandby(INSECURE_BINARY_SERVICE);
         verify(serviceListener, timed()).onActive(INSECURE_BINARY_SERVICE);
 
         final Session session = startSession();
@@ -515,6 +516,7 @@ public final class BasicIT {
         modelStore.setModel(modelWith(INSECURE_STRING_SERVICE));
         final RESTAdapterClient client = startClient();
 
+        verify(serviceListener, timed()).onStandby(INSECURE_STRING_SERVICE);
         verify(serviceListener, timed()).onActive(INSECURE_STRING_SERVICE);
 
         final Session session = startSession();
@@ -670,6 +672,8 @@ public final class BasicIT {
 
         modelStore.setModel(modelWith(INSECURE_SERVICE, INSECURE_BINARY_SERVICE));
 
+        verify(serviceListener, timed()).onStandby(INSECURE_BINARY_SERVICE);
+        verify(serviceListener, timed().times(2)).onStandby(INSECURE_SERVICE);
         verify(serviceListener, timed()).onRemove(INSECURE_SERVICE, true);
         verify(serviceListener, timed()).onActive(INSECURE_BINARY_SERVICE);
         verify(serviceListener, timed().times(2)).onActive(INSECURE_SERVICE);
