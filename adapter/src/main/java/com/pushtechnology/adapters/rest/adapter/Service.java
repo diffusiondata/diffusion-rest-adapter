@@ -81,6 +81,12 @@ public final class Service implements AutoCloseable {
      * Release the service for another to take over.
      */
     public void release() {
+        if (serviceSession != null) {
+            // Stop polling of REST service
+            serviceSession.release();
+            serviceSession = null;
+        }
+
         if (serviceConfig != null) {
             // Release the update source
             publishingClient.removeService(serviceConfig);

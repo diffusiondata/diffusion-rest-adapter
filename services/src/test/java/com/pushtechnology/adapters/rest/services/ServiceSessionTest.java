@@ -297,6 +297,22 @@ public final class ServiceSessionTest {
     }
 
     @Test
+    public void release() {
+        serviceSession.onActive();
+        serviceSession.addEndpoint(endpointConfig);
+        verify(handlerFactory).create(serviceConfig, endpointConfig);
+        verify(endpointClient).request(serviceConfig, endpointConfig);
+        verify(topicManagementClient).addEndpoint(serviceConfig, endpointConfig);
+        verify(serviceListener).onActive(serviceConfig);
+
+        verify(executor).scheduleWithFixedDelay(runnableCaptor.capture(), eq(5000L), eq(5000L), eq(MILLISECONDS));
+
+        serviceSession.release();
+
+        verify(taskFuture).cancel(false);
+    }
+
+    @Test
     public void stopBeforePoll() {
         serviceSession.onActive();
         serviceSession.addEndpoint(endpointConfig);

@@ -262,6 +262,27 @@ public final class ServiceSessionImpl implements ServiceSession {
         LOG.debug("Stopping service session {}", serviceConfig);
     }
 
+    private void releaseEndpoint(PollHandle pollHandle) {
+        if (pollHandle != null) {
+            pollHandle.taskHandle.cancel(false);
+            if (pollHandle.currentPollHandle != null) {
+                pollHandle.currentPollHandle.cancel(false);
+            }
+        }
+    }
+
+    @Override
+    public synchronized void release() {
+        isRunning = false;
+
+        endpointPollers.replaceAll((endpointConfig, pollHandle) -> {
+            releaseEndpoint(pollHandle);
+            return null;
+        });
+
+        LOG.debug("Releasing service session {}", serviceConfig);
+    }
+
     /**
      * The polling task. Triggers an asynchronous poll request.
      */

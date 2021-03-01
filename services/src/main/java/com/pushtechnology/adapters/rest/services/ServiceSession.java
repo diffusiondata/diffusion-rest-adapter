@@ -31,7 +31,12 @@ public interface ServiceSession {
     void addEndpoint(EndpointConfig endpointConfig);
 
     /**
-     * Start the session.
+     * Stop the session.
      */
     void stop();
+
+    /**
+     * Release the service for another to take over.
+     */
+    void release();
 }

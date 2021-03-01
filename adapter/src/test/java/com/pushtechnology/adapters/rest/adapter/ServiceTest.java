@@ -126,6 +126,7 @@ public final class ServiceTest {
 
         service.release();
 
+        verify(serviceSession).release();
         verify(publishingClient).removeService(serviceConfig);
     }
 }
