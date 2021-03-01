@@ -102,11 +102,13 @@ public final class PrometheusMetricsListener
     private static final Gauge CURRENT_SERVICES = Gauge
         .build()
         .name("services_current")
+        .labelNames("state")
         .help("The current number of services.")
         .register();
     private static final Gauge CURRENT_ENDPOINTS = Gauge
         .build()
         .name("endpoints_current")
+        .labelNames("state")
         .help("The current number of endpoints.")
         .register();
 
@@ -159,17 +161,27 @@ public final class PrometheusMetricsListener
 
     @Override
     public void onActive(ServiceConfig serviceConfig) {
+        CURRENT_SERVICES.labels("standby").dec();
+        CURRENT_ENDPOINTS.labels("standby").dec(serviceConfig.getEndpoints().size());
+        CURRENT_SERVICES.labels("active").inc();
+        CURRENT_ENDPOINTS.labels("active").inc(serviceConfig.getEndpoints().size());
     }
 
     @Override
     public void onStandby(ServiceConfig serviceConfig) {
-        CURRENT_SERVICES.inc();
-        CURRENT_ENDPOINTS.inc(serviceConfig.getEndpoints().size());
+        CURRENT_SERVICES.labels("standby").inc();
+        CURRENT_ENDPOINTS.labels("standby").inc(serviceConfig.getEndpoints().size());
     }
 
     @Override
     public void onRemove(ServiceConfig serviceConfig, boolean wasActive) {
-        CURRENT_SERVICES.dec();
-        CURRENT_ENDPOINTS.dec(serviceConfig.getEndpoints().size());
+        if (wasActive) {
+            CURRENT_SERVICES.labels("active").dec();
+            CURRENT_ENDPOINTS.labels("active").dec(serviceConfig.getEndpoints().size());
+        }
+        else {
+            CURRENT_SERVICES.labels("standby").dec();
+            CURRENT_ENDPOINTS.labels("standby").dec(serviceConfig.getEndpoints().size());
+        }
     }
 }
