@@ -141,6 +141,21 @@ public final class MetricsDispatcher implements
         serviceListeners.forEach(listener -> listener.onRemove(serviceConfig, wasActive));
     }
 
+    @Override
+    public void onEndpointAdd(ServiceConfig serviceConfig, EndpointConfig endpointConfig) {
+        serviceListeners.forEach(listener -> listener.onEndpointAdd(serviceConfig, endpointConfig));
+    }
+
+    @Override
+    public void onEndpointFail(ServiceConfig serviceConfig, EndpointConfig endpointConfig) {
+        serviceListeners.forEach(listener -> listener.onEndpointFail(serviceConfig, endpointConfig));
+    }
+
+    @Override
+    public void onEndpointRemove(ServiceConfig serviceConfig, EndpointConfig endpointConfig, boolean wasActive) {
+        serviceListeners.forEach(listener -> listener.onEndpointRemove(serviceConfig, endpointConfig, wasActive));
+    }
+
     private final class PollHandler implements PollEventListener {
         @Override
         public void onPollRequest(PollRequestEvent event) {

@@ -87,8 +87,6 @@ public final class ServiceSessionTest {
     @Mock
     private ServiceEventListener serviceListener;
     @Mock
-    private EndpointResponse response;
-    @Mock
     private UpdateContext<JSON> updateContext;
     @Captor
     private ArgumentCaptor<Runnable> runnableCaptor;
@@ -154,7 +152,7 @@ public final class ServiceSessionTest {
             .thenReturn(taskFuture);
         when(endpointClient
             .request(isA(ServiceConfig.class), isA(EndpointConfig.class)))
-            .thenReturn(CompletableFuture.completedFuture(response), pollFuture0, pollFuture1);
+            .thenReturn(CompletableFuture.completedFuture(endpointResponse), pollFuture0, pollFuture1);
         when(handlerFactory.create(serviceConfig, endpointConfig)).thenReturn(handler);
         when(handlerFactory.create(serviceConfig, fastEndpointConfig)).thenReturn(handler);
 
@@ -163,9 +161,9 @@ public final class ServiceSessionTest {
             .thenReturn(taskFuture);
         when(handlerFactory.create(serviceConfig, endpointConfig)).thenReturn(handler);
 
-        when(response.getContentType()).thenCallRealMethod();
-        when(response.getHeader("content-type")).thenReturn("application/json; charset=utf-8");
-        when(response.getResponse()).thenReturn("{}".getBytes(Charset.forName("UTF-8")));
+        when(endpointResponse.getContentType()).thenCallRealMethod();
+        when(endpointResponse.getHeader("content-type")).thenReturn("application/json; charset=utf-8");
+        when(endpointResponse.getResponse()).thenReturn("{}".getBytes(Charset.forName("UTF-8")));
         when(topicManagementClient.addEndpoint(isNotNull(), isNotNull())).thenReturn(CompletableFuture.completedFuture(null));
         when(publishingClient.createUpdateContext(isNotNull(), isNotNull(), isNotNull(), eq(Diffusion.dataTypes().json()))).thenReturn(updateContext);
         doAnswer(answer((ServiceConfig service, Runnable task) -> { task.run(); return null; })).when(publishingClient).forService(
@@ -206,6 +204,8 @@ public final class ServiceSessionTest {
         verify(serviceListener).onActive(serviceConfig);
 
         verify(executor).scheduleWithFixedDelay(runnableCaptor.capture(), eq(5000L), eq(5000L), eq(MILLISECONDS));
+        verify(serviceListener).onEndpointAdd(serviceConfig, endpointConfig);
+        verify(topicManagementClient).addEndpoint(serviceConfig, endpointConfig);
 
         final Runnable runnable = runnableCaptor.getValue();
 
@@ -223,6 +223,8 @@ public final class ServiceSessionTest {
         serviceSession.addEndpoint(endpointConfig);
         verify(handlerFactory).create(serviceConfig, endpointConfig);
         verify(serviceListener).onActive(serviceConfig);
+        verify(serviceListener).onEndpointAdd(serviceConfig, endpointConfig);
+        verify(topicManagementClient).addEndpoint(serviceConfig, endpointConfig);
 
         verify(executor).scheduleWithFixedDelay(runnableCaptor.capture(), eq(5000L), eq(5000L), eq(MILLISECONDS));
 
@@ -247,6 +249,8 @@ public final class ServiceSessionTest {
         serviceSession.addEndpoint(fastEndpointConfig);
         verify(handlerFactory).create(serviceWithFastEndpointConfig, fastEndpointConfig);
         verify(serviceListener).onActive(serviceWithFastEndpointConfig);
+        verify(serviceListener).onEndpointAdd(serviceWithFastEndpointConfig, fastEndpointConfig);
+        verify(topicManagementClient).addEndpoint(serviceWithFastEndpointConfig, fastEndpointConfig);
 
         verify(executor).scheduleWithFixedDelay(runnableCaptor.capture(), eq(1000L), eq(1000L), eq(MILLISECONDS));
 
@@ -268,6 +272,8 @@ public final class ServiceSessionTest {
         serviceSession.addEndpoint(endpointConfig);
         verify(handlerFactory).create(serviceConfig, endpointConfig);
         verify(serviceListener).onActive(serviceConfig);
+        verify(serviceListener).onEndpointFail(serviceConfig, endpointConfig);
+        verify(serviceListener).onEndpointAdd(serviceConfig, endpointConfig);
 
         verify(executor).scheduleWithFixedDelay(runnableCaptor.capture(), eq(5000L), eq(5000L), eq(MILLISECONDS));
 
@@ -287,6 +293,7 @@ public final class ServiceSessionTest {
         verify(endpointClient).request(serviceConfig, endpointConfig);
         verify(topicManagementClient).addEndpoint(serviceConfig, endpointConfig);
         verify(serviceListener).onActive(serviceConfig);
+        verify(serviceListener).onEndpointAdd(serviceConfig, endpointConfig);
 
         verify(executor).scheduleWithFixedDelay(runnableCaptor.capture(), eq(5000L), eq(5000L), eq(MILLISECONDS));
 
@@ -294,6 +301,7 @@ public final class ServiceSessionTest {
 
         verify(topicManagementClient).removeEndpoint(serviceConfig, endpointConfig);
         verify(taskFuture).cancel(false);
+        verify(serviceListener).onEndpointRemove(serviceConfig, endpointConfig, true);
     }
 
     @Test
@@ -304,12 +312,14 @@ public final class ServiceSessionTest {
         verify(endpointClient).request(serviceConfig, endpointConfig);
         verify(topicManagementClient).addEndpoint(serviceConfig, endpointConfig);
         verify(serviceListener).onActive(serviceConfig);
+        verify(serviceListener).onEndpointAdd(serviceConfig, endpointConfig);
 
         verify(executor).scheduleWithFixedDelay(runnableCaptor.capture(), eq(5000L), eq(5000L), eq(MILLISECONDS));
 
         serviceSession.release();
 
         verify(taskFuture).cancel(false);
+        verify(serviceListener).onEndpointRemove(serviceConfig, endpointConfig, true);
     }
 
     @Test
@@ -320,6 +330,7 @@ public final class ServiceSessionTest {
         verify(endpointClient).request(serviceConfig, endpointConfig);
         verify(topicManagementClient).addEndpoint(serviceConfig, endpointConfig);
         verify(serviceListener).onActive(serviceConfig);
+        verify(serviceListener).onEndpointAdd(serviceConfig, endpointConfig);
 
         verify(executor).scheduleWithFixedDelay(runnableCaptor.capture(), eq(5000L), eq(5000L), eq(MILLISECONDS));
 
@@ -334,6 +345,7 @@ public final class ServiceSessionTest {
         verify(topicManagementClient).removeEndpoint(serviceConfig, endpointConfig);
         verify(taskFuture).cancel(false);
         verify(pollFuture0).whenComplete(isNotNull());
+        verify(serviceListener).onEndpointRemove(serviceConfig, endpointConfig, true);
     }
 
     @Test
@@ -344,6 +356,7 @@ public final class ServiceSessionTest {
         verify(endpointClient).request(serviceConfig, endpointConfig);
         verify(topicManagementClient).addEndpoint(serviceConfig, endpointConfig);
         verify(serviceListener).onActive(serviceConfig);
+        verify(serviceListener).onEndpointAdd(serviceConfig, endpointConfig);
 
         verify(executor).scheduleWithFixedDelay(runnableCaptor.capture(), eq(5000L), eq(5000L), eq(MILLISECONDS));
 
@@ -362,6 +375,7 @@ public final class ServiceSessionTest {
         verify(topicManagementClient).removeEndpoint(serviceConfig, endpointConfig);
         verify(taskFuture).cancel(false);
         verify(pollFuture1).whenComplete(isNotNull());
+        verify(serviceListener).onEndpointRemove(serviceConfig, endpointConfig, true);
     }
 
     @Test
@@ -373,6 +387,7 @@ public final class ServiceSessionTest {
         serviceSession.addEndpoint(endpointConfig);
         verify(handlerFactory).create(serviceConfig, endpointConfig);
         verify(serviceListener).onActive(serviceConfig);
+        verify(serviceListener).onEndpointAdd(serviceConfig, endpointConfig);
 
         verify(executor).scheduleWithFixedDelay(runnableCaptor.capture(), eq(5000L), eq(5000L), eq(MILLISECONDS));
 
@@ -385,14 +400,16 @@ public final class ServiceSessionTest {
         serviceSession.stop();
         verify(topicManagementClient).removeEndpoint(serviceConfig, endpointConfig);
         verify(taskFuture).cancel(false);
+        verify(serviceListener).onEndpointRemove(serviceConfig, endpointConfig, true);
 
         future.complete(endpointResponse);
+        verify(topicManagementClient).addEndpoint(serviceConfig, endpointConfig);
     }
 
 
     @Test
     public void initialiseEndpoint() {
-        when(endpointClient.request(eq(serviceConfig), eq(endpointConfig))).thenReturn(completedFuture(response));
+        when(endpointClient.request(eq(serviceConfig), eq(endpointConfig))).thenReturn(completedFuture(endpointResponse));
 
         serviceSession.onActive();
 
@@ -400,9 +417,9 @@ public final class ServiceSessionTest {
         verify(endpointClient).request(eq(serviceConfig), eq(endpointConfig));
         verify(serviceListener).onActive(serviceConfig);
 
-        verify(response, times(2)).getHeader("content-type");
-        verify(response, times(2)).getContentType();
-        verify(response).getResponse();
+        verify(endpointResponse, times(2)).getHeader("content-type");
+        verify(endpointResponse, times(2)).getContentType();
+        verify(endpointResponse).getResponse();
         verify(topicManagementClient).addEndpoint(
             eq(serviceConfig),
             eq(endpointConfig));
@@ -410,13 +427,14 @@ public final class ServiceSessionTest {
         verify(updateContext).publish(isNotNull());
         verify(handlerFactory).create(serviceConfig, endpointConfig);
         verify(publishingClient).forService(eq(serviceConfig), isNotNull());
+        verify(serviceListener).onEndpointAdd(serviceConfig, endpointConfig);
     }
 
     @Test
     public void initialiseEndpointInfer() {
         serviceSession = new ServiceSessionImpl(executor, endpointClient, serviceWithInferedEndpoint, handlerFactory, topicManagementClient, publishingClient, serviceListener);
 
-        when(endpointClient.request(eq(serviceWithInferedEndpoint), eq(inferEndpointConfig))).thenReturn(completedFuture(response));
+        when(endpointClient.request(eq(serviceWithInferedEndpoint), eq(inferEndpointConfig))).thenReturn(completedFuture(endpointResponse));
 
         serviceSession.onActive();
 
@@ -424,9 +442,9 @@ public final class ServiceSessionTest {
         verify(endpointClient).request(eq(serviceWithInferedEndpoint), eq(inferEndpointConfig));
         verify(serviceListener).onActive(serviceWithInferedEndpoint);
 
-        verify(response, times(3)).getHeader("content-type");
-        verify(response, times(3)).getContentType();
-        verify(response).getResponse();
+        verify(endpointResponse, times(3)).getHeader("content-type");
+        verify(endpointResponse, times(3)).getContentType();
+        verify(endpointResponse).getResponse();
 
         final EndpointConfig inferredEndpoint = EndpointConfig
             .builder()
@@ -440,5 +458,6 @@ public final class ServiceSessionTest {
         verify(updateContext).publish(isNotNull());
         verify(handlerFactory).create(serviceWithInferedEndpoint, inferredEndpoint);
         verify(publishingClient).forService(eq(serviceWithInferedEndpoint), isNotNull());
+        verify(serviceListener).onEndpointAdd(serviceWithInferedEndpoint, inferredEndpoint);
     }
 }

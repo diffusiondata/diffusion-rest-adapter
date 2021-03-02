@@ -213,6 +213,18 @@ public final class MetricsDispatcherTest {
         verify(serviceEventListener0).onActive(serviceConfig);
         verify(serviceEventListener1).onActive(serviceConfig);
 
+        dispatcher.onEndpointAdd(serviceConfig, endpointConfig);
+        verify(serviceEventListener0).onEndpointAdd(serviceConfig, endpointConfig);
+        verify(serviceEventListener1).onEndpointAdd(serviceConfig, endpointConfig);
+
+        dispatcher.onEndpointFail(serviceConfig, endpointConfig);
+        verify(serviceEventListener0).onEndpointFail(serviceConfig, endpointConfig);
+        verify(serviceEventListener1).onEndpointFail(serviceConfig, endpointConfig);
+
+        dispatcher.onEndpointRemove(serviceConfig, endpointConfig, true);
+        verify(serviceEventListener0).onEndpointRemove(serviceConfig, endpointConfig, true);
+        verify(serviceEventListener1).onEndpointRemove(serviceConfig, endpointConfig, true);
+
         dispatcher.onRemove(serviceConfig, true);
 
         verify(serviceEventListener0).onRemove(serviceConfig, true);

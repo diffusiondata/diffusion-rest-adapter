@@ -167,12 +167,10 @@ public final class PrometheusMetricsListenerTest {
         listener.onStandby(serviceConfig);
 
         assertEquals(1.0, getCurrentValue("services_current", "state", "standby"), 0.01);
-        assertEquals(1.0, getCurrentValue("endpoints_current", "state", "standby"), 0.01);
 
         listener.onRemove(serviceConfig, false);
 
         assertEquals(0.0, getCurrentValue("services_current", "state", "standby"), 0.01);
-        assertEquals(0.0, getCurrentValue("endpoints_current", "state", "standby"), 0.01);
     }
 
     @Test
@@ -200,21 +198,51 @@ public final class PrometheusMetricsListenerTest {
         listener.onStandby(serviceConfig);
 
         assertEquals(1.0, getCurrentValue("services_current", "state", "standby"), 0.01);
-        assertEquals(1.0, getCurrentValue("endpoints_current", "state", "standby"), 0.01);
-
 
         listener.onActive(serviceConfig);
 
         assertEquals(0.0, getCurrentValue("services_current", "state", "standby"), 0.01);
-        assertEquals(0.0, getCurrentValue("endpoints_current", "state", "standby"), 0.01);
         assertEquals(1.0, getCurrentValue("services_current", "state", "active"), 0.01);
-        assertEquals(1.0, getCurrentValue("endpoints_current", "state", "active"), 0.01);
 
         listener.onRemove(serviceConfig, true);
 
         assertEquals(0.0, getCurrentValue("services_current", "state", "standby"), 0.01);
-        assertEquals(0.0, getCurrentValue("endpoints_current", "state", "standby"), 0.01);
         assertEquals(0.0, getCurrentValue("services_current", "state", "active"), 0.01);
+    }
+
+    @Test
+    public void onEndpointEvents() {
+        final PrometheusMetricsListener listener = new PrometheusMetricsListener();
+
+        final EndpointConfig endpointConfig = EndpointConfig
+            .builder()
+            .name("endpoint-0")
+            .topicPath("topic")
+            .url("http://localhost/json")
+            .produces("json")
+            .build();
+
+        final ServiceConfig serviceConfig = ServiceConfig
+            .builder()
+            .name("service")
+            .host("localhost")
+            .port(8080)
+            .pollPeriod(60000)
+            .endpoints(singletonList(endpointConfig))
+            .topicPathRoot("a")
+            .build();
+
+        listener.onEndpointAdd(serviceConfig, endpointConfig);
+        assertEquals(1.0, getCurrentValue("endpoints_current", "state", "active"), 0.01);
+
+
+        listener.onEndpointFail(serviceConfig, endpointConfig);
+        assertEquals(1.0, getCurrentValue("endpoints_current", "state", "failed"), 0.01);
+
+        listener.onEndpointRemove(serviceConfig, endpointConfig, false);
+        assertEquals(0.0, getCurrentValue("endpoints_current", "state", "failed"), 0.01);
+
+        listener.onEndpointRemove(serviceConfig, endpointConfig, true);
         assertEquals(0.0, getCurrentValue("endpoints_current", "state", "active"), 0.01);
     }
 

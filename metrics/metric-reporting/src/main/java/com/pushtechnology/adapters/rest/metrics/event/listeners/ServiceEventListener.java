@@ -15,6 +15,7 @@
 
 package com.pushtechnology.adapters.rest.metrics.event.listeners;
 
+import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 
 /**
@@ -38,6 +39,18 @@ public interface ServiceEventListener {
         @Override
         public void onRemove(ServiceConfig serviceConfig, boolean wasActive) {
         }
+
+        @Override
+        public void onEndpointAdd(ServiceConfig serviceConfig, EndpointConfig endpointConfig) {
+        }
+
+        @Override
+        public void onEndpointFail(ServiceConfig serviceConfig, EndpointConfig endpointConfig) {
+        }
+
+        @Override
+        public void onEndpointRemove(ServiceConfig serviceConfig, EndpointConfig endpointConfig, boolean wasActive) {
+        }
     };
 
     /**
@@ -54,4 +67,19 @@ public interface ServiceEventListener {
      * Notification that a service has been removed.
      */
     void onRemove(ServiceConfig serviceConfig, boolean wasActive);
+
+    /**
+     * Notification that an endpoint was added.
+     */
+    void onEndpointAdd(ServiceConfig serviceConfig, EndpointConfig endpointConfig);
+
+    /**
+     * Notification that an endpoint was failed.
+     */
+    void onEndpointFail(ServiceConfig serviceConfig, EndpointConfig endpointConfig);
+
+    /**
+     * Notification that an endpoint was removed.
+     */
+    void onEndpointRemove(ServiceConfig serviceConfig, EndpointConfig endpointConfig, boolean wasActive);
 }

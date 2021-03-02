@@ -43,6 +43,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.stream.Stream;
@@ -92,6 +93,7 @@ import com.pushtechnology.adapters.rest.resources.IncrementingResource;
 import com.pushtechnology.adapters.rest.resources.TimestampResource;
 import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.features.Topics;
+import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
@@ -458,6 +460,11 @@ public final class BasicIT {
         topics.addFallbackStream(Double.class, doubleStream);
         topics.subscribe("?rest/");
 
+        verify(serviceListener, timed()).onEndpointAdd(INSECURE_SERVICE, INCREMENT_ENDPOINT);
+        verify(serviceListener, timed()).onEndpointAdd(INSECURE_SERVICE, TIMESTAMP_ENDPOINT);
+        verify(serviceListener, timed()).onEndpointAdd(SECURE_SERVICE, AUTHENTICATED_INCREMENT_ENDPOINT);
+        verify(serviceListener, timed()).onEndpointAdd(SECURE_SERVICE, AUTHENTICATED_TIMESTAMP_ENDPOINT);
+
         verify(stream, timed()).onSubscription(eq("rest/json/timestamp"), isNotNull());
         verify(stream, timed()).onSubscription(eq("rest/json/increment"), isNotNull());
         verify(stream, timed()).onSubscription(eq("rest/tls/timestamp"), isNotNull());
@@ -473,6 +480,10 @@ public final class BasicIT {
 
         verify(serviceListener, timed()).onRemove(SECURE_SERVICE, true);
         verify(serviceListener, timed()).onRemove(INSECURE_SERVICE, true);
+        verify(serviceListener, timed()).onEndpointRemove(INSECURE_SERVICE, INCREMENT_ENDPOINT, true);
+        verify(serviceListener, timed()).onEndpointRemove(INSECURE_SERVICE, TIMESTAMP_ENDPOINT, true);
+        verify(serviceListener, timed()).onEndpointRemove(SECURE_SERVICE, AUTHENTICATED_INCREMENT_ENDPOINT, true);
+        verify(serviceListener, timed()).onEndpointRemove(SECURE_SERVICE, AUTHENTICATED_TIMESTAMP_ENDPOINT, true);
     }
 
     @Test
@@ -490,6 +501,9 @@ public final class BasicIT {
         topics.addFallbackStream(Long.class, int64Stream);
         topics.addFallbackStream(Double.class, doubleStream);
         topics.subscribe("?rest/");
+
+        verify(serviceListener, timed()).onEndpointAdd(INSECURE_BINARY_SERVICE, INCREMENT_BINARY_ENDPOINT);
+        verify(serviceListener, timed()).onEndpointAdd(INSECURE_BINARY_SERVICE, TIMESTAMP_BINARY_ENDPOINT);
 
         verify(binaryStream, timed()).onSubscription(eq("rest/binary/timestamp"), isNotNull());
         verify(binaryStream, timed()).onSubscription(eq("rest/binary/increment"), isNotNull());
@@ -509,6 +523,8 @@ public final class BasicIT {
         client.close();
 
         verify(serviceListener, timed()).onRemove(INSECURE_BINARY_SERVICE, true);
+        verify(serviceListener, timed()).onEndpointRemove(INSECURE_BINARY_SERVICE, INCREMENT_BINARY_ENDPOINT, true);
+        verify(serviceListener, timed()).onEndpointRemove(INSECURE_BINARY_SERVICE, TIMESTAMP_BINARY_ENDPOINT, true);
     }
 
     @Test
@@ -526,6 +542,9 @@ public final class BasicIT {
         topics.addFallbackStream(Long.class, int64Stream);
         topics.addFallbackStream(Double.class, doubleStream);
         topics.subscribe("?rest/");
+
+        verify(serviceListener, timed()).onEndpointAdd(INSECURE_STRING_SERVICE, INCREMENT_STRING_ENDPOINT);
+        verify(serviceListener, timed()).onEndpointAdd(INSECURE_STRING_SERVICE, TIMESTAMP_STRING_ENDPOINT);
 
         verify(stringStream, timed()).onSubscription(eq("rest/string/timestamp"), isNotNull());
         verify(stringStream, timed()).onSubscription(eq("rest/string/increment"), isNotNull());
@@ -545,6 +564,8 @@ public final class BasicIT {
         client.close();
 
         verify(serviceListener, timed()).onRemove(INSECURE_STRING_SERVICE, true);
+        verify(serviceListener, timed()).onEndpointRemove(INSECURE_STRING_SERVICE, INCREMENT_STRING_ENDPOINT, true);
+        verify(serviceListener, timed()).onEndpointRemove(INSECURE_STRING_SERVICE, TIMESTAMP_STRING_ENDPOINT, true);
     }
 
     @Test
@@ -570,6 +591,11 @@ public final class BasicIT {
         verify(serviceListener, timed()).onActive(SECURE_SERVICE);
         verify(serviceListener, timed()).onActive(INSECURE_SERVICE);
 
+        verify(serviceListener, timed()).onEndpointAdd(INSECURE_SERVICE, INCREMENT_ENDPOINT);
+        verify(serviceListener, timed()).onEndpointAdd(INSECURE_SERVICE, TIMESTAMP_ENDPOINT);
+        verify(serviceListener, timed()).onEndpointAdd(SECURE_SERVICE, AUTHENTICATED_INCREMENT_ENDPOINT);
+        verify(serviceListener, timed()).onEndpointAdd(SECURE_SERVICE, AUTHENTICATED_TIMESTAMP_ENDPOINT);
+
         verify(stream, timed()).onSubscription(eq("rest/json/timestamp"), isNotNull());
         verify(stream, timed()).onSubscription(eq("rest/json/increment"), isNotNull());
         verify(stream, timed()).onSubscription(eq("rest/tls/timestamp"), isNotNull());
@@ -585,6 +611,10 @@ public final class BasicIT {
 
         verify(serviceListener, timed()).onRemove(SECURE_SERVICE, true);
         verify(serviceListener, timed()).onRemove(INSECURE_SERVICE, true);
+        verify(serviceListener, timed()).onEndpointRemove(INSECURE_SERVICE, INCREMENT_ENDPOINT, true);
+        verify(serviceListener, timed()).onEndpointRemove(INSECURE_SERVICE, TIMESTAMP_ENDPOINT, true);
+        verify(serviceListener, timed()).onEndpointRemove(SECURE_SERVICE, AUTHENTICATED_INCREMENT_ENDPOINT, true);
+        verify(serviceListener, timed()).onEndpointRemove(SECURE_SERVICE, AUTHENTICATED_TIMESTAMP_ENDPOINT, true);
     }
 
     @Test
@@ -606,6 +636,9 @@ public final class BasicIT {
         verify(serviceListener, timed()).onStandby(INSECURE_SERVICE);
         verify(serviceListener, timed()).onActive(INSECURE_SERVICE);
 
+        verify(serviceListener, timed()).onEndpointAdd(INSECURE_SERVICE, INCREMENT_ENDPOINT);
+        verify(serviceListener, timed()).onEndpointAdd(INSECURE_SERVICE, TIMESTAMP_ENDPOINT);
+
         verify(stream, timed()).onSubscription(eq("rest/json/timestamp"), isNotNull());
         verify(stream, timed()).onSubscription(eq("rest/json/increment"), isNotNull());
 
@@ -616,6 +649,8 @@ public final class BasicIT {
         client.close();
 
         verify(serviceListener, timed()).onRemove(INSECURE_SERVICE, true);
+        verify(serviceListener, timed()).onEndpointRemove(INSECURE_SERVICE, INCREMENT_ENDPOINT, true);
+        verify(serviceListener, timed()).onEndpointRemove(INSECURE_SERVICE, TIMESTAMP_ENDPOINT, true);
     }
 
     @Test
@@ -632,6 +667,9 @@ public final class BasicIT {
         topics.addFallbackStream(Double.class, doubleStream);
         topics.subscribe("?rest/");
 
+        verify(serviceListener, timed()).onEndpointAdd(INSECURE_SERVICE, INCREMENT_ENDPOINT);
+        verify(serviceListener, timed()).onEndpointAdd(INSECURE_SERVICE, TIMESTAMP_ENDPOINT);
+
         verify(stream, timed()).onSubscription(eq("rest/json/timestamp"), isNotNull());
         verify(stream, timed()).onSubscription(eq("rest/json/increment"), isNotNull());
 
@@ -641,6 +679,8 @@ public final class BasicIT {
         modelStore.setModel(modelWith());
 
         verify(serviceListener, timed()).onRemove(INSECURE_SERVICE, true);
+        verify(serviceListener, timed()).onEndpointRemove(INSECURE_SERVICE, INCREMENT_ENDPOINT, true);
+        verify(serviceListener, timed()).onEndpointRemove(INSECURE_SERVICE, TIMESTAMP_ENDPOINT, true);
 
         verify(stream, timed()).onUnsubscription(eq("rest/json/timestamp"), isNotNull(), eq(REMOVAL));
         verify(stream, timed()).onUnsubscription(eq("rest/json/increment"), isNotNull(), eq(REMOVAL));
@@ -664,6 +704,9 @@ public final class BasicIT {
         topics.addFallbackStream(Double.class, doubleStream);
         topics.subscribe("?rest/");
 
+        verify(serviceListener, timed()).onEndpointAdd(INSECURE_SERVICE, INCREMENT_ENDPOINT);
+        verify(serviceListener, timed()).onEndpointAdd(INSECURE_SERVICE, TIMESTAMP_ENDPOINT);
+
         verify(stream, timed()).onSubscription(eq("rest/json/timestamp"), isNotNull());
         verify(stream, timed()).onSubscription(eq("rest/json/increment"), isNotNull());
 
@@ -677,6 +720,12 @@ public final class BasicIT {
         verify(serviceListener, timed()).onRemove(INSECURE_SERVICE, true);
         verify(serviceListener, timed()).onActive(INSECURE_BINARY_SERVICE);
         verify(serviceListener, timed().times(2)).onActive(INSECURE_SERVICE);
+        verify(serviceListener, timed().times(2)).onEndpointAdd(INSECURE_SERVICE, INCREMENT_ENDPOINT);
+        verify(serviceListener, timed().times(2)).onEndpointAdd(INSECURE_SERVICE, TIMESTAMP_ENDPOINT);
+        verify(serviceListener, timed()).onEndpointAdd(INSECURE_BINARY_SERVICE, INCREMENT_BINARY_ENDPOINT);
+        verify(serviceListener, timed()).onEndpointAdd(INSECURE_BINARY_SERVICE, TIMESTAMP_BINARY_ENDPOINT);
+        verify(serviceListener, timed()).onEndpointRemove(INSECURE_SERVICE, INCREMENT_ENDPOINT, true);
+        verify(serviceListener, timed()).onEndpointRemove(INSECURE_SERVICE, TIMESTAMP_ENDPOINT, true);
 
         verify(binaryStream, timed()).onSubscription(eq("rest/binary/timestamp"), isNotNull());
         verify(binaryStream, timed()).onSubscription(eq("rest/binary/increment"), isNotNull());
@@ -689,6 +738,10 @@ public final class BasicIT {
 
         verify(serviceListener, timed().times(2)).onRemove(INSECURE_SERVICE, true);
         verify(serviceListener, timed()).onRemove(INSECURE_BINARY_SERVICE, true);
+        verify(serviceListener, timed().times(2)).onEndpointRemove(INSECURE_SERVICE, INCREMENT_ENDPOINT, true);
+        verify(serviceListener, timed().times(2)).onEndpointRemove(INSECURE_SERVICE, TIMESTAMP_ENDPOINT, true);
+        verify(serviceListener, timed()).onEndpointRemove(INSECURE_BINARY_SERVICE, INCREMENT_BINARY_ENDPOINT, true);
+        verify(serviceListener, timed()).onEndpointRemove(INSECURE_BINARY_SERVICE, TIMESTAMP_BINARY_ENDPOINT, true);
     }
 
     @Test
@@ -711,6 +764,9 @@ public final class BasicIT {
         topics.addFallbackStream(Double.class, doubleStream);
         topics.subscribe("?rest/");
 
+        verify(serviceListener, timed()).onEndpointAdd(INSECURE_SERVICE, INCREMENT_ENDPOINT);
+        verify(serviceListener, timed()).onEndpointAdd(INSECURE_SERVICE, TIMESTAMP_ENDPOINT);
+
         verify(stream, timed()).onSubscription(eq("rest/json/timestamp"), isNotNull());
         verify(stream, timed()).onSubscription(eq("rest/json/increment"), isNotNull());
 
@@ -719,13 +775,19 @@ public final class BasicIT {
 
         client0.close();
         verify(serviceListener, timed()).onRemove(INSECURE_SERVICE, true);
+        verify(serviceListener, timed()).onEndpointRemove(INSECURE_SERVICE, INCREMENT_ENDPOINT, true);
+        verify(serviceListener, timed()).onEndpointRemove(INSECURE_SERVICE, TIMESTAMP_ENDPOINT, true);
         verify(backupServiceListener, timed()).onActive(INSECURE_SERVICE);
+        verify(backupServiceListener, timed()).onEndpointAdd(INSECURE_SERVICE, INCREMENT_ENDPOINT);
+        verify(backupServiceListener, timed()).onEndpointAdd(INSECURE_SERVICE, TIMESTAMP_ENDPOINT);
 
         verify(stream, never()).onUnsubscription(eq("rest/json/timestamp"), isNotNull(), eq(REMOVAL));
         verify(stream, never()).onUnsubscription(eq("rest/json/increment"), isNotNull(), eq(REMOVAL));
 
         client1.close();
         verify(backupServiceListener, timed()).onRemove(INSECURE_SERVICE, true);
+        verify(backupServiceListener, timed()).onEndpointRemove(INSECURE_SERVICE, INCREMENT_ENDPOINT, true);
+        verify(backupServiceListener, timed()).onEndpointRemove(INSECURE_SERVICE, TIMESTAMP_ENDPOINT, true);
 
         // Depends on automatic topic removal
         verify(stream, timeout(120000L)).onUnsubscription(eq("rest/json/timestamp"), isNotNull(), eq(REMOVAL));
@@ -750,6 +812,15 @@ public final class BasicIT {
         topics.addFallbackStream(Double.class, doubleStream);
         topics.subscribe("?rest/");
 
+        final EndpointConfig inferredEndpoint = EndpointConfig
+            .builder()
+            .name("timestamp")
+            .topicPath("timestamp")
+            .url("/rest/timestamp")
+            .produces("json")
+            .build();
+        verify(serviceListener, timed()).onEndpointAdd(INFERRED_SERVICE, inferredEndpoint);
+
         verify(stream, timed()).onSubscription(eq("rest/auto/timestamp"), specificationCaptor.capture());
 
         assertEquals(TopicType.JSON, specificationCaptor.getValue().getType());
@@ -760,6 +831,7 @@ public final class BasicIT {
         client.close();
 
         verify(serviceListener, timed()).onRemove(INFERRED_SERVICE, true);
+        verify(serviceListener, timed()).onEndpointRemove(INFERRED_SERVICE, inferredEndpoint, true);
     }
 
     @Test
@@ -776,6 +848,8 @@ public final class BasicIT {
         topics.addFallbackStream(JSON.class, stream);
         topics.subscribe("rest/json/constant");
 
+        verify(serviceListener, timed()).onEndpointAdd(CONSTANT_JSON_SERVICE, CONSTANT_JSON_ENDPOINT);
+
         verify(stream, timed()).onSubscription(eq("rest/json/constant"), isNotNull());
 
         verify(stream, timed()).onValue(
@@ -788,6 +862,7 @@ public final class BasicIT {
         client.close();
 
         verify(serviceListener, timed()).onRemove(CONSTANT_JSON_SERVICE, true);
+        verify(serviceListener, timed()).onEndpointRemove(CONSTANT_JSON_SERVICE, CONSTANT_JSON_ENDPOINT, true);
     }
 
     @Test
@@ -804,6 +879,8 @@ public final class BasicIT {
         topics.addFallbackStream(JSON.class, stream);
         topics.subscribe("rest/json/constant");
 
+        verify(serviceListener, timed()).onEndpointAdd(CONSTANT_JSON_SERVICE, CONSTANT_JSON_ENDPOINT);
+
         verify(stream, timed()).onSubscription(eq("rest/json/constant"), isNotNull());
 
         verify(stream, timed()).onValue(
@@ -818,6 +895,7 @@ public final class BasicIT {
         client.close();
 
         verify(serviceListener, timed()).onRemove(CONSTANT_JSON_SERVICE, true);
+        verify(serviceListener, timed()).onEndpointRemove(CONSTANT_JSON_SERVICE, CONSTANT_JSON_ENDPOINT, true);
     }
 
     @Test
@@ -834,6 +912,8 @@ public final class BasicIT {
         topics.addFallbackStream(Binary.class, binaryStream);
         topics.subscribe("rest/binary/constant");
 
+        verify(serviceListener, timed()).onEndpointAdd(CONSTANT_BINARY_SERVICE, CONSTANT_BINARY_ENDPOINT);
+
         verify(binaryStream, timed()).onSubscription(eq("rest/binary/constant"), isNotNull());
 
         verify(binaryStream, timed()).onValue(
@@ -846,6 +926,7 @@ public final class BasicIT {
         client.close();
 
         verify(serviceListener, timed()).onRemove(CONSTANT_BINARY_SERVICE, true);
+        verify(serviceListener, timed()).onEndpointRemove(CONSTANT_BINARY_SERVICE, CONSTANT_BINARY_ENDPOINT, true);
     }
 
     @Test
@@ -862,6 +943,8 @@ public final class BasicIT {
         topics.addFallbackStream(String.class, stringStream);
         topics.subscribe("rest/string/constant");
 
+        verify(serviceListener, timed()).onEndpointAdd(CONSTANT_STRING_SERVICE, CONSTANT_STRING_ENDPOINT);
+
         verify(stringStream, timed()).onSubscription(eq("rest/string/constant"), isNotNull());
 
         verify(stringStream, timed()).onValue(
@@ -874,6 +957,7 @@ public final class BasicIT {
         client.close();
 
         verify(serviceListener, timed()).onRemove(CONSTANT_STRING_SERVICE, true);
+        verify(serviceListener, timed()).onEndpointRemove(CONSTANT_STRING_SERVICE, CONSTANT_STRING_ENDPOINT, true);
     }
 
     @Test
@@ -891,6 +975,9 @@ public final class BasicIT {
         final Topics topics = session.feature(Topics.class);
         topics.addFallbackStream(String.class, stringStream);
         topics.subscribe("?rest/overlap/");
+
+        verify(serviceListener, timed()).onEndpointAdd(OVERLAPPING_SERVICE_0, CONSTANT_STRING_ENDPOINT);
+        verify(serviceListener, timed()).onEndpointAdd(OVERLAPPING_SERVICE_1, INCREMENT_STRING_ENDPOINT);
 
         verify(stringStream, timed()).onSubscription(eq("rest/overlap/constant"), isNotNull());
         verify(stringStream, timed()).onSubscription(eq("rest/overlap/increment"), isNotNull());
@@ -911,6 +998,54 @@ public final class BasicIT {
 
         verify(serviceListener, timed()).onRemove(OVERLAPPING_SERVICE_0, true);
         verify(serviceListener, timed()).onRemove(OVERLAPPING_SERVICE_1, true);
+        verify(serviceListener, timed()).onEndpointRemove(OVERLAPPING_SERVICE_0, CONSTANT_STRING_ENDPOINT, true);
+        verify(serviceListener, timed()).onEndpointRemove(OVERLAPPING_SERVICE_1, INCREMENT_STRING_ENDPOINT, true);
+    }
+
+    @Test
+    public void testConflictingEndpoints() throws IOException {
+        modelStore.setModel(modelWith(CONSTANT_JSON_SERVICE));
+        final RESTAdapterClient client = startClient();
+
+        verify(serviceListener, timed()).onStandby(CONSTANT_JSON_SERVICE);
+        verify(serviceListener, timed()).onActive(CONSTANT_JSON_SERVICE);
+        verify(serviceListener, timed()).onEndpointAdd(CONSTANT_JSON_SERVICE, CONSTANT_JSON_ENDPOINT);
+
+        final EndpointConfig conflictingEndpoint = EndpointConfig
+            .builder()
+            .name("conflicting")
+            .topicPath("constant")
+            .url("/rest/constant")
+            .produces("string")
+            .build();
+        final ServiceConfig conflictingService = ServiceConfig
+            .builder()
+            .name("service-5")
+            .host("localhost")
+            .port(8081)
+            .secure(false)
+            .pollPeriod(500)
+            .topicPathRoot("rest/json")
+            .endpoints(asList(
+                CONSTANT_JSON_ENDPOINT,
+                conflictingEndpoint))
+            .build();
+        modelStore.setModel(modelWith(conflictingService));
+
+        verify(serviceListener, timed()).onRemove(CONSTANT_JSON_SERVICE, true);
+        verify(serviceListener, timed()).onEndpointRemove(CONSTANT_JSON_SERVICE, CONSTANT_JSON_ENDPOINT, true);
+        verify(serviceListener, timed()).onStandby(conflictingService);
+        verify(serviceListener, timed()).onActive(conflictingService);
+        verify(serviceListener, timed()).onEndpointAdd(eq(conflictingService), isNotNull());
+        verify(serviceListener, timed()).onEndpointFail(eq(conflictingService), isNotNull());
+
+        // This ensures the topic is removed before the next test
+        modelStore.setModel(modelWith());
+        verify(serviceListener, timed()).onRemove(conflictingService, true);
+        verify(serviceListener, timed()).onEndpointRemove(eq(conflictingService), isNotNull(), eq(true));
+        verify(serviceListener, timed()).onEndpointRemove(eq(conflictingService), isNotNull(), eq(false));
+
+        client.close();
     }
 
     @Test
@@ -927,6 +1062,7 @@ public final class BasicIT {
 
         verify(serviceListener, timed()).onStandby(CONSTANT_STRING_SERVICE);
         verify(serviceListener, timed()).onActive(CONSTANT_STRING_SERVICE);
+        verify(serviceListener, timed()).onEndpointAdd(CONSTANT_STRING_SERVICE, CONSTANT_STRING_ENDPOINT);
 
         final HttpURLConnection connection = (HttpURLConnection) new URL("http://localhost:9000/-/healthy").openConnection();
 
@@ -939,6 +1075,7 @@ public final class BasicIT {
 
         client.close();
         verify(serviceListener, timed()).onRemove(CONSTANT_STRING_SERVICE, true);
+        verify(serviceListener, timed()).onEndpointRemove(CONSTANT_STRING_SERVICE, CONSTANT_STRING_ENDPOINT, true);
     }
 
     @Test
@@ -955,6 +1092,7 @@ public final class BasicIT {
 
         verify(serviceListener, timed()).onStandby(CONSTANT_STRING_SERVICE);
         verify(serviceListener, timed()).onActive(CONSTANT_STRING_SERVICE);
+        verify(serviceListener, timed()).onEndpointAdd(CONSTANT_STRING_SERVICE, CONSTANT_STRING_ENDPOINT);
 
         final HttpURLConnection connection = (HttpURLConnection) new URL("http://localhost:9001/metrics").openConnection();
 
@@ -974,6 +1112,7 @@ public final class BasicIT {
 
         client.close();
         verify(serviceListener, timed()).onRemove(CONSTANT_STRING_SERVICE, true);
+        verify(serviceListener, timed()).onEndpointRemove(CONSTANT_STRING_SERVICE, CONSTANT_STRING_ENDPOINT, true);
     }
 
     private static VerificationWithTimeout timed() {

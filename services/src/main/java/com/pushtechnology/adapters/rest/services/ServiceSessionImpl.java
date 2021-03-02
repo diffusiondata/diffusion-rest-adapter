@@ -21,7 +21,9 @@ import static com.pushtechnology.adapters.rest.endpoints.EndpointType.inferFromC
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
@@ -56,6 +58,8 @@ public final class ServiceSessionImpl implements ServiceSession {
     private static final Logger LOG = LoggerFactory.getLogger(ServiceSessionImpl.class);
     @GuardedBy("this")
     private final Map<EndpointConfig, PollHandle> endpointPollers = new HashMap<>();
+    @GuardedBy("this")
+    private final Set<EndpointConfig> failedEndpoints = new HashSet<>(0);
     private final ScheduledExecutorService executor;
     private final EndpointClient endpointClient;
     private final ServiceConfig serviceConfig;
@@ -157,6 +161,10 @@ public final class ServiceSessionImpl implements ServiceSession {
                 configAndResult.getFirst(),
                 configAndResult.getSecond())))
             .exceptionally(e -> {
+                serviceListener.onEndpointFail(serviceConfig, endpointConfig);
+                synchronized (this) {
+                    failedEndpoints.add(endpointConfig);
+                }
                 LOG.warn("Endpoint {} not initialised. First request failed. {}", endpointConfig, e.getMessage());
                 return null;
             });
@@ -202,6 +210,10 @@ public final class ServiceSessionImpl implements ServiceSession {
                 });
             })
             .exceptionally(ex -> {
+                serviceListener.onEndpointFail(serviceConfig, endpointConfig);
+                synchronized (this) {
+                    failedEndpoints.add(endpointConfig);
+                }
                 LOG.warn("Topic creation failed for {} because {}", endpointConfig, ex.getMessage());
                 return null;
             });
@@ -218,6 +230,8 @@ public final class ServiceSessionImpl implements ServiceSession {
 
     private PollHandle startEndpoint(EndpointConfig endpointConfig) {
         assert endpointPollers.get(endpointConfig) == null : "The endpoint has already been started";
+
+        serviceListener.onEndpointAdd(serviceConfig, endpointConfig);
 
         final BiConsumer<EndpointResponse, Throwable> handler =
             new PollResultHandler(handlerFactory.create(serviceConfig, endpointConfig));
@@ -243,6 +257,7 @@ public final class ServiceSessionImpl implements ServiceSession {
     private void stopEndpoint(EndpointConfig endpointConfig, PollHandle pollHandle) {
         topicManagementClient.removeEndpoint(serviceConfig, endpointConfig);
         if (pollHandle != null) {
+            serviceListener.onEndpointRemove(serviceConfig, endpointConfig, true);
             pollHandle.taskHandle.cancel(false);
             if (pollHandle.currentPollHandle != null) {
                 pollHandle.currentPollHandle.cancel(false);
@@ -258,12 +273,15 @@ public final class ServiceSessionImpl implements ServiceSession {
             stopEndpoint(endpointConfig, pollHandle);
             return null;
         });
+        failedEndpoints.forEach(endpointConfig ->
+            serviceListener.onEndpointRemove(serviceConfig, endpointConfig, false));
 
         LOG.debug("Stopping service session {}", serviceConfig);
     }
 
-    private void releaseEndpoint(PollHandle pollHandle) {
+    private void releaseEndpoint(EndpointConfig endpointConfig, PollHandle pollHandle) {
         if (pollHandle != null) {
+            serviceListener.onEndpointRemove(serviceConfig, endpointConfig, true);
             pollHandle.taskHandle.cancel(false);
             if (pollHandle.currentPollHandle != null) {
                 pollHandle.currentPollHandle.cancel(false);
@@ -276,9 +294,11 @@ public final class ServiceSessionImpl implements ServiceSession {
         isRunning = false;
 
         endpointPollers.replaceAll((endpointConfig, pollHandle) -> {
-            releaseEndpoint(pollHandle);
+            releaseEndpoint(endpointConfig, pollHandle);
             return null;
         });
+        failedEndpoints.forEach(endpointConfig ->
+            serviceListener.onEndpointRemove(serviceConfig, endpointConfig, false));
 
         LOG.debug("Releasing service session {}", serviceConfig);
     }

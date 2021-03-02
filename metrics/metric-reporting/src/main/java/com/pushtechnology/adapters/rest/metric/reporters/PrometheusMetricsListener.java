@@ -28,6 +28,7 @@ import com.pushtechnology.adapters.rest.metrics.event.listeners.PollEventListene
 import com.pushtechnology.adapters.rest.metrics.event.listeners.PublicationEventListener;
 import com.pushtechnology.adapters.rest.metrics.event.listeners.ServiceEventListener;
 import com.pushtechnology.adapters.rest.metrics.event.listeners.TopicCreationEventListener;
+import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 
 import io.prometheus.client.Counter;
@@ -162,26 +163,41 @@ public final class PrometheusMetricsListener
     @Override
     public void onActive(ServiceConfig serviceConfig) {
         CURRENT_SERVICES.labels("standby").dec();
-        CURRENT_ENDPOINTS.labels("standby").dec(serviceConfig.getEndpoints().size());
         CURRENT_SERVICES.labels("active").inc();
-        CURRENT_ENDPOINTS.labels("active").inc(serviceConfig.getEndpoints().size());
     }
 
     @Override
     public void onStandby(ServiceConfig serviceConfig) {
         CURRENT_SERVICES.labels("standby").inc();
-        CURRENT_ENDPOINTS.labels("standby").inc(serviceConfig.getEndpoints().size());
     }
 
     @Override
     public void onRemove(ServiceConfig serviceConfig, boolean wasActive) {
         if (wasActive) {
             CURRENT_SERVICES.labels("active").dec();
-            CURRENT_ENDPOINTS.labels("active").dec(serviceConfig.getEndpoints().size());
         }
         else {
             CURRENT_SERVICES.labels("standby").dec();
-            CURRENT_ENDPOINTS.labels("standby").dec(serviceConfig.getEndpoints().size());
+        }
+    }
+
+    @Override
+    public void onEndpointAdd(ServiceConfig serviceConfig, EndpointConfig endpointConfig) {
+        CURRENT_ENDPOINTS.labels("active").inc();
+    }
+
+    @Override
+    public void onEndpointFail(ServiceConfig serviceConfig, EndpointConfig endpointConfig) {
+        CURRENT_ENDPOINTS.labels("failed").inc();
+    }
+
+    @Override
+    public void onEndpointRemove(ServiceConfig serviceConfig, EndpointConfig endpointConfig, boolean wasActive) {
+        if (wasActive) {
+            CURRENT_ENDPOINTS.labels("active").dec();
+        }
+        else {
+            CURRENT_ENDPOINTS.labels("failed").dec();
         }
     }
 }

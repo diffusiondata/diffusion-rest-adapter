@@ -15,10 +15,10 @@
 
 package com.pushtechnology.adapters.rest.metrics.event.listeners;
 
-import static org.mockito.MockitoAnnotations.initMocks;
-
-import org.junit.Before;
 import org.junit.Test;
+
+import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
+import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 
 /**
  * Unit tests for {@link ServiceEventListener}.
@@ -26,12 +26,6 @@ import org.junit.Test;
  * @author Push Technology Limited
  */
 public final class ServiceEventListenerTest {
-
-    @Before
-    public void setUp() {
-        initMocks(this);
-    }
-
 
     @Test
     public void onActive() {
@@ -46,5 +40,20 @@ public final class ServiceEventListenerTest {
     @Test
     public void onRemove() {
         ServiceEventListener.NULL_LISTENER.onRemove(null, false);
+    }
+
+    @Test
+    public void onEndpointAdd() {
+        ServiceEventListener.NULL_LISTENER.onEndpointAdd(null, null);
+    }
+
+    @Test
+    public void onEndpointFail() {
+        ServiceEventListener.NULL_LISTENER.onEndpointFail(null, null);
+    }
+
+    @Test
+    public void onEndpointRemove() {
+        ServiceEventListener.NULL_LISTENER.onEndpointRemove(null, null, false);
     }
 }
