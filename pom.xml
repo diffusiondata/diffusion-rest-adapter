@@ -10,7 +10,7 @@
 
     <groupId>com.pushtechnology.adapters.rest</groupId>
     <artifactId>rest-adapter</artifactId>
-    <version>4.0.0</version>
+    <version>4.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <modules>
@@ -48,7 +48,7 @@
         <url>https://github.com/pushtechnology/diffusion-rest-adapter</url>
         <connection>scm:git:https://github.com/pushtechnology/diffusion-rest-adapter</connection>
         <developerConnection>scm:git:ssh://git@github.com/pushtechnology/diffusion-rest-adapter.git</developerConnection>
-        <tag>rest-adapter-4.0.0</tag>
+        <tag>rest-adapter-3.0.0</tag>
     </scm>
 
     <distributionManagement>
