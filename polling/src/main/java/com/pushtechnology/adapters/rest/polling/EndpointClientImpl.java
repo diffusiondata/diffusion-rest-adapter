@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2020 Push Technology Ltd.
+ * Copyright (C) 2021 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,16 @@
 package com.pushtechnology.adapters.rest.polling;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
 import javax.net.ssl.SSLContext;
 
-import org.apache.http.HttpHost;
-import org.apache.http.HttpResponse;
-import org.apache.http.StatusLine;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.concurrent.FutureCallback;
-import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +49,7 @@ public final class EndpointClientImpl implements EndpointClient {
     private final SSLContext sslContext;
     private final HttpClientFactory clientFactory;
     private final PollListener pollListener;
-    private volatile CloseableHttpAsyncClient client;
+    private volatile HttpClient client;
 
     /**
      * Constructor.
@@ -77,48 +77,59 @@ public final class EndpointClientImpl implements EndpointClient {
         final PollCompletionListener completionListener = pollListener.onPollRequest(serviceConfig, endpointConfig);
 
         final CompletableFuture<EndpointResponse> result = new CompletableFuture<>();
-        client.execute(
-            new HttpHost(serviceConfig.getHost(), serviceConfig.getPort(), serviceConfig.isSecure() ? "https" : "http"),
-            new HttpGet(endpointConfig.getUrl()),
-            new FutureCallback<HttpResponse>() {
-                @Override
-                public void completed(HttpResponse httpResponse) {
-                    final StatusLine statusLine = httpResponse.getStatusLine();
-                    if (statusLine.getStatusCode() >= 400) {
-                        result.completeExceptionally(new Exception("Received response " + statusLine));
-                        return;
-                    }
 
-                    try {
-                        final EndpointResponse response = EndpointResponseImpl.create(httpResponse);
-                        completionListener.onPollResponse(response);
-                        result.complete(response);
-                    }
-                    catch (IOException e) {
-                        completionListener.onPollFailure(e);
-                        result.completeExceptionally(e);
-                    }
-                }
+        final URI uri;
+        try {
+            uri = new URI(
+                serviceConfig.isSecure() ? "https" : "http",
+                null,
+                serviceConfig.getHost(),
+                serviceConfig.getPort(),
+                endpointConfig.getUrl(),
+                null,
+                null);
+        }
+        catch (URISyntaxException e) {
+            throw new IllegalArgumentException("Bad URI", e);
+        }
 
-                @Override
-                public void failed(Exception e) {
-                    completionListener.onPollFailure(e);
-                    result.completeExceptionally(e);
-                }
+        client.sendAsync(
+            HttpRequest.newBuilder().GET().uri(uri).build(),
+            HttpResponse.BodyHandlers.ofByteArray())
+        .thenAccept(httpResponse -> {
+            final int statusCode = httpResponse.statusCode();
+            if (statusCode >= 400) {
+                result.completeExceptionally(new Exception("Received response " + statusCode));
+                return;
+            }
 
-                @Override
-                public void cancelled() {
-                    result.cancel(false);
-                }
-            });
+            try {
+                final EndpointResponse response = EndpointResponseImpl.create(httpResponse);
+                completionListener.onPollResponse(response);
+                result.complete(response);
+            }
+            catch (IOException e) {
+                completionListener.onPollFailure(e);
+                result.completeExceptionally(e);
+            }
+        }).exceptionally(e -> {
+            if (e instanceof CompletionException) {
+                completionListener.onPollFailure(e.getCause());
+                result.completeExceptionally(e.getCause());
+            }
+            else {
+                completionListener.onPollFailure(e);
+                result.completeExceptionally(e);
+            }
+            return null;
+        });
         return result;
     }
 
     @Override
     public void start() {
         LOG.debug("Opening endpoint client");
-        final CloseableHttpAsyncClient newClient = clientFactory.create(model, sslContext);
-        newClient.start();
+        final HttpClient newClient = clientFactory.create(model, sslContext);
         client = newClient;
         LOG.debug("Opened endpoint client");
     }
@@ -126,13 +137,7 @@ public final class EndpointClientImpl implements EndpointClient {
     @Override
     public void close() {
         LOG.debug("Closing endpoint client");
-        try {
-            client.close();
-        }
-        catch (IOException e) {
-            // The implementation does not throw an IOException
-            throw new IllegalStateException(e);
-        }
+        client = null;
         LOG.debug("Closed endpoint client");
     }
 }

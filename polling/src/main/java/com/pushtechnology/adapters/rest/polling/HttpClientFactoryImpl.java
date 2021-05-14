@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2020 Push Technology Ltd.
+ * Copyright (C) 2021 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,22 +15,13 @@
 
 package com.pushtechnology.adapters.rest.polling;
 
+import java.net.http.HttpClient;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
 import javax.net.ssl.SSLContext;
 
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.Credentials;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
-import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
-import org.apache.http.impl.nio.client.HttpAsyncClients;
-
-import com.pushtechnology.adapters.rest.model.latest.BasicAuthenticationConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
-import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 
 /**
  * Implementation of {@link HttpClientFactory}.
@@ -41,43 +32,17 @@ public final class HttpClientFactoryImpl implements HttpClientFactory {
     private final ThreadFactory threadFactory = new HttpClientThreadFactory();
 
     @Override
-    public CloseableHttpAsyncClient create(Model model, SSLContext sslContext) {
-        final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-
-        // Configure client with Basic authentication credentials
-        model
-            .getServices()
-            .stream()
-            .filter(ServiceConfig::isSecure)
-            .filter(serviceConfig -> serviceConfig.getSecurity() != null)
-            .filter(serviceConfig -> serviceConfig.getSecurity().getBasic() != null)
-            .forEach(serviceConfig -> {
-                final AuthScope authScope = getAuthScope(serviceConfig);
-                final Credentials credentials = getCredentials(serviceConfig.getSecurity().getBasic());
-                credentialsProvider.setCredentials(authScope, credentials);
-            });
-
-        HttpAsyncClientBuilder builder = HttpAsyncClients
-            .custom()
-            .setThreadFactory(threadFactory)
-            .disableCookieManagement()
-            .setDefaultCredentialsProvider(credentialsProvider);
+    public HttpClient create(Model model, SSLContext sslContext) {
+        HttpClient.Builder builder = HttpClient
+            .newBuilder()
+            .cookieHandler(IgnoreCookies.handler())
+            .authenticator(new SimpleAuthenticator(model))
+            .executor(Executors.newFixedThreadPool(4, threadFactory));
 
         if (sslContext != null) {
-            builder = builder.setSSLContext(sslContext);
+            builder = builder.sslContext(sslContext);
         }
 
         return builder.build();
     }
-
-    private static AuthScope getAuthScope(ServiceConfig serviceConfig) {
-        return new AuthScope(serviceConfig.getHost(), serviceConfig.getPort());
-    }
-
-    private static Credentials getCredentials(BasicAuthenticationConfig basicAuthenticationConfig) {
-        return new UsernamePasswordCredentials(
-            basicAuthenticationConfig.getUserid(),
-            basicAuthenticationConfig.getPassword());
-    }
-
 }

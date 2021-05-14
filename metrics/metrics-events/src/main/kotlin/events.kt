@@ -309,7 +309,7 @@ interface PollFailedEvent : FailureEvent {
     /**
      * @return the exception
      */
-    val exception: Exception
+    val exception: Throwable
 
     /**
      * Factory for {@link PollFailedEvent}.
@@ -318,14 +318,14 @@ interface PollFailedEvent : FailureEvent {
         /**
          * @return a new instance of {@link PollFailedEvent}
          */
-        fun create(requestEvent: PollRequestEvent, exception: Exception): PollFailedEvent {
+        fun create(requestEvent: PollRequestEvent, exception: Throwable): PollFailedEvent {
             return PollFailedEventImpl(requestEvent, exception, System.currentTimeMillis())
         }
 
         /**
          * @return a new instance of {@link PollFailedEvent}
          */
-        fun create(requestEvent: PollRequestEvent, exception: Exception, timestamp: Long): PollFailedEvent {
+        fun create(requestEvent: PollRequestEvent, exception: Throwable, timestamp: Long): PollFailedEvent {
             return PollFailedEventImpl(requestEvent, exception, timestamp)
         }
     }
@@ -338,7 +338,7 @@ interface PollFailedEvent : FailureEvent {
  */
 private data class PollFailedEventImpl(
         override val requestEvent: PollRequestEvent,
-        override val exception: Exception,
+        override val exception: Throwable,
         override val failedTimestamp: Long) : PollFailedEvent {
 
     override val requestTime: Long

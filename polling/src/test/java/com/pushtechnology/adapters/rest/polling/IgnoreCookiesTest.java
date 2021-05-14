@@ -15,19 +15,33 @@
 
 package com.pushtechnology.adapters.rest.polling;
 
-import java.net.http.HttpClient;
+import static org.junit.Assert.assertEquals;
 
-import javax.net.ssl.SSLContext;
+import java.io.IOException;
+import java.net.CookieHandler;
+import java.net.URI;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
-import com.pushtechnology.adapters.rest.model.latest.Model;
+import org.junit.Test;
 
 /**
- * Factory for {@link HttpClient}.
+ * Unit tests for {@link IgnoreCookies}.
+ *
  * @author Push Technology Limited
  */
-public interface HttpClientFactory {
-    /**
-     * @return a new {@link HttpClient}
-     */
-    HttpClient create(Model model, SSLContext sslContext);
+public final class IgnoreCookiesTest {
+    @Test
+    public void ignoreCookies() throws IOException {
+        final CookieHandler handler = IgnoreCookies.handler();
+
+        handler.put(URI.create("https://example.com"), Map.of("key", Collections.singletonList("value")));
+
+        final Map<String, List<String>> cookies = handler.get(
+            URI.create("https://example.com"),
+            Map.of("key", Collections.singletonList("value")));
+
+        assertEquals(0, cookies.size());
+    }
 }

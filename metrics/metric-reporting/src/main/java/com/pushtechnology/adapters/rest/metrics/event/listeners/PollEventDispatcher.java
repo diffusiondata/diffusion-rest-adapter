@@ -74,7 +74,7 @@ public final class PollEventDispatcher implements PollListener {
         }
 
         @Override
-        public void onPollFailure(Exception exception) {
+        public void onPollFailure(Throwable exception) {
             pollEventListener.onPollFailed(PollFailedEvent.Factory.create(pollRequestEvent, exception));
         }
     }

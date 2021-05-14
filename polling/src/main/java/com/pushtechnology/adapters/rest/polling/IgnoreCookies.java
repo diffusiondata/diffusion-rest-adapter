@@ -15,19 +15,36 @@
 
 package com.pushtechnology.adapters.rest.polling;
 
-import java.net.http.HttpClient;
-
-import javax.net.ssl.SSLContext;
-
-import com.pushtechnology.adapters.rest.model.latest.Model;
+import java.net.CookieHandler;
+import java.net.URI;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 /**
- * Factory for {@link HttpClient}.
+ * An implementation of {@link CookieHandler} that ignores cookies.
+ *
  * @author Push Technology Limited
  */
-public interface HttpClientFactory {
+public final class IgnoreCookies extends CookieHandler {
+    private static final CookieHandler HANDLER = new IgnoreCookies();
+
     /**
-     * @return a new {@link HttpClient}
+     * Handler that ignores cookies.
      */
-    HttpClient create(Model model, SSLContext sslContext);
+    public static CookieHandler handler() {
+        return HANDLER;
+    }
+
+    private IgnoreCookies() {
+    }
+
+    @Override
+    public Map<String, List<String>> get(URI uri, Map<String, List<String>> requestHeaders) {
+        return Collections.emptyMap();
+    }
+
+    @Override
+    public void put(URI uri, Map<String, List<String>> responseHeaders) {
+    }
 }

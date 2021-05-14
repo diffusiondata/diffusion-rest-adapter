@@ -50,6 +50,6 @@ public interface PollListener {
          *
          * @param exception the exception associated with the failure
          */
-        void onPollFailure(Exception exception);
+        void onPollFailure(Throwable exception);
     }
 }

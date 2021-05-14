@@ -24,16 +24,15 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.isNotNull;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.net.http.HttpClient;
 import java.nio.file.Paths;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ScheduledExecutorService;
 
-import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -80,7 +79,7 @@ public final class InternalRESTAdapterTest {
     @Mock
     private HttpClientFactory httpClientFactory;
     @Mock
-    private CloseableHttpAsyncClient httpClient;
+    private HttpClient httpClient;
     @Mock
     private TopicControl topicControl;
     @Mock
@@ -231,7 +230,6 @@ public final class InternalRESTAdapterTest {
         verify(sessionFactory).openAsync();
 
         verify(httpClientFactory).create(model0, null);
-        verify(httpClient).start();
 
         verify(session).lock("service-0", UNLOCK_ON_CONNECTION_LOSS);
         verify(serviceListener).onStandby(model0.getServices().get(0));
@@ -239,7 +237,6 @@ public final class InternalRESTAdapterTest {
         restAdapter.onReconfiguration(inactiveModel);
 
         verify(session).close();
-        verify(httpClient).close();
         verify(shutdownHandler).run();
     }
 
@@ -293,7 +290,6 @@ public final class InternalRESTAdapterTest {
         verify(sessionFactory).openAsync();
 
         verify(httpClientFactory).create(model0, null);
-        verify(httpClient).start();
 
         verify(session).lock("service-0", UNLOCK_ON_CONNECTION_LOSS);
         verify(serviceListener).onStandby(model0.getServices().get(0));
@@ -301,7 +297,6 @@ public final class InternalRESTAdapterTest {
         restAdapter.onReconfiguration(model1);
 
         verify(httpClientFactory).create(model1, null);
-        verify(httpClient, times(2)).start();
 
         verify(session).lock("service-1", UNLOCK_ON_CONNECTION_LOSS);
         verify(serviceListener).onStandby(model1.getServices().get(0));
@@ -334,7 +329,6 @@ public final class InternalRESTAdapterTest {
         sessionFuture.complete(session);
 
         verify(httpClientFactory).create(model1, null);
-        verify(httpClient).start();
 
         verify(session).lock("service-1", UNLOCK_ON_CONNECTION_LOSS);
         verify(serviceListener).onStandby(model1.getServices().get(0));
@@ -380,14 +374,11 @@ public final class InternalRESTAdapterTest {
         verify(sessionFactory).openAsync();
 
         verify(httpClientFactory).create(model0, null);
-        verify(httpClient).start();
 
         verify(session).lock("service-0", UNLOCK_ON_CONNECTION_LOSS);
         verify(serviceListener).onStandby(model0.getServices().get(0));
 
         restAdapter.onReconfiguration(model2);
-
-        verify(httpClient).close();
     }
 
     @Test
@@ -437,7 +428,6 @@ public final class InternalRESTAdapterTest {
         verify(sessionFactory).openAsync();
 
         verify(httpClientFactory).create(model0, null);
-        verify(httpClient).start();
 
         verify(session).lock("service-0", UNLOCK_ON_CONNECTION_LOSS);
         verify(serviceListener).onStandby(model0.getServices().get(0));
@@ -445,7 +435,6 @@ public final class InternalRESTAdapterTest {
         restAdapter.close();
 
         verify(session).close();
-        verify(httpClient).close();
         verify(shutdownHandler).run();
     }
 

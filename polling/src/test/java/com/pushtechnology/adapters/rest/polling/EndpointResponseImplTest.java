@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2020 Push Technology Ltd.
+ * Copyright (C) 2021 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,19 @@
 package com.pushtechnology.adapters.rest.polling;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.net.http.HttpHeaders;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Map;
 
-import org.apache.http.ProtocolVersion;
-import org.apache.http.entity.BasicHttpEntity;
-import org.apache.http.message.BasicHttpResponse;
+import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
 
 /**
  * Unit tests for {@link EndpointResponseImpl}.
@@ -32,6 +36,14 @@ import org.junit.Test;
  * @author Push Technology Limited
  */
 public final class EndpointResponseImplTest {
+    @Mock
+    private HttpResponse<byte[]> httpResponse;
+
+    @Before
+    public void setUp() throws IOException {
+        initMocks(this);
+    }
+
     @Test
     public void getResponseLength() throws IOException {
         final EndpointResponse response = createResponse();
@@ -58,12 +70,9 @@ public final class EndpointResponseImplTest {
     }
 
     private EndpointResponse createResponse() throws IOException {
-        final ProtocolVersion protocolVersion = new ProtocolVersion("HTTP", 1, 1);
-        final BasicHttpResponse httpResponse = new BasicHttpResponse(protocolVersion, 200, "OK");
-        final BasicHttpEntity httpEntity = new BasicHttpEntity();
-        httpEntity.setContent(new ByteArrayInputStream("Hello, world!".getBytes()));
-        httpResponse.setEntity(httpEntity);
-        httpResponse.addHeader("Content-Type", "text/plain");
+        when(httpResponse.statusCode()).thenReturn(200);
+        when(httpResponse.body()).thenReturn("Hello, world!".getBytes());
+        when(httpResponse.headers()).thenReturn(HttpHeaders.of(Map.of("Content-Type", List.of("text/plain")), (a, b) -> true));
         return EndpointResponseImpl.create(httpResponse);
     }
 }

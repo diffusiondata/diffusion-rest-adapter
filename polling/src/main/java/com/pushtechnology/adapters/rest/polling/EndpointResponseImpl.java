@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2020 Push Technology Ltd.
+ * Copyright (C) 2021 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,9 @@
 
 package com.pushtechnology.adapters.rest.polling;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.net.http.HttpResponse;
 import java.util.Arrays;
-
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
 
 import net.jcip.annotations.Immutable;
 
@@ -32,40 +28,29 @@ import net.jcip.annotations.Immutable;
  */
 @Immutable
 public final class EndpointResponseImpl implements EndpointResponse {
-    private final HttpResponse httpResponse;
+    private final HttpResponse<byte[]> httpResponse;
     private final byte[] content;
 
     /**
      * Factory method.
      */
-    public static EndpointResponse create(HttpResponse httpResponse) throws IOException {
-        final HttpEntity entity = httpResponse.getEntity();
-
-        final InputStream contentStream = entity.getContent();
-        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-        int next = contentStream.read();
-        while (next != -1) {
-            baos.write(next);
-            next = contentStream.read();
-        }
-
-        return new EndpointResponseImpl(httpResponse, baos.toByteArray());
+    public static EndpointResponse create(HttpResponse<byte[]> httpResponse) throws IOException {
+        return new EndpointResponseImpl(httpResponse, httpResponse.body());
     }
 
-    private EndpointResponseImpl(HttpResponse httpResponse, byte[] content) {
+    private EndpointResponseImpl(HttpResponse<byte[]> httpResponse, byte[] content) {
         this.httpResponse = httpResponse;
         this.content = content;
     }
 
     @Override
     public int getStatusCode() {
-        return httpResponse.getStatusLine().getStatusCode();
+        return httpResponse.statusCode();
     }
 
     @Override
     public String getHeader(String headerName) {
-        return httpResponse.getFirstHeader(headerName).getValue();
+        return httpResponse.headers().firstValue(headerName).orElse(null);
     }
 
     @Override
