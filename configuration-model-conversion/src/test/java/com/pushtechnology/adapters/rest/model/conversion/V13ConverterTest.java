@@ -1,16 +1,32 @@
+/*******************************************************************************
+ * Copyright (C) 2021 Push Technology Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
+
 package com.pushtechnology.adapters.rest.model.conversion;
 
 import static com.pushtechnology.adapters.rest.model.conversion.V13Converter.INSTANCE;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.pushtechnology.adapters.rest.model.v14.BasicAuthenticationConfig;
 import com.pushtechnology.adapters.rest.model.v14.DiffusionConfig;
@@ -167,13 +183,15 @@ public final class V13ConverterTest {
         assertFalse(model.getMetrics().isCounting());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testUnknownModel() {
         final ModelConverter converter = V13Converter.INSTANCE;
 
-        converter.convert(com.pushtechnology.adapters.rest.model.v11.Model
-            .builder()
-            .services(Collections.emptyList())
-            .build());
+        assertThrows(IllegalArgumentException.class, () -> {
+            converter.convert(com.pushtechnology.adapters.rest.model.v11.Model
+                .builder()
+                .services(Collections.emptyList())
+                .build());
+        });
     }
 }

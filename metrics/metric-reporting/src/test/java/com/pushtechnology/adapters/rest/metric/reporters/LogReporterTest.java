@@ -20,23 +20,28 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 /**
  * Unit tests for {@link LogReporter}.
  *
  * @author Push Technology Limited
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness= Strictness.LENIENT)
 public final class LogReporterTest {
     @Mock
     private ScheduledExecutorService executor;
@@ -46,10 +51,8 @@ public final class LogReporterTest {
     private LogReporter collector;
 
     @SuppressWarnings("unchecked")
-    @Before
+    @BeforeEach
     public void setUp() {
-        initMocks(this);
-
         when(executor.scheduleAtFixedRate(isA(Runnable.class), isA(Long.class), isA(Long.class), isA(TimeUnit.class)))
             .thenReturn(loggingTask);
 
@@ -60,7 +63,7 @@ public final class LogReporterTest {
             executor);
     }
 
-    @After
+    @AfterEach
     public void postConditions() {
         Mockito.verifyNoMoreInteractions(executor, loggingTask);
     }

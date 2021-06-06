@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Push Technology Ltd.
+ * Copyright (C) 2021 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,16 @@
 package com.pushtechnology.adapters.rest.adapter;
 
 import static org.mockito.Mockito.verify;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.function.BiConsumer;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import com.pushtechnology.diffusion.transform.transformer.TransformationException;
 
@@ -31,16 +34,16 @@ import com.pushtechnology.diffusion.transform.transformer.TransformationExceptio
  *
  * @author Push Technology Limited
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness= Strictness.LENIENT)
 public final class TransformingHandlerTest {
     @Mock
     private BiConsumer<String, Throwable> delegate;
 
     private TransformingHandler<String, String> handler;
 
-    @Before
+    @BeforeEach
     public void setUp() {
-        initMocks(this);
-
         handler = new TransformingHandler<>(value -> value, delegate);
     }
 

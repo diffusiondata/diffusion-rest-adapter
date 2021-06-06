@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Push Technology Ltd.
+ * Copyright (C) 2021 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +19,17 @@ import static com.pushtechnology.diffusion.client.session.Session.State.CONNECTE
 import static com.pushtechnology.diffusion.client.session.Session.State.CONNECTING;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.MockitoAnnotations.initMocks;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.session.SessionFactory;
@@ -36,6 +39,8 @@ import com.pushtechnology.diffusion.client.session.SessionFactory;
  *
  * @author Push Technology Limited
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness= Strictness.LENIENT)
 public final class EventedSessionListenerTest {
     @Mock
     private SessionFactory sessionFactory;
@@ -48,14 +53,12 @@ public final class EventedSessionListenerTest {
 
     private EventedSessionListener sessionListener;
 
-    @Before
+    @BeforeEach
     public void setUp() {
-        initMocks(this);
-
         sessionListener = new EventedSessionListener();
     }
 
-    @After
+    @AfterEach
     public void postConditions() {
         verifyNoMoreInteractions(sessionFactory, listener, session);
     }

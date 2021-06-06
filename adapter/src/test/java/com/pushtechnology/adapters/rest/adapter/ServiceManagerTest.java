@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Push Technology Ltd.
+ * Copyright (C) 2021 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,26 +21,31 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.MetricsConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
+import com.pushtechnology.adapters.rest.publication.PublishingClient;
 import com.pushtechnology.adapters.rest.services.ServiceSession;
 import com.pushtechnology.adapters.rest.services.ServiceSessionFactory;
-import com.pushtechnology.adapters.rest.publication.PublishingClient;
 
 /**
  * Unit tests for {@link ServiceManager}.
  *
  * @author Push Technology Limited
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness= Strictness.LENIENT)
 public final class ServiceManagerTest {
 
     @Mock
@@ -71,16 +76,14 @@ public final class ServiceManagerTest {
 
     private ServiceManagerContext context;
 
-    @Before
+    @BeforeEach
     public void setUp() {
-        initMocks(this);
-
         context = new ServiceManagerContext(publishingClient, serviceSessionFactory);
 
         when(serviceSessionFactory.create(serviceConfig)).thenReturn(serviceSession);
     }
 
-    @After
+    @AfterEach
     public void postConditions() {
         verifyNoMoreInteractions(publishingClient, serviceSessionFactory);
     }

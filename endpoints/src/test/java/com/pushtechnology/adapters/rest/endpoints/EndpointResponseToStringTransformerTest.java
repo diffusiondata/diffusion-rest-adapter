@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2020 Push Technology Ltd.
+ * Copyright (C) 2021 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,20 @@
 package com.pushtechnology.adapters.rest.endpoints;
 
 import static com.pushtechnology.adapters.rest.endpoints.EndpointResponseToStringTransformer.INSTANCE;
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.doThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.charset.UnsupportedCharsetException;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import com.pushtechnology.adapters.rest.polling.EndpointResponse;
 
@@ -36,14 +38,15 @@ import com.pushtechnology.adapters.rest.polling.EndpointResponse;
  *
  * @author Push Technology Limited
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness= Strictness.LENIENT)
 public final class EndpointResponseToStringTransformerTest {
 
     @Mock
     private EndpointResponse endpointResponse;
 
-    @Before
+    @BeforeEach
     public void setUp() {
-        initMocks(this);
         when(endpointResponse.getContentType()).thenCallRealMethod();
     }
 
@@ -63,10 +66,12 @@ public final class EndpointResponseToStringTransformerTest {
         assertEquals("{\"foo\":\"bar\"}", value);
     }
 
-    @Test(expected = UnsupportedCharsetException.class)
-    public void testException() throws Exception {
+    @Test
+    public void testException() {
         when(endpointResponse.getHeader("content-type")).thenReturn("text/plain; charset=badcharset");
         when(endpointResponse.getResponse()).thenReturn("{\"foo\":\"bar\"}".getBytes(StandardCharsets.UTF_8));
-        INSTANCE.transform(endpointResponse);
+        assertThrows(UnsupportedCharsetException.class, () -> {
+            INSTANCE.transform(endpointResponse);
+        });
     }
 }

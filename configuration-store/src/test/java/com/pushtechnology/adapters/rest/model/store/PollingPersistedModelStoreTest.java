@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Push Technology Ltd.
+ * Copyright (C) 2021 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -31,13 +30,17 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.mockito.stubbing.Answer;
 
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
@@ -52,6 +55,8 @@ import com.pushtechnology.adapters.rest.persistence.Persistence;
  *
  * @author Push Technology Limited
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness= Strictness.LENIENT)
 public final class PollingPersistedModelStoreTest {
     @Mock
     private Persistence persistence;
@@ -102,10 +107,8 @@ public final class PollingPersistedModelStoreTest {
     private PollingPersistedModelStore modelStore;
 
     @SuppressWarnings("unchecked")
-    @Before
+    @BeforeEach
     public void setUp() throws IOException {
-        initMocks(this);
-
         when(executor.scheduleAtFixedRate(isA(Runnable.class), isA(Long.class), isA(Long.class), isA(TimeUnit.class)))
             .thenReturn(future);
         when(persistence.loadModel()).thenReturn(Optional.of(model));
@@ -114,7 +117,7 @@ public final class PollingPersistedModelStoreTest {
         modelStore.onModelChange(listener);
     }
 
-    @After
+    @AfterEach
     public void postConditions() {
         verifyNoMoreInteractions(persistence, executor, future, listener);
     }

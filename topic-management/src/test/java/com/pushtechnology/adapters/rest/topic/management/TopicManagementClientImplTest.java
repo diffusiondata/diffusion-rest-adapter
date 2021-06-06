@@ -22,16 +22,19 @@ import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import com.pushtechnology.adapters.rest.metrics.listeners.TopicCreationListener;
 import com.pushtechnology.adapters.rest.metrics.listeners.TopicCreationListener.TopicCreationCompletionListener;
@@ -49,6 +52,8 @@ import com.pushtechnology.diffusion.v4.SessionDisconnectedException;
  *
  * @author Push Technology Limited
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness= Strictness.LENIENT)
 public final class TopicManagementClientImplTest {
     @Mock
     private Session session;
@@ -94,10 +99,8 @@ public final class TopicManagementClientImplTest {
 
     private TopicManagementClient topicManagementClient;
 
-    @Before
+    @BeforeEach
     public void setUp() {
-        initMocks(this);
-
         topicManagementClient = new TopicManagementClientImpl(topicCreationListener, session);
 
         when(topicCreationListener.onTopicCreationRequest(isNotNull(), isNotNull())).thenReturn(topicCreationCompletionListener);
@@ -107,7 +110,7 @@ public final class TopicManagementClientImplTest {
         when(specification.withProperty(any(), any())).thenReturn(specification);
     }
 
-    @After
+    @AfterEach
     public void postConditions() {
         verifyNoMoreInteractions(topicControl, topicCreationListener, topicCreationCompletionListener, specification);
     }

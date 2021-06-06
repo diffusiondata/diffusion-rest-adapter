@@ -15,9 +15,8 @@
 
 package com.pushtechnology.adapters.rest.polling;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.io.IOException;
 import java.net.http.HttpHeaders;
@@ -26,23 +25,23 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 /**
  * Unit tests for {@link EndpointResponseImpl}.
  *
  * @author Push Technology Limited
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness= Strictness.LENIENT)
 public final class EndpointResponseImplTest {
     @Mock
     private HttpResponse<byte[]> httpResponse;
-
-    @Before
-    public void setUp() throws IOException {
-        initMocks(this);
-    }
 
     @Test
     public void getResponseLength() throws IOException {

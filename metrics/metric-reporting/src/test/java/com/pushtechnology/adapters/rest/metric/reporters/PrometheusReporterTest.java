@@ -17,8 +17,8 @@ package com.pushtechnology.adapters.rest.metric.reporters;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -30,13 +30,14 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ThreadFactory;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnit;
-import org.mockito.junit.MockitoRule;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
@@ -49,12 +50,9 @@ import io.prometheus.client.Counter;
  *
  * @author Push Technology Limited
  */
-
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness= Strictness.LENIENT)
 public final class PrometheusReporterTest {
-
-    @Rule
-    public MockitoRule mockitoRule = MockitoJUnit.rule();
-
     @Mock
     private HttpExchange exchange;
 
@@ -63,7 +61,7 @@ public final class PrometheusReporterTest {
 
     private ByteArrayOutputStream outputStream;
 
-    @Before
+    @BeforeEach
     public void setup() {
         outputStream = new ByteArrayOutputStream();
         when(exchange.getRequestHeaders()).thenReturn(headers);
@@ -72,7 +70,7 @@ public final class PrometheusReporterTest {
         when(headers.getFirst("Accept")).thenReturn("text/plain; version=0.0.4; charset=utf-8");
     }
 
-    @After
+    @AfterEach
     public void postConditions() {
         verifyNoMoreInteractions(exchange, headers);
     }

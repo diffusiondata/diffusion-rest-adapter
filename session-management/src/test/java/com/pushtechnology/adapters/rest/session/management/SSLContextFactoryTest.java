@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2020 Push Technology Ltd.
+ * Copyright (C) 2021 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,15 @@
 package com.pushtechnology.adapters.rest.session.management;
 
 import static java.util.Collections.emptyList;
-import static org.junit.Assert.assertNull;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.nio.file.Paths;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.MetricsConfig;
@@ -33,6 +35,8 @@ import com.pushtechnology.adapters.rest.model.latest.Model;
  *
  * @author Push Technology Limited
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness= Strictness.LENIENT)
 public final class SSLContextFactoryTest {
 
     private final Model model = Model
@@ -48,11 +52,6 @@ public final class SSLContextFactoryTest {
         .build();
 
     private final SSLContextFactory contextFactory = new SSLContextFactory(Paths.get("."));
-
-    @Before
-    public void setUp() {
-        initMocks(this);
-    }
 
     @Test
     public void createNoTruststore() {

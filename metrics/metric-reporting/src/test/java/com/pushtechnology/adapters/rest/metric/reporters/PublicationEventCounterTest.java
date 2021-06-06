@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Push Technology Ltd.
+ * Copyright (C) 2021 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@
 package com.pushtechnology.adapters.rest.metric.reporters;
 
 import static com.pushtechnology.diffusion.client.callbacks.ErrorReason.COMMUNICATION_FAILURE;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.pushtechnology.adapters.rest.metrics.PublicationFailedEvent;
 import com.pushtechnology.adapters.rest.metrics.PublicationRequestEvent;

@@ -27,7 +27,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.nio.charset.Charset;
 import java.util.concurrent.CompletableFuture;
@@ -35,14 +34,17 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import com.pushtechnology.adapters.rest.metrics.event.listeners.ServiceEventListener;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
@@ -50,12 +52,10 @@ import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.polling.EndpointClient;
 import com.pushtechnology.adapters.rest.polling.EndpointPollHandlerFactory;
 import com.pushtechnology.adapters.rest.polling.EndpointResponse;
-import com.pushtechnology.adapters.rest.publication.EventedUpdateSource;
 import com.pushtechnology.adapters.rest.publication.PublishingClient;
 import com.pushtechnology.adapters.rest.publication.UpdateContext;
 import com.pushtechnology.adapters.rest.topic.management.TopicManagementClient;
 import com.pushtechnology.diffusion.client.Diffusion;
-import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
 /**
@@ -63,6 +63,8 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
  *
  * @author Push Technology Limited
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness=Strictness.LENIENT)
 public final class ServiceSessionTest {
     @Mock
     private ScheduledExecutorService executor;
@@ -142,10 +144,8 @@ public final class ServiceSessionTest {
     private ServiceSessionImpl serviceSession;
 
     @SuppressWarnings("unchecked")
-    @Before
+    @BeforeEach
     public void setUp() {
-        initMocks(this);
-
         serviceSession = new ServiceSessionImpl(executor, endpointClient, serviceConfig, handlerFactory, topicManagementClient, publishingClient, serviceListener);
         when(executor
             .scheduleWithFixedDelay(isA(Runnable.class), isA(Long.class), isA(Long.class), isA(TimeUnit.class)))
@@ -170,7 +170,7 @@ public final class ServiceSessionTest {
             isNotNull(), isNotNull());
     }
 
-    @After
+    @AfterEach
     public void postConditions() {
         verifyNoMoreInteractions(executor, endpointClient, handlerFactory, taskFuture, topicManagementClient, serviceListener);
     }

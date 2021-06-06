@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2019 Push Technology Ltd.
+ * Copyright (C) 2021 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,17 +17,21 @@ package com.pushtechnology.adapters.rest.adapter;
 
 import static com.pushtechnology.diffusion.client.Diffusion.dataTypes;
 import static java.util.Arrays.asList;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.function.BiConsumer;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
@@ -42,6 +46,8 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
  *
  * @author Push Technology Limited
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness= Strictness.LENIENT)
 public final class EndpointPollHandlerFactoryTest {
     @Mock
     private PublishingClient publishingClient;
@@ -86,14 +92,12 @@ public final class EndpointPollHandlerFactoryTest {
 
     private PollHandlerFactory<EndpointResponse> pollHandlerFactory;
 
-    @Before
+    @BeforeEach
     public void setUp() {
-        initMocks(this);
-
         pollHandlerFactory = new EndpointPollHandlerFactoryImpl(publishingClient);
     }
 
-    @After
+    @AfterEach
     public void postConditions() {
         verifyNoMoreInteractions(publishingClient);
     }
@@ -122,8 +126,10 @@ public final class EndpointPollHandlerFactoryTest {
         verify(publishingClient).createUpdateContext(serviceConfig, plainTextEndpoint, String.class, dataTypes().string());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void createXML() {
-        pollHandlerFactory.create(serviceConfig, xmlEndpoint);
+        assertThrows(IllegalArgumentException.class, () -> {
+            pollHandlerFactory.create(serviceConfig, xmlEndpoint);
+        });
     }
 }

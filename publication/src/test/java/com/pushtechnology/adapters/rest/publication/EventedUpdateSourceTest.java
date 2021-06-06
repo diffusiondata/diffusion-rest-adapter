@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2020 Push Technology Ltd.
+ * Copyright (C) 2021 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 
 package com.pushtechnology.adapters.rest.publication;
 
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -28,15 +28,16 @@ import java.util.concurrent.CompletionException;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnit;
-import org.mockito.junit.MockitoRule;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import com.pushtechnology.diffusion.client.callbacks.ErrorReason;
 import com.pushtechnology.diffusion.client.session.Session;
@@ -48,10 +49,9 @@ import com.pushtechnology.diffusion.client.session.SessionClosedException;
  *
  * @author Push Technology Limited
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness=Strictness.LENIENT)
 public final class EventedUpdateSourceTest {
-    @Rule
-    public MockitoRule mockitoRule = MockitoJUnit.rule();
-
     @Mock
     private Session session;
     @Mock
@@ -69,13 +69,13 @@ public final class EventedUpdateSourceTest {
     @Captor
     private ArgumentCaptor<BiConsumer<SessionLock, Throwable>> registrationHandler;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         when(session.lock(isNotNull(), isNotNull())).thenReturn(registration);
         when(registration.whenComplete(isNotNull())).thenReturn(registration);
     }
 
-    @After
+    @AfterEach
     public void postConditions() {
         verifyNoMoreInteractions(
             session,

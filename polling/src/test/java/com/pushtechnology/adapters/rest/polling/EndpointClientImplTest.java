@@ -16,15 +16,14 @@
 package com.pushtechnology.adapters.rest.polling;
 
 import static java.util.Collections.singletonList;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.isA;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.io.IOException;
 import java.net.http.HttpClient;
@@ -40,10 +39,14 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import com.pushtechnology.adapters.rest.metrics.listeners.PollListener;
 import com.pushtechnology.adapters.rest.metrics.listeners.PollListener.PollCompletionListener;
@@ -58,6 +61,8 @@ import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
  *
  * @author Push Technology Limited
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public final class EndpointClientImplTest {
     @Mock
     private HttpClientFactory clientFactory;
@@ -101,10 +106,8 @@ public final class EndpointClientImplTest {
     private EndpointClientImpl endpointClient;
 
     @SuppressWarnings("unchecked")
-    @Before
+    @BeforeEach
     public void setUp() throws IOException {
-        initMocks(this);
-
         future = new CompletableFuture<>();
 
         when(clientFactory.create(model, null)).thenReturn(httpClient);
@@ -117,7 +120,7 @@ public final class EndpointClientImplTest {
         endpointClient = new EndpointClientImpl(model, null, clientFactory, pollListener);
     }
 
-    @After
+    @AfterEach
     public void postConditions() {
         verifyNoMoreInteractions(httpClient, pollListener, completionListener);
     }
@@ -184,9 +187,11 @@ public final class EndpointClientImplTest {
         assertEquals(thrown.getCause(), exception);
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void requestBeforeStart() {
-        endpointClient.request(serviceConfig, endpointConfig);
+        assertThrows(IllegalStateException.class, () -> {
+            endpointClient.request(serviceConfig, endpointConfig);
+        });
     }
 
     @Test

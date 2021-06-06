@@ -17,21 +17,22 @@ package com.pushtechnology.adapters.rest.metrics.event.listeners;
 
 import static com.pushtechnology.diffusion.client.features.control.topics.TopicAddFailReason.CLUSTER_REPARTITION;
 import static com.pushtechnology.diffusion.client.topics.details.TopicType.STRING;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnit;
-import org.mockito.junit.MockitoRule;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import com.pushtechnology.adapters.rest.metrics.TopicCreationFailedEvent;
 import com.pushtechnology.adapters.rest.metrics.TopicCreationRequestEvent;
@@ -44,6 +45,8 @@ import com.pushtechnology.diffusion.datatype.Bytes;
  *
  * @author Push Technology Limited
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness= Strictness.LENIENT)
 public final class TopicCreationEventDispatcherTest {
     @Mock
     private TopicCreationEventListener topicCreationEventListener;
@@ -56,15 +59,12 @@ public final class TopicCreationEventDispatcherTest {
     @Captor
     private ArgumentCaptor<TopicCreationFailedEvent> failedCaptor;
 
-    @Rule
-    public MockitoRule mockitoRule = MockitoJUnit.rule();
-
-    @Before
+    @BeforeEach
     public void setUp() {
         when(bytes.length()).thenReturn(10);
     }
 
-    @After
+    @AfterEach
     public void postConditions() {
         verifyNoMoreInteractions(topicCreationEventListener, bytes);
     }

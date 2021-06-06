@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2020 Push Technology Ltd.
+ * Copyright (C) 2021 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,13 +33,14 @@ import java.nio.file.Paths;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ScheduledExecutorService;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnit;
-import org.mockito.junit.MockitoRule;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import com.pushtechnology.adapters.rest.metrics.event.listeners.ServiceEventListener;
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
@@ -59,9 +60,9 @@ import com.pushtechnology.diffusion.client.session.SessionFactory;
  *
  * @author Push Technology Limited
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness= Strictness.LENIENT)
 public final class InternalRESTAdapterTest {
-    @Rule
-    public MockitoRule mockitoRule = MockitoJUnit.rule();
     @Mock
     private ScheduledExecutorService executorService;
     @Mock
@@ -161,7 +162,7 @@ public final class InternalRESTAdapterTest {
 
     private InternalRESTAdapter restAdapter;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         when(sessionFactory.serverHost(isNotNull())).thenReturn(sessionFactory);
         when(sessionFactory.serverPort(anyInt())).thenReturn(sessionFactory);
@@ -197,7 +198,7 @@ public final class InternalRESTAdapterTest {
         verify(sessionFactory).transports(WEBSOCKET);
     }
 
-    @After
+    @AfterEach
     public void postConditions() {
         verifyNoMoreInteractions(
             executorService,

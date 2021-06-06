@@ -20,17 +20,20 @@ import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Consumer;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import com.pushtechnology.adapters.rest.metrics.event.listeners.ServiceEventListener;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
@@ -46,6 +49,8 @@ import com.pushtechnology.diffusion.client.session.Session;
  *
  * @author Push Technology Limited
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness=Strictness.LENIENT)
 public final class ServiceSessionFactoryImplTest {
     @Mock
     private ScheduledExecutorService executor;
@@ -79,10 +84,8 @@ public final class ServiceSessionFactoryImplTest {
     private ServiceSessionFactory serviceSessionFactory;
 
     @SuppressWarnings("unchecked")
-    @Before
+    @BeforeEach
     public void setUp() {
-        initMocks(this);
-
         when(publishingClient.addService(isNotNull())).thenReturn(source);
         when(source.onStandby(isNotNull())).thenReturn(source);
         when(source.onActive(isNotNull())).thenReturn(source);
@@ -97,7 +100,7 @@ public final class ServiceSessionFactoryImplTest {
             serviceListener);
     }
 
-    @After
+    @AfterEach
     public void postConditions() {
         verifyNoMoreInteractions(
             executor,

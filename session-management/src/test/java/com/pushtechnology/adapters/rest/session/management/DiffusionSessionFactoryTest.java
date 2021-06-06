@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Push Technology Ltd.
+ * Copyright (C) 2021 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,23 @@
 package com.pushtechnology.adapters.rest.session.management;
 
 import static com.pushtechnology.diffusion.client.session.SessionAttributes.Transport.WEBSOCKET;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.isA;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.diffusion.client.session.Session;
@@ -40,6 +43,8 @@ import com.pushtechnology.diffusion.client.session.SessionFactory;
  *
  * @author Push Technology Limited
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness= Strictness.LENIENT)
 public final class DiffusionSessionFactoryTest {
     @Mock
     private SessionFactory sessionFactory;
@@ -75,10 +80,8 @@ public final class DiffusionSessionFactoryTest {
         .recoveryBufferSize(256)
         .build();
 
-    @Before
+    @BeforeEach
     public void setUp() {
-        initMocks(this);
-
         when(sessionFactory.transports(WEBSOCKET)).thenReturn(sessionFactory);
         when(sessionFactory.listener(isA(Session.Listener.class))).thenReturn(sessionFactory);
         when(sessionFactory.serverHost("localhost")).thenReturn(sessionFactory);
@@ -96,7 +99,7 @@ public final class DiffusionSessionFactoryTest {
         when(sessionFactory.openAsync()).thenReturn(CompletableFuture.completedFuture(session));
     }
 
-    @After
+    @AfterEach
     public void postConditions() {
         verifyNoMoreInteractions(session, sessionFactory);
     }

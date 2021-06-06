@@ -16,20 +16,21 @@
 package com.pushtechnology.adapters.rest.metrics.event.listeners;
 
 import static java.util.Collections.singletonList;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnit;
-import org.mockito.junit.MockitoRule;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import com.pushtechnology.adapters.rest.metrics.PollFailedEvent;
 import com.pushtechnology.adapters.rest.metrics.PollRequestEvent;
@@ -43,6 +44,8 @@ import com.pushtechnology.adapters.rest.polling.EndpointResponse;
  *
  * @author Push Technology Limited
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness= Strictness.LENIENT)
 public final class PollEventDispatcherTest {
     @Mock
     private PollEventListener pollEventListener;
@@ -54,9 +57,6 @@ public final class PollEventDispatcherTest {
     private ArgumentCaptor<PollSuccessEvent> successCaptor;
     @Captor
     private ArgumentCaptor<PollFailedEvent> failedCaptor;
-
-    @Rule
-    public MockitoRule mockitoRule = MockitoJUnit.rule();
 
     private final EndpointConfig endpointConfig = EndpointConfig
         .builder()
@@ -74,13 +74,13 @@ public final class PollEventDispatcherTest {
         .endpoints(singletonList(endpointConfig))
         .build();
 
-    @Before
+    @BeforeEach
     public void setUp() {
         when(endpointResponse.getStatusCode()).thenReturn(200);
         when(endpointResponse.getResponseLength()).thenReturn(10);
     }
 
-    @After
+    @AfterEach
     public void postConditions() {
         verifyNoMoreInteractions(pollEventListener, endpointResponse);
     }

@@ -19,14 +19,15 @@ import static com.pushtechnology.diffusion.client.callbacks.ErrorReason.ACCESS_D
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
-import org.junit.After;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnit;
-import org.mockito.junit.MockitoRule;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import com.pushtechnology.adapters.rest.metrics.PublicationFailedEvent;
 import com.pushtechnology.adapters.rest.metrics.PublicationRequestEvent;
@@ -37,6 +38,8 @@ import com.pushtechnology.adapters.rest.metrics.PublicationSuccessEvent;
  *
  * @author Push Technology Limited
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness= Strictness.LENIENT)
 public final class PublicationEventDispatcherTest {
     @Mock
     private PublicationEventListener publicationEventListener;
@@ -47,10 +50,7 @@ public final class PublicationEventDispatcherTest {
     @Captor
     private ArgumentCaptor<PublicationFailedEvent> failedCaptor;
 
-    @Rule
-    public MockitoRule mockitoRule = MockitoJUnit.rule();
-
-    @After
+    @AfterEach
     public void postConditions() {
         verifyNoMoreInteractions(publicationEventListener);
     }

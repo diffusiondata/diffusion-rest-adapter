@@ -23,9 +23,9 @@ import static com.pushtechnology.diffusion.client.session.Session.State.CONNECTI
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.joining;
-import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.core.StringContains.containsString;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.ArgumentMatchers.isNull;
@@ -34,7 +34,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -43,7 +42,6 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.stream.Stream;
@@ -66,19 +64,23 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.security.Constraint;
 import org.eclipse.jetty.util.security.Credential;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.mockito.verification.VerificationWithTimeout;
 
-import com.pushtechnology.adapters.rest.metrics.event.listeners.ServiceEventListener;
 import com.pushtechnology.adapters.rest.client.RESTAdapterClient;
+import com.pushtechnology.adapters.rest.metrics.event.listeners.ServiceEventListener;
 import com.pushtechnology.adapters.rest.model.latest.BasicAuthenticationConfig;
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
@@ -93,7 +95,6 @@ import com.pushtechnology.adapters.rest.resources.IncrementingResource;
 import com.pushtechnology.adapters.rest.resources.TimestampResource;
 import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.features.Topics;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
@@ -105,7 +106,9 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
  *
  * @author Push Technology Limited
  */
-@Category(EmbeddedServices.class)
+@Tag("EmbeddedServices")
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness= Strictness.LENIENT)
 public final class BasicIT {
     private static final DiffusionConfig DIFFUSION_CONFIG = DiffusionConfig
         .builder()
@@ -343,7 +346,7 @@ public final class BasicIT {
 
     private MutableModelStore modelStore;
 
-    @BeforeClass
+    @BeforeAll
     public static void startApplicationServer() throws Exception {
         final ServletContextHandler context0 = new ServletContextHandler(ServletContextHandler.SESSIONS);
         context0.setContextPath("/rest");
@@ -425,19 +428,17 @@ public final class BasicIT {
         jettyServer.start();
     }
 
-    @AfterClass
+    @AfterAll
     public static void stopApplicationServer() throws Exception {
         jettyServer.stop();
     }
 
-    @Before
+    @BeforeEach
     public void setup() {
-        initMocks(this);
-
         modelStore = new MutableModelStore();
     }
 
-    @After
+    @AfterEach
     public void postConditions() {
         verifyNoMoreInteractions(listener, serviceListener, backupServiceListener);
     }

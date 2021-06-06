@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Push Technology Ltd.
+ * Copyright (C) 2021 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,12 +23,15 @@ import static com.pushtechnology.diffusion.client.session.Session.State.CONNECTI
 import static com.pushtechnology.diffusion.client.session.Session.State.RECOVERING_RECONNECT;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.MockitoAnnotations.initMocks;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import com.pushtechnology.diffusion.client.session.Session;
 
@@ -37,6 +40,8 @@ import com.pushtechnology.diffusion.client.session.Session;
  *
  * @author Push Technology Limited
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness= Strictness.LENIENT)
 public final class SessionLostListenerTest {
     @Mock
     private Session session;
@@ -45,14 +50,12 @@ public final class SessionLostListenerTest {
 
     private SessionLostListener sessionLostListener;
 
-    @Before
+    @BeforeEach
     public void setUp() {
-        initMocks(this);
-
         sessionLostListener = new SessionLostListener(sessionLossHandler);
     }
 
-    @After
+    @AfterEach
     public void postConditions() {
         verifyNoMoreInteractions(session, sessionLossHandler);
     }

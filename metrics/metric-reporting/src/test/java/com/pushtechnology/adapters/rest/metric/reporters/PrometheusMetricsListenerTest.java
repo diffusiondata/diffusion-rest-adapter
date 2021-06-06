@@ -16,12 +16,9 @@
 package com.pushtechnology.adapters.rest.metric.reporters;
 
 import static java.util.Collections.singletonList;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.util.Collections;
-import java.util.Enumeration;
-
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.pushtechnology.adapters.rest.metrics.PollFailedEvent;
 import com.pushtechnology.adapters.rest.metrics.PollRequestEvent;
@@ -38,7 +35,6 @@ import com.pushtechnology.diffusion.client.callbacks.ErrorReason;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicAddFailReason;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
 
-import io.prometheus.client.Collector;
 import io.prometheus.client.CollectorRegistry;
 
 /**

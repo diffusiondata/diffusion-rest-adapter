@@ -15,10 +15,7 @@
 
 package com.pushtechnology.adapters.rest.metrics.event.listeners;
 
-import org.junit.Test;
-
-import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
-import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
+import org.junit.jupiter.api.Test;
 
 /**
  * Unit tests for {@link ServiceEventListener}.

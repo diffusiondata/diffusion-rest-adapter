@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2020 Push Technology Ltd.
+ * Copyright (C) 2021 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,14 @@
 
 package com.pushtechnology.adapters.rest.persistence;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.pushtechnology.adapters.rest.model.conversion.ConversionContext;
 import com.pushtechnology.adapters.rest.model.latest.Model;
@@ -30,7 +30,7 @@ import com.pushtechnology.adapters.rest.model.latest.Model;
 /**
  * Unit tests for {@link FileSystemPersistence}.
  *
- * @author Matt Champion 02/11/2020
+ * @author Push Technology Limited
  */
 public final class FileSystemPersistenceTest {
     @Test

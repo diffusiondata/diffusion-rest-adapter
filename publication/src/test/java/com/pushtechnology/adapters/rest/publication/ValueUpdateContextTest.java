@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2020 Push Technology Ltd.
+ * Copyright (C) 2021 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ import static com.pushtechnology.diffusion.client.features.TopicCreationResult.E
 import static com.pushtechnology.diffusion.client.session.Session.State.CLOSED_BY_CLIENT;
 import static com.pushtechnology.diffusion.client.session.Session.State.CONNECTED_ACTIVE;
 import static com.pushtechnology.diffusion.client.session.Session.State.RECOVERING_RECONNECT;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNotNull;
@@ -28,16 +28,19 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.AdditionalAnswers;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import com.pushtechnology.adapters.rest.metrics.listeners.PublicationListener;
 import com.pushtechnology.adapters.rest.metrics.listeners.PublicationListener.PublicationCompletionListener;
@@ -52,8 +55,10 @@ import com.pushtechnology.diffusion.datatype.binary.Binary;
 /**
  * Unit tests for {@link ValueUpdateContext}.
  *
- * @author Matt Champion 21/12/2017
+ * @author Push Technology Limited
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness=Strictness.LENIENT)
 public final class ValueUpdateContextTest {
     @Mock
     private Session session;
@@ -76,10 +81,8 @@ public final class ValueUpdateContextTest {
 
     private ValueUpdateContext<Binary> updateContext;
 
-    @Before
+    @BeforeEach
     public void setUp() {
-        initMocks(this);
-
         when(dataType.toBytes(binary)).thenReturn(binary);
         when(bytes.toByteArray()).thenReturn(new byte[0]);
         when(session.feature(TopicUpdate.class)).thenReturn(topicUpdate);
@@ -102,7 +105,7 @@ public final class ValueUpdateContextTest {
         verify(topicUpdate).createUpdateStream("a/topic", Binary.class);
     }
 
-    @After
+    @AfterEach
     public void postConditions() {
         verifyNoMoreInteractions(session, topicUpdate, publicationListener, completionListener, dataType, updateStream);
     }
