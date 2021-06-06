@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Push Technology Ltd.
+ * Copyright (C) 2021 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,9 @@ import net.jcip.annotations.Immutable;
 @Immutable
 public final class FileSystemPersistence implements Persistence {
     private final JsonFactory jsonFactory = new JsonFactory();
-    private final ObjectMapper objectMapper = new ObjectMapper(jsonFactory).enable(SerializationFeature.INDENT_OUTPUT);
+    private final ObjectMapper objectMapper = new ObjectMapper(jsonFactory)
+        .enable(SerializationFeature.INDENT_OUTPUT)
+        .addHandler(new JsonMappingProblemHandler());
     private final ConversionContext conversionContext;
     private final Path configFilePath;
     private final Path versionFilePath;
