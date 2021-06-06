@@ -138,6 +138,7 @@ public final class LiveIT {
         topics.addFallbackStream(JSON.class, stream);
         topics.subscribe("?icndb/");
 
+        verify(serviceListener, timed()).onEndpointAdd(icndb, icndb.getEndpoints().get(0));
         verify(stream, timed()).onSubscription(eq("icndb/random"), isA(TopicSpecification.class));
 
         verify(stream, timed()).onValue(eq("icndb/random"), isA(TopicSpecification.class), isNull(), isA(JSON.class));
@@ -145,6 +146,7 @@ public final class LiveIT {
         stopSession(session);
         client.close();
 
+        verify(serviceListener, timed()).onEndpointRemove(icndb, icndb.getEndpoints().get(0), true);
         verify(serviceListener, timed()).onRemove(icndb, true);
     }
 
