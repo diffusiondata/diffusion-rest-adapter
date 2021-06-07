@@ -44,7 +44,7 @@ public final class V13Converter
     protected Model convertFrom(com.pushtechnology.adapters.rest.model.v13.Model model) {
         return Model
             .builder()
-            .active(true)
+            .active(model.isActive())
             .services(model
                 .getServices()
                 .stream()

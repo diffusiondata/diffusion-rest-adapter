@@ -46,6 +46,7 @@ public final class V13ConverterTest {
         final Model model = INSTANCE.convert(
             com.pushtechnology.adapters.rest.model.v13.Model
                 .builder()
+                .active(true)
                 .services(Collections.singletonList(
                     com.pushtechnology.adapters.rest.model.v13.ServiceConfig
                         .builder()
@@ -122,6 +123,7 @@ public final class V13ConverterTest {
         final Model model = INSTANCE.convert(
             com.pushtechnology.adapters.rest.model.v13.Model
                 .builder()
+                .active(true)
                 .services(Collections.singletonList(
                     com.pushtechnology.adapters.rest.model.v13.ServiceConfig
                         .builder()

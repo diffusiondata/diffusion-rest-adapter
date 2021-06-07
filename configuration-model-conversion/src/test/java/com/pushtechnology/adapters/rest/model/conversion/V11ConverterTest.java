@@ -45,6 +45,7 @@ public final class V11ConverterTest {
         final Model model = INSTANCE.convert(
             com.pushtechnology.adapters.rest.model.v11.Model
                 .builder()
+                .active(true)
                 .services(Collections.singletonList(
                     com.pushtechnology.adapters.rest.model.v11.ServiceConfig
                         .builder()

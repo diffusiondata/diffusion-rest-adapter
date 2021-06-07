@@ -43,7 +43,7 @@ public final class V11Converter
     protected Model convertFrom(com.pushtechnology.adapters.rest.model.v11.Model model) {
         return Model
             .builder()
-            .active(true)
+            .active(model.isActive())
             .services(model
                 .getServices()
                 .stream()

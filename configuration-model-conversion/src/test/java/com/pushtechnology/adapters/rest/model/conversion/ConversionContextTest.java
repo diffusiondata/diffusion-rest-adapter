@@ -17,6 +17,7 @@ package com.pushtechnology.adapters.rest.model.conversion;
 
 import static com.pushtechnology.adapters.rest.model.conversion.ConversionContext.FULL_CONTEXT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -45,12 +46,14 @@ public final class ConversionContextTest {
     public void testConvertFromV11() {
         final Model model = FULL_CONTEXT.convert(com.pushtechnology.adapters.rest.model.v11.Model
             .builder()
+            .active(false)
             .diffusion(com.pushtechnology.adapters.rest.model.v11.DiffusionConfig
                 .builder()
                 .host("example.com")
                 .build())
             .services(Collections.emptyList()).build());
 
+        assertFalse(model.isActive());
         assertEquals(0, model.getServices().size());
     }
 
@@ -58,6 +61,7 @@ public final class ConversionContextTest {
     public void testConvertFromV11WithService() {
         final Model model = FULL_CONTEXT.convert(com.pushtechnology.adapters.rest.model.v11.Model
                 .builder()
+                .active(true)
                 .services(Collections.singletonList(
                     com.pushtechnology.adapters.rest.model.v11.ServiceConfig
                         .builder()

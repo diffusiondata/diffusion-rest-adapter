@@ -43,7 +43,7 @@ public final class V14Converter
     protected Model convertFrom(com.pushtechnology.adapters.rest.model.v14.Model model) {
         return Model
             .builder()
-            .active(true)
+            .active(model.isActive())
             .services(model.getServices().stream().map(ServiceConfigConverter.INSTANCE::convert).collect(toList()))
             .diffusion(DiffusionConfigConverter.INSTANCE.convert(model.getDiffusion()))
             .metrics(MetricsConfigConverter.INSTANCE.convert(model.getMetrics()))
