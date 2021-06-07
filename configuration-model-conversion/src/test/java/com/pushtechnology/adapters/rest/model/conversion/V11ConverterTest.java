@@ -51,7 +51,7 @@ public final class V11ConverterTest {
                         .builder()
                         .host("localhost")
                         .port(80)
-                        .endpoints(Collections.singletonList(com.pushtechnology.adapters.rest.model.v11.EndpointConfig
+                        .endpoints(Collections.singletonList(com.pushtechnology.adapters.rest.model.v12.EndpointConfig
                             .builder()
                             .name("endpoint")
                             .topic("topic")

@@ -17,6 +17,8 @@ package com.pushtechnology.adapters.rest.model.v11;
 
 import java.util.List;
 
+import com.pushtechnology.adapters.rest.model.v12.EndpointConfig;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.ToString;

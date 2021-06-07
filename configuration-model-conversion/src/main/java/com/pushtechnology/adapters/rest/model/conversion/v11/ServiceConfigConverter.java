@@ -15,8 +15,6 @@
 
 package com.pushtechnology.adapters.rest.model.conversion.v11;
 
-import static java.util.stream.Collectors.toList;
-
 import com.pushtechnology.adapters.rest.model.conversion.Converter;
 import com.pushtechnology.adapters.rest.model.v12.ServiceConfig;
 
@@ -43,11 +41,7 @@ import com.pushtechnology.adapters.rest.model.v12.ServiceConfig;
             .host(serviceConfig.getHost())
             .port(serviceConfig.getPort())
             .secure(serviceConfig.isSecure())
-            .endpoints(serviceConfig
-                .getEndpoints()
-                .stream()
-                .map(EndpointConfigConverter.INSTANCE::convert)
-                .collect(toList()))
+            .endpoints(serviceConfig.getEndpoints())
             .pollPeriod(serviceConfig.getPollPeriod())
             .topicRoot(serviceConfig.getTopicRoot())
             .security(SecurityConfigConverter.INSTANCE.convert(serviceConfig.getSecurity()))

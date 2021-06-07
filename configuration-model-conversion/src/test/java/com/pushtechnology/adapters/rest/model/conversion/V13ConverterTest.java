@@ -53,7 +53,7 @@ public final class V13ConverterTest {
                         .name("service")
                         .host("localhost")
                         .port(80)
-                        .endpoints(Collections.singletonList(com.pushtechnology.adapters.rest.model.v13.EndpointConfig
+                        .endpoints(Collections.singletonList(com.pushtechnology.adapters.rest.model.v14.EndpointConfig
                             .builder()
                             .name("endpoint")
                             .topicPath("topic")
@@ -130,7 +130,7 @@ public final class V13ConverterTest {
                         .name("service")
                         .host("localhost")
                         .port(80)
-                        .endpoints(Collections.singletonList(com.pushtechnology.adapters.rest.model.v13.EndpointConfig
+                        .endpoints(Collections.singletonList(com.pushtechnology.adapters.rest.model.v14.EndpointConfig
                             .builder()
                             .name("endpoint")
                             .topicPath("topic")

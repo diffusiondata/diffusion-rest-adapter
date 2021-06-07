@@ -21,7 +21,7 @@ import lombok.ToString;
 import lombok.Value;
 
 /**
- * Endpoint configuration. Version 12.
+ * Endpoint configuration. Version 11 and 12.
  * <p>
  * Description of a REST endpoint to poll.
  *
