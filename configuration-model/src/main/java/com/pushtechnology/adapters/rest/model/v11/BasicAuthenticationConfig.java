@@ -30,7 +30,7 @@ import lombok.Value;
 @Value
 @Builder
 @AllArgsConstructor
-@ToString(of = {})
+@ToString(of = {"principal"})
 public class BasicAuthenticationConfig {
     String principal;
     String credential;
