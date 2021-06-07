@@ -16,7 +16,6 @@
 package com.pushtechnology.adapters.rest.model.conversion.v14;
 
 import com.pushtechnology.adapters.rest.model.conversion.Converter;
-import com.pushtechnology.adapters.rest.model.latest.BasicAuthenticationConfig;
 import com.pushtechnology.adapters.rest.model.latest.SecurityConfig;
 
 /**
@@ -42,13 +41,7 @@ import com.pushtechnology.adapters.rest.model.latest.SecurityConfig;
 
         return SecurityConfig
             .builder()
-            .basic(securityConfig.getBasic() == null ?
-                null :
-                BasicAuthenticationConfig
-                    .builder()
-                    .userid(securityConfig.getBasic().getUserid())
-                    .password(securityConfig.getBasic().getPassword())
-                    .build())
+            .basic(securityConfig.getBasic())
             .build();
     }
 }

@@ -27,7 +27,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import com.pushtechnology.adapters.rest.model.conversion.v12.V12Converter;
-import com.pushtechnology.adapters.rest.model.v13.BasicAuthenticationConfig;
+import com.pushtechnology.adapters.rest.model.latest.BasicAuthenticationConfig;
 import com.pushtechnology.adapters.rest.model.v13.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.v13.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.v13.Model;

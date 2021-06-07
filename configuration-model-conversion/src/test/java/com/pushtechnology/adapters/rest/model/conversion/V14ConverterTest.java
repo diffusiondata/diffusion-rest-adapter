@@ -65,7 +65,7 @@ public final class V14ConverterTest {
                         .topicPathRoot("a")
                         .security(SecurityConfig
                             .builder()
-                            .basic(com.pushtechnology.adapters.rest.model.v14.BasicAuthenticationConfig
+                            .basic(BasicAuthenticationConfig
                                 .builder()
                                 .userid("control")
                                 .password("password")

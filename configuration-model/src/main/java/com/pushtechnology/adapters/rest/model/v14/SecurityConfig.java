@@ -15,6 +15,8 @@
 
 package com.pushtechnology.adapters.rest.model.v14;
 
+import com.pushtechnology.adapters.rest.model.latest.BasicAuthenticationConfig;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Value;

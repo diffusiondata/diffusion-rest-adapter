@@ -62,7 +62,7 @@ public final class V11ConverterTest {
                         .topicRoot("a")
                         .security(com.pushtechnology.adapters.rest.model.v11.SecurityConfig
                             .builder()
-                            .basic(com.pushtechnology.adapters.rest.model.v11.BasicAuthenticationConfig
+                            .basic(com.pushtechnology.adapters.rest.model.v12.BasicAuthenticationConfig
                                 .builder()
                                 .principal("control")
                                 .credential("password")

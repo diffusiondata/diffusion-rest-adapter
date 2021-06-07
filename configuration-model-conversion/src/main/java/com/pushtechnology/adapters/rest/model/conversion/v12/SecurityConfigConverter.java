@@ -16,7 +16,7 @@
 package com.pushtechnology.adapters.rest.model.conversion.v12;
 
 import com.pushtechnology.adapters.rest.model.conversion.Converter;
-import com.pushtechnology.adapters.rest.model.v13.BasicAuthenticationConfig;
+import com.pushtechnology.adapters.rest.model.latest.BasicAuthenticationConfig;
 import com.pushtechnology.adapters.rest.model.v13.SecurityConfig;
 
 /**
