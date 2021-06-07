@@ -15,7 +15,7 @@
 
 package com.pushtechnology.adapters.rest.model.conversion;
 
-import static com.pushtechnology.adapters.rest.model.conversion.V13Converter.INSTANCE;
+import static com.pushtechnology.adapters.rest.model.conversion.v13.V13Converter.INSTANCE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -28,6 +28,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import com.pushtechnology.adapters.rest.model.conversion.v13.V13Converter;
 import com.pushtechnology.adapters.rest.model.v14.BasicAuthenticationConfig;
 import com.pushtechnology.adapters.rest.model.v14.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.v14.EndpointConfig;

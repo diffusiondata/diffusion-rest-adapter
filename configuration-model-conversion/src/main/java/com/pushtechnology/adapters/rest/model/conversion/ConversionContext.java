@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Push Technology Ltd.
+ * Copyright (C) 2021 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.pushtechnology.adapters.rest.model.AnyModel;
+import com.pushtechnology.adapters.rest.model.conversion.v11.V11Converter;
+import com.pushtechnology.adapters.rest.model.conversion.v12.V12Converter;
+import com.pushtechnology.adapters.rest.model.conversion.v13.V13Converter;
+import com.pushtechnology.adapters.rest.model.conversion.v14.V14Converter;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 
 import net.jcip.annotations.Immutable;
