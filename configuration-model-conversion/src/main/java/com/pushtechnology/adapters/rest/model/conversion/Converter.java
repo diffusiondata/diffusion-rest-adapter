@@ -15,20 +15,19 @@
 
 package com.pushtechnology.adapters.rest.model.conversion;
 
-import com.pushtechnology.adapters.rest.model.AnyModel;
-
 /**
- * Converter between different versions of the model.
+ * Converter between different versions of configuration objects.
  *
+ * @param <M> the type of object this converter consumes
+ * @param <N> the type of object this converter produces
  * @author Push Technology Limited
  */
-public interface ModelConverter extends Converter<AnyModel, AnyModel> {
+public interface Converter<M, N> {
     /**
-     * Convert a model to a later version.
-     * @param model The model
-     * @return The model converted to a later version
+     * Convert an object to a later version.
+     * @param object The source object
+     * @return The object converted to a later version
      * @throws IllegalArgumentException if the converter does not know how to convert supplied model
      */
-    @Override
-    AnyModel convert(AnyModel model);
+    N convert(M object);
 }
