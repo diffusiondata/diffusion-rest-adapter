@@ -73,7 +73,7 @@ public final class V14ConverterTest {
                             .build())
                         .build()
                 ))
-                .diffusion(com.pushtechnology.adapters.rest.model.v14.DiffusionConfig
+                .diffusion(com.pushtechnology.adapters.rest.model.latest.DiffusionConfig
                     .builder()
                     .host("localhost")
                     .port(8080)
@@ -143,7 +143,7 @@ public final class V14ConverterTest {
                         .security(null)
                         .build()
                 ))
-                .diffusion(com.pushtechnology.adapters.rest.model.v14.DiffusionConfig
+                .diffusion(com.pushtechnology.adapters.rest.model.latest.DiffusionConfig
                     .builder()
                     .host("localhost")
                     .port(8080)

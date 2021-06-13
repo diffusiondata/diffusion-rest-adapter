@@ -24,7 +24,7 @@ import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
  * @author Push Technology Limited
  */
 /*package*/ final class DiffusionConfigConverter
-        implements Converter<com.pushtechnology.adapters.rest.model.v14.DiffusionConfig, DiffusionConfig> {
+        implements Converter<DiffusionConfig, DiffusionConfig> {
     /**
      * The converter.
      */
@@ -34,20 +34,7 @@ import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
     }
 
     @Override
-    public DiffusionConfig convert(com.pushtechnology.adapters.rest.model.v14.DiffusionConfig diffusionConfig) {
-        return DiffusionConfig
-            .builder()
-            .host(diffusionConfig.getHost())
-            .port(diffusionConfig.getPort())
-            .principal(diffusionConfig.getPrincipal())
-            .password(diffusionConfig.getPassword())
-            .secure(diffusionConfig.isSecure())
-            .connectionTimeout(diffusionConfig.getConnectionTimeout())
-            .reconnectionTimeout(diffusionConfig.getReconnectionTimeout())
-            .maximumMessageSize(diffusionConfig.getMaximumMessageSize())
-            .inputBufferSize(diffusionConfig.getInputBufferSize())
-            .outputBufferSize(diffusionConfig.getOutputBufferSize())
-            .recoveryBufferSize(diffusionConfig.getRecoveryBufferSize())
-            .build();
+    public DiffusionConfig convert(DiffusionConfig diffusionConfig) {
+        return diffusionConfig;
     }
 }

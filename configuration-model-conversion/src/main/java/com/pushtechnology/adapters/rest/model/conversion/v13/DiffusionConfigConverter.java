@@ -16,7 +16,7 @@
 package com.pushtechnology.adapters.rest.model.conversion.v13;
 
 import com.pushtechnology.adapters.rest.model.conversion.Converter;
-import com.pushtechnology.adapters.rest.model.v14.DiffusionConfig;
+import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 
 /**
  * Converter between different version 13 of the model and version 14.

@@ -30,7 +30,7 @@ import org.junit.jupiter.api.Test;
 
 import com.pushtechnology.adapters.rest.model.conversion.v13.V13Converter;
 import com.pushtechnology.adapters.rest.model.latest.BasicAuthenticationConfig;
-import com.pushtechnology.adapters.rest.model.v14.DiffusionConfig;
+import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.v14.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.v14.Model;
 import com.pushtechnology.adapters.rest.model.v14.ServiceConfig;

@@ -20,6 +20,7 @@ import static java.util.Collections.emptyList;
 import java.util.List;
 
 import com.pushtechnology.adapters.rest.model.AnyModel;
+import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
