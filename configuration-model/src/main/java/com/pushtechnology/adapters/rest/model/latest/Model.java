@@ -17,7 +17,6 @@ package com.pushtechnology.adapters.rest.model.latest;
 
 import static java.util.Collections.emptyList;
 
-import java.util.Collections;
 import java.util.List;
 
 import com.pushtechnology.adapters.rest.model.AnyModel;

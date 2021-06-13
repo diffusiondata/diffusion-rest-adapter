@@ -29,9 +29,9 @@ import org.junit.jupiter.api.Test;
 import com.pushtechnology.adapters.rest.model.conversion.v12.V12Converter;
 import com.pushtechnology.adapters.rest.model.latest.BasicAuthenticationConfig;
 import com.pushtechnology.adapters.rest.model.v13.DiffusionConfig;
-import com.pushtechnology.adapters.rest.model.v14.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.v13.Model;
 import com.pushtechnology.adapters.rest.model.v13.ServiceConfig;
+import com.pushtechnology.adapters.rest.model.v14.EndpointConfig;
 import com.pushtechnology.diffusion.client.session.SessionAttributes;
 
 /**

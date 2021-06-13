@@ -17,13 +17,11 @@ package com.pushtechnology.adapters.rest.model.latest;
 
 import static java.util.Collections.emptyList;
 
-import java.util.Collections;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NonNull;
-import lombok.ToString;
 import lombok.Value;
 
 /**
