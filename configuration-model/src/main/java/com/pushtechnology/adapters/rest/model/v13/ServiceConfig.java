@@ -17,6 +17,7 @@ package com.pushtechnology.adapters.rest.model.v13;
 
 import java.util.List;
 
+import com.pushtechnology.adapters.rest.model.latest.SecurityConfig;
 import com.pushtechnology.adapters.rest.model.v14.EndpointConfig;
 
 import lombok.AllArgsConstructor;

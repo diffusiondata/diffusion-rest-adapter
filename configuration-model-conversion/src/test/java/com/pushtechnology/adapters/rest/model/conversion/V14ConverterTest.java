@@ -34,8 +34,8 @@ import com.pushtechnology.adapters.rest.model.latest.BasicAuthenticationConfig;
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
 import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.Model;
+import com.pushtechnology.adapters.rest.model.latest.SecurityConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
-import com.pushtechnology.adapters.rest.model.v14.SecurityConfig;
 
 /**
  * Unit tests for {@link V14Converter}.

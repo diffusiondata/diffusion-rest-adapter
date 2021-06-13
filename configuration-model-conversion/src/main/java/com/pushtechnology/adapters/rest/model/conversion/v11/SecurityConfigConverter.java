@@ -24,7 +24,7 @@ import com.pushtechnology.adapters.rest.model.v12.SecurityConfig;
  * @author Push Technology Limited
  */
 /*package*/ final class SecurityConfigConverter
-        implements Converter<com.pushtechnology.adapters.rest.model.v11.SecurityConfig, SecurityConfig> {
+        implements Converter<SecurityConfig, SecurityConfig> {
     /**
      * The converter.
      */
@@ -34,14 +34,11 @@ import com.pushtechnology.adapters.rest.model.v12.SecurityConfig;
     }
 
     @Override
-    public SecurityConfig convert(com.pushtechnology.adapters.rest.model.v11.SecurityConfig securityConfig) {
+    public SecurityConfig convert(SecurityConfig securityConfig) {
         if (securityConfig == null) {
             return SecurityConfig.builder().build();
         }
 
-        return SecurityConfig
-            .builder()
-            .basic(securityConfig.getBasic())
-            .build();
+        return securityConfig;
     }
 }

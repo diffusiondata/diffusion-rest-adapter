@@ -76,7 +76,7 @@ public final class ConversionContextTest {
                             .build()))
                         .pollPeriod(5000)
                         .topicRoot("a")
-                        .security(com.pushtechnology.adapters.rest.model.v11.SecurityConfig
+                        .security(com.pushtechnology.adapters.rest.model.v12.SecurityConfig
                             .builder()
                             .basic(com.pushtechnology.adapters.rest.model.v12.BasicAuthenticationConfig
                                 .builder()

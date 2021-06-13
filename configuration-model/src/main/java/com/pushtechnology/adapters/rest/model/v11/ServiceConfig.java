@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Push Technology Ltd.
+ * Copyright (C) 2021 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package com.pushtechnology.adapters.rest.model.v11;
 import java.util.List;
 
 import com.pushtechnology.adapters.rest.model.v12.EndpointConfig;
+import com.pushtechnology.adapters.rest.model.v12.SecurityConfig;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

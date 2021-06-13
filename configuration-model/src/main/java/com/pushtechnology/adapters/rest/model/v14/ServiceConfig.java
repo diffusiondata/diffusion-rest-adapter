@@ -19,6 +19,8 @@ import static java.util.Collections.emptyList;
 
 import java.util.List;
 
+import com.pushtechnology.adapters.rest.model.latest.SecurityConfig;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NonNull;

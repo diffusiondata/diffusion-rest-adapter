@@ -17,7 +17,7 @@ package com.pushtechnology.adapters.rest.model.conversion.v12;
 
 import com.pushtechnology.adapters.rest.model.conversion.Converter;
 import com.pushtechnology.adapters.rest.model.latest.BasicAuthenticationConfig;
-import com.pushtechnology.adapters.rest.model.v13.SecurityConfig;
+import com.pushtechnology.adapters.rest.model.latest.SecurityConfig;
 
 /**
  * Converter between different version 12 of the model and version 13.

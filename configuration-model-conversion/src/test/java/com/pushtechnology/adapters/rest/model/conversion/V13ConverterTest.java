@@ -62,7 +62,7 @@ public final class V13ConverterTest {
                             .build()))
                         .pollPeriod(5000)
                         .topicPathRoot("a")
-                        .security(com.pushtechnology.adapters.rest.model.v13.SecurityConfig
+                        .security(com.pushtechnology.adapters.rest.model.latest.SecurityConfig
                             .builder()
                             .basic(BasicAuthenticationConfig
                                 .builder()

@@ -16,7 +16,7 @@
 package com.pushtechnology.adapters.rest.model.conversion.v13;
 
 import com.pushtechnology.adapters.rest.model.conversion.Converter;
-import com.pushtechnology.adapters.rest.model.v14.SecurityConfig;
+import com.pushtechnology.adapters.rest.model.latest.SecurityConfig;
 
 /**
  * Converter between different version 13 of the model and version 14.
@@ -24,7 +24,7 @@ import com.pushtechnology.adapters.rest.model.v14.SecurityConfig;
  * @author Push Technology Limited
  */
 /*package*/ final class SecurityConfigConverter
-        implements Converter<com.pushtechnology.adapters.rest.model.v13.SecurityConfig, SecurityConfig> {
+        implements Converter<SecurityConfig, SecurityConfig> {
     /**
      * The converter.
      */
@@ -34,14 +34,11 @@ import com.pushtechnology.adapters.rest.model.v14.SecurityConfig;
     }
 
     @Override
-    public SecurityConfig convert(com.pushtechnology.adapters.rest.model.v13.SecurityConfig securityConfig) {
+    public SecurityConfig convert(SecurityConfig securityConfig) {
         if (securityConfig == null) {
             return SecurityConfig.builder().build();
         }
 
-        return SecurityConfig
-            .builder()
-            .basic(securityConfig.getBasic())
-            .build();
+        return securityConfig;
     }
 }
