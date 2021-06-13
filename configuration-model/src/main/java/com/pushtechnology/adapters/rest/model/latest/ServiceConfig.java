@@ -81,5 +81,6 @@ public class ServiceConfig {
     /**
      * The security configuration for the service.
      */
-    SecurityConfig security;
+    @Builder.Default
+    SecurityConfig security = SecurityConfig.builder().build();
 }
