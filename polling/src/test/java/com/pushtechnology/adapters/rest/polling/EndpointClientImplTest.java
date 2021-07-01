@@ -19,6 +19,7 @@ import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.isA;
 import static org.mockito.Mockito.verify;
@@ -31,6 +32,7 @@ import java.net.http.HttpHeaders;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -43,6 +45,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
@@ -74,6 +78,8 @@ public final class EndpointClientImplTest {
     private PollListener pollListener;
     @Mock
     private PollCompletionListener completionListener;
+    @Captor
+    private ArgumentCaptor<HttpRequest> requestCaptor;
 
     private final EndpointConfig endpointConfig = EndpointConfig
         .builder()
@@ -201,5 +207,65 @@ public final class EndpointClientImplTest {
         verify(clientFactory).create(model, null);
 
         endpointClient.close();
+    }
+
+    @Test
+    public void requestWithAdditionalHeaders() {
+        final Map<String, String> endpointHeaders = new HashMap<>();
+        endpointHeaders.put("x-test-1", "some other value");
+        endpointHeaders.put("x-test-2", null);
+        final Map<String, String> serviceHeaders = new HashMap<>();
+        serviceHeaders.put("x-test-0", "some value");
+        serviceHeaders.put("x-test-1", "bad value");
+        serviceHeaders.put("x-test-2", "bad value");
+        final EndpointConfig endpointConfig = EndpointConfig
+            .builder()
+            .name("endpoint")
+            .url("/a/url.json")
+            .produces("json")
+            .topicPath("url")
+            .additionalHeaders(endpointHeaders)
+            .build();
+        final ServiceConfig serviceConfig = ServiceConfig
+            .builder()
+            .name("service")
+            .host("localhost")
+            .port(8080)
+            .endpoints(singletonList(endpointConfig))
+            .topicPathRoot("test")
+            .additionalHeaders(serviceHeaders)
+            .build();
+        final Model model = Model
+            .builder()
+            .diffusion(DiffusionConfig
+                .builder()
+                .host("example.com")
+                .build())
+            .services(singletonList(serviceConfig))
+            .metrics(MetricsConfig
+                .builder()
+                .build())
+            .build();
+
+        when(clientFactory.create(model, null)).thenReturn(httpClient);
+        endpointClient = new EndpointClientImpl(model, null, clientFactory, pollListener);
+
+        endpointClient.start();
+
+        verify(clientFactory).create(model, null);
+
+        final Future<?> handle =  endpointClient.request(serviceConfig, endpointConfig);
+
+        assertNotEquals(future, handle);
+        verify(pollListener).onPollRequest(serviceConfig, endpointConfig);
+        verify(httpClient).sendAsync(requestCaptor.capture(), isA(HttpResponse.BodyHandler.class));
+
+        final HttpRequest request = requestCaptor.getValue();
+
+        final Map<String, List<String>> headers = request.headers().map();
+
+        assertEquals(headers.get("x-test-0"), List.of("some value"));
+        assertEquals(headers.get("x-test-1"), List.of("some other value"));
+        assertNull(headers.get("x-test-2"));
     }
 }

@@ -26,6 +26,7 @@ import static java.util.stream.Collectors.joining;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.ArgumentMatchers.isNull;
@@ -42,6 +43,8 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.stream.Stream;
@@ -64,6 +67,8 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.security.Constraint;
 import org.eclipse.jetty.util.security.Credential;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -72,13 +77,17 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatcher;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.hamcrest.MockitoHamcrest;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.mockito.verification.VerificationWithTimeout;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.pushtechnology.adapters.rest.client.RESTAdapterClient;
 import com.pushtechnology.adapters.rest.metrics.event.listeners.ServiceEventListener;
 import com.pushtechnology.adapters.rest.model.latest.BasicAuthenticationConfig;
@@ -91,6 +100,7 @@ import com.pushtechnology.adapters.rest.model.latest.SecurityConfig;
 import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 import com.pushtechnology.adapters.rest.model.store.MutableModelStore;
 import com.pushtechnology.adapters.rest.resources.ConstantResource;
+import com.pushtechnology.adapters.rest.resources.EchoHeadersResource;
 import com.pushtechnology.adapters.rest.resources.IncrementingResource;
 import com.pushtechnology.adapters.rest.resources.TimestampResource;
 import com.pushtechnology.diffusion.client.Diffusion;
@@ -100,6 +110,7 @@ import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
 import com.pushtechnology.diffusion.datatype.binary.Binary;
 import com.pushtechnology.diffusion.datatype.json.JSON;
+import com.pushtechnology.diffusion.transform.transformer.JSONTransformers;
 
 /**
  * Basic integration test for adapting resources against embedded services.
@@ -208,6 +219,14 @@ public final class BasicIT {
         .url("/rest/constant")
         .produces("string")
         .build();
+    private static final EndpointConfig HEADERS_ENDPOINT = EndpointConfig
+        .builder()
+        .name("headers")
+        .topicPath("echo")
+        .url("/rest/headers")
+        .produces("json")
+        .additionalHeaders(Map.of("x-test-1", "some other value"))
+        .build();
     private static final BasicAuthenticationConfig BASIC_AUTHENTICATION_CONFIG = BasicAuthenticationConfig
         .builder()
         .userid("principal")
@@ -314,6 +333,17 @@ public final class BasicIT {
         .topicPathRoot("rest/overlap")
         .endpoints(singletonList(INCREMENT_STRING_ENDPOINT))
         .build();
+    private static final ServiceConfig HEADERS_SERVICE = ServiceConfig
+        .builder()
+        .name("service-10")
+        .host("localhost")
+        .port(8081)
+        .secure(false)
+        .pollPeriod(500)
+        .topicPathRoot("rest/headers")
+        .endpoints(singletonList(HEADERS_ENDPOINT))
+        .additionalHeaders(Map.of("x-test-0", "some value", "x-test-1", "bad value"))
+        .build();
 
     private static final String STRING_CONSTANT = "{\"cromulent\":\"good\",\"embiggen\":\"to make larger\"}";
     private static final JSON JSON_CONSTANT = dataTypes()
@@ -359,6 +389,7 @@ public final class BasicIT {
                 .add(TimestampResource.class)
                 .add(IncrementingResource.class)
                 .add(ConstantResource.class)
+                .add(EchoHeadersResource.class)
                 .build()
                 .map(Class::getCanonicalName)
                 .collect(joining(",")));
@@ -962,6 +993,47 @@ public final class BasicIT {
     }
 
     @Test
+    public void testEchoedHeadersValue() throws IOException {
+        modelStore.setModel(modelWith(HEADERS_SERVICE));
+        final RESTAdapterClient client = startClient();
+
+        verify(serviceListener, timed()).onStandby(HEADERS_SERVICE);
+        verify(serviceListener, timed()).onActive(HEADERS_SERVICE);
+
+        final Session session = startSession();
+
+        final Topics topics = session.feature(Topics.class);
+        topics.addFallbackStream(JSON.class, stream);
+        topics.subscribe("rest/headers/echo");
+
+        verify(serviceListener, timed()).onEndpointAdd(HEADERS_SERVICE, HEADERS_ENDPOINT);
+
+        verify(stream, timed()).onSubscription(eq("rest/headers/echo"), isNotNull());
+
+        verify(stream, timed()).onValue(
+            eq("rest/headers/echo"),
+            isNotNull(),
+            isNull(),
+            matchValue(
+                new TypeReference<Map<String, List<String>>>() {},
+                Map.of(
+                    "Connection", List.of("Upgrade, HTTP2-Settings"),
+                    "User-Agent", List.of("Java-http-client/11.0.11"),
+                    "Host", List.of("localhost:8081"),
+                    "HTTP2-Settings", List.of("AAEAAEAAAAIAAAABAAMAAABkAAQBAAAAAAUAAEAA"),
+                    "Content-Length", List.of("0"),
+                    "Upgrade", List.of("h2c"),
+                    "x-test-0", List.of("some value"),
+                    "x-test-1", List.of("some other value"))));
+
+        stopSession(session);
+        client.close();
+
+        verify(serviceListener, timed()).onRemove(HEADERS_SERVICE, true);
+        verify(serviceListener, timed()).onEndpointRemove(HEADERS_SERVICE, HEADERS_ENDPOINT, true);
+    }
+
+    @Test
     public void testOverlappingServices() throws IOException {
         modelStore.setModel(modelWith(OVERLAPPING_SERVICE_0, OVERLAPPING_SERVICE_1));
         final RESTAdapterClient client = startClient();
@@ -1161,5 +1233,28 @@ public final class BasicIT {
             .services(asList(services))
             .truststore("testKeystore.jks")
             .build();
+    }
+
+    private static <V> JSON matchValue(TypeReference<Map<String, V>> reference, Map<String, V> expected) {
+        return ArgumentMatchers.argThat(new ArgumentMatcher<>() {
+            @Override
+            public boolean matches(JSON json) {
+                try {
+                    final Map<String, V> value = JSONTransformers
+                        .JSON_TRANSFORMERS
+                        .toType(reference)
+                        .transform(json);
+                    return value.equals(expected);
+                }
+                catch (Exception e) {
+                    return false;
+                }
+            }
+
+            @Override
+            public String toString() {
+                return expected.toString();
+            }
+        });
     }
 }

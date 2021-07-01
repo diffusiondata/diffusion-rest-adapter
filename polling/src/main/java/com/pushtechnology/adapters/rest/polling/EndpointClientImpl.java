@@ -21,6 +21,8 @@ import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
@@ -93,8 +95,18 @@ public final class EndpointClientImpl implements EndpointClient {
             throw new IllegalArgumentException("Bad URI", e);
         }
 
+        final HttpRequest.Builder request = HttpRequest.newBuilder().GET().uri(uri);
+        final Map<String, String> headers = new HashMap<>();
+        serviceConfig.getAdditionalHeaders().forEach(headers::put);
+        endpointConfig.getAdditionalHeaders().forEach(headers::put);
+        headers.forEach((headerName, headerValue) -> {
+            if (headerValue != null) {
+                request.setHeader(headerName, headerValue);
+            }
+        });
+
         client.sendAsync(
-            HttpRequest.newBuilder().GET().uri(uri).build(),
+            request.build(),
             HttpResponse.BodyHandlers.ofByteArray())
         .thenAccept(httpResponse -> {
             final int statusCode = httpResponse.statusCode();
