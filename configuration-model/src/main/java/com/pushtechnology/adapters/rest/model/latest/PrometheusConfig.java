@@ -20,7 +20,7 @@ import lombok.Builder;
 import lombok.Value;
 
 /**
- * Prometheus configuration. Version 15.
+ * Prometheus configuration. Version 15 and 16.
  * <p>
  * Configuration for the Prometheus metrics exporter.
  *

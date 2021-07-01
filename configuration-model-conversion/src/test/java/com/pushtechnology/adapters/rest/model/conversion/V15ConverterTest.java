@@ -15,7 +15,8 @@
 
 package com.pushtechnology.adapters.rest.model.conversion;
 
-import static com.pushtechnology.adapters.rest.model.conversion.v14.V14Converter.INSTANCE;
+import static com.pushtechnology.adapters.rest.model.conversion.v15.V15Converter.INSTANCE;
+import static java.util.Collections.emptyMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -28,33 +29,32 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import com.pushtechnology.adapters.rest.model.conversion.v13.V13Converter;
-import com.pushtechnology.adapters.rest.model.conversion.v14.V14Converter;
+import com.pushtechnology.adapters.rest.model.conversion.v15.V15Converter;
 import com.pushtechnology.adapters.rest.model.latest.BasicAuthenticationConfig;
 import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
-import com.pushtechnology.adapters.rest.model.v15.EndpointConfig;
-import com.pushtechnology.adapters.rest.model.v15.Model;
+import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 import com.pushtechnology.adapters.rest.model.latest.SecurityConfig;
-import com.pushtechnology.adapters.rest.model.v15.ServiceConfig;
+import com.pushtechnology.adapters.rest.model.latest.Model;
+import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 
 /**
- * Unit tests for {@link V14Converter}.
+ * Unit tests for {@link V15Converter}.
  *
  * @author Push Technology Limited
  */
-public final class V14ConverterTest {
+public final class V15ConverterTest {
     @Test
     public void testConvert() {
         final Model model = INSTANCE.convert(
-            com.pushtechnology.adapters.rest.model.v14.Model
+            com.pushtechnology.adapters.rest.model.v15.Model
                 .builder()
                 .services(Collections.singletonList(
-                    com.pushtechnology.adapters.rest.model.v14.ServiceConfig
+                    com.pushtechnology.adapters.rest.model.v15.ServiceConfig
                         .builder()
                         .name("service")
                         .host("localhost")
                         .port(80)
-                        .endpoints(Collections.singletonList(com.pushtechnology.adapters.rest.model.v14.EndpointConfig
+                        .endpoints(Collections.singletonList(com.pushtechnology.adapters.rest.model.v15.EndpointConfig
                             .builder()
                             .name("endpoint")
                             .topicPath("topic")
@@ -73,7 +73,7 @@ public final class V14ConverterTest {
                             .build())
                         .build()
                 ))
-                .diffusion(com.pushtechnology.adapters.rest.model.latest.DiffusionConfig
+                .diffusion(DiffusionConfig
                     .builder()
                     .host("localhost")
                     .port(8080)
@@ -83,7 +83,7 @@ public final class V14ConverterTest {
                     .reconnectionTimeout(5000)
                     .maximumMessageSize(64000)
                     .build())
-                .metrics(com.pushtechnology.adapters.rest.model.v14.MetricsConfig.builder().counting(true).build())
+                .metrics(com.pushtechnology.adapters.rest.model.latest.MetricsConfig.builder().logging(true).build())
                 .build());
 
         assertEquals(1, model.getServices().size());
@@ -99,6 +99,7 @@ public final class V14ConverterTest {
         assertEquals(1, endpoints.size());
         assertEquals(5000, service.getPollPeriod());
         assertEquals("a", service.getTopicPathRoot());
+        assertEquals(emptyMap(), service.getAdditionalHeaders());
 
         assertEquals("localhost", diffusion.getHost());
         assertEquals(8080, diffusion.getPort());
@@ -123,15 +124,15 @@ public final class V14ConverterTest {
     @Test
     public void testConvertWithoutSecurity() {
         final Model model = INSTANCE.convert(
-            com.pushtechnology.adapters.rest.model.v14.Model
+            com.pushtechnology.adapters.rest.model.v15.Model
                 .builder()
                 .services(Collections.singletonList(
-                    com.pushtechnology.adapters.rest.model.v14.ServiceConfig
+                    com.pushtechnology.adapters.rest.model.v15.ServiceConfig
                         .builder()
                         .name("service")
                         .host("localhost")
                         .port(80)
-                        .endpoints(Collections.singletonList(com.pushtechnology.adapters.rest.model.v14.EndpointConfig
+                        .endpoints(Collections.singletonList(com.pushtechnology.adapters.rest.model.v15.EndpointConfig
                             .builder()
                             .name("endpoint")
                             .topicPath("topic")
@@ -143,7 +144,7 @@ public final class V14ConverterTest {
                         .security(null)
                         .build()
                 ))
-                .diffusion(com.pushtechnology.adapters.rest.model.latest.DiffusionConfig
+                .diffusion(DiffusionConfig
                     .builder()
                     .host("localhost")
                     .port(8080)
@@ -168,6 +169,7 @@ public final class V14ConverterTest {
         assertEquals(1, endpoints.size());
         assertEquals(5000, service.getPollPeriod());
         assertEquals("a", service.getTopicPathRoot());
+        assertEquals(emptyMap(), service.getAdditionalHeaders());
 
         assertEquals("localhost", diffusion.getHost());
         assertEquals(8080, diffusion.getPort());
@@ -188,7 +190,7 @@ public final class V14ConverterTest {
 
     @Test
     public void testUnknownModel() {
-        final ModelConverter converter = V13Converter.INSTANCE;
+        final ModelConverter converter = V15Converter.INSTANCE;
 
         assertThrows(IllegalArgumentException.class, () -> {
             converter.convert(com.pushtechnology.adapters.rest.model.v11.Model

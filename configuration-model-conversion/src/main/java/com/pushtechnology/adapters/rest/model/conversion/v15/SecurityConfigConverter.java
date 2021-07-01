@@ -13,22 +13,32 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.model.latest;
+package com.pushtechnology.adapters.rest.model.conversion.v15;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Value;
+import com.pushtechnology.adapters.rest.model.conversion.Converter;
+import com.pushtechnology.adapters.rest.model.latest.SecurityConfig;
 
 /**
- * Security configuration. Version 13, 14, 15 and 16.
- * <p>
- * Description of the security used by a REST service.
+ * Converter between different version 15 of the model and version 16.
  *
  * @author Push Technology Limited
  */
-@Value
-@Builder
-@AllArgsConstructor
-public class SecurityConfig {
-    BasicAuthenticationConfig basic;
+/*package*/ final class SecurityConfigConverter
+        implements Converter<SecurityConfig, SecurityConfig> {
+    /**
+     * The converter.
+     */
+    public static final SecurityConfigConverter INSTANCE = new SecurityConfigConverter();
+
+    private SecurityConfigConverter() {
+    }
+
+    @Override
+    public SecurityConfig convert(SecurityConfig securityConfig) {
+        if (securityConfig == null) {
+            return SecurityConfig.builder().build();
+        }
+
+        return securityConfig;
+    }
 }

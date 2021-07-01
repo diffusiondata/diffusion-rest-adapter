@@ -13,73 +13,76 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.model.latest;
+package com.pushtechnology.adapters.rest.model.v15;
 
-import static java.util.Collections.emptyMap;
+import static java.util.Collections.emptyList;
 
-import java.util.Map;
+import java.util.List;
+
+import com.pushtechnology.adapters.rest.model.latest.SecurityConfig;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NonNull;
-import lombok.ToString;
 import lombok.Value;
 
 /**
- * Endpoint configuration. Version 16.
+ * Service configuration. Version 15.
  * <p>
- * Description of a REST endpoint to poll.
+ * Description of a REST service to poll.
  *
  * @author Push Technology Limited
  */
 @Value
 @Builder
 @AllArgsConstructor
-@ToString(of = "name")
-public class EndpointConfig {
+public class ServiceConfig {
     /**
-     * The name of the endpoint.
+     * The name of the service.
      */
     @NonNull
     String name;
-    /**
-     * The URL of the endpoint.
-     */
-    @NonNull
-    String url;
-    /**
-     * The topic path to map the endpoint to. It is relative to the service
-     * topic path root.
-     */
-    @NonNull
-    String topicPath;
-    /**
-     * The type of content produced by the endpoint.
-     * <p>
-     * Supports the values:
-     * <ul>
-     *     <li>auto</li>
-     *     <li>json</li>
-     *     <li>application/json</li>
-     *     <li>text/json</li>
-     *     <li>string</li>
-     *     <li>text/plain</li>
-     *     <li>binary</li>
-     *     <li>application/octet-stream</li>
-     * </ul>
-     */
-    @NonNull
-    String produces;
-    /**
-     * The time in milliseconds between polls. If set overrides the service
-     * poll period.
-     */
-    Long pollPeriod;
 
     /**
-     * Additional headers to include with poll requests.
+     * The host of the service.
+     */
+    @NonNull
+    String host;
+
+    /**
+     * The port to connect to. Defaults to 443.
+     */
+    @Builder.Default
+    int port = 443;
+
+    /**
+     * If a secure transport should be used. Defaults to true.
+     */
+    @Builder.Default
+    boolean secure = true;
+
+    /**
+     * The endpoints the service makes available. Defaults to an empty list.
      */
     @NonNull
     @Builder.Default
-    Map<String, String> additionalHeaders = emptyMap();
+    List<EndpointConfig> endpoints = emptyList();
+
+    /**
+     * The time in milliseconds between polls. Defaults to 60000.
+     */
+    @Builder.Default
+    long pollPeriod = 60000;
+
+    /**
+     * The topic path that is the root of the service.
+     */
+    @NonNull
+    String topicPathRoot;
+
+    /**
+     * The security configuration for the service.
+     */
+    @Builder.Default
+    SecurityConfig security = SecurityConfig.builder().build();
 }

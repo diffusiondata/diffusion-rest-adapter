@@ -13,40 +13,37 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.model.conversion.v14;
+package com.pushtechnology.adapters.rest.model.conversion.v15;
 
 import static java.util.stream.Collectors.toList;
 
 import com.pushtechnology.adapters.rest.model.conversion.AbstractModelConverter;
-import com.pushtechnology.adapters.rest.model.v15.Model;
-
-import net.jcip.annotations.Immutable;
+import com.pushtechnology.adapters.rest.model.latest.Model;
 
 /**
- * Converter between different version 14 of the model and version 15.
+ * Converter between different version 15 of the model and version 16.
  *
  * @author Push Technology Limited
  */
-@Immutable
-public final class V14Converter
-        extends AbstractModelConverter<com.pushtechnology.adapters.rest.model.v14.Model, Model> {
+public final class V15Converter
+    extends AbstractModelConverter<com.pushtechnology.adapters.rest.model.v15.Model, Model> {
     /**
      * The converter.
      */
-    public static final V14Converter INSTANCE = new V14Converter();
+    public static final V15Converter INSTANCE = new V15Converter();
 
-    private V14Converter() {
-        super(com.pushtechnology.adapters.rest.model.v14.Model.class);
+    private V15Converter() {
+        super(com.pushtechnology.adapters.rest.model.v15.Model.class);
     }
 
     @Override
-    protected Model convertFrom(com.pushtechnology.adapters.rest.model.v14.Model model) {
+    protected Model convertFrom(com.pushtechnology.adapters.rest.model.v15.Model model) {
         return Model
             .builder()
             .active(model.isActive())
             .services(model.getServices().stream().map(ServiceConfigConverter.INSTANCE::convert).collect(toList()))
-            .diffusion(DiffusionConfigConverter.INSTANCE.convert(model.getDiffusion()))
-            .metrics(MetricsConfigConverter.INSTANCE.convert(model.getMetrics()))
+            .diffusion(model.getDiffusion())
+            .metrics(model.getMetrics())
             .truststore(model.getTruststore())
             .build();
     }

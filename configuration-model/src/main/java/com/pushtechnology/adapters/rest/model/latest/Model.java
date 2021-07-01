@@ -27,7 +27,7 @@ import lombok.NonNull;
 import lombok.Value;
 
 /**
- * Configuration model. Version 15.
+ * Configuration model. Version 16.
  *
  * @author Push Technology Limited
  */

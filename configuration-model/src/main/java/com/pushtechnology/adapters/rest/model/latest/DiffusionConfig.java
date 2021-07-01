@@ -32,7 +32,7 @@ import lombok.ToString;
 import lombok.Value;
 
 /**
- * Diffusion configuration. Version 14 and 15.
+ * Diffusion configuration. Version 14, 15 and 16.
  * <p>
  * Description of a Diffusion server to publish to.
  *

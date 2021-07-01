@@ -20,7 +20,7 @@ import lombok.Builder;
 import lombok.Value;
 
 /**
- * Metrics configuration. Version 15.
+ * Metrics configuration. Version 15 and 16.
  * <p>
  * Description of the metrics to gather and report.
  *

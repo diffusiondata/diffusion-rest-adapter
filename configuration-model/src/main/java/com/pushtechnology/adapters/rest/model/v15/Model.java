@@ -13,13 +13,15 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.model.latest;
+package com.pushtechnology.adapters.rest.model.v15;
 
 import static java.util.Collections.emptyList;
-import static java.util.Collections.emptyMap;
 
 import java.util.List;
-import java.util.Map;
+
+import com.pushtechnology.adapters.rest.model.AnyModel;
+import com.pushtechnology.adapters.rest.model.latest.DiffusionConfig;
+import com.pushtechnology.adapters.rest.model.latest.MetricsConfig;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,70 +29,52 @@ import lombok.NonNull;
 import lombok.Value;
 
 /**
- * Service configuration. Version 16.
- * <p>
- * Description of a REST service to poll.
+ * Configuration model. Version 15.
  *
  * @author Push Technology Limited
  */
 @Value
 @Builder
 @AllArgsConstructor
-public class ServiceConfig {
+public class Model implements AnyModel {
     /**
-     * The name of the service.
+     * The version of the model.
      */
-    @NonNull
-    String name;
+    public static final int VERSION = 15;
 
     /**
-     * The host of the service.
-     */
-    @NonNull
-    String host;
-
-    /**
-     * The port to connect to. Defaults to 443.
+     * If the client should run. Defaults to true.
      */
     @Builder.Default
-    int port = 443;
+    private boolean active = true;
 
     /**
-     * If a secure transport should be used. Defaults to true.
-     */
-    @Builder.Default
-    boolean secure = true;
-
-    /**
-     * The endpoints the service makes available. Defaults to an empty list.
+     * The Diffusion server.
      */
     @NonNull
     @Builder.Default
-    List<EndpointConfig> endpoints = emptyList();
+    private DiffusionConfig diffusion = DiffusionConfig.builder().build();
 
     /**
-     * The time in milliseconds between polls. Defaults to 60000.
-     */
-    @Builder.Default
-    long pollPeriod = 60000;
-
-    /**
-     * The topic path that is the root of the service.
-     */
-    @NonNull
-    String topicPathRoot;
-
-    /**
-     * The security configuration for the service.
+     * The REST services to poll.
      */
     @NonNull
     @Builder.Default
-    SecurityConfig security = SecurityConfig.builder().build();
+    List<ServiceConfig> services = emptyList();
 
     /**
-     * Additional headers to include with poll requests.
+     * The metrics to gather.
      */
     @NonNull
     @Builder.Default
-    Map<String, String> additionalHeaders = emptyMap();
+    private MetricsConfig metrics = MetricsConfig.builder().build();
+
+    /**
+     * The location of the trust store.
+     * <p>
+     * The location will first be resolved as a classpath resource. If this
+     * fails it will fallback to trying to load the store from this
+     * location on the file system.
+     */
+    String truststore;
 }

@@ -16,6 +16,7 @@
 package com.pushtechnology.adapters.rest.model.conversion;
 
 import static com.pushtechnology.adapters.rest.model.conversion.ConversionContext.FULL_CONTEXT;
+import static java.util.Collections.emptyMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -108,6 +109,7 @@ public final class ConversionContextTest {
         assertEquals(1, endpoints.size());
         assertEquals(5000, service.getPollPeriod());
         assertEquals("a", service.getTopicPathRoot());
+        assertEquals(emptyMap(), service.getAdditionalHeaders());
 
         assertEquals("localhost", diffusion.getHost());
         assertEquals(8080, diffusion.getPort());

@@ -13,18 +13,20 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.model.conversion.v14;
+package com.pushtechnology.adapters.rest.model.conversion.v15;
+
+import java.util.Collections;
 
 import com.pushtechnology.adapters.rest.model.conversion.Converter;
-import com.pushtechnology.adapters.rest.model.v15.EndpointConfig;
+import com.pushtechnology.adapters.rest.model.latest.EndpointConfig;
 
 /**
- * Converter between different version 14 of the model and version 15.
+ * Converter between different version 15 of the model and version 16.
  *
  * @author Push Technology Limited
  */
 /*package*/ final class EndpointConfigConverter
-        implements Converter<com.pushtechnology.adapters.rest.model.v14.EndpointConfig, EndpointConfig> {
+        implements Converter<com.pushtechnology.adapters.rest.model.v15.EndpointConfig, EndpointConfig> {
     /**
      * The converter.
      */
@@ -34,13 +36,14 @@ import com.pushtechnology.adapters.rest.model.v15.EndpointConfig;
     }
 
     @Override
-    public EndpointConfig convert(com.pushtechnology.adapters.rest.model.v14.EndpointConfig endpointConfig) {
+    public EndpointConfig convert(com.pushtechnology.adapters.rest.model.v15.EndpointConfig endpointConfig) {
         return EndpointConfig
             .builder()
             .name(endpointConfig.getName())
             .url(endpointConfig.getUrl())
             .topicPath(endpointConfig.getTopicPath())
             .produces(endpointConfig.getProduces())
+            .additionalHeaders(Collections.emptyMap())
             .build();
     }
 }

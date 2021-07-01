@@ -23,6 +23,7 @@ import com.pushtechnology.adapters.rest.model.conversion.v11.V11Converter;
 import com.pushtechnology.adapters.rest.model.conversion.v12.V12Converter;
 import com.pushtechnology.adapters.rest.model.conversion.v13.V13Converter;
 import com.pushtechnology.adapters.rest.model.conversion.v14.V14Converter;
+import com.pushtechnology.adapters.rest.model.conversion.v15.V15Converter;
 import com.pushtechnology.adapters.rest.model.latest.Model;
 
 import net.jcip.annotations.Immutable;
@@ -55,6 +56,10 @@ public final class ConversionContext implements ModelConverter {
             com.pushtechnology.adapters.rest.model.v14.Model.VERSION,
             com.pushtechnology.adapters.rest.model.v14.Model.class,
             V14Converter.INSTANCE)
+        .register(
+            com.pushtechnology.adapters.rest.model.v15.Model.VERSION,
+            com.pushtechnology.adapters.rest.model.v15.Model.class,
+            V15Converter.INSTANCE)
         .register(
             Model.VERSION,
             Model.class)

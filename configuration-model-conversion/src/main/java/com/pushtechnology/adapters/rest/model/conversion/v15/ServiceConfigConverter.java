@@ -13,20 +13,22 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.model.conversion.v14;
+package com.pushtechnology.adapters.rest.model.conversion.v15;
 
 import static java.util.stream.Collectors.toList;
 
+import java.util.Collections;
+
 import com.pushtechnology.adapters.rest.model.conversion.Converter;
-import com.pushtechnology.adapters.rest.model.v15.ServiceConfig;
+import com.pushtechnology.adapters.rest.model.latest.ServiceConfig;
 
 /**
- * Converter between different version 14 of the model and version 15.
+ * Converter between different version 15 of the model and version 16.
  *
  * @author Push Technology Limited
  */
 /*package*/ final class ServiceConfigConverter
-        implements Converter<com.pushtechnology.adapters.rest.model.v14.ServiceConfig, ServiceConfig> {
+        implements Converter<com.pushtechnology.adapters.rest.model.v15.ServiceConfig, ServiceConfig> {
     /**
      * The converter.
      */
@@ -36,7 +38,7 @@ import com.pushtechnology.adapters.rest.model.v15.ServiceConfig;
     }
 
     @Override
-    public ServiceConfig convert(com.pushtechnology.adapters.rest.model.v14.ServiceConfig serviceConfig) {
+    public ServiceConfig convert(com.pushtechnology.adapters.rest.model.v15.ServiceConfig serviceConfig) {
         return ServiceConfig
             .builder()
             .name(serviceConfig.getName())
@@ -51,6 +53,7 @@ import com.pushtechnology.adapters.rest.model.v15.ServiceConfig;
             .pollPeriod(serviceConfig.getPollPeriod())
             .topicPathRoot(serviceConfig.getTopicPathRoot())
             .security(SecurityConfigConverter.INSTANCE.convert(serviceConfig.getSecurity()))
+            .additionalHeaders(Collections.emptyMap())
             .build();
     }
 }

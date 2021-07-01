@@ -13,7 +13,7 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.pushtechnology.adapters.rest.model.latest;
+package com.pushtechnology.adapters.rest.model.v15;
 
 import static java.util.Collections.emptyMap;
 
@@ -26,7 +26,7 @@ import lombok.ToString;
 import lombok.Value;
 
 /**
- * Endpoint configuration. Version 16.
+ * Endpoint configuration. Version 15.
  * <p>
  * Description of a REST endpoint to poll.
  *
@@ -75,11 +75,4 @@ public class EndpointConfig {
      * poll period.
      */
     Long pollPeriod;
-
-    /**
-     * Additional headers to include with poll requests.
-     */
-    @NonNull
-    @Builder.Default
-    Map<String, String> additionalHeaders = emptyMap();
 }
