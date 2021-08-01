@@ -1,0 +1,37 @@
+{
+  "active" : true,
+  "diffusion" : {
+    "host" : "localhost",
+    "port" : 8080,
+    "secure" : false,
+    "principal" : "control",
+    "password" : "password",
+    "connectionTimeout" : 2000,
+    "reconnectionTimeout" : 60000,
+    "maximumMessageSize" : 32768,
+    "inputBufferSize" : 131072,
+    "outputBufferSize" : 131072,
+    "recoveryBufferSize" : 128
+  },
+  "services" : [{
+    "name": "test-service",
+    "host": "localhost",
+    "port": 9000,
+    "secure": true,
+    "pollPeriod": 30000,
+    "topicPathRoot": "root",
+    "endpoints": [
+      {
+        "name": "test-endpoint",
+        "url": "/endpoint",
+        "topicPath": "path",
+        "produces": "auto"
+      }
+    ]
+  }],
+  "metrics" : {
+    "logging" : false,
+    "prometheus": null
+  },
+  "truststore" : null
+}
