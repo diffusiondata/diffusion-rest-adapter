@@ -38,7 +38,7 @@ public class Model implements AnyModel {
     /**
      * The version of the model.
      */
-    public static final int VERSION = 15;
+    public static final int VERSION = 16;
 
     /**
      * If the client should run. Defaults to true.
